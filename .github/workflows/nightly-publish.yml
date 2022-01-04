@@ -1,0 +1,19 @@
+name: 'github actions publish x-cmd/x-cmd nightly'
+
+on:
+  push:
+  # schedule:
+  #   - cron: '0 12 * * *'
+
+jobs:
+  bot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v2
+        with: { ref: main }
+      - name: install x-cmd && update code && publish x-cmd
+        run: |
+          eval "$(curl https://get.x-cmd.com)"
+          x ws update || true
+          x ws push || true
