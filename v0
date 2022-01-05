@@ -817,7 +817,7 @@ ___x_cmd_main(){
 
         man)        ;;
         tldr)                                   xrc tldr/v0 && tldr "$@" ;;
-        advise)                                 xrc advise/v0 && advise "$@" ;;
+        advise)                                 xrc advise/latest && advise "$@" ;;
         proxy)                                  xrc proxy/latest && proxy "$@" ;;
         env)        ;;
 
@@ -1059,7 +1059,7 @@ x(){
 
 if [ -z "$XRC_NO_ADVISE" ] && [ -n "${BASH_VERSION}${ZSH_VERSION}" ] && [ "${-#*i}" != "$-" ]; then
     # if you use xrc that you must have advise
-    # xrc advise/v0
+    # xrc advise/latest
     advise x
 fi
 
