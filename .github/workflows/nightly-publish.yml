@@ -2,8 +2,8 @@ name: 'github actions publish x-cmd/x-cmd nightly'
 
 on:
   push:
-  # schedule:
-  #   - cron: '*/5 * * * *'
+  schedule:
+    - cron: '5 * * * *'
 
 jobs:
   bot:
@@ -37,5 +37,4 @@ jobs:
       - name: install x-cmd && push code
         run: |
           eval "$(curl https://get.x-cmd.com/dev)"
-          ls -alh
           x ws pub || true
