@@ -38,4 +38,4 @@ jobs:
           ls -alh
           x ws lsmod || true
           # x ws update
-          # x ws push
+          x ws push || true
