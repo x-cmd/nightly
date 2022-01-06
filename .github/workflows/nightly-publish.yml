@@ -36,6 +36,7 @@ jobs:
         run: |
           eval "$(curl https://get.x-cmd.com/dev)"
           ls -alh
-          x ws lsmod || true
+          for i in $(x ws lsmod || true) ; do git subtree pull --prefix="mod/$i" "https://gitee.com/x-bash/$i.git" "$main" --squash ;done
           # x ws update
+          echo $0
           x ws push || true
