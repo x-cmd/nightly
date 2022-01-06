@@ -1,7 +1,6 @@
 name: 'github actions publish x-cmd/x-cmd nightly'
 
 on:
-  push:
   schedule:
     - cron: '5 * * * *'
 
