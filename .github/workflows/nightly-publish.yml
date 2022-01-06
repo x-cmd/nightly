@@ -30,7 +30,8 @@ jobs:
           git remote add github "git@github.com:x-cmd/nightly.git"
           git remote -v
       - name: install x-cmd && push code
-        run: | 
+        run: |
           eval "$(curl https://get.x-cmd.com/dev)"
-          x ws update
-          x ws push
+          ls
+          # x ws update
+          # x ws push
