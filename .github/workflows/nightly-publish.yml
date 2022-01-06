@@ -1,9 +1,8 @@
 name: 'github actions publish x-cmd/x-cmd nightly'
 
 on:
-  push:
-  # schedule:
-  #   - cron: '0 12 * * *'
+  schedule:
+    - cron: '20 * * * *'
 
 jobs:
   bot:
@@ -17,6 +16,7 @@ jobs:
             ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - name: install x-cmd && update code && publish x-cmd
         run: |
-          eval "$(curl https://get.x-cmd.com)"
-          x ws update || true
-          x ws push || true
+          git config --global user.name 'padparadsayc'
+          git config --global user.email 'lth@x-cmd.com'
+          eval "$(curl https://get.x-cmd.com/dev)"
+          x ws pub || true
