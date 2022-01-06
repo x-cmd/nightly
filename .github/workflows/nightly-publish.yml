@@ -11,7 +11,9 @@ jobs:
     steps:
       - name: git checkout
         uses: actions/checkout@v2
-        with: { ref: main }
+        with: 
+          ref: main 
+          fetch-depth: 0
       - uses: webfactory/ssh-agent@v0.5.4
         with:
             ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -36,7 +38,4 @@ jobs:
         run: |
           eval "$(curl https://get.x-cmd.com/dev)"
           ls -alh
-          for i in $(x ws lsmod || true) ; do git subtree pull --prefix="mod/$i" "https://gitee.com/x-bash/$i.git" "main" --squash ;done || true
-          # x ws update
-          echo $0
-          x ws push || true
+          x ws pub || true
