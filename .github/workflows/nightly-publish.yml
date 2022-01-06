@@ -2,7 +2,7 @@ name: 'github actions publish x-cmd/x-cmd nightly'
 
 on:
   schedule:
-    - cron: '5 * * * *'
+    - cron: '30 11 * * *'
 
 jobs:
   bot:
