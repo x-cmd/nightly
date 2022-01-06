@@ -36,5 +36,6 @@ jobs:
         run: |
           eval "$(curl https://get.x-cmd.com/dev)"
           ls -alh
+          x ws lsmod
           # x ws update
           # x ws push
