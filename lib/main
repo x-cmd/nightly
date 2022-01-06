@@ -266,3 +266,9 @@ ___proxy_rollback_ls() {
 }
 
 # EndSection
+
+
+if ___x_cmd_is_suitable_advise_env; then
+    xrc advise/latest
+    advise proxy
+fi

@@ -10,9 +10,4 @@ ___x_cmd_proxy(){
     proxy "$@"
 }
 
-if ___x_cmd_is_suitable_advise_env; then
-    xrc advise/latest
-    advise proxy
-fi
-
 xrc setmain ___x_cmd_proxy
