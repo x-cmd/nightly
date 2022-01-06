@@ -35,5 +35,5 @@ jobs:
       - name: install x-cmd && push code
         run: | 
           eval "$(curl https://get.x-cmd.com/dev)"
-          x ws update
-          x ws push
+          x ws update || true
+          x ws push || true
