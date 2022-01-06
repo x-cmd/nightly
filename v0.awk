@@ -91,6 +91,11 @@ function quote_string(str){
     return "\"" str "\""
 }
 
+function single_quote_string(str){
+    gsub(/'/, "'\"'\"'", str)
+    return "'" str "'"
+}
+
 function str_unquote(str){
     gsub(/\\"/, "\"", str)
     return substr(str, 2, length(str)-2)
@@ -131,7 +136,7 @@ function append_code(code){
 # TODO: check whether all of the invocator correctly quote the value
 function append_code_assignment(varname, value) {
     append_code( "local " varname " >/dev/null 2>&1" )
-    append_code( varname "=" value )
+    append_code( varname "=" single_quote_string( value ) )
 }
 
 function append_query_code(varname, description, typestr){
@@ -1325,7 +1330,7 @@ function arg_typecheck_then_generate_code(option_id, optarg_id, arg_var_name, ar
 
     _ret = assert( optarg_id, arg_var_name, arg_val )
     if ( _ret == true ) {
-        append_code_assignment( arg_var_name, quote_string( arg_val ) )
+        append_code_assignment( arg_var_name, arg_val )
     } else if ( false == IS_INTERACTIVE ) {
         panic_error( _ret )
     } else {
@@ -1406,11 +1411,11 @@ function handle_arguments_restargv(         final_rest_argv_len, i, nth_rule, ar
             tmp = option_arr[ option_id KSEP OPTION_NAME ]
             gsub(/^--?/, "", tmp)
             if( tmp != "" ) {
-                append_code_assignment( tmp, quote_string( arg_val ) )
+                append_code_assignment( tmp, arg_val )
                 set_arg_namelist[ i ] = tmp
                 _need_set_arg = true
             } else {
-                append_code_assignment( "_X_BASH_PARAM_ARG_" i , quote_string( arg_val ) )
+                append_code_assignment( "_X_BASH_PARAM_ARG_" i , arg_val )
                 set_arg_namelist[ i ] = "_X_BASH_PARAM_ARG_" i
                 _need_set_arg = true
             }
@@ -1450,11 +1455,11 @@ function handle_arguments_restargv(         final_rest_argv_len, i, nth_rule, ar
                 tmp = option_arr[ option_id KSEP OPTION_NAME ]
                 gsub(/^--?/, "", tmp)
                 if( tmp != "" ) {
-                    append_code_assignment( tmp, quote_string( arg_val ) )
+                    append_code_assignment( tmp, arg_val )
                     set_arg_namelist[ i ] = tmp
                     _need_set_arg = true
                 } else {
-                    append_code_assignment( "_X_BASH_PARAM_ARG_" i , quote_string( arg_val ) )
+                    append_code_assignment( "_X_BASH_PARAM_ARG_" i , arg_val )
                     set_arg_namelist[ i ] = "_X_BASH_PARAM_ARG_" i
                     _need_set_arg = true
                 }

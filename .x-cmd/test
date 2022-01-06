@@ -1,4 +1,3 @@
-# shellcheck shell=sh disable=SC1072 #xrc
 
 x log init param
 param_log info "copy all files from ./* to ~/.x-cmd/param/"
