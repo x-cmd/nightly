@@ -198,10 +198,6 @@ ___x_cmd_ui_table_control(){
     # LC_ALL=en_US.UTF-8  awk "$(xrc cat ui/_v0/wcwidth.awk)$(cat $___X_CMD_UI_TABLE_CONTROL_AWK_PATH)"
 }
 
-___x_cmd_ui_region_update_table(){
-    LC_ALL=en_US.UTF-8 USE=str,wcwidth,ui ___x_cmd_awk file "$___X_CMD_UI_REGION_AWK"
-}
-
 # EXIT_OP=
 ___ui_table_out3_contain_exit_op(){
     # local EXIT_OP=${EXIT_OP:-""}
@@ -321,7 +317,7 @@ ___ui_table_out_func(){
         # Notice: Meaningless but important.
         printf "\n"
 
-    } | ___x_cmd_ui_table_control | ___x_cmd_ui_region_update_table
+    } | ___x_cmd_ui_table_control | ___x_cmd_ui_region_update_awk
 
     exec 3>&-
 
