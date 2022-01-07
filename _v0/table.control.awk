@@ -60,18 +60,17 @@ function update_view_print_cell(logic_row_i, row_i, col_i,       h, _size){
 
     # if (highlight[ cord ]) h = 1
 
-    if (h == 1) buffer_append( UI_TEXT_BOLD UI_FG_BLUE UI_TEXT_REV )
+    if (h == 1) buffer_append( sprintf("%s",UI_TEXT_BOLD UI_FG_BLUE UI_TEXT_REV ) )
 
     if (logic_row_i == cur_row) {
-        buffer_append( sprintf("%s", UI_FG_BLUE UI_TEXT_REV) )
+        buffer_append( sprintf("%s", UI_FG_GREEN UI_TEXT_REV) )
     }
-
     buffer_append( sprintf( "%s", str_pad_right( data[ cord ], col_max[ col_i ], data_wlen[ cord ] ) ) )
 
     # if ((h == 1) && (highrow[ row_i ] != 1)) printf( UI_END )
 
     if ((h == 1) && ( logic_row_i != cur_row )) buffer_append( sprintf( UI_END ) )
-    # buffer_append( sprintf( UI_END ) )
+    buffer_append( sprintf( UI_END ) )
 }
 
 BEGIN{
@@ -137,9 +136,9 @@ function update_logical_table(  _cord, _elem, row_i, col_i){
 
 function update_logic_view(           logic_row_i, row_i, col_i, start_row){
     start_row = int( (cur_row - 2) / max_row_in_page) * max_row_in_page + 2
-
+    
     buffer_append( sprintf("FILTER: %s" NEWLINE, filter[cur_col]) )
-
+    
     # buffer_append( sprintf("%s %s %s" NEWLINE, counter++, cur_row, cur_col) )
     buffer_append( sprintf("%s     ", UI_TEXT_UNDERLINE UI_TEXT_BOLD) )
     for (col_i=1; col_i<=table_col; col_i++) {
@@ -174,7 +173,6 @@ function parse_data(text,
     gsub(/[ \t\b\n\v\002\001]+$/, "", text)
 
     table_row = split(text, lines, "\002")
-
     
     for (row_i = 1; row_i <= table_row; row_i ++) {
         line = lines[row_i]   # Skip the first line
@@ -191,7 +189,6 @@ function parse_data(text,
             }
 
             data[ row_i KSEP col_i ] = elem
-
             elem_wlen = wcswidth( elem )
             data_wlen [ row_i KSEP col_i ] = elem_wlen
 
