@@ -133,6 +133,9 @@ A
 $mod
 }" ]; then
                                                 printf "%s\n" "$mod"
+                                                printf "Module will be automatically imported during boot: %s\n" "$mod" >&2
+                                            else
+                                                printf "Module ALREADY automatically imported during boot: %s\n" "$mod" >&2
                                             fi
                                         done
                                     } >> "$___X_CMD_ROOT_MOD"
@@ -161,6 +164,19 @@ $d2"
                                 )
                                 ;;
                     load)       eval xrc "$(awk '$1~/[A-Za-z0-9_\-]+/{ print $1;  }'<"$___X_CMD_ROOT_MOD" | tr '\n' ' ')" ;;
+                    ask)        (
+                                    for i in "$@"; do
+                                        if ! ( x boot mod ls | grep "$i" >/dev/null); then
+                                            xrc ui
+                                            if [ "$(
+                                                ui select answer "Not found in boot. Automatically import this module during boot: $*" "YES" "NO!"
+                                            )" = 1 ]; then
+                                                x boot mod add "$i"
+                                            fi
+                                        fi
+                                    done
+                                )
+                                ;;
                     which)      printf "%s\n" "$___X_CMD_ROOT_MOD" ;;
                     cat)        cat "$___X_CMD_ROOT_MOD" 2>/dev/null ;;
                     ls|*)       awk '$1~/[A-Za-z0-9_\-]+/{ print $1;  }'<"$___X_CMD_ROOT_MOD" ;;
