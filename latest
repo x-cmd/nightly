@@ -4,19 +4,10 @@
 # maintainer:   Li Junhao
 
 
-# ___x_cmd_el_xrc_lib(){ xrc "el/lib/${1:?Provide module}"; }
-# x marg1 ___x_cmd_el_xrc_lib <<A
-# alpine
-# container
-# git
-# k8s
-# udpn
-# utils
-# wubi
-# A
-
-x marg1 - xrc el/lib/\$1 <<A
+___x_cmd_el_xrc_lib(){ xrc "el/lib/${1:?Provide module}"; }
+x marg1 ___x_cmd_el_xrc_lib <<A
 alpine
+code
 container
 git
 k8s
@@ -24,6 +15,17 @@ udpn
 utils
 wubi
 A
+
+# x marg1 - xrc el/lib/\$1 <<A
+# alpine
+# code
+# container
+# git
+# k8s
+# udpn
+# utils
+# wubi
+# A
 
 if [ -z "$___X_CMD_THEME_NAME" ]; then
     x theme try el
