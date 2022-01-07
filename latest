@@ -199,6 +199,125 @@ ___x_cmd_abspath(){
     fi
 }
 
+# x glob abc*
+# glob file directory
+# TODO: notice, the glob pattern is actually a regex pattern with ** and * extension. For example, dot is refer as any character, rather than actual .
+alias glob=___x_cmd_glob
+
+___x_cmd_globu(){
+    ___x_cmd_glob "$@" | sort | uniq
+}
+
+___x_cmd_glob(){
+    if [ $# -eq 1 ]; then
+        ___x_cmd_glob file "$@"
+        return
+    fi
+
+    local op="${1}"; shift
+
+    case "$op" in
+        all|dir|file)       ;;
+        *)                  ___x_cmd_glob file "$op" "$@";  return ;;
+    esac
+
+    while [ $# -gt 0 ]; do
+        local pattern="${1:?Please provide pattern}";   shift
+        local a
+        a="$(printf "" | awk -v pattern="${pattern}" '
+        function handle(elem){
+            gsub(/\*\*/, "([^/]+/){0,}[^/]+", elem)
+            gsub(/\*/, "[^/]+", elem)
+            return elem
+        }
+
+        BEGIN{
+            arrl = split(pattern, arr, /\//)
+            if (arrl == 1) {
+                print ""
+                print "^" handle(pattern) "$"
+            } else {
+                folder = ""
+                for (i=1; i<=arrl; ++i) {
+                    if (arr[i] ~ /\*/)  break
+                    if (i == 1)         folder = arr[i]
+                    else                folder = folder "/" arr[i]
+                }
+                print folder
+                pat = ""
+                for (; i<=arrl; ++i) {
+                    arr[i] = handle(arr[i])
+                    if (pat == "")      pat = arr[i]
+                    else                pat = pat "/" arr[i]
+                }
+                pat = "^" pat "$"
+                print pat
+            }
+        }')"
+        local folder="${a%
+*}"
+        pattern="${a#*
+}"
+
+
+        (
+            if [ -n "$folder" ]; then
+                [ -d "$folder" ] || return
+                eval cd "$folder"
+            fi
+
+            case "$op" in
+                all)        find . ;;
+                dir)        find . -type dir ;;
+                file)       find . -type f ;;
+                *)          printf "Please provide argument.\n" >&2; return ;;
+            esac |\
+            awk -v pattern="$pattern" -v prefix="$folder" '
+                BEGIN { if (prefix != "") prefix = prefix "/"; }
+                {
+                    if ( ($0 !~ /^[\ \t]+$/) && ($0 !~ /:$/)) {
+                        tgt = substr($0, 3)
+                        if (match(tgt, pattern)) {
+                            print prefix tgt
+                        }
+                    }
+                }
+            '
+        )
+    done
+
+}
+
+# EndSection
+
+# Section: man
+
+# Reference: https://github.com/Valloric/dotfiles/blob/master/less/LESS_TERMCAP
+
+# termcap terminfo
+# ks      smkx      make the keypad send commands
+# ke      rmkx      make the keypad send digits
+# vb      flash     emit visual bell
+# mb      blink     start blink
+# md      bold      start bold
+# me      sgr0      turn off bold, blink and underline
+# so      smso      start standout (reverse video)
+# se      rmso      stop standout
+# us      smul      start underline
+# ue      rmul      stop underline
+
+___x_cmd_man() {
+    LESS_TERMCAP_md="${___X_CMD_THEME_MD:-"$(printf '\e[01;31m')"}" \
+    LESS_TERMCAP_me="${___X_CMD_THEME_ME:-"$(printf '\e[0m')"}" \
+    LESS_TERMCAP_us="${___X_CMD_THEME_US:-"$(printf '\e[01;04;32m')"}" \
+    LESS_TERMCAP_ue="${___X_CMD_THEME_UE:-"$(printf '\e[0m')"}" \
+    LESS_TERMCAP_so="${___X_CMD_THEME_SO:-"$(printf '\e[45;93m')"}" \
+    LESS_TERMCAP_se="${___X_CMD_THEME_SE:-"$(printf '\e[0m')"}" \
+    GROFF_NO_SGR=1 \
+    command man "$@"
+}
+alias man=___x_cmd_man
+
 # EndSection
 
 # Section : Find And Execute at .x-cmd folder
@@ -913,13 +1032,10 @@ ___x_cmd_main(){
         margs)                                  ___x_cmd_margs "$@"     ;;
         marg1)                                  ___x_cmd_margs 1 "$@"     ;;
 
-        install)                                xrc install/latest && ___x_cmd_install "$@" ;;
+        cd)                                     ___x_cmd_cd "$@" ;;
 
-        cd)                                     ___x_cmd_cd "$@";;
-
-        man)        ;;
-        advise)                                 xrc advise/latest && advise "$@" ;;
-        env)        ;;
+        man)                                    ___x_cmd_man "$@" ;;
+        env)                                    ;;
 
         login)                                  xrc hub/latest && ___x_cmd_hub login "$@" ;;
 
@@ -1027,125 +1143,7 @@ ___x_cmd_main(){
 
 # Section : advise.json
 ___x_cmd_x_cmd_advise_json(){
-    cat <<A
-{
-  "boot": {
-      "cat": null,
-      "which|w": null,
-      "mod": {
-          "add|+": null,
-          "del|-": "x initrc mod ls",
-          "ls": null
-      }
-  },
-  "install": {
-      "ls": "--- list all software",
-      "update": "--- update",
-      "get": {
-          "#1": "x install name",
-          "#desc": "get software installation command"
-      },
-      "run": {
-          "#1": "x install name",
-          "#desc": "run software installation command"
-      },
-      "#1": "x install name"
-  },
-  "config": {
-      "tab": null,
-      "ssh": null,
-      "sshd": null
-  },
-  "man": { },
-  "env": { },
-  "login": { },
-  "register": { },
-  "token": { },
-  "hub": {
-      "file": {
-          "ls": null,
-          "which": "x hub file ls",
-          "upload": "x hub file ls",
-          "share": "x hub file ls",
-          "private": "x hub file ls"
-      },
-      "login": null,
-      "register": null,
-      "token": null
-  },
-  "log": {
-      "init": { },
-      "timestamp": {
-          "on": { },
-          "off": { }
-      },
-      "#n": "xrc x-cmd/_v0/log && ___x_cmd_log_completer"
-  },
-  "upgrade": { },
-  "clear": { },
-  "reinstall": { },
-  "z": null,
-  "uz": null,
-  "ubu|alp|deb|cen|bus": {
-      "alias": { },
-      "run": {
-          "centos": { },
-          "ubuntu": { },
-          "alpine": { },
-          "busybox": { }
-      },
-      "exec": { },
-      "empower": { },
-      "centos": { },
-      "ubuntu": { },
-      "alpine": { },
-      "busybox": { }
-  },
-  "docker|dk|xdk": {
-      "alias": { },
-      "run": {
-          "centos": { },
-          "ubuntu": { },
-          "alpine": { },
-          "busybox": { }
-      },
-      "exec": { },
-      "empower": { },
-      "centos": { },
-      "ubuntu": { },
-      "alpine": { },
-      "busybox": { }
-  },
-  "sh|bash|zsh|fish|ksh|dash|ash": "___advise_ls",
-  "jar": "___advise_ls",
-  "java": "___advise_ls",
-  "pip|pip3": "___advise_ls",
-  "python|py|python3|py3": "___advise_ls",
-  "nvm": null,
-  "javascript|js|node": "___advise_ls",
-  "npm": null,
-  "npx": null,
-  "ts": null,
-  "ruby|rb": null,
-  "lua": null,
-  "jq": null,
-  "yq": null,
-  "cat|du": "___advise_ls",
-  "ls|ll|cd": "___advise_ls",
-  "ps|procs": null,
-  "nmap": null,
-  "ncat": null,
-  "nping": null,
-  "traceroute": null,
-  "sqlite3": null,
-  "run": { },
-  "search_path": { },
-  "which": { },
-  "wsroot": { },
-  "#1": "___x_cmd_list_resource",
-  "#n": "___advise_get_result 1"
-}
-A
+    xrc cat _v0/x.json
     return 126
 }
 # EndSection
