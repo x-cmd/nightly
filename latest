@@ -34,14 +34,4 @@ if [ -z "$___X_CMD_THEME_NAME" ]; then
     x theme try el
 fi
 
-if ! ( x boot mod ls | grep el >/dev/null); then
-    xrc ui
-    if [ "$(
-        ui select answer "Not found in boot. import xrc module during boot?" "YES" "NO!"
-    )" = 1 ]; then
-        x boot mod add el
-    fi
-fi
-
-x boot m
-
+x boot mod ask el
