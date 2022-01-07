@@ -66,6 +66,7 @@ function update_view_print_cell(logic_row_i, row_i, col_i,       h, _size){
         buffer_append( sprintf("%s", UI_FG_GREEN UI_TEXT_REV) )
     }
     buffer_append( sprintf( "%s", str_pad_right( data[ cord ], col_max[ col_i ], data_wlen[ cord ] ) ) )
+    buffer_append( sprintf( "%s", "  " ) )
 
     # if ((h == 1) && (highrow[ row_i ] != 1)) printf( UI_END )
 
@@ -153,7 +154,7 @@ function update_logic_view(           logic_row_i, row_i, col_i, start_row){
         buffer_append( sprintf("%s", str_pad_right(row_i-1, 5)) )
         for (col_i=1; col_i<=table_col; col_i++) {
             update_view_print_cell( logic_row_i, row_i, col_i )
-            buffer_append( sprintf( "%s", "  " ) )
+            # buffer_append( sprintf( "%s", "  " ) )
         }
         buffer_append( sprintf("%s" NEWLINE, UI_END) )
     }

@@ -241,10 +241,10 @@ ___ui_table_out_func(){
         # { cat; printf "\n"; } | ___x_cmd_ui_region_send
         { eval "$@"; printf "\n"; } | ___x_cmd_ui_region_send
         printf "VIEW %s %s\n" "$(ui rows)" "$(ui cols)" | ___x_cmd_ui_region_send
-
+        
         local SPACE=
         printf "UPDATE\n"
-        printf "VIEW %s %s\n" "$(ui rows)" "$(ui cols)"
+        printf "VIEW %s %s\n" "$(ui rows)" "$(ui cols)" 
 
         while region_getchar; do
 
