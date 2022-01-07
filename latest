@@ -444,7 +444,7 @@ ___x_cmd_dust(){
     xrc static-build && static_build_init dust dust ___x_cmd_dust && ___x_cmd_dust  "$@"
 }
 
-___x_cmd_sqlite3(){
+___x_cmd_sqlite(){
     xrc static-build && static_build_init sqlite3 sqlite3 ___x_cmd_sqlite3 && ___x_cmd_sqlite3  "$@"
 }
 
@@ -452,8 +452,16 @@ ___x_cmd_procs(){
     xrc static-build && static_build_init procs procs ___x_cmd_procs && ___x_cmd_procs  "$@"
 }
 
-___x_cmd_bat(){
+___x_cmd_bat_(){
     xrc static-build && static_build_init bat bat ___x_cmd_bat && ___x_cmd_bat      "$@"
+}
+
+___x_cmd_bat(){
+    if [ "$#" -ne 0 ]; then
+        ___x_cmd_bat_ "$@"
+    else
+        ___x_cmd_bat_ "--help"
+    fi
 }
 
 # EndSection
@@ -1019,7 +1027,7 @@ ___x_cmd_main(){
         alias)                                  ___x_cmd_alias      ___x_cmd "$@"   ;;
         unalias)                                ___x_cmd_unalias    ___x_cmd "$@"   ;;
 
-        boot)                                   ( xrc x-cmd/_v0/boot && ___x_cmd_boot "$@"; ) ;;
+        boot)                                   xrc x-cmd/_v0/boot && ___x_cmd_boot "$@" ;;
 
         conjoin)                                ___x_cmd_eval_concurrent_join "$@" ;;
         con)                                    ___x_cmd_eval_concurrent_assign "$@" ;;
@@ -1056,8 +1064,6 @@ ___x_cmd_main(){
         z)                                      (   xrc zuz && zuz z "$@"   ) ;;
         uz)                                     (   xrc zuz && zuz uz "$@"  ) ;;
 
-        ubu|alp|deb|cen|bus)                    (   xrc xdk/v0 && xdk "$subcmd" "$@" ) ;;
-        docker|dk|xdk)                          (   xrc xdk/v0 && xdk "$@" )   ;;
         sh|bash|zsh|fish|ksh|dash|ash)          ___x_cmd_shell_exec "$subcmd" "$@" ;;
 
         jar)                                    java -jar "$@" ;;
@@ -1089,19 +1095,15 @@ ___x_cmd_main(){
 
         7zr)                                    ( xrc p7zr/v0   &&  p7zr "$@" )     ;;
         7z)                                     ( xrc p7z/v0    &&  p7z "$@" )      ;;
-        ls)                                     ___x_cmd_ls         "$@"             ;;
-        ll)                                     ___x_cmd_exa  -l    "$@"             ;;
-        ps)                                     ___x_cmd_procs      "$@"             ;;
-        du)                                     ___x_cmd_dust       "$@"             ;;
-        sqlite3)                                ___x_cmd_sqlite3    "$@"             ;;
-        cat)
-                                                if [ "$#" -ne 0 ]; then
-                                                    ___x_cmd_bat "$@"
-                                                else
-                                                    ___x_cmd_bat "--help"
-                                                fi
-                                                ;;
-        bw)                                     ___x_cmd_bw         "$@"             ;;
+
+        ls)                                     ___x_cmd_ls         "$@"            ;;
+        ll)                                     ___x_cmd_exa  -l    "$@"            ;;
+        ps)                                     ___x_cmd_procs      "$@"            ;;
+        du)                                     ___x_cmd_dust       "$@"            ;;
+        sqlite)                                 ___x_cmd_sqlite     "$@"            ;;
+        cat)                                    ___x_cmd_bat        "$@"            ;;
+        bw)                                     ___x_cmd_bw         "$@"            ;;
+
         jq)
                                                 if [ "$#" -ne 0 ]; then
                                                     ___x_cmd_jq "$@"
@@ -1109,17 +1111,18 @@ ___x_cmd_main(){
                                                     ___x_cmd_jq "--help"
                                                 fi
                                                 ;;
-        yq)                                     ___x_cmd_yq         "$@"             ;;
-        curl)                                   ___x_cmd_static_build_curl  "$@"     ;;
-        openssl|ssl)                            ___x_cmd_openssl    "$@"             ;;
-        tmux)                                   ___x_cmd_tmux       "$@"             ;;
-        git)                                    ___x_cmd_git        "$@"             ;;
-        nmap)                                   ___x_cmd_nmap       "$@"             ;;
-        ncat)                                   ___x_cmd_ncat       "$@"             ;;
-        nping)                                  ___x_cmd_nping      "$@"             ;;
-        traceroute)                             ___x_cmd_traceroute "$@"             ;;
-        run)                                    ___x_cmd_run_by_file "$@"            ;;
-        search_path)                            ___x_cmd_search_path "$@"            ;;
+        yq)                                     ___x_cmd_yq         "$@"            ;;
+        # TODO: we will rename ___x_cmd_curl to make room for it
+        curl)                                   ___x_cmd_static_build_curl  "$@"    ;;
+        openssl|ssl)                            ___x_cmd_openssl    "$@"            ;;
+        tmux)                                   ___x_cmd_tmux       "$@"            ;;
+        git)                                    ___x_cmd_git        "$@"            ;;
+        nmap)                                   ___x_cmd_nmap       "$@"            ;;
+        ncat)                                   ___x_cmd_ncat       "$@"            ;;
+        nping)                                  ___x_cmd_nping      "$@"            ;;
+        traceroute)                             ___x_cmd_traceroute "$@"            ;;
+        run)                                    ___x_cmd_run_by_file "$@"           ;;
+        search_path)                            ___x_cmd_search_path "$@"           ;;
         which|w)                                local p
                                                 for p in "$@"; do
                                                     if ! ___x_cmd_which_one "$p"; then

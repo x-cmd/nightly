@@ -160,7 +160,7 @@ $d2"
                                     fi
                                 )
                                 ;;
-                    load)       eval xrc "$(tr '\n' ' ' <"$___X_CMD_ROOT_MOD" | tr -d '|')" ;;
+                    load)       eval xrc "$(awk '$1~/[A-Za-z0-9_\-]+/{ print $1;  }'<"$___X_CMD_ROOT_MOD" | tr '\n' ' ')" ;;
                     which)      printf "%s\n" "$___X_CMD_ROOT_MOD" ;;
                     cat)        cat "$___X_CMD_ROOT_MOD" 2>/dev/null ;;
                     ls|*)       awk '$1~/[A-Za-z0-9_\-]+/{ print $1;  }'<"$___X_CMD_ROOT_MOD" ;;
