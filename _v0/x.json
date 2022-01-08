@@ -8,19 +8,6 @@
             "ls": null
         }
     },
-    "install": {
-        "ls": "--- list all software",
-        "update": "--- update",
-        "get": {
-            "#1": "x install name",
-            "#desc": "get software installation command"
-        },
-        "run": {
-            "#1": "x install name",
-            "#desc": "run software installation command"
-        },
-        "#1": "x install name"
-    },
     "config": {
         "tab": null,
         "ssh": null,
@@ -56,36 +43,6 @@
     "reinstall": {},
     "z": null,
     "uz": null,
-    "ubu|alp|deb|cen|bus": {
-        "alias": {},
-        "run": {
-            "centos": {},
-            "ubuntu": {},
-            "alpine": {},
-            "busybox": {}
-        },
-        "exec": {},
-        "empower": {},
-        "centos": {},
-        "ubuntu": {},
-        "alpine": {},
-        "busybox": {}
-    },
-    "docker|dk|xdk": {
-        "alias": {},
-        "run": {
-            "centos": {},
-            "ubuntu": {},
-            "alpine": {},
-            "busybox": {}
-        },
-        "exec": {},
-        "empower": {},
-        "centos": {},
-        "ubuntu": {},
-        "alpine": {},
-        "busybox": {}
-    },
     "sh|bash|zsh|fish|ksh|dash|ash": "___advise_ls",
     "jar": "___advise_ls",
     "java": "___advise_ls",
@@ -107,7 +64,7 @@
     "ncat": null,
     "nping": null,
     "traceroute": null,
-    "sqlite3": null,
+    "sqlite": null,
     "run": {},
     "search_path": {},
     "which": {},

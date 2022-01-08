@@ -276,7 +276,7 @@ ___x_cmd_glob(){
             awk -v pattern="$pattern" -v prefix="$folder" '
                 BEGIN { if (prefix != "") prefix = prefix "/"; }
                 {
-                    if ( ($0 !~ /^[\ \t]+$/) && ($0 !~ /:$/)) {
+                    if ( ($0 !~ /^[ \t]+$/) && ($0 !~ /:$/)) {
                         tgt = substr($0, 3)
                         if (match(tgt, pattern)) {
                             print prefix tgt
