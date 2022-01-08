@@ -27,6 +27,10 @@ jobs:
           ssh-add ~/.ssh/id_rsa
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: add git remote url
+        run: |
+          git config --global user.name 'padparadsayc'
+          git config --global user.email 'lth@x-cmd.com'
       - name: install x-cmd && push code
         run: |
           eval "$(curl https://get.x-cmd.com/dev)"
