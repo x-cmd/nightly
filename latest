@@ -8,7 +8,8 @@ ___x_cmd_list_resource(){
 cowsay
 theme
 tldr
-advise"
+advise
+install"
 }
 
 # Section : Unfinished ___x_cmd_official_which
@@ -797,16 +798,17 @@ ___x_cmd_arg_line(){
 
 NR==1{
     argl = split($0, argv, "\001")
+
     for (i=1; i<=argl; ++i) {
         gsub("\002", "\n", argv[i])
+        gsub(/\\/, "\\\\\\", argv[i])
         gsub("\"", "\\\"", argv[i])
-        argv[i] = "\"" argv[i] "\""
+        # TODO: Awk will have a warning about "$" and the solution: throw it to "2>/dev/null"
+        gsub(/\$/, "\\\$", argv[i])
+        argv[i] = "\\\"" argv[i] "\\\""
         if (argstr == "") argstr = argv[i]
         else argstr = argstr " " argv[i]
     }
-    # gsub("\"", "\\\"", argstr)
-    # print "\"" argstr "\""
-    # gsub("\$", "\\\$", argstr)
     print argstr
 }
 
@@ -835,7 +837,7 @@ NR>1{
 END {
     if (count > 0) printcode( count )
 }
-'
+' 2>/dev/null
 
 }
 
@@ -865,7 +867,7 @@ ___x_cmd_args(){
     ___x_cmd_arg_line "$n" "$@" | while read -r line; do
         if [ -z "$code" ]; then
             # code="$line"
-            eval ___x_cmd_args_let '${line:-"printf \"%s \""}'
+            eval ___x_cmd_args_let "$line"
             continue
         fi
         eval ___x_cmd_args_funeach "$line"
@@ -893,6 +895,7 @@ ___x_cmd_margs(){
         printf "%s %s\n" ___x_cmd_args_funeach "$line"
     done
     )"
+
 }
 
 # EndSection
@@ -1038,7 +1041,7 @@ ___x_cmd_main(){
         args)                                   ___x_cmd_args "$@"      ;;
         arg1)                                   ___x_cmd_args 1 "$@"    ;;
         margs)                                  ___x_cmd_margs "$@"     ;;
-        marg1)                                  ___x_cmd_margs 1 "$@"     ;;
+        marg1)                                  ___x_cmd_margs 1 "$@"   ;;
 
         cd)                                     ___x_cmd_cd "$@" ;;
 
@@ -1146,7 +1149,7 @@ ___x_cmd_main(){
 
 # Section : advise.json
 ___x_cmd_x_cmd_advise_json(){
-    xrc cat _v0/x.json
+    xrc cat x-cmd/_v0/x.json
     return 126
 }
 # EndSection
