@@ -1,4 +1,4 @@
-FROM --platform=$TARGETPLATFORM x-cmd/base-alpine-1-curl
+FROM --platform=$TARGETPLATFORM xcmd/base-alpine-1-curl
 
 RUN eval "$(curl https://get.x-cmd.com/nightly)"
 
