@@ -29,10 +29,10 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       - name: add git remote url
         run: |
-          git config --global user.name 'padparadsayc'
-          git config --global user.email 'lth@x-cmd.com'
+          git config --global user.name 'edwinjhlee'
+          git config --global user.email 'l@x-cmd.com'
       - name: install x-cmd && push code
         run: |
-          eval "$(curl https://get.x-cmd.com/dev)"
+          eval "$(curl https://get.x-cmd.com/dev)" || true
           ___X_CMD_IN_CHINA_NET=
           x ws pub || true
