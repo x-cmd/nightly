@@ -210,10 +210,6 @@ ___x_cmd_theme_control_get_current_background_color(){
 
 # EndSection
 
-if [ -n "$___X_CMD_ENABLE_AUTO_RUN" ]; then
-    ___x_cmd_theme_control "$@"
-fi
-
 if ___x_cmd_is_suitable_advise_env; then
     xrc advise/latest
     advise ___x_cmd_theme_control "" theme
