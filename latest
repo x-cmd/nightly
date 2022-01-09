@@ -59,19 +59,19 @@ ___x_cmd_log() {
 ___x_cmd_log_init(){
     local logger_name="${1}"
 
-    local var="XRC_LOG_LEVEL_${logger_name}"
-    eval "${logger_name}_log(){     O=$logger_name ___x_cmd_logger \"\$@\";   }"
+    local var="___X_CMD_LOG_LEVEL_OF_LOGGER_${logger_name}"
+    eval "${logger_name}_log(){     O=$logger_name ___x_cmd_log_logger_func \"\$@\";   }"
     ___x_cmd_log_set_level "$logger_name" info 1
 }
 
 ___x_cmd_log_timestamp(){
     local arg="${1:?Provide timestamp}"
     case "$arg" in
-        on)     XRC_LOG_TIMESTAMP="+%H:%M:%S";      return 0   ;;
-        off)    XRC_LOG_TIMESTAMP= ;                return 0   ;;
+        on)     ___X_CMD_LOG_LOGGER_TIMESTAMP_FORMAT="+%H:%M:%S";      return 0   ;;
+        off)    ___X_CMD_LOG_LOGGER_TIMESTAMP_FORMAT= ;                return 0   ;;
         *)      printf "Try customized timestamp format wit date command:\n"
                 if date "$arg"; then
-                    XRC_LOG_TIMESTAMP="$arg"
+                    ___X_CMD_LOG_LOGGER_TIMESTAMP_FORMAT="$arg"
                     return 0
                 fi
                 return 1    ;;
@@ -83,21 +83,21 @@ ___x_cmd_log_set_level(){
     local level="${2:?Provide level}"
     local level_code="${3:?Provide level code}"
 
-    local var="XRC_LOG_LEVEL_${logger_name}"
+    local var="___X_CMD_LOG_LEVEL_OF_LOGGER_${logger_name}"
     eval "$var=$level_code"
 
-    local level_name
-    local on=
-    for level_name in debug info warn error; do
-        [ "$level_name" = "$level" ] && on=1
-        if [ -z "$on" ]; then
-            alias "${logger_name}:${level_name}"=" : # "
-        else
-            alias "${logger_name}:${level_name}"="${logger_name}_log ${level_name}"
-        fi
-    done
+    # local level_name
+    # local on=
+    # for level_name in debug info warn error; do
+    #     [ "$level_name" = "$level" ] && on=1
+    #     if [ -z "$on" ]; then
+    #         alias "${logger_name}:${level_name}"=" : # "
+    #     else
+    #         alias "${logger_name}:${level_name}"="${logger_name}_log ${level_name}"
+    #     fi
+    # done
 
-    O="$logger_name" ___x_cmd_logger info "Level of logger [$logger_name] is set to [$level]"
+    O="$logger_name" ___x_cmd_log_logger_func info "Level of logger [$logger_name] is set to [$level]"
 }
 
 ___x_cmd_log_help(){
@@ -128,46 +128,65 @@ A
 
 # Section: logger
 # TODO: To move xrc_log
-XRC_LOG_COLOR=1
-XRC_LOG_TIMESTAMP=      # "+%H:%M:%S"      # Enable Timestamp.
+___X_CMD_LOG_COLORIZED_TF=
 
-# TODO: rename to ___x_cmd_log_logger
-___x_cmd_logger(){
+___X_CMD_LOG_LOGGER_TIMESTAMP_FORMAT=      # "+%H:%M:%S"      # Enable Timestamp.
+
+___X_CMD_LOG_COLORIZED_DEBUG="${___X_CMD_LOG_COLORIZED_DEBUG:-"\\033[32;2m"}"
+___X_CMD_LOG_COLORIZED_INFO="${___X_CMD_LOG_COLORIZED_INFO:-"\\033[36m"}"
+___X_CMD_LOG_COLORIZED_WARN="${___X_CMD_LOG_COLORIZED_WARN:-"\\033[33m"}"
+___X_CMD_LOG_COLORIZED_ERROR="${___X_CMD_LOG_COLORIZED_ERROR:-"\\033[31m"}"
+
+___X_CMD_LOG_COLORIZED_TIMESTAMP_BEGIN="${___X_CMD_LOG_COLORIZED_WARN:-"["}"
+___X_CMD_LOG_COLORIZED_TIMESTAMP_END="${___X_CMD_LOG_COLORIZED_WARN:-"]"}"
+
+___x_cmd_log_logger_func(){
     local logger="${O:-DEFAULT}"
-    local IFS=
     local level="${1:?Please provide logger level}"
 
-    local color="\e[32;2m"
+    local color="$___X_CMD_LOG_COLORIZED_DEBUG"
     local level_code=0
     case "$level" in
         debug|DEBUG|verbose)    level="DBG";    shift ;;
-        info|INFO)              level="INF";    level_code=1;   color="\e[36m";     shift ;;
-        warn|WARN)              level="WRN";    level_code=2;   color="\e[33m";     shift ;;
-        error|ERROR)            level="ERR";    level_code=3;   color="\e[31m";     shift ;;
+        info|INFO)              level="INF";    level_code=1;   color="$___X_CMD_LOG_COLORIZED_INFO";       shift ;;
+        warn|WARN)              level="WRN";    level_code=2;   color="$___X_CMD_LOG_COLORIZED_WARN";       shift ;;
+        error|ERROR)            level="ERR";    level_code=3;   color="$___X_CMD_LOG_COLORIZED_ERROR";      shift ;;
         *)                      level="DBG"     ;;
     esac
 
-    local var="XRC_LOG_LEVEL_${logger}"
+    local var="___X_CMD_LOG_LEVEL_OF_LOGGER_${logger}"
 
     eval "[ $level_code -lt \"\${${var}:-1}\" ]" && return 0
 
-    local timestamp=
-    [ -n "$XRC_LOG_TIMESTAMP" ] && timestamp=" [$(date "${XRC_LOG_TIMESTAMP}")]"
+    if [ -z "$___X_CMD_LOG_COLORIZED_TF" ]; then
+        if [ -t 2 ]; then
+            ___X_CMD_LOG_COLORIZED_TF=true
+        else
+            ___X_CMD_LOG_COLORIZED_TF=false
+        fi
+    fi
 
-    if [ -n "$XRC_LOG_COLOR" ]; then
+    local IFS=
+    local timestamp=
+    if [ "$___X_CMD_LOG_COLORIZED_TF" = true ]; then
+        if [ -n "$___X_CMD_LOG_LOGGER_TIMESTAMP_FORMAT" ]; then
+            timestamp="$(date "${___X_CMD_LOG_LOGGER_TIMESTAMP_FORMAT}")"
+            timestamp="${___X_CMD_LOG_COLORIZED_TIMESTAMP_BEGIN}${timestamp}${___X_CMD_LOG_COLORIZED_TIMESTAMP_END}${color}"
+        fi
 
         if [ $# -eq 0 ]; then
-            printf "${color}%s[%s]${timestamp}: " "$logger" "$level"
+            printf "${color}%s[%s] ${timestamp}: " "$logger" "$level"
             cat | awk 'NR==1{ print($0) }; NR>=2{ print("> " $0); }; END{ printf("%s", "\033[0m"); }'
         else
-            printf "${color}%s[%s]${timestamp}: %s\e[0m\n" "$logger" "$level" "$*"
+            printf "${color}%s[%s] ${timestamp}: %s\033[0m\n" "$logger" "$level" "$*"
         fi
     else
+        [ -n "$___X_CMD_LOG_LOGGER_TIMESTAMP_FORMAT" ] && timestamp="$(date "${___X_CMD_LOG_LOGGER_TIMESTAMP_FORMAT}")"
         if [ $# -eq 0 ]; then
-            printf "%s[%s]${timestamp}: " "$logger" "$level"
+            printf "%s[%s] ${timestamp}: " "$logger" "$level"
             cat | awk 'NR==1{ print($0) }; NR>=2{ print("> " $0); }; }'
         else
-            printf "%s[%s]${timestamp}: %s\n" "$logger" "$level" "$*"
+            printf "%s[%s] ${timestamp}: %s\n" "$logger" "$level" "$*"
         fi
     fi >&2
 }
@@ -215,6 +234,5 @@ ___x_cmd_log_completer(){
     esac
 }
 # EndSection
-
 
 xrc setmain ___x_cmd_log
