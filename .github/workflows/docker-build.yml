@@ -1,0 +1,20 @@
+name: Docker build
+on: 
+  # push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Docker build
+      run: |
+        eval "$(curl https://get.x-cmd.com/dev)" || true
+        git clone git@github.com:x-cmd/image.git
+        cd image
+        xws image alpine 
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
