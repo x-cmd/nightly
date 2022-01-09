@@ -1,4 +1,4 @@
-name: Docker build
+name: docker build
 on: 
   # push:
   workflow_dispatch:
@@ -12,7 +12,7 @@ jobs:
     - name: Docker build
       run: |
         eval "$(curl https://get.x-cmd.com/dev)" || true
-        git clone git@github.com:x-cmd/image.git
+        git clone https://github.com/x-cmd/image.git
         cd image
         xws image alpine 
       env:
