@@ -86,12 +86,12 @@ A
     esac
     case "$sys_name" in 
         darwin)
-            s=s"/homebrew-bottles"
+            s="$s/homebrew-bottles"
             eval "$s"
             core_url="$url/homebrew-core.git"
         ;;
         linux)
-            s=s"/linuxbrew-bottles"
+            s="$s/linuxbrew-bottles"
             eval "$s"
             core_url="$url/linuxbrew-core.git"
         ;;

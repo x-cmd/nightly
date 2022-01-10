@@ -59,7 +59,7 @@ ___proxy_exec(){
     shift
 
     if xrc "proxy/lib/$subcmd"; then
-        proxy_"$subcmd" "$@"
+        ___x_cmd_proxy_"$subcmd" "$@"
     else
         proxy_log error "Module not found. Autoloading failure."
         return 1
