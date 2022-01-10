@@ -12,8 +12,7 @@ ___x_cmd_dev_mod_lsfile0()(
         "v*" \
         "_v*/**" \
         "lib/**" \
-        "third-party/**" \
-        "lib/**" | \
+        "third-party/**" | \
     while read -r i; do
         [ "$i" != "${i#*_test*}" ] && continue
         # [ "$i" != "${i%.test}" ] && continue
@@ -66,7 +65,7 @@ ___x_cmd_dev_mod_tgz(){
     scope="${scope#*/}"
 
     mkdir -p "$WSROOT/dist" &&
-        eval "tar czvf $scope.tgz $(___x_cmd_dev_mod_lsfile | tr '\n' ' ')" &&
+        eval "tar czvf $scope.tgz $(___x_cmd_dev_mod_lsfile | sort | uniq | tr '\n' ' ')" &&
         mv "$scope.tgz" "$WSROOT/dist/$scope.tgz" &&
         ls -alh "$WSROOT/dist/$scope.tgz"
 }
