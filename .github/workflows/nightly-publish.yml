@@ -1,4 +1,4 @@
-name: 'github actions publish x-cmd/x-cmd nightly'
+name: 'publish x-cmd/x-cmd nightly'
 
 on:
   workflow_dispatch:
@@ -36,12 +36,3 @@ jobs:
           eval "$(curl https://get.x-cmd.com/dev)" || true
           ___X_CMD_IN_CHINA_NET=
           x ws pub || true
-
-      - name: Docker build
-        run: |
-          docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}"
-          docker buildx create --use
-          bash ./.x-cmd/build
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}

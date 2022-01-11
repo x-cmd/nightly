@@ -1,0 +1,26 @@
+name: 'docker build'
+
+on:
+  workflow_run:
+    workflows: ["publish x-cmd/x-cmd nightly"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  bot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v2
+        with: 
+          ref: main 
+          fetch-depth: 0
+      - name: Docker build
+        run: |
+          docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}"
+          docker buildx create --use
+          bash ./.x-cmd/build
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
