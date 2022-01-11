@@ -102,19 +102,42 @@ Please input the script. Press Ctrl-D to EXIT.
 A
 
         local script
-        script="$(cat)"
+        script="$(cat)" || {
+            cat >&2 <<A
+Wrong code. Exit.
+A
+            return 1
+        }
 
         ___x_cmd_dev_try_get_shell_to_test | while read -r SHELL; do
+            trap 'printf "Interrputed.\n"; break ' SIGINT
+            trap 'printf "Interrputed.\n"; break ' SIGTERM
             printf "\n%s\n%s: %s\n" "--------------------" "Trying" "$SHELL" >&2
             printf "%s" "$script" | ___x_cmd_dev_try_script "$SHELL"
+            code=$?
+            trap - SIGINT
+            trap - SIGTERM
+
+            if [ $code -eq 255 ]; then
+                printf "%s\n" "Exit because docker exit in 255 status." >&2
+                return 255
+            fi
         done
         return
+    else
+        trap 'printf "Interrputed.\n"; break ' SIGINT
+        ___x_cmd_dev_try_get_shell_to_test | while read -r SHELL; do
+            printf "\n%s\n%s: %s\n" "--------------------" "Trying" "$SHELL"
+            ___x_cmd_dev_try_script "$SHELL" "$@"
+            code=$?
+            if [ $code -eq 255 ]; then
+                printf "%s\n" "Exit because docker exit in 255 status." >&2
+                return 255
+            fi
+        done
+        trap - SIGINT
     fi
 
-    ___x_cmd_dev_try_get_shell_to_test | while read -r SHELL; do
-        printf "\n%s\n%s: %s\n" "--------------------" "Trying" "$SHELL"
-        ___x_cmd_dev_try_script "$SHELL" "$@"
-    done
 }
 
 ___x_cmd_dev_try_posix(){
