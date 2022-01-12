@@ -132,7 +132,8 @@ ___X_CMD_LOG_COLORIZED_TF=
 
 ___X_CMD_LOG_LOGGER_TIMESTAMP_FORMAT=      # "+%H:%M:%S"      # Enable Timestamp.
 
-___X_CMD_LOG_COLORIZED_DEBUG="${___X_CMD_LOG_COLORIZED_DEBUG:-"\\033[32;2m"}"
+___X_CMD_LOG_COLORIZED_MSG="${___X_CMD_LOG_COLORIZED_MSG:-""}"
+___X_CMD_LOG_COLORIZED_DEBUG="${___X_CMD_LOG_COLORIZED_DEBUG:-"\\033[32m"}"
 ___X_CMD_LOG_COLORIZED_INFO="${___X_CMD_LOG_COLORIZED_INFO:-"\\033[36m"}"
 ___X_CMD_LOG_COLORIZED_WARN="${___X_CMD_LOG_COLORIZED_WARN:-"\\033[33m"}"
 ___X_CMD_LOG_COLORIZED_ERROR="${___X_CMD_LOG_COLORIZED_ERROR:-"\\033[31m"}"
@@ -144,16 +145,17 @@ ___x_cmd_log_logger_func(){
     local logger="${O:-DEFAULT}"
     local level="${1:?Please provide logger level}"
 
-    local color="$___X_CMD_LOG_COLORIZED_DEBUG"
+    local type_color="$___X_CMD_LOG_COLORIZED_DEBUG"
     local level_code=0
     case "$level" in
         debug|DEBUG|verbose)    level="DBG";    shift ;;
-        info|INFO)              level="INF";    level_code=1;   color="$___X_CMD_LOG_COLORIZED_INFO";       shift ;;
-        warn|WARN)              level="WRN";    level_code=2;   color="$___X_CMD_LOG_COLORIZED_WARN";       shift ;;
-        error|ERROR)            level="ERR";    level_code=3;   color="$___X_CMD_LOG_COLORIZED_ERROR";      shift ;;
+        info|INFO)              level="INF";    level_code=1;   type_color="$___X_CMD_LOG_COLORIZED_INFO";       shift ;;
+        warn|WARN)              level="WRN";    level_code=2;   type_color="$___X_CMD_LOG_COLORIZED_WARN";       shift ;;
+        error|ERROR)            level="ERR";    level_code=3;   type_color="$___X_CMD_LOG_COLORIZED_ERROR";      shift ;;
         *)                      level="DBG"     ;;
     esac
 
+    local msg_color="${___X_CMD_LOG_COLORIZED_MSG:-"$type_color"}"
     local var="___X_CMD_LOG_LEVEL_OF_LOGGER_${logger}"
 
     eval "[ $level_code -lt \"\${${var}:-1}\" ]" && return 0
@@ -171,22 +173,22 @@ ___x_cmd_log_logger_func(){
     if [ "$___X_CMD_LOG_COLORIZED_TF" = true ]; then
         if [ -n "$___X_CMD_LOG_LOGGER_TIMESTAMP_FORMAT" ]; then
             timestamp="$(date "${___X_CMD_LOG_LOGGER_TIMESTAMP_FORMAT}")"
-            timestamp="${___X_CMD_LOG_COLORIZED_TIMESTAMP_BEGIN}${timestamp}${___X_CMD_LOG_COLORIZED_TIMESTAMP_END}${color}"
+            timestamp="${___X_CMD_LOG_COLORIZED_TIMESTAMP_BEGIN}${timestamp}${___X_CMD_LOG_COLORIZED_TIMESTAMP_END} "
         fi
 
         if [ $# -eq 0 ]; then
-            printf "${color}%s[%s] ${timestamp}: " "$logger" "$level"
+            printf "${timestamp}\033[1m${type_color}[%s] <%s>:" "$level" "$logger"
             cat | awk 'NR==1{ print($0) }; NR>=2{ print("> " $0); }; END{ printf("%s", "\033[0m"); }'
         else
-            printf "${color}%s[%s] ${timestamp}: %s\033[0m\n" "$logger" "$level" "$*"
+            printf "${timestamp}\033[1m${type_color}[%s] <%s>: \033[0m${msg_color}%s\033[0m\n" "$level" "$logger" "$*"
         fi
     else
-        [ -n "$___X_CMD_LOG_LOGGER_TIMESTAMP_FORMAT" ] && timestamp="$(date "${___X_CMD_LOG_LOGGER_TIMESTAMP_FORMAT}")"
+        [ -n "$___X_CMD_LOG_LOGGER_TIMESTAMP_FORMAT" ] && timestamp="$(date "${___X_CMD_LOG_LOGGER_TIMESTAMP_FORMAT}") "
         if [ $# -eq 0 ]; then
-            printf "%s[%s] ${timestamp}: " "$logger" "$level"
+            printf "${timestamp}[%s] <%s>:" "$level" "$logger"
             cat | awk 'NR==1{ print($0) }; NR>=2{ print("> " $0); }; }'
         else
-            printf "%s[%s] ${timestamp}: %s\n" "$logger" "$level" "$*"
+            printf "${timestamp}[%s] <%s>: %s\n" "$level" "$logger" "$*"
         fi
     fi >&2
 }
