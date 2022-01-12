@@ -2,6 +2,7 @@
 
 # git facility
 ___x_cmd_dev_ws_name(){
+    param:void
     local name
     name=$(___x_cmd_dev_ws_geturl)
     name="${name%.git}"
@@ -51,6 +52,7 @@ ___x_cmd_dev_ws_add_source(){
 }
 
 ___x_cmd_dev_ws_pull(){
+    param:void
     ___x_cmd_dev_ws_add_source || return
 
     local branch
@@ -64,6 +66,7 @@ ___x_cmd_dev_ws_pull(){
 }
 
 ___x_cmd_dev_ws_push(){
+    param:void
     ___x_cmd_dev_ws_add_source || return
 
     local branch
@@ -75,7 +78,6 @@ ___x_cmd_dev_ws_push(){
 }
 
 ___x_cmd_dev_ws(){
-
     if [ -f "$(x wsroot)/.x-cmd/$1" ]; then
         x _ws "$@"
         return

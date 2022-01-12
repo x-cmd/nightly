@@ -29,11 +29,13 @@ A
 
 
 ___x_cmd_dev_all_repolist(){
+    param:void
     # ___x_cmd_curl_gitx x-cmd x-cmd main repolist
     curl https://gitee.com/x-cmd/x-cmd/raw/main/repolist 2>/dev/null | awk '{ if ($0 ~ /^\+/) gsub(/^\+/, "", $0); print $0 }'
 }
 
 ___x_cmd_dev_all_map(){
+    param:void
     local curdir="${1:-$HOME}"
     local x_bash_eval="${2:?Provide sentence}"
     local x_cmd_eval="${3:-"$2"}"
@@ -65,12 +67,14 @@ ___x_cmd_dev_all_map(){
 
 # shellcheck disable=SC2016
 ___x_cmd_dev_all_clone(){
+    param:void
     ___x_cmd_dev_all_map "${1:-$HOME}" \
         'git clone "git@gitee.com:$org/$name.git"'
 }
 
 # shellcheck disable=SC2016
 ___x_cmd_dev_all_repo(){
+    param:void
     ___x_cmd_dev_all_map "${1:-$HOME}" '
         if [ -d "$name" ]; then
             cd "$name" && git pull && git pull origin main
@@ -81,6 +85,7 @@ ___x_cmd_dev_all_repo(){
 }
 
 ___x_cmd_dev_all_ls(){
+    param:void
     ___x_cmd_dev_mod_ls "$@"
 }
 

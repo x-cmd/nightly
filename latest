@@ -38,12 +38,6 @@ A
     "___x_cmd_dev_${PARAM_SUBCMD}" "$@"
 }
 
-
-# if [ -n "${BASH_VERSION}${ZSH_VERSION}" ] && [ "${-#*i}" != "$-" ]; then
-#     xrc advise/latest
-#     advise dev
-# fi
-
 alias xdev="x dev"
 
 # Section: git
@@ -67,3 +61,8 @@ giam(){
 # EndSection
 
 xrc setmain ___x_cmd_dev
+
+if ___x_cmd_is_suitable_advise_env; then
+    xrc advise/latest
+    advise ___x_cmd_dev "" dev
+fi

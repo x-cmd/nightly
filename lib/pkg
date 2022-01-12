@@ -18,6 +18,7 @@ ___x_cmd_dev_pkg_add(){
 }
 
 ___x_cmd_dev_pkg_pull(){
+    param:void
     local name="${1:?Provide module name}"
     # local position="${2:-"git@gitee.com/x-bash/$name.git"}"
     local position="${2:-"https://$(___x_cmd_dev_pkg_gitx)/x-bash/$name.git"}"
@@ -26,6 +27,7 @@ ___x_cmd_dev_pkg_pull(){
 }
 
 ___x_cmd_dev_pkg_update(){
+    param:void
     local IFS
     local mod
     git prune
@@ -44,9 +46,13 @@ ___x_cmd_dev_pkg_update(){
 
 # Section: information
 
-___x_cmd_dev_pkg_lsmod(){       ___x_cmd_dev_mod_ls "$@";   }
+___x_cmd_dev_pkg_lsmod(){
+    param:void
+    ___x_cmd_dev_mod_ls "$@"
+}
 
 ___x_cmd_dev_pkg_lsfile()(
+    param:void
     cd "$(x wsroot)/mod" || return
 
     ___x_cmd_dev_pkg_lsmod "$@" | (
@@ -58,6 +64,7 @@ ___x_cmd_dev_pkg_lsfile()(
 )
 
 ___x_cmd_dev_pkg_install()(
+    param:void
     cd "$(x wsroot)/mod" || return
 
     ___x_cmd_dev_pkg_lsmod "$@" | (
@@ -69,6 +76,7 @@ ___x_cmd_dev_pkg_install()(
 )
 
 ___x_cmd_dev_pkg_wc(){
+    param:void
     cd "$(x wsroot)/mod" &&
         ___x_cmd_dev_pkg_lsfile "$@" | xargs wc | sort -n -r | less
 }
@@ -78,6 +86,7 @@ ___x_cmd_dev_pkg_wc(){
 # Section: tgz tar 7z
 
 ___x_cmd_dev_pkg_tgz()(
+    param:void
     case "${1:-all}" in
         core)       scope=core ;;
         all)        scope=all ;;
@@ -94,6 +103,7 @@ ___x_cmd_dev_pkg_tgz()(
 )
 
 ___x_cmd_dev_pkg_tar()(
+    param:void
     case "${1:-all}" in
         core)       scope=core ;;
         all)        scope=all ;;
@@ -110,6 +120,7 @@ ___x_cmd_dev_pkg_tar()(
 )
 
 ___x_cmd_dev_pkg_7z()(
+    param:void
     case "${1:-all}" in
         core)       scope=core ;;
         all)        scope=all ;;
@@ -128,6 +139,7 @@ ___x_cmd_dev_pkg_7z()(
 # EndSection
 
 ___x_cmd_dev_pkg_pub(){
+    param:void
     ___x_cmd_dev_pkg_update "$@" && ___x_cmd_dev_pkg_tgz "$@" && git add . && git commit -m ...
     ___x_cmd_dev_ws_push
 }
@@ -151,6 +163,7 @@ subcommand:
 
     tgz             "compress modules of core/all/<special-release> into <name>.tgz"
     tar             "compress modules"
+    7z              "compress modules of 7z"
 
     init            "init"
 

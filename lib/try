@@ -1,6 +1,7 @@
 
 
 ___x_cmd_dev_try(){
+    param:void
     ___x_cmd_dev_try_posix "$@"
 }
 
@@ -109,20 +110,27 @@ A
             return 1
         }
 
-        ___x_cmd_dev_try_get_shell_to_test | while read -r SHELL; do
-            trap 'printf "Interrputed.\n"; break ' SIGINT
-            trap 'printf "Interrputed.\n"; break ' SIGTERM
-            printf "\n%s\n%s: %s\n" "--------------------" "Trying" "$SHELL" >&2
-            printf "%s" "$script" | ___x_cmd_dev_try_script "$SHELL"
-            code=$?
-            trap - SIGINT
-            trap - SIGTERM
+        trap 'printf "Interrputed.\n"; break ' SIGINT
+        trap 'printf "Interrputed.\n"; break ' SIGTERM
 
-            if [ $code -eq 255 ]; then
-                printf "%s\n" "Exit because docker exit in 255 status." >&2
-                return 255
-            fi
-        done
+        ___x_cmd_dev_try_get_shell_to_test | {
+            trap 'printf "Interrputed.\n"; break ' SIGINT
+
+            while read -r SHELL || echo err; do
+
+                echo "trap"
+                trap -p SIGINT
+
+                printf "\n%s\n%s: %s\n" "--------------------" "Trying" "$SHELL" >&2
+                printf "%s" "$script" | ___x_cmd_dev_try_script "$SHELL"
+                code=$?
+
+                if [ $code -eq 255 ]; then
+                    printf "%s\n" "Exit because docker exit in 255 status." >&2
+                    return 255
+                fi
+            done
+        }
         return
     else
         trap 'printf "Interrputed.\n"; break ' SIGINT

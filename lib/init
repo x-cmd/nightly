@@ -22,6 +22,7 @@ A
 
 # According projects
 ___x_cmd_dev_init_gitignore(){
+    param:void
     cat >.gitignore  <<A
 dist
 build
@@ -35,6 +36,7 @@ A
 # TODO: vscode project
 # According project
 ___x_cmd_dev_init_vscode(){
+    param:void
     mkdir -p "$(x wsroot)/.vscode"
     xrc cat dev/lib/settings.json >"$(x wsroot)/.vscode/settings.json"
 
@@ -55,11 +57,12 @@ ___x_cmd_dev_init_vscode(){
 }
 
 ___x_cmd_dev_init_license(){
+    param:void
     xrc cat dev/lib/LICENSE > "$(x wsroot)/LICENSE"
 }
 
 ___x_cmd_dev_init_xproj(){
-
+    param:void
     local folder="${1:-$(pwd)}"
     local repo="${2:-$(basename "$folder")}"
 
