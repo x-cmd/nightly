@@ -3,6 +3,8 @@
 # author:       Li Junhao           l@x-cmd.com    edwinjhlee.github.io
 # maintainer:   Li Junhao
 
+x log init proxy
+
 ___X_CMD_PROXY_BACKUP_DIR="$___X_CMD_ROOT/proxy/.backup"
 xrc param
 ___x_cmd_proxy(){
