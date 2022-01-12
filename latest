@@ -534,7 +534,7 @@ ___x_cmd_xrc_source_file(){
     while [ $# -ne 0 ]; do
         ___X_CMD_LOCAL_XRCPATH="$1";   shift
 
-        if ! ___X_CMD_NO_LOCAL=1 ___x_cmd_which_one "$___X_CMD_LOCAL_XRCPATH"; then
+        if ! ___X_CMD_NO_LOCAL=1 ___x_cmd_which_one_with_naming "$___X_CMD_LOCAL_XRCPATH"; then
             printf "ERROR: Interrupted because resource not found. %s \n" "$___X_CMD_LOCAL_XRCPATH" >&2
             printf "%s\n" "return 1"
             return 1
@@ -586,6 +586,19 @@ ${___X_CMD_WHICH_ONE_RESULT}${___X_CMD_XRC_MODULE_IMPORTED}"
     if [ -n "$___X_CMD_XRC_SET_MAIN" ]; then
         ___x_cmd_ldict_put ___X_CMD_XRC_SET_MAIN_DICT "${___X_CMD_WHICH_ONE_RESULT}" "${___X_CMD_XRC_SET_MAIN}"
         # TODO: rename module
+
+        if [ -n "$___X_CMD_WHICH_ONE_NAMING" ] && [ "$___X_CMD_WHICH_ONE_NAMING" != "$___X_CMD_XRC_SET_MAIN" ]; then
+            echo "
+            $___X_CMD_WHICH_ONE_NAMING(){
+                \"$___X_CMD_XRC_SET_MAIN\" \"\$@\"
+            }" >&2
+
+            eval "
+            $___X_CMD_WHICH_ONE_NAMING(){
+                \"$___X_CMD_XRC_SET_MAIN\" \"\$@\"
+            }"
+        fi
+
         ___X_CMD_XRC_SET_MAIN=
     fi
 }
@@ -609,8 +622,37 @@ ___x_cmd_search_path(){
 
 # Section: which
 # RETURN ___X_CMD_WHICH_ONE_RESULT
+___x_cmd_which_one_with_naming(){
+    local RESOURCE_NAME="${1:?Provide resource name for ___x_cmd_which_one_with_naming}"
+    ___X_CMD_WHICH_ONE_RESULT=
+    ___X_CMD_WHICH_ONE_NAMING=
+
+    case "$RESOURCE_NAME" in
+        *=/*)                   ;;
+        *=http://*|*=https://*) ;;
+        *=*@*/*)                ;;
+        *=./*|*=../*)           ;;
+        *=*)                    ;;
+        *)
+            # TODO: some future work for http
+            case "$RESOURCE_NAME" in
+                */*)    ;;
+                *)      ___X_CMD_WHICH_ONE_NAMING="${RESOURCE_NAME}" ;;     # Only when it is a module name...
+            esac
+            # ___X_CMD_WHICH_ONE_NAMING="${RESOURCE_NAME##*/}"
+            ___x_cmd_which_one "${RESOURCE_NAME}"
+            return
+    esac
+
+
+    ___X_CMD_WHICH_ONE_NAMING="${RESOURCE_NAME%%=*}"
+
+    ___x_cmd_which_one "${RESOURCE_NAME#*=}"
+}
+
+
 ___x_cmd_which_one(){
-    local RESOURCE_NAME=${1:?Provide resource name}
+    local RESOURCE_NAME="${1:?Provide resource name for ___x_cmd_which_one}"
 
     ___X_CMD_WHICH_ONE_RESULT=
 
