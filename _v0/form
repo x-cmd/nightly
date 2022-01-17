@@ -170,8 +170,34 @@ ___x_cmd_ui_prompt_form_main(){
     local q_focus=0
 
     {
-        ___x_cmd_ui_prompt_form_draw
+        {
+            while true; do
+                printf "REFRESH\n"
+                sleep "${ANIMATE_INTERVAL:-0.2}" || break
+            done
+        } &
+
         while region_getchar; do
+            printf "C:%s:%s\n" "${___X_CMD_UI_GETCHAR_TYPE}" "${___X_CMD_UI_GETCHAR_CHAR}"
+            if [ "$___X_CMD_UI_GETCHAR_CHAR" = "$(printf "\004")" ]; then
+                break
+            fi
+        done
+        kill $!
+        sleep 0.1s
+    } | {
+        ___x_cmd_ui_prompt_form_draw
+        local ___line
+        while read -r ___line; do
+
+            case "$___line" in
+                REFRESH)        ___x_cmd_ui_prompt_form_draw ;;
+                C:*)            
+                    ___line="${___line#C:}"
+                    ___X_CMD_UI_GETCHAR_TYPE="${___line%%:*}"
+                    ___X_CMD_UI_GETCHAR_CHAR="${___line#*:}"
+            esac
+
             case "$___X_CMD_UI_GETCHAR_CHAR" in
                 UP|DN)
                     if [ $q_focus -eq 0 ]; then
@@ -238,8 +264,6 @@ ___x_cmd_ui_prompt_form_main(){
                         dict @x_ui_prompt_form put "$q_current" "answer" "$tmp_answer"
                     fi
             esac
-
-            ___x_cmd_ui_prompt_form_draw
         done
         
         # Notice: Meaningless but important.
