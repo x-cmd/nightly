@@ -1188,7 +1188,7 @@ function generate_advise_json(      indent, indent_str,
             ADVISE_JSON = ADVISE_JSON "\n" indent_str "  \"" option_id "\": \"" advise_map[option_id] "\","
             continue
         }
-        oparr_keyprefix = option_id KSEP OPTARG_OPARR
+        oparr_keyprefix = option_id KSEP "1" KSEP OPTARG_OPARR
         oparr_string    = generate_advise_json_value_candidates(oparr_keyprefix)
         ADVISE_JSON     = ADVISE_JSON "\n" indent_str "  \"" option_id "\": " oparr_string
     }

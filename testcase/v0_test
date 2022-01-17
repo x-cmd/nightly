@@ -2,7 +2,7 @@
 
 ___X_CMD_XRC_MODULE_IMPORTED=
 xrc param/v0
-xrc assert
+xrc assert/latest
 
 # Section: define functions for param testcases
 
@@ -117,7 +117,7 @@ test_advise_json(){
   },
   "rarg": {
     "#desc": "Test rest argement",
-    "#1": [  ],
+    "#1": [ "private", "public", "inner-public" ],
     "#2": [  ],
     "#3": [  ],
     "#4": [  ],

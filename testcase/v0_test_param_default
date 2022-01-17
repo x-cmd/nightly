@@ -1,5 +1,4 @@
 # shellcheck shell=sh disable=SC2039,SC2142,SC3043
-xrc assert
 
 arg_sep="$(printf "\005")"
 dict_sep="$(printf "\003")"
