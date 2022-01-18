@@ -1,8 +1,8 @@
-# shellcheck shell=sh disable=SC3043 # xrc
+# shellcheck shell=sh disable=SC3043,SC2120 # xrc
 
 # Section: bootrc consider external module.
 ___x_cmd_boot(){
-    local subcmd="$1";  shift
+    local subcmd="$1"; [ $# -gt 0 ] && shift
     if ! mkdir -p "$HOME/.x-cmd/.boot"; then
         printf "boot abort for mkdir fails: %s\n" "$HOME/.x-cmd/.boot" >/dev/stderr
         return 1
@@ -27,8 +27,11 @@ fi
 :
 A
             (
-                if [ "$BASH_VERSION" ]; then        CAN="$HOME/.bashrc"
-                    [ "$(uname)" = "Darwin" ]  &&   CAN="$CAN $HOME/.bash_profile"
+                if [ "$BASH_VERSION" ]; then
+                    # The bash login mode will not source the .bashrc file but the .bash_profile file.
+                    # Ref: https://blog.flowblok.id.au/2013-02/shell-startup-scripts.html
+                    CAN="$HOME/.bashrc $HOME/.bash_profile"
+                    # [ "$(uname)" = "Darwin" ]  &&   CAN="$CAN $HOME/.bash_profile"
                 elif [ "$ZSH_VERSION" ]; then       CAN="$HOME/.zshrc"
                 elif [ "$KSH_VERSION" ]; then       CAN="$HOME/.kshrc"
                 else                                CAN="$HOME/.shinit"
@@ -168,9 +171,7 @@ $d2"
                                     for i in "$@"; do
                                         if ! ( x boot mod ls | grep "$i" >/dev/null); then
                                             xrc ui
-                                            if [ "$(
-                                                ui select answer "Not found in boot. Automatically import this module during boot: $*" "YES" "NO!"
-                                            )" = 1 ]; then
+                                            if [ "$( ui 'select' answer "Not found in boot. Automatically import this module during boot: $*" "YES" "NO" )" = 1 ]; then
                                                 x boot mod add "$i"
                                             fi
                                         fi
@@ -189,6 +190,8 @@ $d2"
                                 ;;
                 esac
                 ;;
+        *)  xrc advise/lib/advise_get
+            ___x_cmd_advise_get_help "$(xrc which x-cmd/_v0/x.json)" boot '' ;;
     esac
 }
 
