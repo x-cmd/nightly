@@ -1,0 +1,8 @@
+a="$(printf "\001")"
+
+echo "abc
+aaa${a}ccc${a}ddd
+eee${a}" | awk -v RS="$a" '{
+    print NR $0
+}'
+

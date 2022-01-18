@@ -1,5 +1,6 @@
 # shellcheck shell=sh disable=SC3043
 
+xrc ui/_v0/getchar
 xrc ui/_v0/region
 
 # Section: select app
@@ -32,7 +33,7 @@ ___x_cmd_ui_region_select_main(){
     local question="$1"; shift
     {
         ___x_cmd_ui_region_select_draw "$state" "$state_text" "$question" "$@"
-        while region_getchar; do
+        while ___x_cmd_ui_getchar; do
             case "${___X_CMD_UI_GETCHAR_CHAR}" in
                 UP)
                     if [ $state -eq -1 ]; then

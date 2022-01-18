@@ -98,6 +98,21 @@ function end(){
     printf(UI_CURSOR_RESTORE) > "/dev/stderr"
 
     printf(UI_CURSOR_NORM) > "/dev/stderr"
+
+    print ":"
+}
+
+function env_code(VAR, text){
+    text=$0
+    time =0
+    time = time + gsub(/\\/, "\\\\", text)
+    time = time + gsub(/"/, "\\\"", text)
+    time = time + gsub("\n", "\\n", text)
+    if (time == 0) {
+        printf("%s", VAR "=\"" text "\"; ")
+    } else {
+        printf("%s", VAR "=\"$(printf \"" text "\")\"; ")
+    }
 }
 
 {
@@ -106,6 +121,8 @@ function end(){
         gsub("\001", "\n", $0)
         LAST_WIDTH=op2
         update($0, op2)
+    } else if (op == "ENV") {
+        env_code(op2, $0)
     } else if ($1 == "UPDATE") {
         op = $1
         op2 = $2
@@ -114,7 +131,10 @@ function end(){
     } else if (op == "RESULT") {
         end()
         print $0
-    }  else {   
+    } else if ($1 == "ENV") {
+        op = $1
+        op2 = $2
+    } else {   
         op = $1
         op2 = $2
     }

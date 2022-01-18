@@ -105,10 +105,9 @@ ___ui_table_json(){
 
 # EndSection
 
-xrc ui/_v0/region
-xrc ui/_v0/getchar
-
 # Section: table app 1: all data
+
+xrc ui/_v0/region
 
 # CRUD
 ___ui_table_out2(){
@@ -128,7 +127,7 @@ ___ui_table_out2(){
 
     {
         ___ui_table_out | ___x_cmd_ui_region_send
-        while ___x_cmd_ui_getchar; do
+        while region_getchar; do
             case "$___X_CMD_UI_GETCHAR_CHAR" in
                 UP|DN)
                     if [ "$___X_CMD_UI_GETCHAR_CHAR" = UP ]; then
@@ -181,6 +180,7 @@ ___ui_table_out2(){
 }
 
 # EndSection
+
 
 # Section: table app 1: all data
 
@@ -242,7 +242,7 @@ ___ui_table_out_func(){
         # printf "UPDATE\n"
         # printf "VIEW %s %s\n" "$(ui rows)" "$(ui cols)" 
 
-        while ___x_cmd_ui_getchar; do
+        while region_getchar; do
 
             if [ -n "$SPACE"  ]; then
                 case "$___X_CMD_UI_GETCHAR_TYPE" in

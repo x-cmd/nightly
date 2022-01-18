@@ -38,10 +38,10 @@ ______________________________________+
 +-----------------------------------+
 | Rule   | Route    | Method | Name |
 +--------+----------+---------------+
-| think  | <Cloure> | get   | work  |
-| think  | <Cloure> | get   | work  |
-| think  | <Cloure> | get   | work  |
-| think  | <Cloure> | get   | work  |
+| think  | <Cloure> | get    | work |
+| think  | <Cloure> | get    | work |
+| think  | <Cloure> | get    | work |
+| think  | <Cloure> | get    | work |
 +-----------------------------------+
 
 
