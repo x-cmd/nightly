@@ -3,7 +3,6 @@
 # author:       Li Junhao           l@x-cmd.com
 # maintainer:   Li Junhao
 
-
 # Section : Unfinished ___x_cmd_official_which
 
 # TODO: optimization. Consider sharing the big binary in a common folder.
@@ -167,7 +166,10 @@ ___x_cmd_run_by_file(){
 
     if [ -x "$filepath" ]; then
         "$filepath" "$@"
-        return
+        local code=$?
+        # In bash and dash. The file mount into the docker container using [ -x <path> ]
+        #   does not correctly determine whether the file has execute permissions or not.
+        [ $code != 126 ] && return $code
     fi
 
     local engine
@@ -280,36 +282,6 @@ ___x_cmd_glob(){
     done
 
 }
-
-# EndSection
-
-# Section: man
-
-# Reference: https://github.com/Valloric/dotfiles/blob/master/less/LESS_TERMCAP
-
-# termcap terminfo
-# ks      smkx      make the keypad send commands
-# ke      rmkx      make the keypad send digits
-# vb      flash     emit visual bell
-# mb      blink     start blink
-# md      bold      start bold
-# me      sgr0      turn off bold, blink and underline
-# so      smso      start standout (reverse video)
-# se      rmso      stop standout
-# us      smul      start underline
-# ue      rmul      stop underline
-
-___x_cmd_man() {
-    LESS_TERMCAP_md="${___X_CMD_THEME_MD:-"$(printf '\e[01;31m')"}" \
-    LESS_TERMCAP_me="${___X_CMD_THEME_ME:-"$(printf '\e[0m')"}" \
-    LESS_TERMCAP_us="${___X_CMD_THEME_US:-"$(printf '\e[01;04;32m')"}" \
-    LESS_TERMCAP_ue="${___X_CMD_THEME_UE:-"$(printf '\e[0m')"}" \
-    LESS_TERMCAP_so="${___X_CMD_THEME_SO:-"$(printf '\e[45;93m')"}" \
-    LESS_TERMCAP_se="${___X_CMD_THEME_SE:-"$(printf '\e[0m')"}" \
-    GROFF_NO_SGR=1 \
-    command man "$@"
-}
-alias man=___x_cmd_man
 
 # EndSection
 
@@ -1041,7 +1013,6 @@ ___x_cmd_main(){
 
         cd)                                     ___x_cmd_cd "$@" ;;
 
-        man)                                    ___x_cmd_man "$@" ;;
         env)                                    ;;
 
         login)                                  xrc hub/latest && ___x_cmd_hub login "$@" ;;
