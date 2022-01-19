@@ -9,6 +9,11 @@ ___x_cmd_man() {
         :*)
             x tldr "${1#:}"
             return
+            ;;
+        _x_cmd_advise_json)
+            xrc cat man/lib/___x_cmd_man.json
+            return 126
+            ;;
     esac
 
     # TODO: search function
@@ -29,8 +34,6 @@ ___x_cmd_man() {
     exec 3<&-
 }
 # EndSection
-
-alias man=___x_cmd_man
 
 # Section: man_run
 # Reference: https://github.com/Valloric/dotfiles/blob/master/less/LESS_TERMCAP
@@ -56,7 +59,6 @@ ___x_cmd_man_run() {
     GROFF_NO_SGR=1 \
     command man "$@"
 }
-
 # EndSection
 
 xrc setmain ___x_cmd_man
