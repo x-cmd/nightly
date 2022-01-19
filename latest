@@ -1,4 +1,4 @@
-# shellcheck shell=sh disable=SC2039,SC1090,SC3043,SC2263
+# shellcheck shell=sh disable=SC2039,SC1090,SC3043,SC2263 # xrc
 
 # author:       Li Junhao           l@x-cmd.com    edwinjhlee.github.io
 # maintainer:   Li Junhao
@@ -28,7 +28,7 @@ ___x_cmd_awk(){
         "")
             local code="$(cat)"
             local USE="$___X_CMD_AWK_ALL_LIB"
-            printf "" | awk "$@" "$(eval cat "$(___x_cmd_awk_lib)")
+            printf "" | command awk "$@" "$(eval cat "$(___x_cmd_awk_lib)")
 END{
     ${code}
 }"
@@ -40,11 +40,11 @@ END{
                 printf "%s\n" "Cannot find out code."
                 return 1
             fi
-            awk "$@" "$code"
+            command awk "$@" "$code"
             ;;
         code)
             local code="$1"; shift
-            awk "$@" "$(eval cat "$(___x_cmd_awk_lib)")
+            command awk "$@" "$(eval cat "$(___x_cmd_awk_lib)")
 ${code}"
             ;;
         src)
@@ -54,12 +54,12 @@ ${code}"
         try)
             local code="$1"; shift
             local USE="$___X_CMD_AWK_ALL_LIB"
-            awk "$@" "$(eval cat "$(___x_cmd_awk_lib)")
+            command awk "$@" "$(eval cat "$(___x_cmd_awk_lib)")
 $code"
             ;;
         *)
             local USE="$___X_CMD_AWK_ALL_LIB"
-            printf "" | awk "$@" "$(eval cat "$(___x_cmd_awk_lib)")
+            printf "" | command awk "$@" "$(eval cat "$(___x_cmd_awk_lib)")
 END{
     ${op}
 }"
@@ -74,3 +74,5 @@ END{
 # }' $@
 
 alias xawk=___x_cmd_awk
+
+xrc setmain ___x_cmd_awk
