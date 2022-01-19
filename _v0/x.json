@@ -25,8 +25,6 @@
         "ssh": null,
         "sshd": null
     },
-    "man": {},
-    "env": {},
     "login": "--- Login user account",
     "register": {},
     "token": {},
@@ -65,10 +63,7 @@
     },
     "nvm": null,
     "pip|npm": null,
-    "jar|java|py|js|node|npx|ts|rb|lua": {
-        "#desc": "Execute your script use these environments",
-        "#1": "___advise_ls"
-    },
+    "jar|java|python|js|node|npx|ts|rb|lua": "--- Execute your script use these environments",
     "jq|yq": null,
     "cat|du": "___advise_ls",
     "ls|ll|cd": "___advise_ls",
@@ -84,9 +79,14 @@
     "wsroot": {},
     "args": null,
     "alias|unalias": "--- x alias or unalias",
+    "ws": {
+        "#1": "xrc advise/lib/advise_get && ___x_cmd_advise_get_complete \"$(x advise which ___x_cmd_dev)\" mod ''",
+        "#desc": "Execute a file in workspace, usually the .x-cmd directory in the repository"
+    },
     "#1": [
         "dev",
-        "ws --- Execute a file in workspace, usually the .x-cmd directory in the repository",
+        "man",
+        "env",
         "advise --- Generate command completion based on advise json",
         "theme --- Change terminal theme",
         "tldr --- Collaborative cheatsheets for console commands",
