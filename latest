@@ -6,3 +6,4 @@ ___x_cmd_perl(){
     :
 }
 
+xrc setmain ___x_cmd_perl
