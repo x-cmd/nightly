@@ -1,9 +1,4 @@
 
-
-BEGIN {
-    
-}
-
 # Section: Global data
 BEGIN {
 
@@ -216,119 +211,155 @@ function parse_data(text,
     update_logical_table()
 }
 
-function send_msg(channel, msg){
-    # gsub("\n", "\001", msg)
-    print(channel)
-    print(msg)
-    fflush()
-}
+# function send_msg(channel, msg){
+#     # gsub("\n", "\001", msg)
+#     print(channel)
+#     print(msg)
+#     fflush()
+# }
 
 function send_msg_update(msg){
     # gsub("\n", "\001", msg)
-    print("UPDATE " max_col_size)
-    print(msg)
+    printf("%s %s %s\001", "UPDATE", max_col_size, max_row_size)
+    printf("%s\001", msg)
+    fflush()
+}
+
+function send_env(var, value){
+    # gsub("\n", "\001", msg)
+    printf("%s %s\001", "ENV", var)
+    printf("%s\001", value)
     fflush()
 }
 
 # Section: Get data
+
+function update_width_height(width, height) {
+    max_row_size = height
+    max_col_size = width
+    # TIDO: if row less than 10 rows, we should exit.
+    max_row_in_page = max_row_size - 10
+}
+
 NR==1 {
+    update_width_height( $2, $3 )
+}
+
+NR==2 {
     parse_data($0)
     # update_view()
 }
 
 # EndSection
 
-
 BEGIN {
-    last_command = ""
+    final_command = ""
     filter_edit_state = false
-
     # filter
+}
+
+function exit_with_elegant(command, item){
+    final_command = command
+    exit()
 }
 
 # Section: handle the view
 
-NR>1 {
+NR>2 {
     command = $1
     command = str_trim( command )
 
     if (command == "VIEW") {
-        max_row_size = $2
-        max_col_size = $3
-        max_row_in_page = max_row_size - 10
-        # TIDO: if row less than 10 rows, we should exit.
+        update_width_height( $2, $3 )
         update_logic_view()
-    } else if (filter_edit_state == true) {
+    } else if (command == "CHAR") {
+        char_type = $2
+        char_value = $3
 
-        if (command == "FILTER_EDIT_END") {
-            filter_edit_state = false
-            update_logical_table()
-        } else if (command == "INPUT") {
-            type = $2
-            char = $3
-            if (type == "ascii-delete") {
-                cur_filter = filter[ cur_col ]
-                filter[ cur_col ] = substr(cur_filter, 1, length(cur_filter) - 1)
-                # trigger filter: invocation cost much...
+        if (filter_edit_state == true) {
+            if (char_value == "ENTER") {
+                filter_edit_state = false
+                update_logical_table()
             } else {
-                cur_filter = filter[ cur_col ]
-                filter[ cur_col ] = cur_filter char
+                if (char_type == "ascii-delete") {
+                    cur_filter = filter[ cur_col ]
+                    filter[ cur_col ] = substr(cur_filter, 1, length(cur_filter) - 1)
+                    # trigger filter: invocation cost much...
+                } else {
+                    cur_filter = filter[ cur_col ]
+                    filter[ cur_col ] = cur_filter char_value
+                }
             }
         } else {
-
+            if (char_type == "ascii-space") {
+                filter_edit_state = true
+            } else if (char_value == "ENTER") {
+                # filter_edit_state = false
+            } else if (char_value == "c") {
+                # create
+                exit_with_elegant( "create" )
+            } else if (char_value == "r") {
+                # retriev
+                exit_with_elegant( "retrieve" )
+            } else if (char_value == "u") {
+                # update
+                exit_with_elegant( "update" )
+            } else if (char_value == "d") {
+                # delete
+                exit_with_elegant( "delete" )
+            } else if (char_value == "e") {
+                # edit
+                exit_with_elegant( "edit" )
+            } else if (char_value == "f") {
+                # refresh
+                exit_with_elegant( "refresh" )
+            } else if (char_value == "p") {
+                # previous page
+                cur_row = cur_row + max_row_in_page
+                cur_row = ((cur_row - 2) % logic_table_row + 2)
+                update_logical_table()
+            } else if (char_value == "n") {
+                cur_row = cur_row - max_row_in_page
+                cur_row = ((cur_row - 2) % logic_table_row + 2)
+                cur_row = ((cur_row + logic_table_row - 2) % logic_table_row +2 )
+                update_logical_table()
+            } else if (char_value == "UP") {
+                cur_row = cur_row - 1
+                if (cur_row <= 1) cur_row = logic_table_row
+                update_logical_table()
+            } else if (char_value == "DN") {
+                if (cur_row <= 1) {
+                    cur_row = 2
+                } else {
+                    cur_row = cur_row + 1
+                    if (cur_row > logic_table_row) cur_row = 2
+                }
+                update_logical_table()
+            } else if (char_value == "LEFT" ) {
+                # debug_file("RECV" command)
+                cur_col = cur_col - 1
+                if (cur_col <= 0) cur_col = table_col
+                update_logical_table()
+            } else if (char_value == "RIGHT") {
+                if (cur_col <= 0) {
+                    cur_col = 1
+                } else {
+                    cur_col = cur_col + 1
+                    if (cur_col > table_col) cur_col = 1
+                }
+                update_logical_table()
+            }
         }
-
-    } else {
-
-        if (command == "UP") {
-            cur_row = cur_row - 1
-            if (cur_row <= 1) cur_row = logic_table_row
-        } else if (command == "DN") {
-            if (cur_row <= 1) {
-                cur_row = 2
-            } else {
-                cur_row = cur_row + 1
-                if (cur_row > logic_table_row) cur_row = 2
-            }
-        } else if (command == "LEFT" ) {
-            # debug_file("RECV" command)
-            cur_col = cur_col - 1
-            if (cur_col <= 0) cur_col = table_col
-        } else if (command == "RIGHT") {
-            if (cur_col <= 0) {
-                cur_col = 1
-            } else {
-                cur_col = cur_col + 1
-                if (cur_col > table_col) cur_col = 1
-            }
-        } else if (command == "PREV-PAGE") {
-            cur_row = cur_row + max_row_in_page
-            cur_row = ((cur_row - 2) % logic_table_row + 2)
-        } else if (command == "NEXT-PAGE") {
-            cur_row = cur_row - max_row_in_page
-            cur_row = ((cur_row - 2) % logic_table_row + 2)
-            cur_row = ((cur_row + logic_table_row - 2) % logic_table_row +2 )
-        } else if (command == "CREATE") {
-            last_command = command
-        } else if (command == "REFRESH") {
-            last_command = command
-        } else if (command == "UPDATE") {
-            last_command = command
-        } else if (command == "DELETE") {
-            last_command = command
-        } else if (command == "ENTER") {
-            last_command = command
-        } else if (command == "FILTER_EDIT_BEGIN") {
-            filter_edit_state = true
-        } else {
-            # debug_file("CMD-exit: " command " " $0)
-            # exit(0)
-        } 
     }
 }
 
 END {
-    send_msg( "RESULT", last_command " " cur_row " " cur_col " " lines[cur_row])
+    if (final_command != "") {
+        send_env("___X_CMD_UI_TABLE_final_command", final_command)
+        send_env("___X_CMD_UI_TABLE_CUR_ROW", cur_row)
+        send_env("___X_CMD_UI_TABLE_CUR_COL", cur_col)
+        send_env("___X_CMD_UI_TABLE_CUR_LINE", lines[cur_row])
+    }
 }
 
 # EndSection

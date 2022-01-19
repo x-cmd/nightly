@@ -14,24 +14,23 @@ f(){
 }
 
 g(){
-
+    local i
     (
-        $SHELL -c 'echo $PPID'
+        # $SHELL -c 'echo $PPID'
         while read -r l; do
             echo "$l"
         done
     ) | {
-        read -r pid
-        echo "ccc $pid"
+        # read -r pid
         while read -r a; do
             echo "$a"
             i=$((i+1))
-            [ "$i" = 2 ] && break    
+            [ "$i" -ge 2 ] && break    
         done
         echo "exit already |$!|"
-        kill -SIGPIPE "$pid"
 
-        
+        kill -SIGPIPE "$( $SHELL -c 'printf "%s\n" "$PPID"' )"
+        # kill -SIGPIPE "$pid"
     }
 }
 
@@ -46,6 +45,18 @@ h(){
     )
 }
 
-h
 
+# g
+
+g1(){
+
+    (
+        $SHELL -c 'printf "%s" "$PPID"' >&2
+        
+    ) | {
+        $SHELL -c 'printf "%s" "$PPID"' >&2
+    }
+}
+
+g
 

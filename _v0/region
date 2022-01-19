@@ -42,10 +42,16 @@ ___x_cmd_ui_region_send_update(){
 
 ___x_cmd_ui_region_send_env(){
     while [ $# -gt 0 ]; do
-        printf "%s${___X_CMD_UI_REGION_RS}" "$1"
+        printf "ENV %s${___X_CMD_UI_REGION_RS}" "$1"
         printf "%s${___X_CMD_UI_REGION_RS}" "$(eval printf \"\$"$1"\")"
         shift
     done
+}
+
+___x_cmd_ui_region_send_env_kv(){
+    printf "ENV %s${___X_CMD_UI_REGION_RS}" "$1"
+    printf "%s${___X_CMD_UI_REGION_RS}" "$2"
+    shift
 }
 
 # TODO: sendenv
@@ -54,7 +60,7 @@ ___x_cmd_ui_region_send_env(){
 
 # Section: region update
 
-xrc awk
+xrc awk/latest
 xrc ui/_v0/getchar
 
 ___X_CMD_UI_REGION_AWK="$(xrc which ui/_v0/region.awk)"
@@ -78,7 +84,16 @@ ___x_cmd_ui_region_update_(){
 }
 
 ___x_cmd_ui_region_update_awk(){
+    # UI_CURSOR_SAVE = "\0337"
+    # UI_CURSOR_RESTORE = "\0338"
+
+    # restore cursor then clear lines ...
+    trap '
+    printf "\033[34h\033[?25h" >&2; 
+    return 130
+    ' INT
     LC_ALL=en_US.UTF-8 USE=str,ui ___x_cmd_awk file "$___X_CMD_UI_REGION_AWK" -v RS="$___X_CMD_UI_REGION_RS"
+    # printf "\033[34h\033[?25h"
 }
 
 # EndSection
@@ -87,25 +102,25 @@ ___x_cmd_ui_region_update_awk(){
 case "$___X_CMD_SHELL" in
     bash|zsh)
 ___x_cmd_pidofsubshell(){
-    $SHELL -c 'printf $PPID'
+    $SHELL -c 'printf "%s\n" "$PPID"'
 }   
     ;;
 
     dash)
 ___x_cmd_pidofsubshell(){
-    /bin/dash -c 'printf $PPID'
+    /bin/dash -c 'printf "%s\n" "$PPID"'
 }  
     ;;
 
     ash)
 ___x_cmd_pidofsubshell(){
-    ash -c 'printf $PPID'
+    ash -c 'printf "%s\n" "$PPID"'
 }  
     ;;
 
     *)
 ___x_cmd_pidofsubshell(){
-    "$0" -c 'printf $PPID'
+    "$0" -c 'printf "%s\n" "$PPID"'
 }
     ;;
 esac
@@ -114,7 +129,8 @@ esac
 # Section: just_run
 ___x_cmd_ui_region_run(){
     # echo "$("$@" | ___x_cmd_ui_region_update)"
-    "$@" | ___x_cmd_ui_region_update
+    eval "$("$@" | ___x_cmd_ui_region_update)"
+    # "$@" 
 }
 # EndSection
 
@@ -139,6 +155,7 @@ ___x_cmd_ui_region_autorefresh_(){
     local fun="${1:?Provide handler}"; shift
 
     {
+        ___x_cmd_pidofsubshell
         local ticks=1
         while true; do
             ticks="$((ticks+1))"
@@ -146,8 +163,11 @@ ___x_cmd_ui_region_autorefresh_(){
             sleep "${___X_CMD_UI_REFRESH_INTERVAL:-0.2}" || break
         done
     } | {
+        local PID_OF_UPSUBSHELL
+        read -r PID_OF_UPSUBSHELL
+
         "$@"
-        kill -SIGPIPE "$(___x_cmd_pidofsubshell)" 
+        kill -SIGPIPE "$PID_OF_UPSUBSHELL"
     } | ___x_cmd_ui_region_update
 }
 
@@ -162,6 +182,7 @@ ___x_cmd_ui_region_autorefresh_with_keyboard_(){
     local fun="${1:?Provide handler}"; shift
 
     {
+        ___x_cmd_pidofsubshell
         {
             local ticks=1
             while true; do
@@ -175,9 +196,12 @@ ___x_cmd_ui_region_autorefresh_with_keyboard_(){
         done
         kill $!
     } | {
+        local PID_OF_UPSUBSHELL
+        read -r PID_OF_UPSUBSHELL
+
         "$fun" "$@"
         # TODO: maybe we should wait 0.1s
-        kill -SIGPIPE "$(___x_cmd_pidofsubshell)"
+        kill -SIGPIPE "$PID_OF_UPSUBSHELL"
     } | ___x_cmd_ui_region_update
 }
 
@@ -229,8 +253,9 @@ ___x_cmd_ui_region_autorefresh_with_keyboard_vc(){
 
 # Example code ...
 
+xrc cowsay
 ___ui_region_demo0_(){
-    for percentage in $(seq 1 60); do
+    for percentage in $(seq 1 10); do
 
         case $(( percentage / 10 % 2 )) in
             0) 
@@ -258,8 +283,8 @@ $(cowsay Hi Good work)
 }
 
 ___ui_region_demo0(){
+    xrc cowsay
     ___x_cmd_ui_region_run ___ui_region_demo0_
-    # printf "\033[34h\033[?25h"
 }
 
 
