@@ -166,7 +166,11 @@ $d2"
                                     fi
                                 )
                                 ;;
-                    load)       eval xrc "$(awk '$1~/[A-Za-z0-9_\-]+/{ print $1;  }'<"$___X_CMD_ROOT_MOD" | tr '\n' ' ')" ;;
+                    load)
+                                local mod_list
+                                mod_list="$(awk '$1~/[A-Za-z0-9_\-]+/{ print $1;  }'<"$___X_CMD_ROOT_MOD" | tr '\n' ' ')"
+                                [ -n "${mod_list}" ] && eval xrc "$mod_list"
+                                ;;
                     ask)        (
                                     for i in "$@"; do
                                         if ! ( x boot mod ls | grep "$i" >/dev/null); then
