@@ -373,7 +373,7 @@ ___x_cmd_static_build_file(){
     local repo="${2:?Provide repo name}"
     shift 2
     eval " ___x_cmd_$app(){
-        xrc static-build && static_build_init $repo $app ___x_cmd_$app && ___x_cmd_$app  \"\$@\"
+        xrc static-build && static_build_init $app $repo ___x_cmd_$app && ___x_cmd_$app  \"\$@\"
     }"
     ___x_cmd_"$app" "$@"
 }
@@ -1004,7 +1004,7 @@ ___x_cmd_main(){
         ruby|rb)                                ruby "$(___x_cmd_official_which "$2")" "$@"      ;;
         lua)            ;;
 
-        7zr)                                    ( xrc p7zr/v0   &&  p7zr "$@" ) ;;
+        7zr)                                    ( xrc p7zr/v0   &&  p7zd "$@" ) ;;
         7z)                                     ___x_cmd_static_build_file      p7zip 7za               "$@"    ;;
 
         ls)                                     ___x_cmd_ls         "$@"        ;;
