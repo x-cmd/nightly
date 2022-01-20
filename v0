@@ -10,12 +10,11 @@ if command -v 7z 1>/dev/null 2>&1; then
 
 else
 
-x log init p7zr
+x log init p7zd
 _7zd_which(){
     local target="$HOME/.x-cmd/.bin/7zd"
     mkdir -p "$target"
-
-    xrc os/v0       # In need
+    xrc os
     local arch
     arch="$(os arch)"
     local osname
@@ -32,34 +31,28 @@ _7zd_which(){
             exe=7zd.${osname}.${arch}  
         ;;
         *)
-            p7zr_log error "Unsupported [arch=$arch] [os=$osname]!" >&2; 
+            p7zd_log error "Unsupported [arch=$arch] [os=$osname]!" >&2; 
             return 1 
         ;;
     esac
-
-    local url="https://gitee.com/static-build/p7zip/raw/main/bin"
-    if [ "$___X_CMD_IN_CHINA_NET" != 1 ]; then
-        url="https://raw.githubusercontent.com/static-build/p7zip/main/bin"
-    fi
-
-    p7zr_log debug "Downloading: $url/$exe"
+    p7zd_log debug "Downloading: p7zip/main/bin/$exe"
     if CACHE="$target/$exe" ___x_cmd_curl_gitx static-build "p7zip" main "bin/$exe" "$target/$exe"; then
         chmod +x "$target/$exe" && printf "%s" "$target/$exe"
     else
-        p7zr_log error "Fail to download: $url/$exe"
+        p7zd_log error "Fail to download: p7zip/main/bin/$exe"
         return 1
     fi
 }
 
 fi
 
-p7zr(){
+p7zd(){
     local p7z_path
     p7z_path="$(_7zd_which)"
     eval "
-        p7zr(){
+        p7zd(){
             $p7z_path \${1:+\"\$@\"}
         }
     "
-    p7zr ${1:+"$@"}
+    p7zd ${1:+"$@"}
 }
