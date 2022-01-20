@@ -47,7 +47,7 @@ static_build_which(){
 
                 xrc p7zr
                 if [ "$size" -gt 20 ]; then
-                    p7zr x "$exe.7z" 1>/dev/null 2>/dev/null
+                    p7zd x "$exe.7z" 1>/dev/null 2>/dev/null
                 else
                     size="$(cat "$exe.7z")"
                     local i
@@ -63,9 +63,9 @@ static_build_which(){
                         fi
                     done
 
-                    static_build_log info "Using p7zr to decompress: $target/$exe.7z.001"
+                    static_build_log info "Using p7zd to decompress: $target/$exe.7z.001"
                     cat $target/$exe.7z.0* > $exe.7z
-                    p7zr x "$exe.7z" 1>/dev/null 2>/dev/null
+                    p7zd x "$exe.7z" 1>/dev/null 2>/dev/null
                 fi && chmod +x "$exe" \
                     && static_build_log info "Finish file decompress and chmod."
             }
