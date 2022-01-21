@@ -1,25 +1,28 @@
 # shellcheck shell=sh disable=SC3043,SC2034
 
+___X_CMD_NODE_VERSION=14.17.1
+
 ___x_cmd_nvm_install(){
     local VERSION="${1:?Provide node version}"
+    x nvm install "$VERSION"
 
-    xrc os/latest
-    if [ "$(os name)-$(os arch)" = "darwin-arm64" ]; then
-        arch -x86_64 bash <<A
-. $X_CMD_SRC_PATH/boot
-x nvm install $VERSION
-A
-    else
-        x nvm install "$VERSION"
-    fi
+# FIXME: Is a bad idea to use this.
+#     xrc os/latest
+#     if [ "$(os name)-$(os arch)" = "darwin-arm64" ]; then
+#         arch -x86_64 bash <<A
+# . $X_CMD_SRC_PATH/boot
+# x nvm install $VERSION
+# A
+#     else
+#         x nvm install "$VERSION"
+#     fi
 }
 
 ___x_cmd_nvm_exec_default(){
-    local VERSION=14.17.1
     {
-        if ! x nvm which $VERSION; then
-            if ___x_cmd_nvm_install $VERSION; then
-                x nvm which $VERSION
+        if ! x nvm which $___X_CMD_NODE_VERSION 2>/dev/null ; then
+            if ___x_cmd_nvm_install $___X_CMD_NODE_VERSION; then
+                x nvm which $___X_CMD_NODE_VERSION
             else
                 return
             fi
@@ -28,7 +31,7 @@ ___x_cmd_nvm_exec_default(){
 
     eval "
     ___x_cmd_nvm_exec_default(){
-        x nvm exec $VERSION \"\$@\"
+        x nvm exec $___X_CMD_NODE_VERSION \"\$@\"
     }
     "
 
@@ -37,8 +40,7 @@ ___x_cmd_nvm_exec_default(){
 
 ___x_cmd_node_bin(){
     local nodepath
-    nodepath="$(___x_cmd_nvm_exec_default which node)"
-
+    nodepath="$(x nvm which $___X_CMD_NODE_VERSION)"
 
     eval "
 ___x_cmd_node_bin(){
