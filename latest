@@ -983,7 +983,7 @@ ___x_cmd_main(){
         pip|pip3)                               xrc python/latest && ___x_cmd_pip3 "$@" ;;
         python|py)                              xrc python/latest && ___x_cmd_python "$@" ;;
 
-        nvm)                                    xrc nvm/v0;     nvm "$@" ;;
+        nvm)                                    xrc nvm/latest  && ___x_cmd_nvm "$@" ;;
         javascript|js|node)                     xrc node/latest && ___x_cmd_node "$@" ;;
         npm)                                    xrc node/latest && ___x_cmd_npm "$@" ;;
         npx)                                    xrc node/latest && ___x_cmd_npx "$@" ;;
