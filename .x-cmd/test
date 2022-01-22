@@ -1,0 +1,46 @@
+# shellcheck shell=sh disable=SC1072 #source
+
+dbash() {
+    docker run -it -v "$(pwd)":/ui "xcmd/bash${1}-dev" bash -i -c "cd ui && bash"
+}
+
+cross_env_test() {
+    for i in bash3 bash4 bash5 ; do
+        ui_log info "Testing : " "$i"
+        docker run -it -v "$(pwd)":/ui "xcmd/${i}-dev" bash -i -c "cd ui && x test local"
+    done
+
+    for i in alpine ubuntu centos debian; do
+        ui_log info "Testing : " "$i"
+        docker run -it -v "$(pwd)":/ui "xcmd/${i}-dev" sh -i -c "cd ui && x test local"
+    done
+}
+
+x log init ui
+ui_log info "Testing : $1"
+case "$1" in
+    local)
+        ui_log info "copy all files from ./* to ~/.x-cmd/param/"
+        . ~/.x-cmd/xrc/latest
+        cp -r ./* ~/.x-cmd/ui
+        . ~/.x-cmd/xrc/latest
+        # . ./testcase/v0_test
+        # . ./_v0/table
+        xrc ui/_v0/region
+        type ___x_cmd_ui_getchar
+        ;;
+    cross)
+        x test local
+        cross_env_test
+        ;;
+    bash3|bash4|bash5)
+        docker run -it -v "$(pwd)":/ui "xcmd/${1}-dev" bash -i -c "cd ui && x test local"
+        ;;
+    alpine|ubuntu|centos|debian)
+        docker run -it -v "$(pwd)":/ui "xcmd/${1}-dev" sh -i -c "cd ui && x test local"
+        ;;
+    *)
+        echo "Usage: x test {cross|local|bash:3|bash:4|bash:5|alpine|ubuntu|centos}"
+        return 1
+        ;;
+esac

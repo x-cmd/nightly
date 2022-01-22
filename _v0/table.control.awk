@@ -79,7 +79,7 @@ function update_view_print_cell(logic_row_i, row_i, col_i,       h, _size){
 }
 
 BEGIN{
-    NEWLINE = "\001"
+    NEWLINE = "\n"
     counter = 1
 }
 
@@ -156,7 +156,6 @@ function update_logic_view(           logic_row_i, row_i, col_i, start_row){
     }
     buffer_append( sprintf("%s", UI_END) )
     buffer_append( sprintf( NEWLINE ) )
-
     for (logic_row_i = start_row; logic_row_i <= start_row + max_row_in_page; logic_row_i ++) {
         if (logic_row_i > logic_table_row) break
         row_i = logic_table[ logic_row_i ]
@@ -219,15 +218,27 @@ function parse_data(text,
 # }
 
 function send_msg_update(msg){
-    # gsub("\n", "\001", msg)
-    printf("%s %s %s\001", "UPDATE", max_col_size, max_row_size)
-    printf("%s\001", msg)
+    # mawk
+    if (RS == "\n") {
+        # gsub("\n", "\001", msg)
+        gsub(/\n/, "\001", msg)
+    }
+
+    printf("%s %s %s" RS, "UPDATE", max_col_size, max_row_size)
+    printf("%s" RS, msg)
+
     fflush()
 }
 
 function send_env(var, value){
+    # mawk
+    if (RS == "\n") {
+        # gsub("\n", "\001", msg)
+        gsub(/\n/, "\001", value)
+    }
+
     # gsub("\n", "\001", msg)
-    printf("%s %s\001", "ENV", var)
+    printf("%s %s\n", "ENV", var)
     printf("%s\001", value)
     fflush()
 }
@@ -237,7 +248,7 @@ function send_env(var, value){
 function update_width_height(width, height) {
     max_row_size = height
     max_col_size = width
-    # TIDO: if row less than 10 rows, we should exit.
+    # TODO: if row less than 10 rows, we should exit.
     max_row_in_page = max_row_size - 10
 }
 
@@ -260,12 +271,13 @@ BEGIN {
 
 function exit_with_elegant(command, item){
     final_command = command
-    exit()
+    exit(0)
 }
 
 # Section: handle the view
 
 NR>2 {
+
     command = $1
     command = str_trim( command )
 
@@ -294,6 +306,7 @@ NR>2 {
             if (char_type == "ascii-space") {
                 filter_edit_state = true
             } else if (char_value == "ENTER") {
+                exit_with_elegant( "enter" )
                 # filter_edit_state = false
             } else if (char_value == "c") {
                 # create
@@ -317,16 +330,16 @@ NR>2 {
                 # previous page
                 cur_row = cur_row + max_row_in_page
                 cur_row = ((cur_row - 2) % logic_table_row + 2)
-                update_logical_table()
+                # update_logical_table()
             } else if (char_value == "n") {
                 cur_row = cur_row - max_row_in_page
                 cur_row = ((cur_row - 2) % logic_table_row + 2)
                 cur_row = ((cur_row + logic_table_row - 2) % logic_table_row +2 )
-                update_logical_table()
+                # update_logical_table()
             } else if (char_value == "UP") {
                 cur_row = cur_row - 1
                 if (cur_row <= 1) cur_row = logic_table_row
-                update_logical_table()
+                # update_logical_table()
             } else if (char_value == "DN") {
                 if (cur_row <= 1) {
                     cur_row = 2
@@ -334,12 +347,12 @@ NR>2 {
                     cur_row = cur_row + 1
                     if (cur_row > logic_table_row) cur_row = 2
                 }
-                update_logical_table()
+                # update_logical_table()
             } else if (char_value == "LEFT" ) {
                 # debug_file("RECV" command)
                 cur_col = cur_col - 1
                 if (cur_col <= 0) cur_col = table_col
-                update_logical_table()
+                # update_logical_table()
             } else if (char_value == "RIGHT") {
                 if (cur_col <= 0) {
                     cur_col = 1
@@ -347,7 +360,7 @@ NR>2 {
                     cur_col = cur_col + 1
                     if (cur_col > table_col) cur_col = 1
                 }
-                update_logical_table()
+                # update_logical_table()
             }
         }
     }

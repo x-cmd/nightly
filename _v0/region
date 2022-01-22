@@ -27,15 +27,41 @@ ___x_cmd_ui_region_send_screeninfo(){
     printf "SIZE %s %s${___X_CMD_UI_REGION_RS}" "${COLUMNS}" "${LINES}"
 }
 
+if [ "$(___x_cmd_awk impl)" = mawk ]; then
+___x_cmd_ui_region_send_update(){
+    printf "UPDATE %s %s${___X_CMD_UI_REGION_RS}%s${___X_CMD_UI_REGION_RS}" "${COLUMNS}" "${LINES}"
+    if [ "$#" -eq 0 ]; then
+        cat
+    else
+        printf "%s" "$*"
+    fi | tr '\n' '\001'
+    printf "%s" "${___X_CMD_UI_REGION_RS}"
+}
+
+___x_cmd_ui_region_send_env(){
+    local tmp
+    tmp="$(printf "\002")"
+    while [ $# -gt 0 ]; do
+        printf "ENV %s${tmp}" "$1"
+        printf "%s" "$(eval printf \"\$"$1"\")"
+        printf "%s" "${tmp}"
+        shift
+    done | tr '\n\002' '\001\n'
+}
+
+___x_cmd_ui_region_send_env_kv(){
+    printf "ENV %s${___X_CMD_UI_REGION_RS}" "$1"
+    printf "%s" "$2" | tr '\n' '\001'
+    printf "%s" "${___X_CMD_UI_REGION_RS}"
+    shift
+}
+else
 ___x_cmd_ui_region_send_update(){
     printf "UPDATE %s %s${___X_CMD_UI_REGION_RS}" "${COLUMNS}" "${LINES}"
     if [ "$#" -eq 0 ]; then
         cat
-        # printf "\n"
     else
         printf "%s" "$*"
-        # printf "\n"
-        :
     fi
     printf "%s" "${___X_CMD_UI_REGION_RS}"
 }
@@ -53,6 +79,8 @@ ___x_cmd_ui_region_send_env_kv(){
     printf "%s${___X_CMD_UI_REGION_RS}" "$2"
     shift
 }
+
+fi
 
 # TODO: sendenv
 
@@ -89,12 +117,26 @@ ___x_cmd_ui_region_update_awk(){
 
     # restore cursor then clear lines ...
     trap '
-    printf "\033[34h\033[?25h" >&2; 
+    printf "\033[34h\033[?25h" >&2;
     return 130
     ' INT
-    LC_ALL=en_US.UTF-8 USE=str,ui ___x_cmd_awk file "$___X_CMD_UI_REGION_AWK" -v RS="$___X_CMD_UI_REGION_RS"
+    ___x_cmd_ui_region_update_awk_ "$@"
     # printf "\033[34h\033[?25h"
 }
+
+if [ "$(___x_cmd_awk impl)" = mawk ]; then
+
+___x_cmd_ui_region_update_awk_(){
+    LC_ALL=en_US.UTF-8 USE=str,ui ___x_cmd_awk file "$___X_CMD_UI_REGION_AWK" -W interactive
+}
+
+else
+
+___x_cmd_ui_region_update_awk_(){
+    LC_ALL=en_US.UTF-8 USE=str,ui ___x_cmd_awk file "$___X_CMD_UI_REGION_AWK" -v RS="$___X_CMD_UI_REGION_RS"
+}
+
+fi
 
 # EndSection
 

@@ -199,7 +199,7 @@ ___x_cmd_ui_prompt_form_function(){
     while read -r ___line; do
         case "$___line" in
             R:*)    
-                ___x_cmd_ui_prompt_form_draw
+                [ -n "$___X_CMD_UI_GETCHAR_CHAR" ] && ___x_cmd_ui_prompt_form_draw
                 ___X_CMD_UI_GETCHAR_TYPE=
                 ___X_CMD_UI_GETCHAR_CHAR=
                 ;;

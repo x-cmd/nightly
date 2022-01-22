@@ -100,8 +100,7 @@ function end(){
 }
 
 function env_code(VAR, text){
-    text=$0
-    time =0
+    time = 0
     time = time + gsub(/\\/, "\\\\", text)
     time = time + gsub(/"/, "\\\"", text)
     time = time + gsub("\n", "\\n", text)
@@ -129,28 +128,28 @@ function update_width_height(w, h) {
 {
     if (op == "UPDATE") {
         op = ""
-        gsub("\001", "\n", $0)
+        if (RS == "\n") {
+            gsub("\001", "\n", $0)
+        }
         update($0)
     } else if (op == "ENV") {
-        env_code(op2, $0)
+        env_code(op1, $0)
     } else if ($1 == "UPDATE") {
         op = $1
         update_width_height($2, $3)
     } else if (op == "STDOUT") {
         print $0
     } else if (op == "RESULT") {
-        end()
         print $0
     } else if ($1 == "ENV") {
-        op = $1
-        op2 = $2
+        op = "ENV"
+        op1 = $2
     } else if ($1 == "SIZE") {
         update_width_height($2, $3)
     } else {   
         op = $1
         op2 = $2
     }
-
 }
 
 END {
