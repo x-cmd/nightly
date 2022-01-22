@@ -1,7 +1,6 @@
 # shellcheck shell=sh disable=SC2039,SC1090,SC3043,SC2263 # xrc
 
-# author:       Li Junhao           l@x-cmd.com    edwinjhlee.github.io
-# maintainer:   Li Junhao
+# author:       Li Junhao           l@x-cmd.com
 # license:      GPLv3
 
 # LIB
@@ -11,7 +10,7 @@ ___x_cmd_awk_lib(){
 
     printf "%s\n" "default,$USE" | tr "," "\n" | while read -r lib; do
         [ -z "$lib" ] && continue
-        xrc which "awk/_v0/${lib}.awk"
+        xrc which "awk/lib/${lib}.awk"
         printf " "
         # printf "%s\n" "./${lib}.awk"
     done | tr "\n" " "
@@ -19,20 +18,37 @@ ___x_cmd_awk_lib(){
 
 ___X_CMD_AWK_ALL_LIB="bit,math,ord,char,str,wcwidth,arr,ui"
 
+
+___X_CMD_AWK_IMPLEMENTATION=
+
+___x_cmd_awk_detect_implemetation(){
+    if command -v mawk 2>/dev/null; then
+        if awk -W version 2>/dev/null | awk '{
+            if($0 ~ "mawk") { exit 0 }
+            else { exit 1 }
+        }'; then
+            ___X_CMD_AWK_IMPLEMENTATION=mawk
+            return
+        fi
+    fi
+    ___X_CMD_AWK_IMPLEMENTATION=awk
+}
+
+___x_cmd_awk_impl(){
+    if [ -z "$___X_CMD_AWK_IMPLEMENTATION" ]; then
+        ___x_cmd_awk_detect_implemetation
+    fi
+    printf "%s\n" "$___X_CMD_AWK_IMPLEMENTATION"
+}
+
 ___x_cmd_awk(){
     local IFS="
 "
 
     local op="$1"; shift
     case "$op" in
-        "")
-            local code="$(cat)"
-            local USE="$___X_CMD_AWK_ALL_LIB"
-            printf "" | command awk "$@" "$(eval cat "$(___x_cmd_awk_lib)")
-END{
-    ${code}
-}"
-            ;;
+        impl)
+            ___x_cmd_awk_impl ;;
         file)
             local fp="$1"; shift
             local code
@@ -48,8 +64,8 @@ END{
 ${code}"
             ;;
         src)
-            local fp="$1"; shift
-            eval cat "$(___x_cmd_awk_lib) $fp"
+            local IFS=" "
+            eval cat "$(___x_cmd_awk_lib) $*"
             ;;
         try)
             local code="$1"; shift
@@ -57,12 +73,19 @@ ${code}"
             command awk "$@" "$(eval cat "$(___x_cmd_awk_lib)")
 $code"
             ;;
-        *)
+        end)
+            local code="$1"; shift
+            if [ "$code" = - ]; then
+                code="$(cat)"
+            fi
             local USE="$___X_CMD_AWK_ALL_LIB"
             printf "" | command awk "$@" "$(eval cat "$(___x_cmd_awk_lib)")
 END{
-    ${op}
+    $code
 }"
+            ;;
+        *)
+            command awk "$@"
             ;;
     esac
 }
