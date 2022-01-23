@@ -1,11 +1,10 @@
 # shellcheck shell=sh disable=SC3043,SC2164
 
-# author:       Li Junhao           l@x-cmd.com    edwinjhlee.github.io
-# maintainer:   Li Junhao
+# author:       Li Junhao           l@x-cmd.com
 # license:      GPLv3
 
 for i in cd ls mv cp rm open; do
-    xrc x_fs/_v0/$i
+    xrc x_fs/lib/$i
 done
 
 ___x_cmd_fs_activate(){

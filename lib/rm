@@ -4,6 +4,10 @@
 # maintainer:   Li Junhao
 # license:      GPLv3
 
+# 1. remove lcoal file, or file in the remote machine
+# 2. remove database
+# 3. remove ...
+
 ___x_cmd_rm(){
     for i in "$@"; do
         case "$i" in
