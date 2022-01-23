@@ -958,7 +958,6 @@ ___x_cmd_main(){
         marg1)                                  ___x_cmd_margs 1 "$@"   ;;
 
         cd)                                     ___x_cmd_cd "$@" ;;
-
         env)                                    ;;
 
         login)                                  xrc hub/latest && ___x_cmd_hub login "$@" ;;
@@ -974,6 +973,7 @@ ___x_cmd_main(){
 
         z)                                      (   xrc zuz && zuz z "$@"   ) ;;
         uz)                                     (   xrc zuz && zuz uz "$@"  ) ;;
+        zl)                                     (   xrc zuz && zuz ls "$@"  ) ;;
 
         sh|bash|zsh|fish|ksh|dash|ash)          ___x_cmd_shell_exec "$subcmd" "$@" ;;
 
