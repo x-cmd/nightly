@@ -4,7 +4,7 @@ ___X_CMD_XRC_MODULE_IMPORTED=
 
 x log init awk
 xrc assert
-xrc awk
+xrc awk/latest
 
 rm -rf tmp
 mkdir -p tmp

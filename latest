@@ -45,12 +45,12 @@ ___x_cmd_awk(){
     local IFS="
 "
 
-    local op="$1"; shift
+    local op="$1";
     case "$op" in
         impl)
             ___x_cmd_awk_impl ;;
         file)
-            local fp="$1"; shift
+            local fp="$2"; [ "$#" -gt 1 ] && shift 2
             local code
             if ! code="$(eval cat "$(___x_cmd_awk_lib)" "$fp")"; then
                 printf "%s\n" "Cannot find out code."
@@ -59,22 +59,23 @@ ___x_cmd_awk(){
             command awk "$@" "$code"
             ;;
         code)
-            local code="$1"; shift
+            local code="$2"; [ "$#" -gt 1 ] && shift 2
             command awk "$@" "$(eval cat "$(___x_cmd_awk_lib)")
 ${code}"
             ;;
         src)
+            [ "$#" -gt 0 ] && shift
             local IFS=" "
             eval cat "$(___x_cmd_awk_lib) $*"
             ;;
         try)
-            local code="$1"; shift
+            local code="$2"; [ "$#" -gt 1 ] && shift 2
             local USE="$___X_CMD_AWK_ALL_LIB"
             command awk "$@" "$(eval cat "$(___x_cmd_awk_lib)")
 $code"
             ;;
         end)
-            local code="$1"; shift
+            local code="$2"; [ "$#" -gt 1 ] && shift 2
             if [ "$code" = - ]; then
                 code="$(cat)"
             fi

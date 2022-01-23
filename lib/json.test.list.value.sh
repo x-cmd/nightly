@@ -1,6 +1,6 @@
 
 
-xrc awk
+xrc awk/latest
 
 # DSL: json_get(_, ".b")
 

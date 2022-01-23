@@ -1,6 +1,6 @@
 
 
-xrc awk
+xrc awk/latest
 
 
 

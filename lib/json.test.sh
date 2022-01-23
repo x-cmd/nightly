@@ -1,6 +1,6 @@
 
 
-xrc awk
+xrc awk/latest
 
 # awk -v data='abc
 # ' 'END { print data; }' <<< ""
