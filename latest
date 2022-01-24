@@ -45,7 +45,7 @@ static_build_which(){
                 size=${size% *}
                 size=$(printf "%s" $size)   # Notice: Intentionary let it unquoted.
 
-                xrc p7zr
+                xrc p7zip
                 if [ "$size" -gt 20 ]; then
                     p7zd x "$exe.7z" 1>/dev/null 2>/dev/null
                 else
