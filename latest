@@ -923,11 +923,6 @@ ___x_cmd_ws_(){
     fi
 }
 
-___x_cmd_cd(){
-    xrc x_fs/latest && ___x_cmd_cd "$@"
-}
-
-
 ___x_cmd_alias_init ___x_cmd
 
 ___x_cmd_main(){
@@ -957,7 +952,6 @@ ___x_cmd_main(){
         margs)                                  ___x_cmd_margs "$@"     ;;
         marg1)                                  ___x_cmd_margs 1 "$@"   ;;
 
-        cd)                                     ___x_cmd_cd "$@" ;;
         env)                                    ;;
 
         login)                                  xrc hub/latest && ___x_cmd_hub login "$@" ;;
@@ -1004,7 +998,7 @@ ___x_cmd_main(){
         ruby|rb)                                ruby "$(___x_cmd_official_which "$2")" "$@"      ;;
         lua)            ;;
 
-        7zr)                                    ( xrc p7zr/v0   &&  p7zd "$@" ) ;;
+        7zd|7zr)                                    ( xrc p7zip/v0   &&  p7zd "$@" ) ;;
         7z)                                     ___x_cmd_static_build_file      p7zip 7za               "$@"    ;;
 
         ls)                                     ___x_cmd_ls         "$@"        ;;
