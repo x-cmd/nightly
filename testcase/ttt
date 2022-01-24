@@ -1,7 +1,0 @@
-f(){
-    for a in $(seq 5); do
-        printf "char: %s\n" "$a"
-        sleep 1
-    done | awk 'BEGIN{ print "begin" }{ print NR ": " $0 }' 
-}
-f

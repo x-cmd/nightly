@@ -18,18 +18,20 @@ ___x_cmd_ui_region(){
 
 # Section: send
 # shellcheck disable=SC2120
+xrc ui/_v0/getchar
+xrc awk
+
+___X_CMD_UI_REGION_AWK="$(xrc which ui/_v0/region.awk)"
 
 ___x_cmd_ui_region_send(){
     ___x_cmd_ui_region_send_update "$@"
 }
 
-___x_cmd_ui_region_send_screeninfo(){
-    printf "SIZE %s %s${___X_CMD_UI_REGION_RS}" "${COLUMNS}" "${LINES}"
-}
-
-if [ "$(___x_cmd_awk impl)" = mawk ]; then
+if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
+___X_CMD_UI_REGION_RS="
+"
 ___x_cmd_ui_region_send_update(){
-    printf "UPDATE %s %s${___X_CMD_UI_REGION_RS}%s${___X_CMD_UI_REGION_RS}" "${COLUMNS}" "${LINES}"
+    printf "UPDATE %s %s${___X_CMD_UI_REGION_RS}" "${COLUMNS}" "${LINES}"
     if [ "$#" -eq 0 ]; then
         cat
     else
@@ -56,6 +58,7 @@ ___x_cmd_ui_region_send_env_kv(){
     shift
 }
 else
+___X_CMD_UI_REGION_RS="$(printf "\001")"
 ___x_cmd_ui_region_send_update(){
     printf "UPDATE %s %s${___X_CMD_UI_REGION_RS}" "${COLUMNS}" "${LINES}"
     if [ "$#" -eq 0 ]; then
@@ -82,20 +85,16 @@ ___x_cmd_ui_region_send_env_kv(){
 
 fi
 
+___x_cmd_ui_region_send_screeninfo(){
+    printf "SIZE %s %s${___X_CMD_UI_REGION_RS}" "${COLUMNS}" "${LINES}"
+}
+
 # TODO: sendenv
 
 # EndSection
 
 # Section: region update
 
-xrc awk/latest
-xrc ui/_v0/getchar
-
-___X_CMD_UI_REGION_AWK="$(xrc which ui/_v0/region.awk)"
-# ___X_CMD_UI_REGION_AWK=./region.awk
-
-___X_CMD_UI_REGION_SEPERATOR="$(printf "\001")"
-___X_CMD_UI_REGION_RS="$(printf "\001")"
 
 
 ___x_cmd_ui_region_update(){
@@ -121,17 +120,14 @@ ___x_cmd_ui_region_update_awk(){
     return 130
     ' INT
     ___x_cmd_ui_region_update_awk_ "$@"
-    # printf "\033[34h\033[?25h"
 }
 
-if [ "$(___x_cmd_awk impl)" = mawk ]; then
-
+if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
 ___x_cmd_ui_region_update_awk_(){
     LC_ALL=en_US.UTF-8 USE=str,ui ___x_cmd_awk file "$___X_CMD_UI_REGION_AWK" -W interactive
 }
 
 else
-
 ___x_cmd_ui_region_update_awk_(){
     LC_ALL=en_US.UTF-8 USE=str,ui ___x_cmd_awk file "$___X_CMD_UI_REGION_AWK" -v RS="$___X_CMD_UI_REGION_RS"
 }
@@ -170,9 +166,7 @@ esac
 
 # Section: just_run
 ___x_cmd_ui_region_run(){
-    # echo "$("$@" | ___x_cmd_ui_region_update)"
     eval "$("$@" | ___x_cmd_ui_region_update)"
-    # "$@" 
 }
 # EndSection
 
@@ -244,7 +238,7 @@ ___x_cmd_ui_region_autorefresh_with_keyboard_(){
         "$fun" "$@"
         # TODO: maybe we should wait 0.1s
         kill -SIGPIPE "$PID_OF_UPSUBSHELL"
-    } | ___x_cmd_ui_region_update
+    } | ___x_cmd_ui_region_update 
 }
 
 ___x_cmd_ui_region_autorefresh_with_keyboard(){
@@ -266,7 +260,6 @@ ______x_cmd_ui_region_autorefresh_with_keyboard_vc_handler(){
 
             case "$___line" in
                 REFRESH)
-                    # viewer
                     "$viewer" || break
                     continue
                     ;;

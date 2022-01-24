@@ -53,13 +53,9 @@ ___ui_table_out(){
     if [ "${-#*i}" != "$-" ]; then
         eval "printf \"%s\" \"\${$O}\"" | \
             LC_ALL=en_US.UTF-8  awk -v HIGHCOL="${HIGHCOL:-""}" -v HIGHROW="${HIGHROW:-""}" -v out="$out" "$(xrc cat ui/_v0/wcwidth.awk)$(xrc cat ui/_v0/table.awk)"
-            # LC_ALL=en_US.UTF-8  awk -v HIGHCOL=3,6 -v HIGHROW=6 -v out="$out" "$(xrc cat ui/_v0/wcwidth.awk)$(xrc cat ui/_v0/table.awk)"
-            # awk '{ print $0; }'
     else
         eval "printf \"%s\" \"\${$O}\"" | \
             LC_ALL=en_US.UTF-8  awk -v HIGHCOL="${HIGHCOL:-""}" -v HIGHROW="${HIGHROW:-""}"  -v out="$out" "$(xrc cat ui/_v0/wcwidth.awk)$(xrc cat ui/_v0/table.awk)"
-            # LC_ALL=en_US.UTF-8  awk -v HIGHCOL=3,6 -v HIGHROW=6 -v out="$out" "$(xrc cat ui/_v0/wcwidth.awk)$(xrc cat ui/_v0/table.awk)"
-            # awk '{ print $0; }'
     fi
 }
 
@@ -107,6 +103,7 @@ ___ui_table_json(){
 
 xrc ui/_v0/region
 xrc ui/_v0/getchar
+xrc awk
 
 # Section: table app 1: all data
 
@@ -115,15 +112,21 @@ xrc ui/_v0/getchar
 # 2. Input json, then tranfer as primitive data to awk
 # 3. Using instruction to control table
 
-
-# ___X_CMD_UI_TABLE_CONTROL_AWK_PATH="./table.control.awk" # ui/_v0/table.control.awk
 ___X_CMD_UI_TABLE_CONTROL_AWK_PATH="$(x which ui/_v0/table.control.awk)"
 
+if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
+___X_CMD_UI_REGION_RS="\n"
+___x_cmd_ui_table_control(){
+    LC_ALL=en_US.UTF-8 USE=str,wcwidth,ui ___x_cmd_awk file "$___X_CMD_UI_TABLE_CONTROL_AWK_PATH" \
+        -v EXIT_OP="$EXIT_OP" -W interactive
+}
+else
+___X_CMD_UI_REGION_RS="$(printf "\001")"
 ___x_cmd_ui_table_control(){
     LC_ALL=en_US.UTF-8 USE=str,wcwidth,ui ___x_cmd_awk file "$___X_CMD_UI_TABLE_CONTROL_AWK_PATH" \
         -v EXIT_OP="$EXIT_OP" -v RS="$___X_CMD_UI_REGION_RS"
-    # LC_ALL=en_US.UTF-8  awk "$(xrc cat ui/_v0/wcwidth.awk)$(cat $___X_CMD_UI_TABLE_CONTROL_AWK_PATH)"
 }
+fi
 
 ___ui_table_json(){
     # cat | json_to_table 
@@ -131,7 +134,7 @@ ___ui_table_json(){
 }
 
 ___ui_table_out3(){
-    ___ui_table_out_func 'printf "%s\n" "$___X_CMD_UI_TABLE_DEFAULT"'
+    eval "$(___ui_table_out_func 'printf "%s" "$___X_CMD_UI_TABLE_DEFAULT"')"
 }
 
 ___ui_table_json_to_table(){
@@ -163,7 +166,6 @@ ___ui_table_out_func(){
 
         while ___x_cmd_ui_getchar; do
             printf "CHAR %s %s${___X_CMD_UI_REGION_RS}" "$___X_CMD_UI_GETCHAR_TYPE" "$___X_CMD_UI_GETCHAR_CHAR"
-            # interval checking: printf "VIEW %s %s\n" "$(ui cols)" "$(ui rows)" 
         done
         
         # TODO: figure out why
@@ -172,10 +174,10 @@ ___ui_table_out_func(){
         kill $!
     } | ( 
         read -r PID_OF_UPSUBSHELL
-        ___x_cmd_ui_table_control 
+        ___x_cmd_ui_table_control
         kill -SIGPIPE "$PID_OF_UPSUBSHELL"
     ) | ( 
-        ___x_cmd_ui_region_update_awk 
+        ___x_cmd_ui_region_update_awk
     )
 
     # tput cvvis

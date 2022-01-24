@@ -189,7 +189,6 @@ ___x_cmd_ui_prompt_form_controller(){
 }
 
 ___x_cmd_ui_prompt_form_function(){
-
     local q_current=1
     local q_focus=0
     local tmp_answer
@@ -198,7 +197,7 @@ ___x_cmd_ui_prompt_form_function(){
     local ___line
     while read -r ___line; do
         case "$___line" in
-            R:*)    
+            R:*)  
                 [ -n "$___X_CMD_UI_GETCHAR_CHAR" ] && ___x_cmd_ui_prompt_form_draw
                 ___X_CMD_UI_GETCHAR_TYPE=
                 ___X_CMD_UI_GETCHAR_CHAR=
@@ -217,8 +216,6 @@ ___x_cmd_ui_prompt_form_function(){
     ___x_cmd_ui_prompt_form_draw
 
     if [ "$OUTPUT" != "" ]; then
-#             local ___X_CMD_UI_REGION_SEPERATOR="
-# "
         for i in $(seq "$q_count"); do
             ___x_cmd_ui_region_send_env_kv \
                 "$(dict @x_ui_prompt_form get "$i" "2")" \
@@ -279,7 +276,8 @@ ___x_cmd_ui_prompt_form_main(){
 }
 
 ___x_cmd_ui_prompt_form(){
-    eval "$(OUTPUT=1 ___x_cmd_ui_prompt_form_main "$@")"
+    OUTPUT=1
+    ___x_cmd_ui_prompt_form_main "$@"
 }
 
 # ___x_cmd_ui_prompt_form \
