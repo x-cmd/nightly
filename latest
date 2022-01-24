@@ -18,27 +18,12 @@ ___x_cmd_awk_lib(){
 
 ___X_CMD_AWK_ALL_LIB="bit,math,ord,char,str,wcwidth,arr,ui"
 
-
-___X_CMD_AWK_IMPLEMENTATION=
-
-___x_cmd_awk_detect_implemetation(){
-    if command -v mawk 2>/dev/null; then
-        if awk -W version 2>/dev/null | awk '{
-            if($0 ~ "mawk") { exit 0 }
-            else { exit 1 }
-        }'; then
-            ___X_CMD_AWK_IMPLEMENTATION=mawk
-            return
-        fi
-    fi
-    ___X_CMD_AWK_IMPLEMENTATION=awk
-}
-
 ___x_cmd_awk_impl(){
-    if [ -z "$___X_CMD_AWK_IMPLEMENTATION" ]; then
-        ___x_cmd_awk_detect_implemetation
+    if awk -Wv 2>&1 | grep -q "mawk"; then
+        printf "%s\n" "mawk"
+        return
     fi
-    printf "%s\n" "$___X_CMD_AWK_IMPLEMENTATION"
+    printf "%s\n" "awk"
 }
 
 ___x_cmd_awk(){
@@ -85,6 +70,7 @@ END{
     $code
 }"
             ;;
+        _x_cmd_advise_json) printf "{}";;
         *)
             command awk "$@"
             ;;
