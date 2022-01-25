@@ -26,10 +26,15 @@ ___x_cmd_fs_ls_1(){
                 return 0
                 ;;
             :cpu)
+                # TODO: lscpu should be provided by a different module, like os module.
                 ___x_cmd_fs_ls_cpu && return 0
                 ;;
             :mem)
+                # TODO: lscpu should be provided by a different module, like os module.
                 ___x_cmd_fs_ls_mem && return 0
+                ;;
+            :proc|:ps)
+
                 ;;
         esac
     fi
