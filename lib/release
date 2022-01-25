@@ -1,60 +1,24 @@
-# shellcheck shell=sh disable=SC3043
 
-# author:       Li Junhao           l@x-cmd.com    edwinjhlee.github.io
-# maintainer:   Li Junhao
 
-os(){
-    local subcmd="${1:?Provide Sub Command}";   shift
-    case "$subcmd" in
-        name)               ___os_name          "$@"    ;;
-        arch)               ___os_arch          "$@"    ;;
-        release|r)          ___os_release       "$@"    ;;
-        rname|rn)           ___os_release_name  "$@"    ;;
-        *)                  ___os_help          "$@"    ;;
-    esac
-}
+# Section: release
 
-if [ -n "${BASH_VERSION}${ZSH_VERSION}" ] && [ "${-#*i}" != "$-" ]; then
-
-    xrc advise
-    advise os - <<A
-{
-    "name": null,
-    "arch": null,
-    "release|r": null,
-    "rname|rn": null
-}
-A
-
-fi
-
-___os_help(){
-    cat <<A
-os
-SUBCOMMANDS:
-    name        "provide name"
-    arch        "provide arch information"
-    release     "provide release"
-A
-}
-
-___os_kernal(){
+___x_cmd_os_kernal(){
     :
 }
 
-___os_release_code(){
-    ___os_release | awk -v FS="=" '$1=="DISTRIB_CODENAME"{ print $2; exit 0; }'
+___x_cmd_os_release_code(){
+    ___x_cmd_os_release | awk -v FS="=" '$1=="DISTRIB_CODENAME"{ print $2; exit 0; }'
 }
 
-___os_extract(){
+___x_cmd_os_extract(){
     awk -v name=${1:-Provide name} -v code=1 -v FS='=' '
 $1==name { print $2; code=0 }
 END { exit code }
 '
 }
 
-___os_release_name(){
-    if [ -f /etc/os-release ] && ___os_extract "ID" </etc/os-release 2>/dev/null; then
+___x_cmd_os_release_name(){
+    if [ -f /etc/os-release ] && ___x_cmd_os_extract "ID" </etc/os-release 2>/dev/null; then
         return 0
     fi
 
@@ -87,7 +51,7 @@ ___os_release_name(){
         return 0
     fi
 
-    if [ -f /etc/os-release ] && ___os_extract DISTRIB_ID </etc/lsb-release 2>/dev/null | tr "[:upper:]" "[:lower:]"; then
+    if [ -f /etc/os-release ] && ___x_cmd_os_extract DISTRIB_ID </etc/lsb-release 2>/dev/null | tr "[:upper:]" "[:lower:]"; then
         return 0
     fi
 
@@ -96,9 +60,9 @@ ___os_release_name(){
 }
 
 # shellcheck disable=SC2120
-___os_release(){
+___x_cmd_os_release(){
     if [ $# -eq 0 ]; then
-        ___os_release_all
+        ___x_cmd_os_release_all
         return
     fi
 
@@ -119,25 +83,25 @@ ___os_release(){
         [ "$var" = - ] && var=tmp
         read $var
     } <<A
-$(___os_release_all)
+$(___x_cmd_os_release_all)
 A
 }
 
 # #1 release-name
 # #2 release-version
 # #3 release-codename
-___os_release_all(){
+___x_cmd_os_release_all(){
 
     if s=$(cat /etc/lsb-release 2>/dev/null); then
-        printf "%s" "$s" | ___os_extract "DISTRIB_ID"
-        printf "%s" "$s" | ___os_extract "DISTRIB_RELEASE"
-        printf "%s" "$s" | ___os_extract "DISTRIB_CODENAME"
+        printf "%s" "$s" | ___x_cmd_os_extract "DISTRIB_ID"
+        printf "%s" "$s" | ___x_cmd_os_extract "DISTRIB_RELEASE"
+        printf "%s" "$s" | ___x_cmd_os_extract "DISTRIB_CODENAME"
     fi
 
     local s
     if s=$(cat /etc/os-release 2>/dev/null); then
-        printf "%s" "$s" | ___os_extract "ID"
-        printf "%s" "$s" | ___os_extract "VERSION_ID"
+        printf "%s" "$s" | ___x_cmd_os_extract "ID"
+        printf "%s" "$s" | ___x_cmd_os_extract "VERSION_ID"
 
         # NAME="Alpine Linux"
         # ID=alpine
@@ -206,8 +170,12 @@ ___os_release_all(){
 
 }
 
+# EndSection
+
+# Section: name and arch
+
 # code from nvm
-___os_name() {
+___x_cmd_os_name() {
     case "$(command uname -a)" in
         Linux\ *)                   printf "%s" linux ;;
         Darwin\ *)                  printf "%s" darwin ;;
@@ -220,11 +188,11 @@ ___os_name() {
 }
 
 # code from nvm
-___os_arch() {
+___x_cmd_os_arch() {
     local HOST_ARCH
     local OS
 
-    OS="$(___os_name)"
+    OS="$(___x_cmd_os_name)"
     if [ "${OS}" = "sunos" ]; then
         # first try to use pkgsrc to guess the most appropriate arch.
         if HOST_ARCH=$(pkg_info -Q MACHINE_ARCH pkg_install 2>/dev/null); then
@@ -272,4 +240,5 @@ ___os_arch() {
     printf "%s" "${ARCH}"
 }
 
+# EndSection
 
