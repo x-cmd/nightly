@@ -1,7 +1,6 @@
 # shellcheck shell=sh disable=SC3043 # xrc
 
 # author:       Li Junhao           l@x-cmd.com
-# maintainer:   Li Junhao
 
 xrc os/lib/import
 xrc os/lib/release
