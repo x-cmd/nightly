@@ -1,5 +1,5 @@
 # shellcheck shell=sh
-xrc ui/_v0/region
+xrc ui/lib/region
 
 f(){
     for i in $(seq 100); do

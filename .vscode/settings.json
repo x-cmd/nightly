@@ -2,10 +2,13 @@
     "files.defaultLanguage": "shellscript",
     "files.associations": {
         "**/*.awk": "awk",
-        "**/*": "shellscript",
         "**/*.json": "json",
-        "**/*.md": "markdown"
+        "**/*.md": "markdown",
+        "**/*.yml": "yaml",
+        "**/LICENSE": "TXT",
+        "**/*": "shellscript",
     },
+    "files.trimTrailingWhitespace": true,
     "editor.detectIndentation": true,
     "editor.tabSize": 4,
     "explicitFolding.rules": {
@@ -23,5 +26,29 @@
                 "autoFold": true
             }
         ]
-    }
+    },
+    "better-comments.highlightPlainText": true,
+    "better-comments.tags": [
+        {
+            "tag": "!",
+            "color": "#FF2D00",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": false,
+            "italic": false,
+        },
+        {
+            "tag": "?",
+            "color": "#3498DB",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": false,
+            "italic": false
+        },
+    ],
+    // "editor.tokenColorCustomizations": {
+    //     "comments": "#00ff95af"
+    // }
 }

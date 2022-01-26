@@ -3,7 +3,7 @@
 # author:       Li Junhao           l@x-cmd.com    edwinjhlee.github.io
 # maintainer:   Li Junhao
 
-xrc ui/_v0/region
+xrc ui/lib/region
 
 ___x_cmd_ui_animate(){
     local op="$1"; shift

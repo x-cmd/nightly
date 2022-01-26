@@ -18,7 +18,7 @@ ___x_cmd_ui_region(){
 
 # Section: send
 # shellcheck disable=SC2120
-xrc ui/_v0/getchar
+xrc ui/lib/getchar
 xrc awk
 
 ___X_CMD_UI_REGION_AWK="$(xrc which ui/_v0/region.awk)"
@@ -242,7 +242,7 @@ ___x_cmd_ui_region_autorefresh_with_keyboard_(){
 }
 
 ___x_cmd_ui_region_autorefresh_with_keyboard(){
-    eval "$(___x_cmd_ui_region_autorefresh_with_keyboard_ "$@")"
+    ___x_cmd_ui_region_autorefresh_with_keyboard_ "$@"
 }
 # EndSection
 

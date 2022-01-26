@@ -3,8 +3,8 @@
 # Section: form app
 
 xrc assert/latest
-xrc ui/_v0/getchar
-xrc ui/_v0/region
+xrc ui/lib/getchar
+xrc ui/lib/region
 # dict
 
 # dict @x_ui_prompt_form put selected 3
@@ -233,6 +233,10 @@ ___x_cmd_ui_prompt_form_main(){
 
     xrc dict/latest
     for arg in "$@"; do
+        arg="$(printf "$arg\n" | awk '{
+            gsub(/\033\[([0-9]+;)*[0-9]+m/, "", $0)
+            print $0
+        }')"
         case "$arg" in
             --) 
                 dict @x_ui_prompt_form put "$q_count" "argc" "$arg_count"
@@ -276,8 +280,7 @@ ___x_cmd_ui_prompt_form_main(){
 }
 
 ___x_cmd_ui_prompt_form(){
-    OUTPUT=1
-    ___x_cmd_ui_prompt_form_main "$@"
+    eval "$(OUTPUT=1 ___x_cmd_ui_prompt_form_main "$@")"
 }
 
 # ___x_cmd_ui_prompt_form \

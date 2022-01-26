@@ -1,7 +1,7 @@
 # shellcheck shell=sh disable=SC3043
 
-xrc ui/_v0/getchar
-xrc ui/_v0/region
+xrc ui/lib/getchar
+xrc ui/lib/region
 
 # Section: select app
 ___x_cmd_ui_region_select_draw(){
@@ -13,6 +13,10 @@ ___x_cmd_ui_region_select_draw(){
         local arg
         printf "%s\n" "$prompt"
         for arg in "$@"; do
+            arg="$(printf "$arg\n" | awk '{
+                gsub(/\033\[([0-9]+;)*[0-9]+m/, "", $0)
+                print $0
+            }')"
             l=$((l+1))
             if [ "$l" -eq "$select" ]; then
                 printf "  $l. \033[7m%s\033[0m\n" "$arg"
@@ -138,3 +142,5 @@ ___x_cmd_ui_select(){
 #     "Install minikube" \
 #     "Install jvm" \
 #     "Install nvm"
+
+# ui sel "text" "Please select the app you want to install:"  "Install docker"  "Install k8s"

@@ -179,6 +179,8 @@ function update_logic_view(           logic_row_i, row_i, col_i, start_row){
 function parse_data(text, 
     row_i, col_i,
     elem, elem_wlen){
+    # gsub(/\033\[([0-9]+;)*[0-9]+m/, "", text)
+    text=str_remove_style(text)
     gsub(/^[ \t\n\b\v\002\001]+/, "", text)
     gsub(/[ \t\b\n\v\002\001]+$/, "", text)
 

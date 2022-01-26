@@ -107,7 +107,7 @@ ___ui_table_json(){
 
 # Section: table app 1: all data
 
-xrc ui/_v0/region
+xrc ui/lib/region
 
 # CRUD
 ___ui_table_out2(){

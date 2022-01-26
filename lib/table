@@ -13,7 +13,7 @@ ___ui_table(){
         -)          ___ui_table_clear                       ;;
         +)          shift; ___ui_table_read      "$@"       ;;
         jsonfmt)    shift; ___ui_table_json_to_table "$@"   ;;
-        func)       shift; ___ui_table_out_func  "$@"       ;;
+        func)       shift; eval "$(___ui_table_out_func  "$@" )" ;;
         *)          [ $# -gt 0 ] && shift; ___ui_table_out3      "$@"       ;;
     esac
 }
@@ -101,8 +101,8 @@ ___ui_table_json(){
 
 # EndSection
 
-xrc ui/_v0/region
-xrc ui/_v0/getchar
+xrc ui/lib/region
+xrc ui/lib/getchar
 xrc awk
 
 # Section: table app 1: all data
@@ -187,6 +187,9 @@ ___ui_table_out_func(){
 
 
 # EndSection
+
+# Section: test1
+
 # ui table -
 # ui table + B%USER               PID  %CPU %MEM      VSZ    RSS   TT  STAT STARTED      TIME COMMAND
 # for i in $(seq 12); do
@@ -239,12 +242,14 @@ ___ui_table_out_func(){
 
 # ui table func prepare_data
 
+# EndSection
+
 # Section: other design for encapulation
 
 # ___ui_table_out_jsonsource(){
 #     local srcfunc="$1"; shift
 #     local IFS=" "
-#     ___ui_table_out_func "$srcfunc | ___ui_table_json_to_table $*"
+#     eval "$(___ui_table_out_func "$srcfunc | ___ui_table_json_to_table $*")"
 # }
 
 # data(){
@@ -284,7 +289,6 @@ ___ui_table_out_func(){
 # A
 # }
 
-# printf "$(___ui_table_out_jsonsource data .table.abc name age gender math=score.math)\n"
 # ___ui_table_out_jsonsource data .table.abc name age gender math=score.math
 
 # EndSection
