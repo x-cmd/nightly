@@ -13,7 +13,7 @@ else
     ___x_cmd_ls_bin(){ builtin ls "$@"; }
 fi
 
-___x_cmd_lazyloading ___x_cmd_ls_app ls/lib/app
+___x_cmd_definelazyloader ___x_cmd_ls_app ls/lib/app
 
 ___x_cmd_ls(){
     if [ "$#" -eq 1 ]; then
