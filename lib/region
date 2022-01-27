@@ -9,7 +9,7 @@ ___x_cmd_ui_region(){
         keyboard)                            ___x_cmd_ui_region_update_with_keyboard "$@"           ;;
         autorefresh_with_keyboard)           ___x_cmd_ui_region_autorefresh_with_keyboard "$@"      ;;
         autorefresh_with_keyboard_vc)        ___x_cmd_ui_region_autorefresh_with_keyboard_vc "$@"   ;;
-        send_update)                   
+        send_update)
             ;;
         send_env)
             ;;
@@ -21,7 +21,7 @@ ___x_cmd_ui_region(){
 xrc ui/lib/getchar
 xrc awk
 
-___X_CMD_UI_REGION_AWK="$(xrc which ui/_v0/region.awk)"
+___X_CMD_UI_REGION_AWK="$(xrc which ui/lib/region.awk)"
 
 ___x_cmd_ui_region_send(){
     ___x_cmd_ui_region_send_update "$@"
@@ -141,19 +141,19 @@ case "$___X_CMD_SHELL" in
     bash|zsh)
 ___x_cmd_pidofsubshell(){
     $SHELL -c 'printf "%s\n" "$PPID"'
-}   
+}
     ;;
 
     dash)
 ___x_cmd_pidofsubshell(){
     /bin/dash -c 'printf "%s\n" "$PPID"'
-}  
+}
     ;;
 
     ash)
 ___x_cmd_pidofsubshell(){
     ash -c 'printf "%s\n" "$PPID"'
-}  
+}
     ;;
 
     *)
@@ -165,24 +165,44 @@ esac
 # EndSection
 
 # Section: just_run
+___x_cmd_ui_region___run_clear(){
+    [ -z "$START" ] && return
+
+    {
+        printf "\0338"
+        printf "\E[J"
+        printf "\033[34h\033[?25h"
+    } >&2
+    stty echo
+
+    START=
+}
+
+___x_cmd_ui_region___run_inner(){
+    stty -echo
+    trap ___x_cmd_ui_region___run_clear INT
+
+    local START=1
+    "$@" | ___x_cmd_ui_region_update
+
+    ___x_cmd_ui_region___run_clear
+}
+
 ___x_cmd_ui_region_run(){
-    eval "$("$@" | ___x_cmd_ui_region_update)"
+    eval "$(___x_cmd_ui_region___run_inner "$@")"
 }
 # EndSection
 
 # Section: keyboard
-___x_cmd_ui_region_update_with_keyboard_(){
+___x_cmd_ui_region_update_with_keyboard_mainloop(){
     local fun="${1:?Provide handler}"; shift
 
-    {
-        while ___x_cmd_ui_getchar; do
-            "$fun" "$@" || break
-        done
-    } | ___x_cmd_ui_region_update
+    while ___x_cmd_ui_getchar; do
+        "$fun" "$@" || break
+    done
 }
-
 ___x_cmd_ui_region_update_with_keyboard(){
-    eval "$(___x_cmd_ui_region_update_with_keyboard_ "$@")"
+    ___x_cmd_ui_region_run ___x_cmd_ui_region_update_with_keyboard_mainloop "$@"
 }
 # EndSection
 
@@ -238,7 +258,7 @@ ___x_cmd_ui_region_autorefresh_with_keyboard_(){
         "$fun" "$@"
         # TODO: maybe we should wait 0.1s
         kill -SIGPIPE "$PID_OF_UPSUBSHELL"
-    } | ___x_cmd_ui_region_update 
+    } | ___x_cmd_ui_region_update
 }
 
 ___x_cmd_ui_region_autorefresh_with_keyboard(){
@@ -263,7 +283,7 @@ ______x_cmd_ui_region_autorefresh_with_keyboard_vc_handler(){
                     "$viewer" || break
                     continue
                     ;;
-                C:*)            
+                C:*)
                     ___line="${___line#C:}"
                     ___X_CMD_UI_GETCHAR_TYPE="${___line%%:*}"
                     ___X_CMD_UI_GETCHAR_CHAR="${___line#*:}"
@@ -293,13 +313,13 @@ ___ui_region_demo0_(){
     for percentage in $(seq 1 10); do
 
         case $(( percentage / 10 % 2 )) in
-            0) 
+            0)
             style=warn
             text="Important to say: Percentage is even.
 1
 2"
 ;;
-            1) 
+            1)
             style=error
             text="Hia hia. Percentage is odd.
 hi";;
@@ -336,3 +356,10 @@ ___ui_region_demo0(){
 # "
 
 # EndSection
+
+# Section: demo for animate
+
+
+
+# EndSection
+

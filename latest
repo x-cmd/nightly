@@ -1,29 +1,28 @@
-# shellcheck shell=sh disable=SC3043
+# shellcheck shell=sh disable=SC3043 # xrc
 
-# author:       Li Junhao           l@x-cmd.com    edwinjhlee.github.io
-# maintainer:   Li Junhao
+# author:       Li Junhao           l@x-cmd.com
 
 # For some advancing usage. Refer to http://linuxcommand.org/lc3_adv_tput.php
 
 # tput: https://www.gnu.org/software/termutils/manual/termutils-2.0/html_chapter/tput_1.html
 
 # Section : ui major function and facilities and init
-ui(){
-    local f=$1
+___x_cmd_ui(){
+    local f="$1"
     local IFS="
 "
     case "$f" in
-        http://* | https://* | ftp://* |ftps://* | git://* )    ui_url "$f"             ;;
-        :)                                                      ui_print_var "$@"       ;; # TODO
-        progressbar|probar)     shift;                          ___ui_progressbar "$@"     ;; 
-        cmd|cmdline)            shift;                          ui_cmdline "$@"         ;;
-        table)                  
-            shift; 
-            command -v ___ui_table >/dev/null || xrc ui/lib/table;        
-            ___ui_table  "$@"
+        http://* | https://* | ftp://* |ftps://* | git://* )    ___x_cmd_ui_url "$f"             ;;
+        :)                                                      ___x_cmd_ui_print_var "$@"       ;; # TODO
+        progressbar|probar)     shift;                          ___x_cmd_ui_progressbar "$@"  ;;
+        cmd|cmdline)            shift;                          ___x_cmd_ui_cmdline "$@"         ;;
+        table)
+            shift;
+            command -v ___x_cmd_ui_table >/dev/null || xrc ui/lib/table;
+            ___x_cmd_ui_table  "$@"
             ;;
         #TODO: need to review
-        select|choice|sel)               
+        select|choice|sel)
             shift
             command -v ___x_cmd_ui_select >/dev/null || xrc ui/lib/select
             ___x_cmd_ui_select "$@"
@@ -46,16 +45,16 @@ ui(){
         spin)
             shift
             ___x_cmd_ui_spin "$@" ;;
-        sep)        shift; ui_seperator "$@" ;;
-        sep1)       shift; ui_seperator1 "$@" ;;
-        sep2)       shift; ui_seperator2 "$@" ;;
-        sep3)       shift; ui_seperator3 "$@" ;;
+        sep)        shift; ___x_cmd_ui_seperator "$@" ;;
+        sep1)       shift; ___x_cmd_ui_seperator1 "$@" ;;
+        sep2)       shift; ___x_cmd_ui_seperator2 "$@" ;;
+        sep3)       shift; ___x_cmd_ui_seperator3 "$@" ;;
 
-        prompt)                 shift; xrc ui/lib/prompt;       ___ui_prompt "$@"       ;;
-        md|markdown)            shift; xrc ui/lib/markdown;     ___ui_markdown "$@"     ;;
+        prompt)                 shift; xrc ui/lib/prompt;       ___x_cmd_ui_prompt "$@"       ;;
+        md|markdown)            shift; xrc ui/lib/markdown;     ___x_cmd_ui_markdown "$@"     ;;
         cols)                                                   printf "%s" "$COLUMNS"  ;;
         rows)                                                   printf "%s" "$LINES"    ;;
-        *)                                                      ui_style "$@"           ;;
+        *)                                                      ___x_cmd_ui_style "$@"           ;;
     esac
 }
 
@@ -64,28 +63,28 @@ ui(){
 # Section : init
 
 # Thank ryenus, iRaS and Mekcki for answers in https://stackoverflow.com/questions/263890/how-do-i-find-the-width-height-of-a-terminal-window
-ui_init_lines_columns(){
+___x_cmd_ui_init_lines_columns(){
     local IFS
     IFS=" "
     read -r LINES COLUMNS <<A
 $(stty size)
 A
 }
-ui_init_lines_columns
+___x_cmd_ui_init_lines_columns
 
 if read -p " " -e ___UI_TMP_TEST 1>/dev/null 2>/dev/null <<A
 hi
 A
 then
 
-___ui_read(){
+___x_cmd_ui_read(){
     local varname="${1:?Provide varname}"
     read -p " " -e -r "$varname"
 }
 
 else
 
-___ui_read(){
+___x_cmd_ui_read(){
     local varname="${1:?Provide varname}"
     printf "%s" " "
     read -r "$varname"
@@ -97,7 +96,6 @@ ___UI_TMP_TEST=
 # EndSection
 
 # Section : ui style
-
 ___x_cmd_ui_colorcode(){
     case "$1" in
         black)      printf 0 ;;
@@ -113,11 +111,11 @@ ___x_cmd_ui_colorcode(){
 
 if command -v tput 1>/dev/null 2>&1; then
 
-ui_tput(){
+___x_cmd_ui_tput(){
     local op="$1"; shift
     case "$op" in
-        cursor_read)                ui_cursor_read "$@";;
-        screen)                     ui_screen "$@" ;;
+        cursor_read)                ___x_cmd_ui_cursor_read "$@";;
+        screen)                     ___x_cmd_ui_screen "$@" ;;
 
         sc|cursor_save)             tput sc ;;
         rc|cursor_restore)          tput rc ;;
@@ -128,8 +126,8 @@ ui_tput(){
 
         smcup|screen_save)          tput smcup ;;
         rmcup|screen_restore)       tput rmcup ;;
-        
-        
+
+
         *)                          tput "$op" "$@" ;;
     esac
 }
@@ -137,11 +135,11 @@ ui_tput(){
 
 else
 
-ui_tput(){
+___x_cmd_ui_tput(){
     local op="$1"; shift
     case "$op" in
-        cursor_read)                ui_cursor_read "$@";;
-        screen)                     ui_screen "$@" ;;
+        cursor_read)                ___x_cmd_ui_cursor_read "$@";;
+        screen)                     ___x_cmd_ui_screen "$@" ;;
 
         sc|cursor_save)             printf "\0337" ;;
         rc|cursor_restore)          printf "\0338" ;;
@@ -152,7 +150,7 @@ ui_tput(){
 
         smcup|screen_save)          printf "\033[?1049h" ;;
         rmcup|screen_restore)       printf "\033[?1049l" ;;
-        
+
         el)                         printf "\033[K" ;;
         el1)                        printf "\033[1K" ;;
         cuu)                        printf "\033[%sA" "${2:?Provide number of line to move up}" ;;
@@ -161,7 +159,7 @@ ui_tput(){
 
 fi
 
-ui_style(){
+___x_cmd_ui_style(){
     local IFS=" "
     while [ $# -gt 0 ]; do
         case "$1" in
@@ -194,7 +192,7 @@ ui_style(){
 
 # Section : cmdline URL, seperator, seperator2
 
-ui_cmdline(){
+___x_cmd_ui_cmdline(){
     local prompt=${1:-">"}
 
     # if [ ! -t 0 ]; then
@@ -209,45 +207,45 @@ ui_cmdline(){
     fi
 }
 
-ui_url(){
+___x_cmd_ui_url(){
     printf "$(ui smul)%s$(ui rmul)" "${1:?Provide URL}"
 }
 
-ui_draw_seperator(){
+___x_cmd_ui_draw_seperator(){
     local sep=""
     local _i=1
     local maxw
     maxw="$(ui cols)"
     while [ "$_i" -lt "$maxw" ];do
-        sep="$sep""${1:-—}" 
+        sep="$sep""${1:-—}"
         _i="$((_i+1))"
     done
-    printf "$sep\n" 
+    printf "$sep\n"
 }
 
 # TODO: Seq is an external command.
-ui_seperator(){
-    local sep 
+___x_cmd_ui_seperator(){
+    local sep
     local maxw
     maxw="$(ui cols)"
     sep="$(seq -f "${1:-—}" -s '' "$maxw")"
-    echo "$sep"
+    printf "%s\n" "$sep"
 }
 
-ui_seperator2(){
-    local sep 
+___x_cmd_ui_seperator2(){
+    local sep
     local maxw
     maxw=$(( $(ui cols) / 2 ))
     sep="$(seq -f "${1:-—}" -s '' "$maxw")"
-    echo "$sep"
+    printf "%s\n"  "$sep"
 }
 
-ui_seperator3(){
-    local sep 
+___x_cmd_ui_seperator3(){
+    local sep
     local maxw
     maxw=$(( $(ui cols) / 3 ))
     sep="$(seq -f "${1:-—}" -s '' "$maxw")"
-    echo "$sep"
+    printf "%s\n"  "$sep"
 }
 
 ___x_cmd_ui_spin(){
@@ -266,12 +264,12 @@ ___x_cmd_ui_spin(){
 # Section : progress
 
 # shellcheck disable=SC2120
-___ui_progressbar(){
+___x_cmd_ui_progressbar(){
     local maxw=80
     [ "$COLUMNS" -lt "$maxw" ] && maxw=$COLUMNS
 
     if [ -n "$3" ]; then    printf "%s\n" "$3"
-    else                    cat;         
+    else                    cat;
     fi | awk -v ch="${1:-\*}" -v other="${2:-" "}" -v maxw="$COLUMNS" '
 function str_rep(char, number, _i, _s) {
     for (   _i=1; _i<=number; ++_i  ) _s = _s char
@@ -285,12 +283,12 @@ function print_progressbar(percent,         _width, _space, _stars, _s){
     _space = _width - _stars
 
     s = str_rep(ch, _stars) str_rep(other, _space)
-    
+
     if (percent == 100)     printf("( DONE! )|%s|", s)
     else                    printf("( %3d %% )|%s|", percent, s)
 }
 
-NR==1{  
+NR==1{
     print_progressbar($0)
     fflush()
 }
@@ -302,22 +300,22 @@ NR>=2{
 '
 }
 
-___ui_progressbar_test(){
+___x_cmd_ui_progressbar_test(){
     for i in $(seq 0 100); do
         printf "%s\n" "$i"
         sleep 0.01s
-    done | ___ui_progressbar
+    done | ___x_cmd_ui_progressbar
 }
 
 # EndSection
 
 # Section : tput facility: cursor
-
-
 # reference: https://unix.stackexchange.com/questions/88296/get-vertical-cursor-position/183121#183121
-ui_cursor_read(){
-    local cv 
-    local ch 
+# TODO: Not work in alpine. Find out a way to work in alpine.
+# Notice: I think I already put enough effort in it. Since we cannot get the cursor position, we have to do the control by ourself thus we always know where the cursor is.
+___x_cmd_ui_cursor_read(){
+    local cv
+    local ch
     local IFS
     # tput u7                  # Inquire for cursor position
     # read -sdR CURPOS         # Read cursor position
@@ -329,15 +327,15 @@ ui_cursor_read(){
     cv="${cv#*[}"
 
     case $# in
-        0) echo "$cv $ch";;
-        1) eval "$1=$cv";;
-        *) 
-            eval "$1=$cv"; 
+        0)  printf "%s %s\n" "$cv" "$ch";;
+        1)  eval "$1=$cv";;
+        *)
+            eval "$1=$cv";
             eval "$2=$ch";;
     esac
 }
 
-___ui_line_count(){
+___x_cmd_ui_line_count(){
     local maxw="$COLUMNS"
     local n
     local IFS
@@ -350,17 +348,15 @@ ___ui_line_count(){
 
 # EndSection
 
-
-
 # Section : screen design -- tput screen facility
 
-ui_screen() {
-    ui_tput screen_save
+___x_cmd_ui_screen() {
+    ___x_cmd_ui_tput screen_save
     eval "$@"
-    ui_tput screen_restore
+    ___x_cmd_ui_tput screen_restore
 }
 
-ui_banner() {
+___x_cmd_ui_banner() {
     # echo -n ${BG:-$UI_BG_BLUE}${FG:-$UI_FG_WHITE}
     local FG
     local BG
@@ -390,12 +386,12 @@ RUN_CMD_WITH_STEP() {
 # EndSection
 
 # Section : interactive component
-_______ui_check_cmd_run(){
+___x_cmd_ui_check_cmd_run(){
     local msg="${1:?Please Provide message}"; shift
 
     # TODO: Consider using trap or other method to interrupt the par animation
     local filepath
-    filepath="$TMPDIR/_______ui_check_cmd_run.$$.$(date +%s).txt"
+    filepath="$TMPDIR/___x_cmd_ui_check_cmd_run.$$.$(date +%s).txt"
     {
         eval "$@"
         printf "%s" "$?" > "$filepath"
@@ -417,9 +413,9 @@ _______ui_check_cmd_run(){
     }
 }
 
-ui_check_cmd(){
-    local msg="${1:?Please Provide message}";    
-    if _______ui_check_cmd_run "$@"; then
+___x_cmd_ui_check_cmd(){
+    local msg="${1:?Please Provide message}";
+    if ___x_cmd_ui_check_cmd_run "$@"; then
         printf "\r$(ui green)$(ui bold)%s       %s$(ui end)"  "√" "$msg"
     else
         local code=$?
@@ -431,11 +427,11 @@ ui_check_cmd(){
 
 # Section other unused
 # Maybe not useful
-___ui_yesno() {
+___x_cmd_ui_yesno() {
     local p
     while true; do
         printf "%s" "$1 (Input 'y' for yes or 'n' for no):"
-        ___ui_read p
+        ___x_cmd_ui_read p
         # remove space
         case $p in
             y)          return 0 ;;
@@ -444,11 +440,11 @@ ___ui_yesno() {
     done
 }
 
-___ui_yesno_enter() {
+___x_cmd_ui_yesno_enter() {
     local p
     while true; do
         printf "%s" "$1 (Press Enter or y for yes, otherwise no):"
-        ___ui_read p
+        ___x_cmd_ui_read p
         # remove space
         case $p in
             y|"")           return 0    ;;
@@ -457,14 +453,14 @@ ___ui_yesno_enter() {
     done
 }
 
-___ui_readint() {
+___x_cmd_ui_readint() {
     local min=${1:?Provide min}
     local max=${2:?Provide max}
 
     local choice
     while true; do
-        printf "%s" "${3:-Read integer: }" 
-        ___ui_read choice
+        printf "%s" "${3:-Read integer: }"
+        ___x_cmd_ui_read choice
         if [ "$choice" -ge "$min" ] && [ "$choice" -le "$max" ]; then
             printf "%s" "$choice"
             return 0
@@ -472,3 +468,5 @@ ___ui_readint() {
     done
 }
 # EndSection
+
+xrc setmain ___x_cmd_ui

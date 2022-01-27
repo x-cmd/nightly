@@ -2,9 +2,10 @@
 
 xrc ui/lib/getchar
 xrc ui/lib/region
+xrc ui/lib/varctl
 
 # Section: select app
-___x_cmd_ui_region_select_draw(){
+___x_cmd_ui_select_draw(){
     local select="$1"
     local text="$2"
     local prompt="$3"; shift 3
@@ -13,7 +14,7 @@ ___x_cmd_ui_region_select_draw(){
         local arg
         printf "%s\n" "$prompt"
         for arg in "$@"; do
-            arg="$(printf "$arg\n" | awk '{
+            arg="$(printf "$arg\n" | command awk '{
                 gsub(/\033\[([0-9]+;)*[0-9]+m/, "", $0)
                 print $0
             }')"
@@ -29,113 +30,57 @@ ___x_cmd_ui_region_select_draw(){
     } | ___x_cmd_ui_region_send
 }
 
-___x_cmd_ui_region_select_main(){
-    stty -echo
-    exec 3>&1
-    local state=1          # default
-    local state_text="1"
+___x_cmd_ui_select_mainloop(){
+    local choice=1          # default
+    local choice_text="1"
     local question="$1"; shift
-    {
-        ___x_cmd_ui_region_select_draw "$state" "$state_text" "$question" "$@"
-        while ___x_cmd_ui_getchar; do
-            case "${___X_CMD_UI_GETCHAR_CHAR}" in
-                UP)
-                    if [ $state -eq -1 ]; then
-                        state=$#
-                    else
-                        state="$((state-1))" 
-                    fi
-                    ;;
-                DN)
-                    if [ $state -eq -1 ]; then
-                        state=1
-                    else
-                        state="$((state+1))" 
-                    fi
-                    ;;
-                ENTER)
-                    break ;;
-                DELETE)     
-                    state_text="${state_text%?}"
-                    if [ "$state_text" = "" ]; then
-                        state=-1
-                    elif [ "$state_text" -ge 1 ] && [ "$state_text" -le $# ]; then
-                        state="$state_text"
-                    else
-                        state=-1
-                    fi
-                    ;;
-                0|1|2|3|4|5|6|7|8|9)        
-                    state_text="${state_text}${___X_CMD_UI_GETCHAR_CHAR}"
-                    if [ "$state_text" = "" ]; then
-                        state=-1
-                    elif [ "$state_text" -ge 1 ] && [ "$state_text" -le $# ]; then
-                        state="$state_text"
-                    else
-                        state=-1
-                    fi
-                    ;;
-            esac
-            if [ "$state" -eq -1 ]; then
-                # state=$(( state % $# + $# ))
-                state=-1
-            else
-                state=$(( (state + $# - 1 ) % $# + 1 ))
-                state_text="$state"
-            fi
-            ___x_cmd_ui_region_select_draw "$state" "$state_text" "$question" "$@"
-        done
-        
-        # Notice: Meaningless but important.
-        ___x_cmd_ui_region_select_draw "$state" "$state_text" "$question" "$@"
 
-        if [ "$state" -eq -1 ]; then
-            case "$___UI_REGION_OUTPUT" in
-                text)           printf "" ;;
-                numtext)        printf "%s\n" -1 ;;
-                ""|*)           printf "%s" "-1" ;;
-            esac >&3
-        else
-            case "$___UI_REGION_OUTPUT" in
-                text)           eval printf "\"%s\"" "\${$state}" ;;
-                numtext)        eval printf "\"%s\n%s\"" "\"$state\"" "\${$state}" ;;
-                ""|*)           printf "%s" "$state" ;;
-            esac >&3
-        fi
-        
-    } | ___x_cmd_ui_region_update_awk
-    # tput cvvis
-    exec 3>&-
-    printf "\033[34h\033[?25h" >&2
-    stty echo 
-}
+    ___x_cmd_ui_select_draw "$choice" "$choice_text" "$question" "$@"
+    while ___x_cmd_ui_getchar; do
+        case "${___X_CMD_UI_GETCHAR_CHAR}" in
+            UP)                     ___x_cmd_ui_varctl_numtext choice choice_text 1 "$#" dec ;;
+            DN)                     ___x_cmd_ui_varctl_numtext choice choice_text 1 "$#" inc ;;
+            ENTER)                  break ;;
+            DELETE)                 ___x_cmd_ui_varctl_numtext choice choice_text 1 "$#" del ;;
+            0|1|2|3|4|5|6|7|8|9)    ___x_cmd_ui_varctl_numtext choice choice_text 1 "$#" "${___X_CMD_UI_GETCHAR_CHAR}" ;;
+        esac
+        ___x_cmd_ui_select_draw "$choice" "$choice_text" "$question" "$@"
+    done
 
-___x_cmd_ui_region_select_null(){
-    printf "%s" "$(___x_cmd_ui_region_select_main "$@")"
-}
+    # Notice: Meaningless but important.
+    ___x_cmd_ui_select_draw "$choice" "$choice_text" "$question" "$@"
 
-___x_cmd_ui_region_select_text(){
-    printf "%s" "$(___UI_REGION_OUTPUT=text ___x_cmd_ui_region_select_main "$@")"
-}
-
-___x_cmd_ui_region_select_numtext(){
-    printf "%s" "$(___UI_REGION_OUTPUT=numtext ___x_cmd_ui_region_select_main "$@")"
+    ___x_cmd_ui_region_send_env_kv ___X_CMD_UI_SELECT_RET "$choice"
 }
 
 ___x_cmd_ui_select(){
-    local op="$1"; shift
-    case "$op" in
-        text)           ___x_cmd_ui_region_select_text "$@" ;;
-        numtext)        ___x_cmd_ui_region_select_numtext "$@" ;;
-        *)              ___x_cmd_ui_region_select_null "$@" ;;
+    local VAR="$1";  [ $# -gt 0 ] && shift
+    local VAR1
+    local VAR2
+    case "$VAR" in
+        ,*)
+            VAR1=
+            VAR2="${VAR#,}"
+            ;;
+        *,*)
+            VAR1="${VAR%,*}"
+            VAR2="${VAR#*,}"
+            ;;
+        *)
+            VAR1="$VAR"
+            VAR2=
     esac
+    eval "$(___x_cmd_ui_region_run ___x_cmd_ui_select_mainloop "$@")"
+    shift
+    eval "$VAR1"="$___X_CMD_UI_SELECT_RET"
+    eval "$VAR2"="\$$___X_CMD_UI_SELECT_RET"
 }
 
 # EndSection
 
 # ui choice "text"\
 # ui sel "text"\
-# ___x_cmd_ui_select "text"\
+# ___x_cmd_ui_select idx,text\
 #     "Please select the app you want to install:" \
 #     "Install docker" \
 #     "Install k8s" \

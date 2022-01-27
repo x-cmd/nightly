@@ -1,6 +1,6 @@
 
 
-___UI_READER_AWK="$(xrc which ui/_v0/reader.awk)"
+___UI_READER_AWK="$(xrc which ui/lib/reader.awk)"
 
 ___ui_simple_send_option_selected(){
     printf "%s %s\n" "OPTION.SELECTED" "${1:?Provide selected}"

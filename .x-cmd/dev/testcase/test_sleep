@@ -2,7 +2,7 @@
 f(){
         {
             while true; do
-                printf "VIEW %s %s\n" "$(ui cols)" "$(ui rows)" 
+                printf "VIEW %s %s\n" "$(ui cols)" "$(ui rows)"
                 sleep 0.2 || break
             done
         } &
