@@ -16,14 +16,13 @@ subcommand:
     ls                  "list compress inside file"
 A
     param:run
-    echo "___x_cmd_zuz_$PARAM_SUBCMD" "$@"
     if [ -z "$PARAM_SUBCMD" ] || [ -z "$*" ]; then
         printf "\n%s\n    %s\n    %s\n    %s\n    %s\n" \
                 "SYMPOSIS:" \
-                "x z <zipfile> <source...>" \
-                "x uz <zipfile>" \
+                "x z   <zipfile> <source...>" \
+                "x uz  <zipfile>" \
                 "x uzr <zipfile>" \
-                "x zl <zipfile>"
+                "x zl  <zipfile>"
         ___x_cmd_zuz help
         return 0
     fi
@@ -40,6 +39,7 @@ A
 x log init zuz
 ___x_cmd_zuz_run(){
     local IFS=' '
+    # shellcheck disable=SC2154
     zuz_log info "Command to execute => $* $logger_msg"
     IFS=
     eval "$@"
@@ -56,4 +56,6 @@ ___x_cmd_zuz_run(){
 
 xrc zuz/lib/cat zuz/lib/ls zuz/lib/uz zuz/lib/z
 
-xrc setmain ___x_cmd_zuz
+# TODO: FIX it
+# @see: https://e.gitee.com/lteam18/issues/kanban?issue=I4S27Y
+# xrc setmain ___x_cmd_zuz

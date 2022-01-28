@@ -1,3 +1,4 @@
+# shellcheck shell=sh disable=SC2034,SC2154
 # Section: cat zip file, following the list of files to cat ...
 ___x_cmd_zuz_cat(){
     param:void

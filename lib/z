@@ -1,4 +1,4 @@
-
+# shellcheck shell=sh disable=SC2034,SC2154
 # Section: zip the file
 ___x_cmd_zuz_z(){
     param:dsl <<A
