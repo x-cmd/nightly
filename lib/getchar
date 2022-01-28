@@ -1,11 +1,14 @@
-# Section: getchar
+
+# Section: read_char
 
 if [ -n "$KSH_VERSION" ]; then
 
 ___x_cmd_ui_region_read_char(){
     stty -echo
     read -s -n 1 "$@"
+    local code=$?
     stty echo
+    return $code
 }
 
 else
@@ -15,6 +18,10 @@ ___x_cmd_ui_region_read_char(){
 }
 
 fi
+
+# EndSection
+
+# Section: getchar_read1
 
 ___X_CMD_UI_REGION_E="$(printf "\033")"
 ___X_CMD_UI_REGION_ENTER="$(printf "\015")"
@@ -26,6 +33,8 @@ if [ -n "$BASH_VERSION" ]; then
 ___x_cmd_ui_region_getchar_read1(){
     local IFS="$(printf "\001")"
     read -rsn "${1:-1}" ___X_CMD_UI_GETCHAR_CHAR
+    local code=$?
+    return $code
 }
 
 
@@ -42,11 +51,16 @@ echo "Using stty for read1" >&2
 ___x_cmd_ui_region_getchar_read1(){
     stty raw
     ___X_CMD_UI_GETCHAR_CHAR="$(dd bs=1 count="${1:-1}" 2> /dev/null)"
+    local code=$?
     stty -raw
+    return $code
 }
 
 fi
 
+# EndSection
+
+# Section: leading_1_len
 ___x_cmd_ui_region_get_leading_1_len(){
     local num
     num="$(printf "%d" "'$1")"
@@ -64,6 +78,9 @@ ___x_cmd_ui_region_get_leading_1_len(){
         fi
     done
 }
+# EndSection
+
+# Section: main: ___x_cmd_ui_getchar
 
 # Not worked in ksh. Using stty -echo
 
@@ -73,7 +90,10 @@ ___x_cmd_ui_region_get_leading_1_len(){
 ___X_CMD_UI_GETCHAR_TYPE=
 ___X_CMD_UI_GETCHAR_CHAR=
 ___x_cmd_ui_getchar(){
-    ___x_cmd_ui_region_getchar_read1
+    ___X_CMD_UI_GETCHAR_TYPE=interrupt-read
+    ___X_CMD_UI_GETCHAR_CHAR=interrupt-read
+
+    ___x_cmd_ui_region_getchar_read1 || return $?
 
     ___X_CMD_UI_GETCHAR_TYPE=special
 
@@ -86,11 +106,11 @@ ___x_cmd_ui_getchar(){
 " ] && ___X_CMD_UI_GETCHAR_CHAR=ENTER && return
 
     if [ "$___X_CMD_UI_GETCHAR_CHAR" = "$___X_CMD_UI_REGION_E" ]; then
-        ___x_cmd_ui_region_getchar_read1 # read 2 more chars
+        ___x_cmd_ui_region_getchar_read1 || return $? # read 2 more chars
 
         case "$___X_CMD_UI_GETCHAR_CHAR" in
-            \[) 
-                ___x_cmd_ui_region_getchar_read1 # read 2 more chars
+            \[)
+                ___x_cmd_ui_region_getchar_read1 || return $? # read 2 more chars
                 case "$___X_CMD_UI_GETCHAR_CHAR" in
                     'A')       ___X_CMD_UI_GETCHAR_CHAR=UP  ;;
                     'B')       ___X_CMD_UI_GETCHAR_CHAR=DN  ;;
@@ -99,7 +119,7 @@ ___x_cmd_ui_getchar(){
                     *)         ___X_CMD_UI_GETCHAR_CHAR="[$___X_CMD_UI_GETCHAR_CHAR" ;;
                 esac
                 ;;
-            q)  
+            q)
                 ___X_CMD_UI_GETCHAR_CHAR=QUITTING
                 return 1
                 ;;
@@ -109,19 +129,19 @@ ___x_cmd_ui_getchar(){
         return
     fi
 
-    
+
     [ "$___X_CMD_UI_GETCHAR_CHAR" = "$___X_CMD_UI_REGION_BACKSPACE" ] && ___X_CMD_UI_GETCHAR_CHAR=BACKSPACE && return
     [ "$___X_CMD_UI_GETCHAR_CHAR" = "$___X_CMD_UI_REGION_DELETE" ] && {
         ___X_CMD_UI_GETCHAR_TYPE=ascii-delete
         ___X_CMD_UI_GETCHAR_CHAR=DELETE
         return
     }
-    
+
     local num
     num=$(___x_cmd_ui_region_get_leading_1_len "$___X_CMD_UI_GETCHAR_CHAR")
     if [ "$num" -eq 0 ]; then
         # TODO: When input space, it will give "${#___X_CMD_UI_GETCHAR_CHAR}" - eq 0
-        
+
         # [ "${#___X_CMD_UI_GETCHAR_CHAR}" -eq 0 ] && ___X_CMD_UI_GETCHAR_CHAR=ENTER && return
 
         num="$(printf "%d" "'$___X_CMD_UI_GETCHAR_CHAR")"
@@ -153,7 +173,7 @@ ___x_cmd_ui_getchar(){
     else
         local ch1="$___X_CMD_UI_GETCHAR_CHAR"
         ___X_CMD_UI_GETCHAR_TYPE="UTF8-MULTI-$num"
-        ___x_cmd_ui_region_getchar_read1 "$((num-1))"
+        ___x_cmd_ui_region_getchar_read1 "$((num-1))" || return $?
         ___X_CMD_UI_GETCHAR_CHAR="${ch1}${___X_CMD_UI_GETCHAR_CHAR}"
     fi
 }

@@ -166,6 +166,7 @@ esac
 
 # Section: just_run
 ___x_cmd_ui_region___run_clear(){
+    # This is useless
     [ -z "$START" ] && return
 
     {
@@ -207,62 +208,53 @@ ___x_cmd_ui_region_update_with_keyboard(){
 # EndSection
 
 # Section: autorefresh
-___x_cmd_ui_region_autorefresh_(){
+___x_cmd_ui_region_autorefresh_mainloop(){
     local fun="${1:?Provide handler}"; shift
 
     {
-        ___x_cmd_pidofsubshell
         local ticks=1
         while true; do
             ticks="$((ticks+1))"
             printf "R:%s\n" "$ticks"
-            sleep "${___X_CMD_UI_REFRESH_INTERVAL:-0.2}" || break
+            sleep "${___X_CMD_UI_REFRESH_INTERVAL:-0.2}"
         done
     } | {
-        local PID_OF_UPSUBSHELL
-        read -r PID_OF_UPSUBSHELL
-
-        "$@"
-        kill -SIGPIPE "$PID_OF_UPSUBSHELL"
-    } | ___x_cmd_ui_region_update
+        "$fun" "$@"
+    }
 }
 
 ___x_cmd_ui_region_autorefresh(){
-    eval "$(___x_cmd_ui_region_autorefresh_ "$@")"
+    # eval "$(___x_cmd_ui_region_autorefresh_ "$@")"
+    ___x_cmd_ui_region_run ___x_cmd_ui_region_autorefresh_mainloop "$@"
 }
 
 # EndSection
 
 # Section: autorefresh_with_keyboard
-___x_cmd_ui_region_autorefresh_with_keyboard_(){
+___x_cmd_ui_region_autorefresh_with_keyboard_mainloop(){
     local fun="${1:?Provide handler}"; shift
 
     {
-        ___x_cmd_pidofsubshell
-        {
+        (
             local ticks=1
             while true; do
                 ticks="$((ticks+1))"
                 printf "R:%s\n" "$ticks"
-                sleep "${___X_CMD_UI_REFRESH_INTERVAL:-0.2}" || break
+                sleep "${___X_CMD_UI_REFRESH_INTERVAL:-0.1}"
             done
-        } &
-        while ___x_cmd_ui_getchar; do
-            printf "C:%s:%s\n" "${___X_CMD_UI_GETCHAR_TYPE}" "${___X_CMD_UI_GETCHAR_CHAR}"
-        done
-        kill $!
-    } | {
-        local PID_OF_UPSUBSHELL
-        read -r PID_OF_UPSUBSHELL
+        ) &
 
+        while ___x_cmd_ui_getchar; do
+            printf "C:%s:%s\n" "${___X_CMD_UI_GETCHAR_TYPE}" "${___X_CMD_UI_GETCHAR_CHAR}" || break
+        done
+    } | {
         "$fun" "$@"
-        # TODO: maybe we should wait 0.1s
-        kill -SIGPIPE "$PID_OF_UPSUBSHELL"
-    } | ___x_cmd_ui_region_update
+    }
 }
 
 ___x_cmd_ui_region_autorefresh_with_keyboard(){
-    ___x_cmd_ui_region_autorefresh_with_keyboard_ "$@"
+    # ___x_cmd_ui_region_autorefresh_with_keyboard_ "$@"
+    ___x_cmd_ui_region_run ___x_cmd_ui_region_autorefresh_with_keyboard_mainloop "$@"
 }
 # EndSection
 

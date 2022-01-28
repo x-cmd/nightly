@@ -2,59 +2,43 @@
 
 # author:       Li Junhao           l@x-cmd.com
 
-# For some advancing usage. Refer to http://linuxcommand.org/lc3_adv_tput.php
+# Section: define lazy loader
+___x_cmd_definelazyloader   ___x_cmd_ui_table         ui/lib/table
+___x_cmd_definelazyloader   ___x_cmd_ui_select        ui/lib/select
+___x_cmd_definelazyloader   ___x_cmd_ui_form          ui/lib/form
+___x_cmd_definelazyloader   ___x_cmd_ui_truefalse     ui/lib/truefalse
+___x_cmd_definelazyloader   ___x_cmd_ui_table         ui/lib/table
+___x_cmd_definelazyloader   ___x_cmd_ui_prompt        ui/lib/prompt
+___x_cmd_definelazyloader   ___x_cmd_ui_markdown      ui/lib/markdown
 
-# tput: https://www.gnu.org/software/termutils/manual/termutils-2.0/html_chapter/tput_1.html
+# EndSection
 
 # Section : ui major function and facilities and init
 ___x_cmd_ui(){
     local f="$1"
-    local IFS="
-"
+    shift
     case "$f" in
-        http://* | https://* | ftp://* |ftps://* | git://* )    ___x_cmd_ui_url "$f"             ;;
-        :)                                                      ___x_cmd_ui_print_var "$@"       ;; # TODO
-        progressbar|probar)     shift;                          ___x_cmd_ui_progressbar "$@"  ;;
-        cmd|cmdline)            shift;                          ___x_cmd_ui_cmdline "$@"         ;;
-        table)
-            shift;
-            command -v ___x_cmd_ui_table >/dev/null || xrc ui/lib/table;
-            ___x_cmd_ui_table  "$@"
-            ;;
-        #TODO: need to review
-        select|choice|sel)
-            shift
-            command -v ___x_cmd_ui_select >/dev/null || xrc ui/lib/select
-            ___x_cmd_ui_select "$@"
-            ;;
-        form)
-            shift
-            command -v ___x_cmd_ui_prompt_form >/dev/null || xrc ui/lib/form
-            ___x_cmd_ui_prompt_form "$@"
-            ;;
-        tf)
-            shift
-            command -v ___x_cmd_ui_tf >/dev/null || xrc ui/lib/truefalse
-            ___x_cmd_ui_tf "$@"
-            ;;
-        animate)
-            shift
-            command -v ___x_cmd_ui_animate >/dev/null || xrc ui/lib/animate
-            ___x_cmd_ui_animate "$@"
-            ;;
-        spin)
-            shift
-            ___x_cmd_ui_spin "$@" ;;
-        sep)        shift; ___x_cmd_ui_seperator "$@" ;;
-        sep1)       shift; ___x_cmd_ui_seperator1 "$@" ;;
-        sep2)       shift; ___x_cmd_ui_seperator2 "$@" ;;
-        sep3)       shift; ___x_cmd_ui_seperator3 "$@" ;;
+        http://* | https://* | ftp://* |ftps://* | git://* )        ___x_cmd_ui_url "$f" "$@" ;;
+        :)                                                          ___x_cmd_ui_print_var "$f" "$@" ;;
+        progressbar|probar)                                         ___x_cmd_ui_progressbar "$@" ;;
+        cmd|cmdline)                                                ___x_cmd_ui_cmdline "$@" ;;
+        table)                                                      ___x_cmd_ui_table  "$@" ;;
+        select)                                                     ___x_cmd_ui_select "$@" ;;
+        form)                                                       ___x_cmd_ui_form "$@" ;;
+        tf|truefalse)                                               ___x_cmd_ui_tf "$@" ;;
+        prompt)                                                     ___x_cmd_ui_prompt "$@" ;;
+        md|markdown)                                                ___x_cmd_ui_markdown "$@" ;;
+        spin)                                                       ___x_cmd_ui_spin "$@" ;;
+        sep)                                                        ___x_cmd_ui_sep "$@" ;;
+        sep1)                                                       ___x_cmd_ui_sep1 "$@" ;;
+        sep2)                                                       ___x_cmd_ui_sep2 "$@" ;;
+        sep3)                                                       ___x_cmd_ui_sep3 "$@" ;;
 
-        prompt)                 shift; xrc ui/lib/prompt;       ___x_cmd_ui_prompt "$@"       ;;
-        md|markdown)            shift; xrc ui/lib/markdown;     ___x_cmd_ui_markdown "$@"     ;;
-        cols)                                                   printf "%s" "$COLUMNS"  ;;
-        rows)                                                   printf "%s" "$LINES"    ;;
-        *)                                                      ___x_cmd_ui_style "$@"           ;;
+        cols)                                                       printf "%s" "$COLUMNS" ;;
+        rows)                                                       printf "%s" "$LINES" ;;
+
+        style)                                                      ___x_cmd_ui_style "$@" ;;
+        *)                                                          ___x_cmd_ui_style "$f" "$@" ;;
     esac
 }
 
@@ -110,6 +94,9 @@ ___x_cmd_ui_colorcode(){
 }
 
 if command -v tput 1>/dev/null 2>&1; then
+
+# For some advancing usage. Refer to http://linuxcommand.org/lc3_adv_tput.php
+# tput: https://www.gnu.org/software/termutils/manual/termutils-2.0/html_chapter/tput_1.html
 
 ___x_cmd_ui_tput(){
     local op="$1"; shift
@@ -190,7 +177,7 @@ ___x_cmd_ui_style(){
 
 # EndSection
 
-# Section : cmdline URL, seperator, seperator2
+# Section : cmdline URL, sep, sep2, sep3
 
 ___x_cmd_ui_cmdline(){
     local prompt=${1:-">"}
@@ -198,24 +185,24 @@ ___x_cmd_ui_cmdline(){
     # if [ ! -t 0 ]; then
     if [ $# -gt 1 ]; then
         shift;
-        printf "$(ui bold yellow)${prompt} $(ui normal white)%s$(ui end)\n" "$*"
+        printf "$(___x_cmd_ui bold yellow)${prompt} $(___x_cmd_ui normal white)%s$(___x_cmd_ui end)\n" "$*"
     else
         local line
         while read -r line; do
-            printf "$(ui bold yellow)${prompt} $(ui normal white)%s$(ui end)\n" "$line"
+            printf "$(___x_cmd_ui bold yellow)${prompt} $(___x_cmd_ui normal white)%s$(___x_cmd_ui end)\n" "$line"
         done
     fi
 }
 
 ___x_cmd_ui_url(){
-    printf "$(ui smul)%s$(ui rmul)" "${1:?Provide URL}"
+    printf "$(___x_cmd_ui smul)%s$(___x_cmd_ui rmul)" "${1:?Provide URL}"
 }
 
 ___x_cmd_ui_draw_seperator(){
     local sep=""
     local _i=1
     local maxw
-    maxw="$(ui cols)"
+    maxw="$(___x_cmd_ui cols)"
     while [ "$_i" -lt "$maxw" ];do
         sep="$sep""${1:-—}"
         _i="$((_i+1))"
@@ -224,26 +211,26 @@ ___x_cmd_ui_draw_seperator(){
 }
 
 # TODO: Seq is an external command.
-___x_cmd_ui_seperator(){
+___x_cmd_ui_sep(){
     local sep
     local maxw
-    maxw="$(ui cols)"
+    maxw="$(___x_cmd_ui cols)"
     sep="$(seq -f "${1:-—}" -s '' "$maxw")"
     printf "%s\n" "$sep"
 }
 
-___x_cmd_ui_seperator2(){
+___x_cmd_ui_sep2(){
     local sep
     local maxw
-    maxw=$(( $(ui cols) / 2 ))
+    maxw=$(( $(___x_cmd_ui cols) / 2 ))
     sep="$(seq -f "${1:-—}" -s '' "$maxw")"
     printf "%s\n"  "$sep"
 }
 
-___x_cmd_ui_seperator3(){
+___x_cmd_ui_sep3(){
     local sep
     local maxw
-    maxw=$(( $(ui cols) / 3 ))
+    maxw=$(( $(___x_cmd_ui cols) / 3 ))
     sep="$(seq -f "${1:-—}" -s '' "$maxw")"
     printf "%s\n"  "$sep"
 }
@@ -397,7 +384,7 @@ ___x_cmd_ui_check_cmd_run(){
         printf "%s" "$?" > "$filepath"
     } | {
         local i="-"
-        local FMT="\r$(ui blue)$(ui bold)%s       $(ui end)$(ui yellow)%s$(ui end)"
+        local FMT="\r$(___x_cmd_ui blue)$(___x_cmd_ui bold)%s       $(___x_cmd_ui end)$(___x_cmd_ui yellow)%s$(___x_cmd_ui end)"
         printf "$FMT" "$i" "$msg"
         while [ ! -f "$filepath" ]; do
             sleep 0.1
@@ -416,10 +403,10 @@ ___x_cmd_ui_check_cmd_run(){
 ___x_cmd_ui_check_cmd(){
     local msg="${1:?Please Provide message}";
     if ___x_cmd_ui_check_cmd_run "$@"; then
-        printf "\r$(ui green)$(ui bold)%s       %s$(ui end)"  "√" "$msg"
+        printf "\r$(___x_cmd_ui green)$(___x_cmd_ui bold)%s       %s$(___x_cmd_ui end)"  "√" "$msg"
     else
         local code=$?
-        printf "\r$(ui red)$(ui bold)%s       %s$(ui end)"    "X" "$msg"
+        printf "\r$(___x_cmd_ui red)$(___x_cmd_ui bold)%s       %s$(___x_cmd_ui end)"    "X" "$msg"
         return "$code"
     fi
 }
