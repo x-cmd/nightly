@@ -137,7 +137,7 @@ ___x_cmd_cd_choose(){
     local result
 
     local adir
-    local text="ui sel ,result \"Which to cd into:\""
+    local text="ui select ,result \"Which to cd into:\""
     local IFS="
 "
     while read -r adir; do
