@@ -6,7 +6,7 @@
 
 # Section: main
 
-___ui_table(){
+___x_cmd_ui_table(){
     local O="${O:-___X_CMD_UI_TABLE_DEFAULT}"
     case "${1}" in
         json)       shift; ___ui_table_json      "$@"       ;;
@@ -52,10 +52,10 @@ ___ui_table_out(){
 
     if [ "${-#*i}" != "$-" ]; then
         eval "printf \"%s\" \"\${$O}\"" | \
-            LC_ALL=en_US.UTF-8  awk -v HIGHCOL="${HIGHCOL:-""}" -v HIGHROW="${HIGHROW:-""}" -v out="$out" "$(xrc cat ui/lib/wcwidth.awk)$(xrc cat ui/lib/table.awk)"
+            LC_ALL=en_US.UTF-8  awk -v HIGHCOL="${HIGHCOL:-""}" -v HIGHROW="${HIGHROW:-""}" -v out="$out" "$(xrc cat awk/lib/wcwidth.awk)$(xrc cat ui/lib/table.awk)"
     else
         eval "printf \"%s\" \"\${$O}\"" | \
-            LC_ALL=en_US.UTF-8  awk -v HIGHCOL="${HIGHCOL:-""}" -v HIGHROW="${HIGHROW:-""}"  -v out="$out" "$(xrc cat ui/lib/wcwidth.awk)$(xrc cat ui/lib/table.awk)"
+            LC_ALL=en_US.UTF-8  awk -v HIGHCOL="${HIGHCOL:-""}" -v HIGHROW="${HIGHROW:-""}"  -v out="$out" "$(xrc cat awk/lib/wcwidth.awk)$(xrc cat ui/lib/table.awk)"
     fi
 }
 
@@ -89,14 +89,14 @@ ___ui_table_json(){
     args="${args#,}"
 
     local line
-    ui table -
+    ___x_cmd_ui_table -
     local IFS="
 "
-    eval ui table + "$title"
+    eval ___x_cmd_ui_table + "$title"
     for line in $(x jq -r ".[] | [ $args ] | map( . | @json) | join(\" \") "); do
-        eval ui table + "$line"
+        eval ___x_cmd_ui_table + "$line"
     done
-    ui table out 6
+    ___x_cmd_ui_table out 6
 }
 
 # EndSection
@@ -113,18 +113,17 @@ xrc awk
 # 3. Using instruction to control table
 
 ___X_CMD_UI_TABLE_CONTROL_AWK_PATH="$(x which ui/lib/table.control.awk)"
+___X_CMD_UI_TABLE_CONTROL_AWK_PATH="./table.control.awk"
 
 if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
-___X_CMD_UI_REGION_RS="\n"
-___x_cmd_ui_table_control(){
+___x_cmd_ui_table_control_awk(){
     LC_ALL=en_US.UTF-8 USE=str,wcwidth,ui ___x_cmd_awk file "$___X_CMD_UI_TABLE_CONTROL_AWK_PATH" \
         -v EXIT_OP="$EXIT_OP" -W interactive
 }
 else
-___X_CMD_UI_REGION_RS="$(printf "\001")"
-___x_cmd_ui_table_control(){
+___x_cmd_ui_table_control_awk(){
     LC_ALL=en_US.UTF-8 USE=str,wcwidth,ui ___x_cmd_awk file "$___X_CMD_UI_TABLE_CONTROL_AWK_PATH" \
-        -v EXIT_OP="$EXIT_OP" -v RS="$___X_CMD_UI_REGION_RS"
+        -v EXIT_OP="$EXIT_OP" -v RS="$___X_CMD_UI_REGION_RS" -v ORS="$___X_CMD_UI_REGION_RS"
 }
 fi
 
@@ -133,8 +132,12 @@ ___ui_table_json(){
     :
 }
 
+___x_cmd_ui_table_control_display(){
+    printf "%s" "$___X_CMD_UI_TABLE_DEFAULT"
+}
+
 ___ui_table_out3(){
-    eval "$(___ui_table_out_func 'printf "%s" "$___X_CMD_UI_TABLE_DEFAULT"')"
+    eval "$(___ui_table_out_func ___x_cmd_ui_table_control_display)"
 }
 
 ___ui_table_json_to_table(){
@@ -147,42 +150,50 @@ ___ui_table_json_to_table(){
 }
 
 # DATA
-___ui_table_out_func(){
-    local EXIT_OP=${EXIT_OP:-"ENTER,CREATE,DELETE"}
-    EXIT_OP=",$EXIT_OP,"
+# ___ui_table_out_func(){
+#     stty -echo
+#     {
+#         ___x_cmd_pidofsubshell
 
-    stty -echo
+#         { eval "$@"; } | ___x_cmd_ui_region_send
+
+#         {
+#             while true; do
+#                 printf "VIEW %s %s${___X_CMD_UI_REGION_RS}" "$(ui cols)" "$(ui rows)"
+#                 sleep "${___X_CMD_UI_REFRESH_INTERVAL:-0.2}" || break
+#             done
+#         } &
+
+#         while ___x_cmd_ui_getchar; do
+#             printf "CHAR %s %s${___X_CMD_UI_REGION_RS}" "$___X_CMD_UI_GETCHAR_TYPE" "$___X_CMD_UI_GETCHAR_CHAR"
+#         done
+
+#         # TODO: figure out why
+#         # Notice: Meaningless but important.
+#         # printf "\n"
+#         kill $!
+#     } | (
+#         read -r PID_OF_UPSUBSHELL
+#         ___x_cmd_ui_table_control
+#         kill -SIGPIPE "$PID_OF_UPSUBSHELL"
+#     ) | (
+#         ___x_cmd_ui_region_update_awk
+#     )
+
+#     # tput cvvis
+#     stty echo
+#     printf "\033[34h\033[?25h" >&2
+# }
+
+___x_cmd_ui_table_control(){
     {
-        ___x_cmd_pidofsubshell
+        "$@" | ___x_cmd_ui_region_send_update
+        cat
+    } | ___x_cmd_ui_table_control_awk
+}
 
-        { eval "$@"; } | ___x_cmd_ui_region_send
-
-        {
-            while true; do
-                printf "VIEW %s %s${___X_CMD_UI_REGION_RS}" "$(ui cols)" "$(ui rows)"
-                sleep "${___X_CMD_UI_REFRESH_INTERVAL:-0.2}" || break
-            done
-        } &
-
-        while ___x_cmd_ui_getchar; do
-            printf "CHAR %s %s${___X_CMD_UI_REGION_RS}" "$___X_CMD_UI_GETCHAR_TYPE" "$___X_CMD_UI_GETCHAR_CHAR"
-        done
-
-        # TODO: figure out why
-        # Notice: Meaningless but important.
-        # printf "\n"
-        kill $!
-    } | (
-        read -r PID_OF_UPSUBSHELL
-        ___x_cmd_ui_table_control
-        kill -SIGPIPE "$PID_OF_UPSUBSHELL"
-    ) | (
-        ___x_cmd_ui_region_update_awk
-    )
-
-    # tput cvvis
-    stty echo
-    printf "\033[34h\033[?25h" >&2
+___ui_table_out_func(){
+    ___x_cmd_ui_region_autorefresh_with_keyboard ___x_cmd_ui_table_control
 }
 
 
@@ -190,20 +201,20 @@ ___ui_table_out_func(){
 
 # Section: test1
 
-# ui table -
-# ui table + B%USER               PID  %CPU %MEM      VSZ    RSS   TT  STAT STARTED      TIME COMMAND
-# for i in $(seq 12); do
-#     ui table + edwinjhlee       45694  69.7  3.2 12906080 542124   "??"  R    "三02下午" 2171:02.57 "com.docker.hyperkit -A -u -F vms/0/hyperkit.pid -c 4 -m 8192M -s 0:0,hostbridge -s"
-#     ui table + _windowserver    24773   9.6  0.9  9289004 146772   "??"  Ss   "29 521"  2827:26.66 "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer -daemo"
-#     ui table + edwinjhlee       40627   9.1  0.8  9704844 133228   "??"  Ss   "25 621"  351:58.88 "/Applications/Visual Studio Code.app/Contents/MacOS/Electron /Users/edwinjhlee/x-b"
-#     ui table + edwinjhlee       81250   5.9  1.7 57448804 293384   "??"  S    "2:25下午"  18:21.02 "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Renderer).app1"
-#     ui table + edwinjhlee       81250   5.9  1.7 57448804 293384   "??"  S    "2:25下午"  18:21.02 "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Renderer).app2"
-#     ui table + edwinjhlee       99999   5.9  1.7 57448804 293384   "??"  S    "2:25下午"  18:21.02 "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Renderer).app3"
-# done
-# ui table
+___x_cmd_ui_table -
+___x_cmd_ui_table + B%USER               PID  %CPU %MEM      VSZ    RSS   TT  STAT STARTED      TIME COMMAND
+for i in $(seq 12); do
+    ___x_cmd_ui_table + edwinjhlee       45694  69.7  3.2 12906080 542124   "??"  R    "三02下午" 2171:02.57 "com.docker.hyperkit -A -u -F vms/0/hyperkit.pid -c 4 -m 8192M -s 0:0,hostbridge -s"
+    ___x_cmd_ui_table + _windowserver    24773   9.6  0.9  9289004 146772   "??"  Ss   "29 521"  2827:26.66 "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer -daemo"
+    ___x_cmd_ui_table + edwinjhlee       40627   9.1  0.8  9704844 133228   "??"  Ss   "25 621"  351:58.88 "/Applications/Visual Studio Code.app/Contents/MacOS/Electron /Users/edwinjhlee/x-b"
+    ___x_cmd_ui_table + edwinjhlee       81250   5.9  1.7 57448804 293384   "??"  S    "2:25下午"  18:21.02 "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Renderer).app1"
+    ___x_cmd_ui_table + edwinjhlee       81250   5.9  1.7 57448804 293384   "??"  S    "2:25下午"  18:21.02 "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Renderer).app2"
+    ___x_cmd_ui_table + edwinjhlee       99999   5.9  1.7 57448804 293384   "??"  S    "2:25下午"  18:21.02 "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Renderer).app3"
+done
+___x_cmd_ui_table
 
 # prepare_data(){
-#     ui table jsonfmt .table.abc name age gender math=score.math <<A
+#     ___x_cmd_ui_table jsonfmt .table.abc name age gender math=score.math <<A
 # {
 #     "table": {
 #         "abc": [
@@ -240,7 +251,7 @@ ___ui_table_out_func(){
 # A
 # }
 
-# ui table func prepare_data
+# ___x_cmd_ui_table func prepare_data
 
 # EndSection
 

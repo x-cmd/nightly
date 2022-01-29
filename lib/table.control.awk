@@ -15,7 +15,7 @@ BEGIN {
     max_row_in_page = available_row
 
     start_row = 1
-    
+
     cur_col = 1
     cur_row = 0
 
@@ -31,7 +31,7 @@ BEGIN {
 }
 # EndSection
 
-# Section
+# Section: view
 
 BEGIN {
     BUFFER = ""
@@ -141,9 +141,9 @@ function update_logical_table(  _cord, _elem, row_i, col_i){
 
 function update_logic_view(           logic_row_i, row_i, col_i, start_row){
     start_row = int( (cur_row - 2) / max_row_in_page) * max_row_in_page + 2
-    
+
     buffer_append( sprintf("FILTER: %s" NEWLINE, filter[cur_col]) )
-    
+
     # buffer_append( sprintf("%s %s %s" NEWLINE, counter++, cur_row, cur_col) )
     buffer_append( sprintf("%s     ", UI_TEXT_UNDERLINE UI_TEXT_BOLD) )
     for (col_i=1; col_i<=table_col; col_i++) {
@@ -173,10 +173,9 @@ function update_logic_view(           logic_row_i, row_i, col_i, start_row){
     BUFFER = ""
 }
 
-
 # EndSection
 
-function parse_data(text, 
+function parse_data(text,
     row_i, col_i,
     elem, elem_wlen){
     # gsub(/\033\[([0-9]+;)*[0-9]+m/, "", text)
@@ -185,7 +184,7 @@ function parse_data(text,
     gsub(/[ \t\b\n\v\002\001]+$/, "", text)
 
     table_row = split(text, lines, "\002")
-    
+
     for (row_i = 1; row_i <= table_row; row_i ++) {
         line = lines[row_i]   # Skip the first line
         arr_len = split(line, arr, "\003")
@@ -212,6 +211,8 @@ function parse_data(text,
     update_logical_table()
 }
 
+# Section: utilities
+
 # function send_msg(channel, msg){
 #     # gsub("\n", "\001", msg)
 #     print(channel)
@@ -221,32 +222,30 @@ function parse_data(text,
 
 function send_msg_update(msg){
     # mawk
-    if (RS == "\n") {
+    if (ORS == "\n") {
         # gsub("\n", "\001", msg)
         gsub(/\n/, "\001", msg)
     }
 
-    printf("%s %s %s" RS, "UPDATE", max_col_size, max_row_size)
-    printf("%s" RS, msg)
+    printf("%s %s %s" ORS, "UPDATE", max_col_size, max_row_size)
+    printf("%s" ORS, msg)
 
     fflush()
 }
 
 function send_env(var, value){
     # mawk
-    if (RS == "\n") {
-        # gsub("\n", "\001", msg)
+    if (ORS == "\n") {
         gsub(/\n/, "\001", value)
-        printf("%s %s\n", "ENV", var)
-        printf("%s\n", value)
-    } else{
-        printf("%s %s\001", "ENV", var)
-        printf("%s\001", value)
     }
+
+    printf("%s %s" ORS, "ENV", var)
+    printf("%s" ORS, value)
     # printf("%s %s\001", "ENV", var)
     # printf("%s\001", value)
     fflush()
 }
+# EndSection
 
 # Section: Get data
 
@@ -279,95 +278,107 @@ function exit_with_elegant(command, item){
     exit(0)
 }
 
+# Section: controller
+
+function ctrl_in_filter_state(char_type, char_value){
+    if (char_value == "ENTER") {
+        filter_edit_state = false
+        update_logical_table()
+    } else if (char_type == "ascii-delete") {
+        cur_filter = filter[ cur_col ]
+        filter[ cur_col ] = substr(cur_filter, 1, length(cur_filter) - 1)
+        # trigger filter: invocation cost much...
+    } else {
+        cur_filter = filter[ cur_col ]
+        filter[ cur_col ] = cur_filter char_value
+    }
+}
+
+function ctrl_not_in_filter_state(char_type, char_value){
+    if (char_type == "ascii-space") {
+        filter_edit_state = true
+    } else if (char_value == "ENTER") {
+        exit_with_elegant( "enter" )
+        # filter_edit_state = false
+    } else if (char_value == "c") {
+        # create
+        exit_with_elegant( "create" )
+    } else if (char_value == "r") {
+        # retriev
+        exit_with_elegant( "retrieve" )
+    } else if (char_value == "u") {
+        # update
+        exit_with_elegant( "update" )
+    } else if (char_value == "d") {
+        # delete
+        exit_with_elegant( "delete" )
+    } else if (char_value == "e") {
+        # edit
+        exit_with_elegant( "edit" )
+    } else if (char_value == "f") {
+        # refresh
+        exit_with_elegant( "refresh" )
+    } else if (char_value == "p") {
+        # previous page
+        cur_row = cur_row + max_row_in_page
+        cur_row = ((cur_row - 2) % logic_table_row + 2)
+        # update_logical_table()
+    } else if (char_value == "n") {
+        cur_row = cur_row - max_row_in_page
+        cur_row = ((cur_row - 2) % logic_table_row + 2)
+        cur_row = ((cur_row + logic_table_row - 2) % logic_table_row +2 )
+        # update_logical_table()
+    } else if (char_value == "UP") {
+        cur_row = cur_row - 1
+        if (cur_row <= 1) cur_row = logic_table_row
+        # update_logical_table()
+    } else if (char_value == "DN") {
+        if (cur_row <= 1) {
+            cur_row = 2
+        } else {
+            cur_row = cur_row + 1
+            if (cur_row > logic_table_row) cur_row = 2
+        }
+        # update_logical_table()
+    } else if (char_value == "LEFT" ) {
+        # debug_file("RECV" command)
+        cur_col = cur_col - 1
+        if (cur_col <= 0) cur_col = table_col
+        # update_logical_table()
+    } else if (char_value == "RIGHT") {
+        if (cur_col <= 0) {
+            cur_col = 1
+        } else {
+            cur_col = cur_col + 1
+            if (cur_col > table_col) cur_col = 1
+        }
+        # update_logical_table()
+    }
+}
+
+function ctrl(char_type, char_value) {
+
+    if (filter_edit_state == true) {
+        ctrl_in_filter_state(char_type, char_value)
+    } else {
+        ctrl_not_in_filter_state(char_type, char_value)
+    }
+}
+
+# EndSection
+
 # Section: handle the view
 
 NR>2 {
-
-    command = $1
-    command = str_trim( command )
-
-    if (command == "VIEW") {
-        update_width_height( $2, $3 )
+    if ($0~/^R:/) {
+        split($0, arr, ":")
+        update_width_height(arr[2], arr[3])
         update_logic_view()
-    } else if (command == "CHAR") {
-        char_type = $2
-        char_value = $3
-
-        if (filter_edit_state == true) {
-            if (char_value == "ENTER") {
-                filter_edit_state = false
-                update_logical_table()
-            } else {
-                if (char_type == "ascii-delete") {
-                    cur_filter = filter[ cur_col ]
-                    filter[ cur_col ] = substr(cur_filter, 1, length(cur_filter) - 1)
-                    # trigger filter: invocation cost much...
-                } else {
-                    cur_filter = filter[ cur_col ]
-                    filter[ cur_col ] = cur_filter char_value
-                }
-            }
-        } else {
-            if (char_type == "ascii-space") {
-                filter_edit_state = true
-            } else if (char_value == "ENTER") {
-                exit_with_elegant( "enter" )
-                # filter_edit_state = false
-            } else if (char_value == "c") {
-                # create
-                exit_with_elegant( "create" )
-            } else if (char_value == "r") {
-                # retriev
-                exit_with_elegant( "retrieve" )
-            } else if (char_value == "u") {
-                # update
-                exit_with_elegant( "update" )
-            } else if (char_value == "d") {
-                # delete
-                exit_with_elegant( "delete" )
-            } else if (char_value == "e") {
-                # edit
-                exit_with_elegant( "edit" )
-            } else if (char_value == "f") {
-                # refresh
-                exit_with_elegant( "refresh" )
-            } else if (char_value == "p") {
-                # previous page
-                cur_row = cur_row + max_row_in_page
-                cur_row = ((cur_row - 2) % logic_table_row + 2)
-                # update_logical_table()
-            } else if (char_value == "n") {
-                cur_row = cur_row - max_row_in_page
-                cur_row = ((cur_row - 2) % logic_table_row + 2)
-                cur_row = ((cur_row + logic_table_row - 2) % logic_table_row +2 )
-                # update_logical_table()
-            } else if (char_value == "UP") {
-                cur_row = cur_row - 1
-                if (cur_row <= 1) cur_row = logic_table_row
-                # update_logical_table()
-            } else if (char_value == "DN") {
-                if (cur_row <= 1) {
-                    cur_row = 2
-                } else {
-                    cur_row = cur_row + 1
-                    if (cur_row > logic_table_row) cur_row = 2
-                }
-                # update_logical_table()
-            } else if (char_value == "LEFT" ) {
-                # debug_file("RECV" command)
-                cur_col = cur_col - 1
-                if (cur_col <= 0) cur_col = table_col
-                # update_logical_table()
-            } else if (char_value == "RIGHT") {
-                if (cur_col <= 0) {
-                    cur_col = 1
-                } else {
-                    cur_col = cur_col + 1
-                    if (cur_col > table_col) cur_col = 1
-                }
-                # update_logical_table()
-            }
-        }
+    } else {
+        cmd=$0
+        gsub(/^C:/, "", cmd)
+        idx = index(cmd, ":")
+        ctrl(substr(cmd, 1, idx-1), substr(cmd, idx+1))
     }
 }
 

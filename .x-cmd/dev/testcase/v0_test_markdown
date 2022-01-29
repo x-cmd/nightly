@@ -10,9 +10,9 @@ ___ui_markdown(){
         cat "$@"
     else
         cat
-    # fi | awk -v COLUMNS="$COLUMNS" "$(xrc cat ui/lib/wcwidth.awk)$(cat "$___X_BASH_UI_MARKDOWN_AWK")"
-    fi | awk -v COLUMNS="$COLUMNS" "$(cat ./lib/wcwidth.awk)$(cat "$___X_BASH_UI_MARKDOWN_AWK")"
-    # awk -v COLUMNS="$COLUMNS" "$(xrc cat ui/lib/wcwidth.awk)$(cat "$___X_BASH_UI_MARKDOWN_AWK")"
+    # fi | command awk -v COLUMNS="$COLUMNS" "$(xrc cat awk/lib/wcwidth.awk)$(cat "$___X_BASH_UI_MARKDOWN_AWK")"
+    fi | command awk -v COLUMNS="$COLUMNS" "$(cat ./lib/wcwidth.awk)$(cat "$___X_BASH_UI_MARKDOWN_AWK")"
+    # command awk -v COLUMNS="$COLUMNS" "$(xrc cat awk/lib/wcwidth.awk)$(cat "$___X_BASH_UI_MARKDOWN_AWK")"
 }
 
 test(){
@@ -30,7 +30,7 @@ ___ui_run_gawk(){
         cat "$@"
     else
         cat
-    fi | gawk -v COLUMNS="$COLUMNS" "$(cat ./lib/wcwidth.awk)$(cat "$___X_BASH_UI_MARKDOWN_AWK")"
+    fi | command gawk -v COLUMNS="$COLUMNS" "$(cat ./lib/wcwidth.awk)$(cat "$___X_BASH_UI_MARKDOWN_AWK")"
 }
 ___ui_run_mawk(){
     ui_init_lines_columns
@@ -38,7 +38,7 @@ ___ui_run_mawk(){
         cat "$@"
     else
         cat
-    fi | mawk -v COLUMNS="$COLUMNS" "$(cat ./lib/wcwidth.awk)$(cat "$___X_BASH_UI_MARKDOWN_AWK")"
+    fi | command mawk -v COLUMNS="$COLUMNS" "$(cat ./lib/wcwidth.awk)$(cat "$___X_BASH_UI_MARKDOWN_AWK")"
 }
 ___ui_run_nawk(){
     ui_init_lines_columns
@@ -46,7 +46,7 @@ ___ui_run_nawk(){
         cat "$@"
     else
         cat
-    fi | nawk -v COLUMNS="$COLUMNS" "$(cat ./lib/wcwidth.awk)$(cat "$___X_BASH_UI_MARKDOWN_AWK")"
+    fi | command nawk -v COLUMNS="$COLUMNS" "$(cat ./lib/wcwidth.awk)$(cat "$___X_BASH_UI_MARKDOWN_AWK")"
 }
 
 ___ui_markdown ./testcase/test_all.md

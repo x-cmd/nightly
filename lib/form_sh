@@ -11,8 +11,10 @@ xrc ui/lib/region
 # dict @x_ui_prompt_form put result 1
 
 ___x_cmd_ui_form_draw_sep(){
-    printf "%s\n" "$(seq -f "\xE2\x80\x95" -s '' "$COLUMNS")"
-    # printf "%s\n" "$(seq -f - -s '' "$COLUMNS")"
+    # printf "%s\n" "$(seq -f "\xE2\x80\x95" -s '' "$COLUMNS")"
+    # printf "%s\n" "$(seq -f "\xE2\x80\x95" -s '' "$COLUMNS")"
+    printf "%s\n" "$(seq -f - -s '' "$COLUMNS")"
+    # :
 }
 
 # Section: form draw
@@ -201,28 +203,64 @@ ___x_cmd_ui_form_function(){
     done
 }
 
-___x_cmd_ui_form_awk(){
-    local IFS
-    IFS="$(printf "\001")"
-
-    printf "%s" "$*" | command awk -v RS="$IFS" "$(xrc which ui/lib/form.awk)"
-}
-
 ___x_cmd_ui_form_main(){
-    ___x_cmd_ui_region_run ___x_cmd_ui_form_awk "$@"
+    local q_count=1
+    local arg_count=0
+    local arg
+
+    xrc dict/latest
+    for arg in "$@"; do
+        case "$arg" in
+            --)
+                dict @x_ui_prompt_form put "$q_count" argc "$arg_count"
+                q_count=$((q_count + 1))
+                arg_count=0
+                ;;
+            *)
+                # arg="$(printf "$arg\n" | awk '{
+                #     gsub(/\033\[([0-9]+;)*[0-9]+m/, "", $0)
+                #     print $0
+                # }')"
+
+                arg_count=$((arg_count + 1))
+                dict @x_ui_prompt_form put "$q_count" "$arg_count" "$arg"
+                dict @x_ui_prompt_form put "$q_count" argc "$arg_count"
+        esac
+    done
+
+    local i
+    local j
+    for i in $(seq $q_count); do
+        local default
+        default="$( dict @x_ui_prompt_form get "$i" "3" )"
+        if [ "$( dict @x_ui_prompt_form get "$i" "4" )" = = ]; then
+            local answer=1
+            for j in $(seq 5 "$(dict @x_ui_prompt_form get "$i" "argc")"); do
+                if [ "$default" = "$( dict @x_ui_prompt_form get "$i" "$j" )" ]; then
+                    answer=$(( j - 4 ))
+                    break
+                fi
+            done
+            dict @x_ui_prompt_form put "$i" answer "$answer"
+        else
+            dict @x_ui_prompt_form put "$i" answer "$default"
+        fi
+    done
+
+    ___x_cmd_ui_region_autorefresh_with_keyboard ___x_cmd_ui_form_function
 }
 
 ___x_cmd_ui_form(){
-    eval "$(___x_cmd_ui_form_main "$@")"
+    ___x_cmd_ui_form_main "$@"
 }
 
 # ___x_cmd_ui_form \
-#     "Accesstype" atype public                   = private public -- \
-#     "RepoName" repo ""                          =~ "abc1[0-9]+"   -- \
-#     "Username" user ""                          =~ "12[0-9]+" -- \
+#     "Accesstype" atype public                   "=" private public -- \
+#     "RepoName" repo ""                          "=~" "abc1[0-9]+"   -- \
+#     "Username" user ""                          "=~" "12[0-9]+" -- \
 #     "Test multiple line argument"               mul_line_arg ""  -- \
-#     "Provide repo name" repo ""                 =~ "abc" "cde" "def" -- \
-#     "Provide two repo name" repo2_1_1 ""        = "abc" "cde" "def" -- \
-#     "Provide two repo name" repo2_1_2 ""        = "cde"
+#     "Provide repo name" repo ""                 "=~" "abc" "cde" "def" -- \
+#     "Provide two repo name" repo2_1_1 ""        "=" "abc" "cde" "def" -- \
+#     "Provide two repo name" repo2_1_2 ""        "=" "cde"
 
 # EndSection

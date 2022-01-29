@@ -1,6 +1,6 @@
 BEGIN{
     line_count = 0
-    
+
     printf(UI_CURSOR_SAVE) > "/dev/stderr"
     printf(UI_CURSOR_HIDE) > "/dev/stderr"
 }
@@ -13,7 +13,7 @@ function ui_cursor_godown_n_line(n){
     return "\033[" n "B"
 }
 
-function cal_empty_line(line_count, width, 
+function cal_empty_line(line_count, width,
     i, ret){
 
     ret = ""
@@ -30,11 +30,11 @@ BEGIN{
     UI_LINEWRAP_DISABLE="\033[?7l"
     UI_LINEWRAP_ENABLE="\033[?7h"
 }
-function output(text, 
+function output(text,
     line_arr, line_arr_len, return_text, i, blank_line){
-    
+
     return_text = "" UI_LINEWRAP_DISABLE
-    
+
 
     line_arr_len = split(text, line_arr, "\n")
     OUTPUT_LINE_COUNT = 0
@@ -67,14 +67,14 @@ function update(text){
     LAST_OUTPUT_LINE_COUNT = OUTPUT_LINE_COUNT
 
     last_output_test = output_text
-    
+
     output_text = output(text, width)
 
     printf(UI_CURSOR_RESTORE) > "/dev/stderr"
     # printf(UI_CURSOR_SAVE)
 
     if (LAST_OUTPUT_LINE_COUNT < OUTPUT_LINE_COUNT) {
-        # printf( "%s", 
+        # printf( "%s",
         #     last_output_test cal_empty_line(OUTPUT_LINE_COUNT - LAST_OUTPUT_LINE_COUNT, width) )
         printf( "%s", str_rep("\n", OUTPUT_LINE_COUNT)) > "/dev/stderr"
         printf("\033[" (OUTPUT_LINE_COUNT ) "A") > "/dev/stderr"
@@ -104,13 +104,13 @@ function env_code(VAR, text){
     time = time + gsub(/\\/, "\\\\", text)
     time = time + gsub(/"/, "\\\"", text)
     time = time + gsub("\n", "\\n", text)
-    # print "time:" time >> "aaa" 
+    # print "time:" time >> "aaa"
     # if (time == 0) {
     #     printf("%s", VAR "=\"" text "\"; ")
     # } else {
     #     printf("%s", VAR "=\"$(printf \"" text "\")\"; ")
     # }
-    printf("%s", VAR "=\"$(printf \"" text "\")\"; ") 
+    printf("%s", VAR "=\"$(printf \"" text "\")\"; ")
 }
 
 BEGIN {
@@ -136,10 +136,13 @@ function update_width_height(w, h) {
         op1 = $2
     } else if (op == "UPDATE") {
         op = ""
-        if (RS == "\n") {
-            gsub("\001", "\n", $0)
+        if (last_update != $0) {
+            last_update = $0
+            if (RS == "\n") {
+                gsub("\001", "\n", $0)
+            }
+            update($0)
         }
-        update($0)
     } else if (op == "ENV") {
         env_code(op1, $0)
         op=""
@@ -149,7 +152,7 @@ function update_width_height(w, h) {
         print $0
     } else if ($1 == "SIZE") {
         update_width_height($2, $3)
-    } else {   
+    } else {
         op = $1
         op2 = $2
     }

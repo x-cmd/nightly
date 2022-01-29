@@ -30,9 +30,8 @@ ___x_cmd_ui(){
         md|markdown)                                                ___x_cmd_ui_markdown "$@" ;;
         spin)                                                       ___x_cmd_ui_spin "$@" ;;
         sep)                                                        ___x_cmd_ui_sep "$@" ;;
-        sep1)                                                       ___x_cmd_ui_sep1 "$@" ;;
-        sep2)                                                       ___x_cmd_ui_sep2 "$@" ;;
-        sep3)                                                       ___x_cmd_ui_sep3 "$@" ;;
+        sep2)                                                       ___x_cmd_ui_sep2 "${1:--}" $(( $(___x_cmd_ui cols) / 2 )) ;;
+        sep3)                                                       ___x_cmd_ui_sep3 "${1:--}" $(( $(___x_cmd_ui cols) / 3 )) ;;
 
         cols)                                                       printf "%s" "$COLUMNS" ;;
         rows)                                                       printf "%s" "$LINES" ;;
@@ -210,29 +209,14 @@ ___x_cmd_ui_draw_seperator(){
     printf "$sep\n"
 }
 
-# TODO: Seq is an external command.
 ___x_cmd_ui_sep(){
+    local maxw="${2:?$COLUMNS}"
+
+    # TODO: Introducing a much better solution
+    # printf "%s\n" "$(seq -f "\xE2\x80\x95" -s '' "$COLUMNS")"
     local sep
-    local maxw
-    maxw="$(___x_cmd_ui cols)"
     sep="$(seq -f "${1:-—}" -s '' "$maxw")"
     printf "%s\n" "$sep"
-}
-
-___x_cmd_ui_sep2(){
-    local sep
-    local maxw
-    maxw=$(( $(___x_cmd_ui cols) / 2 ))
-    sep="$(seq -f "${1:-—}" -s '' "$maxw")"
-    printf "%s\n"  "$sep"
-}
-
-___x_cmd_ui_sep3(){
-    local sep
-    local maxw
-    maxw=$(( $(___x_cmd_ui cols) / 3 ))
-    sep="$(seq -f "${1:-—}" -s '' "$maxw")"
-    printf "%s\n"  "$sep"
 }
 
 ___x_cmd_ui_spin(){
@@ -257,7 +241,7 @@ ___x_cmd_ui_progressbar(){
 
     if [ -n "$3" ]; then    printf "%s\n" "$3"
     else                    cat;
-    fi | awk -v ch="${1:-\*}" -v other="${2:-" "}" -v maxw="$COLUMNS" '
+    fi | command awk -v ch="${1:-\*}" -v other="${2:-" "}" -v maxw="$COLUMNS" '
 function str_rep(char, number, _i, _s) {
     for (   _i=1; _i<=number; ++_i  ) _s = _s char
     return _s
