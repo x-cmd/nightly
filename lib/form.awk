@@ -261,8 +261,8 @@ NR>1{
     # printf("%s", $0) >"/dev/stderr"
     if ($0~/^R:/) {
         split($0, arr, ":")
-        max_col_size = arr[2]
-        max_row_size = arr[3]
+        max_col_size = arr[3]
+        max_row_size = arr[4]
         view()
     } else {
         cmd=$0

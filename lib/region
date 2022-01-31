@@ -19,6 +19,7 @@ ___x_cmd_ui_region(){
 xrc ui/lib/getchar
 xrc awk
 
+# ___X_CMD_UI_REGION_AWK="./lib/region.awk"
 ___X_CMD_UI_REGION_AWK="$(xrc which ui/lib/region.awk)"
 
 ___x_cmd_ui_region_send(){
@@ -259,7 +260,7 @@ ___x_cmd_ui_region___autorefresh_with_keyboard_mainloop(){
             local ticks=1
             while true; do
                 ticks="$((ticks+1))"
-                printf "R:%s %s %s%s" "$ticks" "$COLUMNS" "$LINES" "$___X_CMD_UI_REGION_RS"
+                printf "R:%s:%s:%s%s" "$ticks" "$COLUMNS" "$LINES" "$___X_CMD_UI_REGION_RS"
                 sleep "${___X_CMD_UI_REFRESH_INTERVAL:-0.1}"
             done
         ) &

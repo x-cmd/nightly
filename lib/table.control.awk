@@ -32,7 +32,6 @@ BEGIN {
 # EndSection
 
 # Section: view
-
 BEGIN {
     BUFFER = ""
 }
@@ -80,43 +79,69 @@ function update_view_print_cell(logic_row_i, row_i, col_i,       h, _size){
 
 BEGIN{
     NEWLINE = "\n"
-    counter = 1
+    UI_KEY="\033[7m"
 }
 
-function update_view(           row_i, col_i, start_row){
-    start_row = int( (cur_row - 2) / max_row_in_page) * max_row_in_page + 2
+function get_help(key, msg) {
+    return UI_KEY key UI_END " " msg "; "
+}
+
+function update_logic_view(           logic_row_i, row_i, col_i, start_row, _row_in_page){
+
+    _row_in_page = max_row_in_page
+
+    _msg = get_help("q", "to quit")
+
+    if (ctrl_help_toggle == true) {
+        _msg = get_help("h", "close help") _msg "\n"
+        _msg = _msg get_help("ARROW UP/DOWN/LEFT/ROW", "to move focus") "\n"
+        _msg = _msg get_help("n/p", "for next/previous page") "\n"
+        _msg = _msg get_help("c/r/u/d", "for create/retrive/update/delete")
+        _row_in_page = _row_in_page - 3
+    } else {
+        _msg = get_help("h", "open  help") _msg
+    }
+
+    buffer_append( _msg "\n\n")
+
+    start_row = int( (cur_row - 2) / _row_in_page) * _row_in_page + 2
 
     buffer_append( sprintf("FILTER: %s" NEWLINE, filter[cur_col]) )
 
-    buffer_append( sprintf("%s %s %s" NEWLINE, counter++, cur_row, cur_col) )
     buffer_append( sprintf("%s     ", UI_TEXT_UNDERLINE UI_TEXT_BOLD) )
     for (col_i=1; col_i<=table_col; col_i++) {
-        # update_view_print_cell( 1, col_i )
-        buffer_append( sprintf( "%s  ", str_pad_right( data[ 1 KSEP col_i ], col_max[ col_i ], data_wlen[ 1 KSEP col_i ] ) ) )
+        # limit the length
+        if (col_max[ col_i ] > available_cols_len) {
+            buffer_append( sprintf( "%s", str_pad_right( data[ 1 KSEP col_i ], available_cols_len + 6, data_wlen[ 1 KSEP col_i ] ) ) )
+        }else{
+            buffer_append( sprintf( "%s  ", str_pad_right( data[ 1 KSEP col_i ], col_max[ col_i ], data_wlen[ 1 KSEP col_i ] ) ) )
+        }
+        # buffer_append( sprintf( "%s  ", str_pad_right( data[ 1 KSEP col_i ], col_max[ col_i ], data_wlen[ 1 KSEP col_i ] ) ) )
     }
     buffer_append( sprintf("%s", UI_END) )
     buffer_append( sprintf( NEWLINE ) )
 
-    for (row_i = start_row; row_i <= start_row + max_row_in_page; row_i ++) {
-        if (row_i > table_row) break
+    for (logic_row_i = start_row; logic_row_i <= start_row + _row_in_page; logic_row_i ++) {
+        if (logic_row_i > logic_table_row) break
+        row_i = logic_table[ logic_row_i ]
         buffer_append( sprintf("%s", str_pad_right(row_i-1, 5)) )
         for (col_i=1; col_i<=table_col; col_i++) {
-            update_view_print_cell( row_i, row_i, col_i )
-            buffer_append( sprintf( "%s", "  " ) )
+            update_view_print_cell( logic_row_i, row_i, col_i )
+            # buffer_append( sprintf( "%s", "  " ) )
         }
         buffer_append( sprintf("%s" NEWLINE, UI_END) )
     }
-    # printf( NEWLINE )
+    buffer_append( sprintf("SELECT: %s" NEWLINE, data[ cur_row KSEP cur_col ]) )
+    # buffer_append( NEWLINE )
 
-    send_msg_update( buffer_clear() )
+    send_update( buffer_clear() )
     BUFFER = ""
 }
 
 # EndSection
 
-# Section: logical table
-
-function update_logical_table(  _cord, _elem, row_i, col_i){
+# Section: logical table reconstruction
+function update_logical_table(  _cord, _elem, row_i, col_i, _ok){
     logic_table[1] = 1
     logic_table_row = 1
     for (row_i = 2; row_i <= table_row; row_i++) {
@@ -138,42 +163,48 @@ function update_logical_table(  _cord, _elem, row_i, col_i){
     }
     cur_row = 2
 }
+# EndSection
 
-function update_logic_view(           logic_row_i, row_i, col_i, start_row){
-    start_row = int( (cur_row - 2) / max_row_in_page) * max_row_in_page + 2
+# Section: utilities
 
-    buffer_append( sprintf("FILTER: %s" NEWLINE, filter[cur_col]) )
-
-    # buffer_append( sprintf("%s %s %s" NEWLINE, counter++, cur_row, cur_col) )
-    buffer_append( sprintf("%s     ", UI_TEXT_UNDERLINE UI_TEXT_BOLD) )
-    for (col_i=1; col_i<=table_col; col_i++) {
-        if (col_max[ col_i ] > available_cols_len) {
-            buffer_append( sprintf( "%s", str_pad_right( data[ 1 KSEP col_i ], available_cols_len + 6, data_wlen[ 1 KSEP col_i ] ) ) )
-        }else{
-            buffer_append( sprintf( "%s  ", str_pad_right( data[ 1 KSEP col_i ], col_max[ col_i ], data_wlen[ 1 KSEP col_i ] ) ) )
-        }
-        # buffer_append( sprintf( "%s  ", str_pad_right( data[ 1 KSEP col_i ], col_max[ col_i ], data_wlen[ 1 KSEP col_i ] ) ) )
+function send_update(msg){
+    # mawk
+    if (ORS == "\n") {
+        # gsub("\n", "\001", msg)
+        gsub(/\n/, "\001", msg)
     }
-    buffer_append( sprintf("%s", UI_END) )
-    buffer_append( sprintf( NEWLINE ) )
-    for (logic_row_i = start_row; logic_row_i <= start_row + max_row_in_page; logic_row_i ++) {
-        if (logic_row_i > logic_table_row) break
-        row_i = logic_table[ logic_row_i ]
-        buffer_append( sprintf("%s", str_pad_right(row_i-1, 5)) )
-        for (col_i=1; col_i<=table_col; col_i++) {
-            update_view_print_cell( logic_row_i, row_i, col_i )
-            # buffer_append( sprintf( "%s", "  " ) )
-        }
-        buffer_append( sprintf("%s" NEWLINE, UI_END) )
-    }
-    buffer_append( sprintf("SELECT: %s" NEWLINE, data[ cur_row KSEP cur_col ]) )
-    # printf( NEWLINE )
 
-    send_msg_update( buffer_clear() )
-    BUFFER = ""
+    printf("%s %s %s" ORS, "UPDATE", max_col_size, max_row_size)
+    printf("%s" ORS, msg)
+
+    fflush()
 }
 
+function send_env(var, value){
+    # mawk
+    if (ORS == "\n") {
+        gsub(/\n/, "\001", value)
+    }
+
+    printf("%s %s" ORS, "ENV", var)
+    printf("%s" ORS, value)
+    # printf("%s %s\001", "ENV", var)
+    # printf("%s\001", value)
+    fflush()
+}
 # EndSection
+
+# Section: Get data
+function update_width_height(width, height) {
+    max_row_size = height
+    max_col_size = width
+    # TODO: if row less than 10 rows, we should exit.
+    max_row_in_page = max_row_size - 10
+}
+
+NR==1 {
+    update_width_height( $2, $3 )
+}
 
 function parse_data(text,
     row_i, col_i,
@@ -211,55 +242,6 @@ function parse_data(text,
     update_logical_table()
 }
 
-# Section: utilities
-
-# function send_msg(channel, msg){
-#     # gsub("\n", "\001", msg)
-#     print(channel)
-#     print(msg)
-#     fflush()
-# }
-
-function send_msg_update(msg){
-    # mawk
-    if (ORS == "\n") {
-        # gsub("\n", "\001", msg)
-        gsub(/\n/, "\001", msg)
-    }
-
-    printf("%s %s %s" ORS, "UPDATE", max_col_size, max_row_size)
-    printf("%s" ORS, msg)
-
-    fflush()
-}
-
-function send_env(var, value){
-    # mawk
-    if (ORS == "\n") {
-        gsub(/\n/, "\001", value)
-    }
-
-    printf("%s %s" ORS, "ENV", var)
-    printf("%s" ORS, value)
-    # printf("%s %s\001", "ENV", var)
-    # printf("%s\001", value)
-    fflush()
-}
-# EndSection
-
-# Section: Get data
-
-function update_width_height(width, height) {
-    max_row_size = height
-    max_col_size = width
-    # TODO: if row less than 10 rows, we should exit.
-    max_row_in_page = max_row_size - 10
-}
-
-NR==1 {
-    update_width_height( $2, $3 )
-}
-
 NR==2 {
     parse_data($0)
     # update_view()
@@ -267,9 +249,11 @@ NR==2 {
 
 # EndSection
 
+# Section: ctrl
 BEGIN {
     final_command = ""
-    filter_edit_state = false
+    ctrl_filter_edit_state = false
+    ctrl_help_toggle = false
     # filter
 }
 
@@ -278,11 +262,9 @@ function exit_with_elegant(command, item){
     exit(0)
 }
 
-# Section: controller
-
 function ctrl_in_filter_state(char_type, char_value){
     if (char_value == "ENTER") {
-        filter_edit_state = false
+        ctrl_filter_edit_state = false
         update_logical_table()
     } else if (char_type == "ascii-delete") {
         cur_filter = filter[ cur_col ]
@@ -296,15 +278,17 @@ function ctrl_in_filter_state(char_type, char_value){
 
 function ctrl_not_in_filter_state(char_type, char_value){
     if (char_type == "ascii-space") {
-        filter_edit_state = true
+        ctrl_filter_edit_state = true
     } else if (char_value == "ENTER") {
         exit_with_elegant( "enter" )
-        # filter_edit_state = false
+        # ctrl_filter_edit_state = false
+    } else if (char_value == "h") {
+        ctrl_help_toggle = 1 - ctrl_help_toggle
+    } else if (char_value == "q") {
+        exit_with_elegant( "quit" )
     } else if (char_value == "c") {
-        # create
         exit_with_elegant( "create" )
     } else if (char_value == "r") {
-        # retriev
         exit_with_elegant( "retrieve" )
     } else if (char_value == "u") {
         # update
@@ -318,12 +302,12 @@ function ctrl_not_in_filter_state(char_type, char_value){
     } else if (char_value == "f") {
         # refresh
         exit_with_elegant( "refresh" )
-    } else if (char_value == "p") {
+    } else if (char_value == "n") {
         # previous page
         cur_row = cur_row + max_row_in_page
         cur_row = ((cur_row - 2) % logic_table_row + 2)
         # update_logical_table()
-    } else if (char_value == "n") {
+    } else if (char_value == "p") {
         cur_row = cur_row - max_row_in_page
         cur_row = ((cur_row - 2) % logic_table_row + 2)
         cur_row = ((cur_row + logic_table_row - 2) % logic_table_row +2 )
@@ -357,8 +341,7 @@ function ctrl_not_in_filter_state(char_type, char_value){
 }
 
 function ctrl(char_type, char_value) {
-
-    if (filter_edit_state == true) {
+    if (ctrl_filter_edit_state == true) {
         ctrl_in_filter_state(char_type, char_value)
     } else {
         ctrl_not_in_filter_state(char_type, char_value)
@@ -367,12 +350,11 @@ function ctrl(char_type, char_value) {
 
 # EndSection
 
-# Section: handle the view
-
+# Section: MSG Flow And End
 NR>2 {
     if ($0~/^R:/) {
         split($0, arr, ":")
-        update_width_height(arr[2], arr[3])
+        update_width_height(arr[3], arr[4])
         update_logic_view()
     } else {
         cmd=$0
@@ -390,5 +372,4 @@ END {
         send_env("___X_CMD_UI_TABLE_CUR_LINE", lines[cur_row])
     }
 }
-
 # EndSection
