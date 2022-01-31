@@ -16,14 +16,21 @@ ___x_cmd_awk_lib(){
     done | tr "\n" " "
 }
 
-___X_CMD_AWK_ALL_LIB="bit,math,ord,char,str,wcwidth,arr,ui"
+___X_CMD_AWK_ALL_LIB="bit,math,ord,char,str,wcwidth,arr,ui,json,jiter,jiter_flat"
+___X_CMD_AWK_IMPLEMENTATION=
 
-___x_cmd_awk_impl(){
+___x_cmd_awk_detect_implemetation(){
     if awk -Wv 2>&1 | grep -q "mawk"; then
-        printf "%s\n" "mawk"
+        ___X_CMD_AWK_IMPLEMENTATION=mawk
         return
     fi
-    printf "%s\n" "awk"
+    ___X_CMD_AWK_IMPLEMENTATION=awk
+}
+___x_cmd_awk_impl(){
+    if [ -z "$___X_CMD_AWK_IMPLEMENTATION" ]; then
+        ___x_cmd_awk_detect_implemetation
+    fi
+    printf "%s\n" "$___X_CMD_AWK_IMPLEMENTATION"
 }
 
 ___x_cmd_awk(){
