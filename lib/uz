@@ -20,7 +20,6 @@ ___x_cmd_zuz_uz(){
     mkdir -p "$dest_folder"
     cd "$dest_folder" || return 1
 
-
     if [ "$#" -gt 0 ]; then
         ___x_cmd_zuz_uz_and_files "$@"
     else
@@ -28,8 +27,8 @@ ___x_cmd_zuz_uz(){
     fi
 
     local exit_code="$?"
-    if [ "$exit_code" = 0 ];then
-        [ -n "$ZUZ_DELETE_AFTER" ] && rm "$target_file"
+    if [ -n "$ZUZ_DELETE_AFTER" ];then
+        [ "$exit_code" = 0 ] && rm "$target_file"
     else
         return $exit_code
     fi
@@ -49,6 +48,9 @@ ___x_cmd_zuz_uz_whole_file(){
         *.bz2)
             ___x_cmd_zuz_run tar xjvf "$target_file"
             ;;
+        *.tar.xz)
+            ___x_cmd_zuz_run tar xvf "$target_file"
+            ;;
         *.bz2.*)
             cat "${target_file%.*}".* | tar xjvf
             ;;
@@ -65,8 +67,7 @@ ___x_cmd_zuz_uz_whole_file(){
             ___x_cmd_zuz_run gunzip -k -d "$target_file"
             ;;
         *.xz)
-            # TODO: Figure it out
-            ___x_cmd_zuz_run xz -d "$target_file"
+            ___x_cmd_zuz_run xz -k -d "$target_file"
             ;;
         *.zip)
             ___x_cmd_zuz_run x 7z e "$target_file"
