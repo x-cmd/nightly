@@ -1,6 +1,6 @@
 
-___X_CMD_JSON_AWK_SRC="$(xrc cat awk/_v0/json.awk)"
-___X_CMD_JSON_AWK_SRC="$(xrc cat awk/_v0/default.awk)
+___X_CMD_JSON_AWK_SRC="$(xrc cat awk/lib/json.awk)"
+___X_CMD_JSON_AWK_SRC="$(xrc cat awk/lib/default.awk)
 $___X_CMD_JSON_AWK_SRC
 "
 

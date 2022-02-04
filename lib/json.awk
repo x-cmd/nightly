@@ -295,6 +295,7 @@ function ___json_parse_walk_dict(arr, keypath,
     }
     arr[ keypath T_LEN ] = nth - 1  # starts from 1
     arr[ keypath T_KEY ] = _klist
+    # TODO: arr[ keypath T_KEY ] = _klist (nth-1)
     return true
 }
 
@@ -394,6 +395,7 @@ function json_to_machine_friendly(text){
 function json_dict_keys(arr, keypath, klist, _l){
     _l = split(arr[ keypath T_KEY ], klist, S)
     klist[ L ] = _l
+    # TODO: klist[ L ] = _l-1
     return _l
 }
 
@@ -413,6 +415,7 @@ function json_dict_push(arr, keypath, key, value,  _v){
     } else {
         arr[ keypath T_LEN ] = arr[ keypath T_LEN ] + 1
         arr[ keypath T_KEY ] = arr[ keypath T_KEY ] S key
+        # TODO: arr[ keypath T_KEY ] = arr[ keypath T_KEY ] key S
         arr[keypath S key] = value
     }
     return _v

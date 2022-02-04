@@ -1,8 +1,8 @@
 # shellcheck shell=bash disable=SC3043
 x log init awk
 
-mkdir -p ~/.x-cmd/awk/_v0
-cp -rf _v0/*.awk ~/.x-cmd/awk/_v0/
+mkdir -p ~/.x-cmd/awk/lib
+cp -rf _v0/*.awk ~/.x-cmd/awk/lib/
 cp -rf latest ~/.x-cmd/awk/
 
 # Section: Testcase for different awk

@@ -58,6 +58,8 @@ function jiter( obj, item ){
         JITER_CURLEN = 0
 
         obj[ JITER_FA_KEYPATH ] = T_LIST
+        # TODO: consider it. so we can distinguish ...
+        # obj[ JITER_FA_KEYPATH T_KEY ] = \001
 
         JITER_STACK[ ++JITER_LEVEL ] = JITER_FA_KEYPATH
     } else if (item ~ /^\]$/) {
@@ -262,3 +264,44 @@ function jiter_print_exact( obj, item, key ){
     }
 }
 # EndSection
+
+# Section: jiter_str: list and dict
+
+function jiter_str_list_begin(){
+    JITER_STR_LIST_LEN = 0
+}
+
+function jiter_str_list_add(value){
+    if (JITER_STR_LIST_LEN == 1) {
+        print ",\n" value
+    } else {
+        JITER_STR_LIST_LEN = 1
+        print "["
+        print value
+    }
+}
+
+function jiter_str_list_end(){
+    print "\n]"
+}
+
+
+function jiter_str_dict_begin(){
+    JITER_STR_LIST_LEN = 0
+}
+
+function jiter_str_list_add(key, value){
+    if (JITER_STR_LIST_LEN == 1) {
+        print ",\n" key "\n,\n" value
+    } else {
+        JITER_STR_LIST_LEN = 1
+        print "{\n" key "\n,\n" value
+    }
+}
+
+function jiter_str_dict_end(){
+    print "\n}"
+}
+
+# EndSection
+
