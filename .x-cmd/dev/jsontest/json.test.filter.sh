@@ -20,7 +20,7 @@ f1(){
     END{
         # print json_stringify_format(_, ".", 4)
 
-        print json_filter(_, "1", ".name", "v1.0.2")
+        print jfilter(_, "1", ".name", "v1.0.2")
     }
     '
 }

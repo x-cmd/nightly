@@ -1,11 +1,27 @@
 
-
+# Section: jiter after tokenized
 function jiter_after_tokenize(jobj, text,       _arr, _arrl, _i){
     _arrl = split( json_to_machine_friendly(text), _arr, "\n" )
     for (_i=1; _i<=_arrl; ++_i) {
         jiter( jobj, _arr[_i] )
     }
 }
+
+function jiter_after_tokenize_(jobj, text) {
+    jiter_after_tokenize(_, text)
+}
+# EndSection
+
+# Section: jiter_
+function init_jiter_(){
+    init_jiter()
+}
+
+function jiter_( item ){
+    # efficiency defect 1%
+    jiter( _, item )
+}
+# EndSection
 
 # Section: jiter
 BEGIN{
@@ -96,26 +112,6 @@ function jiter( obj, item ){
         JITER_STATE = obj[ JITER_FA_KEYPATH ]
         JITER_CURLEN = obj[ JITER_FA_KEYPATH T_LEN ]
     }
-}
-
-# EndSection
-
-# Section: jiter_
-
-function init_jiter_(){
-    JITER_FA_KEYPATH = ""
-    JITER_STATE = T_ROOT
-    JITER_LAST_KP = ""
-    JITER_LEVEL = 1
-    JITER_STACK[ 1 ] = ""
-    JITER_CURLEN = 0
-
-    JITER_LAST_KL = ""
-}
-
-function jiter_( item ){
-    # efficiency defect 1%
-    jiter( _, item )
 }
 
 # EndSection
@@ -263,45 +259,5 @@ function jiter_print_exact( obj, item, key ){
         JITER_CURLEN = obj[ JITER_FA_KEYPATH T_LEN ]
     }
 }
-# EndSection
-
-# Section: jiter_str: list and dict
-
-function jiter_str_list_begin(){
-    JITER_STR_LIST_LEN = 0
-}
-
-function jiter_str_list_add(value){
-    if (JITER_STR_LIST_LEN == 1) {
-        print ",\n" value
-    } else {
-        JITER_STR_LIST_LEN = 1
-        print "["
-        print value
-    }
-}
-
-function jiter_str_list_end(){
-    print "\n]"
-}
-
-
-function jiter_str_dict_begin(){
-    JITER_STR_LIST_LEN = 0
-}
-
-function jiter_str_list_add(key, value){
-    if (JITER_STR_LIST_LEN == 1) {
-        print ",\n" key "\n,\n" value
-    } else {
-        JITER_STR_LIST_LEN = 1
-        print "{\n" key "\n,\n" value
-    }
-}
-
-function jiter_str_dict_end(){
-    print "\n}"
-}
-
 # EndSection
 

@@ -15,9 +15,9 @@ json_join(){
 }
 
 END{
-    # print json_handle_jpath("1.1.a")
+    # print jpath("1.1.a")
     # print jget(jobj, "1.1.c")
-    # print json_handle_jpath("1")
+    # print jpath("1")
     # print jjoin(jobj, "1", "::-1", "\n", "a\001c\001b", "\t")
     # print jjoin(jobj, "1", "4:1", "\n", "a\001c\001b", "\t")
     # print jjoin(jobj, "1", "4:1:-2", "\n", "a\001c\001b", "\t")

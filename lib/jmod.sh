@@ -9,7 +9,7 @@ SSS="$(cat default.awk)$(cat json.awk jiter.awk)"
 f1(){
     awk -v key="$1" "$SSS"'
     {
-        jiter_print_exact(_, $0, json_handle_jpath( key ) )
+        jiter_print_exact(_, $0, jpath( key ) )
     }
     '
 }

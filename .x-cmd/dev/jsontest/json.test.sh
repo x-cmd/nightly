@@ -19,9 +19,9 @@ awk -v RS="\t" "$SSS"'
 END{
     json_parse(data, arr)
     json_dict_push(arr, S "\"" 1 "\"" S "\"" 2 "\"","\"d\"",9)
-    json_list_push(arr, json_handle_jpath("1.2.b"),9)
+    json_list_push(arr, jpath("1.2.b"),9)
     # print( jkey(1, "b", 6) )
-    # print ( json_handle_jpath(".b.1"))
+    # print ( jpath(".b.1"))
     # print("---"  arr[ jkey(1, "b", 6) ])
 
 

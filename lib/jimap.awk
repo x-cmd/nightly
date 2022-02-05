@@ -9,7 +9,7 @@ BEGIN{
     JITER_STACK[ 1 ] = ""   # keypath
 }
 
-function init_jiter_capture(){
+function init_jimap(){
     JITER_FA_KEYPATH = ""
     JITER_STATE = T_ROOT
     JITER_LAST_KP = ""
@@ -20,7 +20,7 @@ function init_jiter_capture(){
     JITER_LAST_KL = ""
 }
 
-function jiter_capture( obj, item ){
+function jimap( obj, item ){
 
     if (item ~ /^[,:]*$/) {
         return
@@ -94,16 +94,16 @@ function jiter_capture( obj, item ){
 
 
 BEGIN{
-    jiter_capture_setup( json_kp("work", 1, "handle", "a") )
+    jimap_setup( json_kp("work", 1, "handle", "a") )
 }
 
 {
-    if ( jiter_capture( token, json_kp("work", 1, "handle", "a") ) ){
+    if ( jimap( token, json_kp("work", 1, "handle", "a") ) ){
         return
     }
 
-    jiter_capture_get("a" KSEP "b")
-    jiter_capture_get_raw("a" KSEP "b")
+    jimap_get("a" KSEP "b")
+    jimap_get_raw("a" KSEP "b")
 
 }
 

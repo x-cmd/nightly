@@ -5,7 +5,7 @@ BEGIN{
 }
 
 {
-    if (jiter_capture_exect(token, json_kp("work", 1, "handle", "a"))){
+    if (jimod(token, json_kp("work", 1, "handle", "a"))){
         return
     }
 
