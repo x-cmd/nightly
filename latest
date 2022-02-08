@@ -3,22 +3,52 @@
 # author:       Li Junhao           l@x-cmd.com
 # license:      GPLv3
 
+xrc static-build/lib/staticbin os
+
+___x_cmd_pandoc(){
+    ___x_cmd_staticbin_init \
+        ___x_cmd_pandoc \
+        "$___X_CMD_ROOT/.bin/pandoc" \
+        pandoc \
+        "$(___x_cmd_pandoc_bin_download_url)" \
+        && ___x_cmd_pandoc "$@"
+}
+
+# Section: detail
+
 #  https://github.com/jgm/pandoc/releases/download/2.17.0.1/pandoc-2.17.0.1-macOS.zip
 #  https://github.com.cnpmjs.org/jgm/pandoc/releases/download/2.17.0.1/pandoc-2.17.0.1-macOS.zip
 #  TODO: provide gitcode
 
-___x_cmd_pandoc(){
-    while [ $# -gt 0 ]; do
-        case "$1" in
-            htt*)       x curl "$1"     ;;
-            # TODO: add resource for x path
-            *)          cat "$1"        ;;
-            # If json, use json color
-            # If source file, use language parser
-        esac
+___x_cmd_pandoc_bin_download_url(){
+    local sys
+    sys="$(os rname)-$(os arch)"
+    local p
+    case "$sys" in
+        Darwin-*)
+            p="2.17.0.1/pandoc-2.17.0.1-macOS.zip"
+            ;;
+        win-*)
+            p="2.17.0.1/pandoc-2.17.1.1-windows-x86_64.zip"
+            ;;
+        linux-amd64)
+            p="2.17.0.1/pandoc-2.17.1.1-linux-amd64.tar.gz"
+            ;;
+        linux-arm64)
+            p="2.17.0.1/pandoc-2.17.1.1-linux-arm64.tar.gz"
+            ;;
+        *)
+            printf "System Not Supported: %s\n" "$sys" >&2
+            return 1
+    esac
 
-        shift
-    done
+    if [ -z "$___X_CMD_WHICHNET" ]; then
+        printf "%s/%s" "https://github.com/jgm/pandoc/releases/download" "$p"
+    else
+        printf "%s/%s" "https://github.com.cnpmjs.org/jgm/pandoc/releases/download" "$p"
+    fi
 }
+
+# EndSection
 
 xrc setmain ___x_cmd_pandoc
