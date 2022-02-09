@@ -12,10 +12,7 @@ ___x_cmd_shall(){
 
 # Section: try
 ___x_cmd_shall_try(){
-    param:void
-
     local SHELL
-
     if [ "$#" -eq 0 ]; then
 
         cat >&2 <<A
