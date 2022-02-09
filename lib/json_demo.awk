@@ -11,13 +11,13 @@ function json_get_dict_value(obj, keypath,     _arr, i, _key){
     }
 }
 
-function json_get_list_value(obj, keypath, key,     _arr, i){
-    l = jlist_len(obj, keypath)
-    for (i=1; i<=l; ++i) {
-        # val = jlist_get(keypath S i)
-        val = jstr(obj, keypath S i)
-    }
-}
+# function json_get_list_value(obj, keypath, key,     _arr, i){
+#     l = jlist_len(obj, keypath)
+#     for (i=1; i<=l; ++i) {
+#         # val = jlist_get(keypath S i)
+#         val = jstr(obj, keypath S i)
+#     }
+# }
 
 
 # Section: return json list's key value

@@ -5,7 +5,7 @@ xrc awk
 # awk -v data='abc
 # ' 'END { print data; }' <<< ""
 
-SSS="$(cat default.awk)$(cat json.awk jiter.awk)"
+SSS="$(cat default.awk)$(cat json.awk jparse.awk jiparse.awk jdict.awk jlist.awk)"
 
 
 f(){
@@ -17,12 +17,14 @@ awk -v RS="\t" "$SSS"'
 }
 
 END{
-    json_parse(data, arr)
-    json_dict_push(arr, S "\"" 1 "\"" S "\"" 2 "\"","\"d\"",9)
-    json_list_push(arr, jpath("1.2.b"),9)
-    # print( jkey(1, "b", 6) )
-    # print ( jpath(".b.1"))
-    # print("---"  arr[ jkey(1, "b", 6) ])
+    jparse(data, arr)
+    jdict_push(arr, S "\"" 1 "\"" S "\"" 2 "\"","\"d\"",9)
+    jdict_rm(arr, jpath("1.2"), q("a"))
+    jlist_push(arr, jpath("1.2.b"),9)
+    jlist_rm(arr, jpath("1.2.b"), 6)
+    print( jkey(1, "b", 6) )
+    print ( jpath(".b.1"))
+    print("--- "  arr[ jpath("1.2.b.6") ])
 
 
     print json_stringify_format(arr, ".", 6)

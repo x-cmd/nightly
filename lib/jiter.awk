@@ -1,29 +1,4 @@
-
-# Section: jiter after tokenized
-function jiter_after_tokenize(jobj, text,       _arr, _arrl, _i){
-    _arrl = split( json_to_machine_friendly(text), _arr, "\n" )
-    for (_i=1; _i<=_arrl; ++_i) {
-        jiter( jobj, _arr[_i] )
-    }
-}
-
-function jiter_after_tokenize_(jobj, text) {
-    jiter_after_tokenize(_, text)
-}
-# EndSection
-
-# Section: jiter_
-function init_jiter_(){
-    init_jiter()
-}
-
-function jiter_( item ){
-    # efficiency defect 1%
-    jiter( _, item )
-}
-# EndSection
-
-# Section: jiter
+# Section: jiparse
 BEGIN{
     JITER_LEVEL = 1
     JITER_STACK[ 1 ] = ""   # keypath
@@ -38,34 +13,157 @@ function init_jiter(){
     JITER_CURLEN = 0
 
     JITER_LAST_KL = ""
+
+    # JTAR = JITER_TARGET
+    JTAR_FA_KEYPATH = ""
+    JTAR_STATE = T_ROOT
+    JTAR_LAST_KP = ""
+    JTAR_LEVEL = 0
+    JTAR_CURLEN = 0
+
+    JTAR_LAST_KL = ""
+
 }
 
-function jiter( obj, item ){
+# Section: target parser
 
+# example code
+function jiter_target_eq( obj, item, jpath,     _ret ){
+    if ( JTAR_LEVEL == 0 ) {
+        _ret = jiter( item, JITER_STACK )
+        # print "jiter \t " item "\t|" _ret "|\t|" jpath "|"
+        if ( _ret == "" ) return false
+        if ( _ret != jpath) return false
+    }
+    ___jiter_target_parse( obj, item )
+    if (JTAR_LEVEL == 0) return true
+    return false
+}
+
+function jiter_target_eq_( item, keypath_regex ){
+    return jiter_target_eq( _, item, keypath_regex)
+}
+
+function jiter_target_rmatch( obj, item, keypath_regex ){
+
+    if ( JTAR_LEVEL == 0 ) {
+        _ret = jiter( item, JITER_STACK )
+        if ( _ret == "" ) return false
+        match( _ret, keypath_regex )
+        if ( RLENGTH <= 0 ) return false
+    }
+
+    ___jiter_target_parse( obj, item )
+    if (JTAR_LEVEL == 0) return true
+    return false
+}
+
+function jiter_target_rmatch_( item, keypath_regex ){
+    return jiter_target_rmatch( _, item, keypath_regex)
+}
+
+function ___jiter_target_parse( obj, item ){
     if (item ~ /^[,:]*$/) {
         return
-    } else if (item ~ /^[tfn"0-9+-]/) { #"
+    }
+
+    if (item ~ /^[tfn"0-9+-]/) #"
     # } else if (item !~ /^[\{\}\[\]]$/) {
-        JITER_CURLEN = JITER_CURLEN + 1
-        if ( JITER_STATE != T_DICT ) {
-            obj[ JITER_FA_KEYPATH S "\"" JITER_CURLEN "\"" ] = item
+    {
+        JTAR_CURLEN = JTAR_CURLEN + 1
+        if ( JTAR_STATE != T_DICT ) {
+            obj[ JTAR_FA_KEYPATH S "\"" JTAR_CURLEN "\"" ] = item
         } else {
+            if ( JTAR_LAST_KP != "" ) {
+                JTAR_CURLEN = JTAR_CURLEN - 1
+                obj[ JTAR_FA_KEYPATH S JTAR_LAST_KP ] = item
+                JTAR_LAST_KP = ""
+            } else {
+                JTAR_LAST_KP = item
+                obj[ JTAR_FA_KEYPATH T_KEY ] = obj[ JTAR_FA_KEYPATH T_KEY ] S item
+            }
+        }
+    } else if (item ~ /^\[$/) {
+        if ( JTAR_STATE != T_DICT ) {
+            JTAR_CURLEN = JTAR_CURLEN + 1
+            obj[ JTAR_FA_KEYPATH T_LEN ] = JTAR_CURLEN
+            JTAR_FA_KEYPATH = JTAR_FA_KEYPATH S "\"" JTAR_CURLEN "\""
+        } else {
+            obj[ JTAR_FA_KEYPATH T_LEN ] = JTAR_CURLEN
+            JTAR_FA_KEYPATH = JTAR_FA_KEYPATH S JTAR_LAST_KP
+            JTAR_LAST_KP = ""
+        }
+
+        JTAR_STATE = T_LIST
+        JTAR_CURLEN = 0
+
+        obj[ JTAR_FA_KEYPATH ] = T_LIST
+
+        obj[ ++JTAR_LEVEL ] = JTAR_FA_KEYPATH
+    } else if (item ~ /^\]$/) {
+        obj[ JTAR_FA_KEYPATH T_LEN ] = JTAR_CURLEN
+
+        JTAR_LEVEL --
+
+        JTAR_FA_KEYPATH = obj[ JTAR_LEVEL ]
+        JTAR_STATE = obj[ JTAR_FA_KEYPATH ]
+        JTAR_CURLEN = obj[ JTAR_FA_KEYPATH T_LEN ]
+    } else if (item ~ /^\{$/) {
+        if ( JTAR_STATE != T_DICT ) {
+            JTAR_CURLEN = JTAR_CURLEN + 1
+            obj[ JTAR_FA_KEYPATH T_LEN ] = JTAR_CURLEN
+            JTAR_FA_KEYPATH = JTAR_FA_KEYPATH S "\"" JTAR_CURLEN "\""
+        } else {
+            obj[ JTAR_FA_KEYPATH T_LEN ] = JTAR_CURLEN
+            JTAR_FA_KEYPATH = JTAR_FA_KEYPATH S JTAR_LAST_KP
+            JTAR_LAST_KP = ""
+        }
+
+        JTAR_STATE = T_DICT
+        JTAR_CURLEN = 0
+
+        obj[ JTAR_FA_KEYPATH ] = T_DICT
+        obj[ ++JTAR_LEVEL ] = JTAR_FA_KEYPATH
+    } else if (item ~ /^\}$/) {
+        obj[ JTAR_FA_KEYPATH T_LEN ] = JTAR_CURLEN
+
+        JTAR_LEVEL --
+
+        JTAR_FA_KEYPATH = obj[ JTAR_LEVEL ]
+        JTAR_STATE = obj[ JTAR_FA_KEYPATH ]
+        JTAR_CURLEN = obj[ JTAR_FA_KEYPATH T_LEN ]
+    }
+}
+# EndSection
+
+# Section: jiter core
+
+function jiter( item, stack,  _res ) {
+    if (item ~ /^[,:]*$/) {
+        return
+    } else if (item ~ /^[tfn"0-9+-]/) #"
+    # } else if (item !~ /^[\{\}\[\]]$/) {
+    {
+        JITER_CURLEN = JITER_CURLEN + 1
+        if ( JITER_STATE == T_DICT ) {
             if ( JITER_LAST_KP != "" ) {
                 JITER_CURLEN = JITER_CURLEN - 1
-                obj[ JITER_FA_KEYPATH S JITER_LAST_KP ] = item
+                _res = JITER_FA_KEYPATH S JITER_LAST_KP
                 JITER_LAST_KP = ""
+                return _res
             } else {
                 JITER_LAST_KP = item
-                obj[ JITER_FA_KEYPATH T_KEY ] = obj[ JITER_FA_KEYPATH T_KEY ] S item
             }
+        } else {
+            return JITER_FA_KEYPATH S "\"" JITER_CURLEN "\""
         }
     } else if (item ~ /^\[$/) {
         if ( JITER_STATE != T_DICT ) {
             JITER_CURLEN = JITER_CURLEN + 1
-            obj[ JITER_FA_KEYPATH T_LEN ] = JITER_CURLEN
+            stack[ JITER_FA_KEYPATH T_LEN ] = JITER_CURLEN
             JITER_FA_KEYPATH = JITER_FA_KEYPATH S "\"" JITER_CURLEN "\""
         } else {
-            obj[ JITER_FA_KEYPATH T_LEN ] = JITER_CURLEN
+            stack[ JITER_FA_KEYPATH T_LEN ] = JITER_CURLEN
             JITER_FA_KEYPATH = JITER_FA_KEYPATH S JITER_LAST_KP
             JITER_LAST_KP = ""
         }
@@ -73,26 +171,26 @@ function jiter( obj, item ){
         JITER_STATE = T_LIST
         JITER_CURLEN = 0
 
-        obj[ JITER_FA_KEYPATH ] = T_LIST
-        # TODO: consider it. so we can distinguish ...
-        # obj[ JITER_FA_KEYPATH T_KEY ] = \001
+        stack[ JITER_FA_KEYPATH ] = T_LIST
 
-        JITER_STACK[ ++JITER_LEVEL ] = JITER_FA_KEYPATH
+        stack[ ++JITER_LEVEL ] = JITER_FA_KEYPATH
+
+        return JITER_FA_KEYPATH
     } else if (item ~ /^\]$/) {
-        obj[ JITER_FA_KEYPATH T_LEN ] = JITER_CURLEN
+        stack[ JITER_FA_KEYPATH T_LEN ] = JITER_CURLEN
 
         JITER_LEVEL --
 
-        JITER_FA_KEYPATH = JITER_STACK[ JITER_LEVEL ]
-        JITER_STATE = obj[ JITER_FA_KEYPATH ]
-        JITER_CURLEN = obj[ JITER_FA_KEYPATH T_LEN ]
+        JITER_FA_KEYPATH = stack[ JITER_LEVEL ]
+        JITER_STATE = stack[ JITER_FA_KEYPATH ]
+        JITER_CURLEN = stack[ JITER_FA_KEYPATH T_LEN ]
     } else if (item ~ /^\{$/) {
         if ( JITER_STATE != T_DICT ) {
             JITER_CURLEN = JITER_CURLEN + 1
-            obj[ JITER_FA_KEYPATH T_LEN ] = JITER_CURLEN
+            stack[ JITER_FA_KEYPATH T_LEN ] = JITER_CURLEN
             JITER_FA_KEYPATH = JITER_FA_KEYPATH S "\"" JITER_CURLEN "\""
         } else {
-            obj[ JITER_FA_KEYPATH T_LEN ] = JITER_CURLEN
+            stack[ JITER_FA_KEYPATH T_LEN ] = JITER_CURLEN
             JITER_FA_KEYPATH = JITER_FA_KEYPATH S JITER_LAST_KP
             JITER_LAST_KP = ""
         }
@@ -100,164 +198,76 @@ function jiter( obj, item ){
         JITER_STATE = T_DICT
         JITER_CURLEN = 0
 
-        obj[ JITER_FA_KEYPATH ] = T_DICT
+        stack[ JITER_FA_KEYPATH ] = T_DICT
 
-        JITER_STACK[ ++JITER_LEVEL ] = JITER_FA_KEYPATH
+        stack[ ++JITER_LEVEL ] = JITER_FA_KEYPATH
+
+        return JITER_FA_KEYPATH
     } else if (item ~ /^\}$/) {
-        obj[ JITER_FA_KEYPATH T_LEN ] = JITER_CURLEN
+        stack[ JITER_FA_KEYPATH T_LEN ] = JITER_CURLEN
 
         JITER_LEVEL --
 
-        JITER_FA_KEYPATH = JITER_STACK[ JITER_LEVEL ]
-        JITER_STATE = obj[ JITER_FA_KEYPATH ]
-        JITER_CURLEN = obj[ JITER_FA_KEYPATH T_LEN ]
+        JITER_FA_KEYPATH = stack[ JITER_LEVEL ]
+        JITER_STATE = stack[ JITER_FA_KEYPATH ]
+        JITER_CURLEN = stack[ JITER_FA_KEYPATH T_LEN ]
     }
+    return ""
+}
+# EndSection
+
+# Section: target handler for print
+
+# There is no handle_print, because if you want to format the output, pipe to another formatter
+function handle_print1_eq(jpath,    _ret){
+    if (JTAR_LEVEL == 0){
+        _ret = jiter( item, JITER_STACK )
+        if ( _ret == "" ) return false
+        if ( _ret != jpath) return false
+    }
+    jiter_target_levelcal( item )
+    printf("%s", item)
+    if (JTAR_LEVEL == 0) {
+        printf("\n")
+        return true
+    }
+    return false
+}
+
+function handle_print0_eq(jpath){
+    if (JTAR_LEVEL == 0){
+        _ret = jiter( item, JITER_STACK )
+        if ( _ret == "" ) return false
+        if ( _ret != jpath) return false
+    }
+    jiter_target_levelcal( item )
+    printf("%s\n", item)
+    if (JTAR_LEVEL == 0) {
+        return true
+    }
+    return false
+}
+
+function jiter_target_levelcal( item ){
+    if (item ~ /^[\[\{]$/) {
+        JTAR_LEVEL += 1
+    } else if (item ~ /^[\]\}]$/) {
+        JTAR_LEVEL -= 1
+    }
+    return JTAR_LEVEL
 }
 
 # EndSection
 
-# Section: jiter_print_exact
-BEGIN{
-    START_PRINT=0
-    START_PRINT_S = 0
-    START_PRINT_B = 0
+# Section: jiparse
+function jiparse( obj, item, _kp ){
+    _kp = jiter( item, obj )
+    obj[ _kp ] = item
+    return _kp
 }
 
-# TODO: Find out where do we use it?
-function _jiter_print_exact_setprint(kp, key){
-    if (kp == key) {
-        START_PRINT = 1
-    }
-}
-
-function jiter_print_exact_after_tokenize(jobj, text, key,      _arr, _arrl, _i){
-    _arrl = split( json_to_machine_friendly(text), _arr, "\n" )
-    for (_i=1; _i<=_arrl; ++_i) {
-        jiter_print_exact( jobj, _arr[_i], key )
-    }
-}
-
-
-# TODO: Optimize. If key not match, then we SKIP.
-function jiter_print_exact( obj, item, key ){
-    if (START_PRINT == 2) {
-        exit(0)
-        return
-    }
-
-    if (START_PRINT == 1) {
-
-        if (item ~ /^\[$/) {
-            START_PRINT_S = START_PRINT_S + 1
-        } else if (item ~ /^\]$/) {
-            START_PRINT_S = START_PRINT_S - 1
-        } else if (item ~ /^\{$/) {
-            START_PRINT_B = START_PRINT_B + 1
-        } else if (item ~ /^\}$/) {
-            START_PRINT_B = START_PRINT_B - 1
-        }
-
-        if ( (START_PRINT_B == 0) && (START_PRINT_S == 0) ) {
-            START_PRINT = 2
-        }
-
-        print item
-
-        # if (START_PRINT == 2) {
-        #     # print item
-        # } else {
-        #     print item
-        # }
-
-        return
-    }
-
-    if (item ~ /^[,:]*$/) {
-        return
-    } else if (item ~ /^[tfn"0-9+-]/) { #"
-    # } else if (item !~ /^[\{\}\[\]]$/) {
-        JITER_CURLEN = JITER_CURLEN + 1
-        if ( JITER_STATE != T_DICT ) {
-            # start printing
-            # print JITER_FA_KEYPATH S "\"" JITER_CURLEN "\""  "\t" item
-            if ( JITER_FA_KEYPATH S "\"" JITER_CURLEN "\"" == key ) {
-                print item
-                START_PRINT = 2
-            }
-        } else {
-            if ( JITER_LAST_KP != "" ) {
-                # start printing
-                # print JITER_FA_KEYPATH S JITER_LAST_KP "\t" item
-                if ( JITER_FA_KEYPATH S JITER_LAST_KP == key ) {
-                    print item
-                    START_PRINT = 2
-                }
-                JITER_LAST_KP = ""
-            } else {
-                JITER_LAST_KP = item
-            }
-        }
-    } else if (item ~ /^\[$/) {
-        JITER_CURLEN = JITER_CURLEN + 1
-        obj[ JITER_FA_KEYPATH T_LEN ] = JITER_CURLEN
-        if ( JITER_STATE != T_DICT ) {
-            JITER_FA_KEYPATH = JITER_FA_KEYPATH S "\"" JITER_CURLEN "\""
-        } else {
-            JITER_FA_KEYPATH = JITER_FA_KEYPATH S JITER_LAST_KP
-            JITER_LAST_KP = ""
-        }
-
-        JITER_STATE = T_LIST
-        JITER_CURLEN = 0
-
-        # start-printing
-        if (JITER_FA_KEYPATH == key) {
-            START_PRINT_S = START_PRINT_S + 1
-            START_PRINT = 1
-            print item
-        }
-        obj[ JITER_FA_KEYPATH ] = T_LIST
-
-        JITER_STACK[ ++JITER_LEVEL ] = JITER_FA_KEYPATH
-    } else if (item ~ /^\]$/) {
-        obj[ JITER_FA_KEYPATH T_LEN ] = JITER_CURLEN
-
-        JITER_LEVEL --
-
-        JITER_FA_KEYPATH = JITER_STACK[ JITER_LEVEL ]
-        JITER_STATE = obj[ JITER_FA_KEYPATH ]
-        JITER_CURLEN = obj[ JITER_FA_KEYPATH T_LEN ]
-    } else if (item ~ /^\{$/) {
-        JITER_CURLEN = JITER_CURLEN + 1
-        obj[ JITER_FA_KEYPATH T_LEN ] = JITER_CURLEN
-        if ( JITER_STATE != T_DICT ) {
-            JITER_FA_KEYPATH = JITER_FA_KEYPATH S "\"" JITER_CURLEN "\""
-        } else {
-            JITER_FA_KEYPATH = JITER_FA_KEYPATH S JITER_LAST_KP
-            JITER_LAST_KP = ""
-        }
-
-        JITER_STATE = T_DICT
-        JITER_CURLEN = 0
-
-        # start-printing
-        if (JITER_FA_KEYPATH == key) {
-            START_PRINT_B = START_PRINT_B + 1
-            START_PRINT = 1
-            print item
-        }
-        obj[ JITER_FA_KEYPATH ] = T_DICT
-
-        JITER_STACK[ ++JITER_LEVEL ] = JITER_FA_KEYPATH
-    } else if (item ~ /^\}$/) {
-        obj[ JITER_FA_KEYPATH T_LEN ] = JITER_CURLEN
-
-        JITER_LEVEL --
-
-        JITER_FA_KEYPATH = JITER_STACK[ JITER_LEVEL ]
-        JITER_STATE = obj[ JITER_FA_KEYPATH ]
-        JITER_CURLEN = obj[ JITER_FA_KEYPATH T_LEN ]
-    }
+function jiparse_( item ){
+    return jiparse( _, item )
 }
 # EndSection
 

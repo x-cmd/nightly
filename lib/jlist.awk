@@ -39,18 +39,18 @@ function jlist_len(arr, keypath){
 # Section: 2arr
 # TODO: to check
 function jlist_id2arr(obj, keypath, range, arr,    i, l){
-    jrange(range, obj[ _kp T_LEN ])
+    jrange(range, obj[ keypath T_LEN ])
 
     l=0
     if (jrange_step > 0) {
         for (i=jrange_start; i<=jrange_end; i=i+jrange_step) {
             l = l + 1
-            arr[l] = keypath S i
+            arr[l] = keypath S q(i)
         }
     } else {
         for (i=jrange_start; i>=jrange_end; i=i+jrange_step) {
             l = l + 1
-            arr[l] = keypath S i
+            arr[l] = keypath S q(i)
         }
     }
     return l
@@ -58,7 +58,7 @@ function jlist_id2arr(obj, keypath, range, arr,    i, l){
 
 function jlist_value2arr(obj, keypath, range, arr,    i, l){
     l = jlist_id2arr(obj, keypath, range, arr)
-    for (i=1; i<=l; ++l) {
+    for (i=1; i<=l; ++i) {
         arr[i] = obj[ arr[i] ]
     }
     return l
@@ -66,24 +66,24 @@ function jlist_value2arr(obj, keypath, range, arr,    i, l){
 
 function jlist_str2arr(obj, keypath, range, arr,    i, l){
     l = jlist_id2arr(obj, keypath, range, arr)
-    for (i=1; i<=l; ++l) {
-        arr[i] = jstr( obj[ arr[i] ] )
+    for (i=1; i<=l; ++i) {
+        arr[i] = jstr( obj, arr[i])
     }
     return l
 }
 
 function jlist_str02arr(obj, keypath, range, arr,    i, l){
     l = jlist_id2arr(obj, keypath, range, arr)
-    for (i=1; i<=l; ++l) {
-        arr[i] = jstr0( obj[ arr[i] ] )
+    for (i=1; i<=l; ++i) {
+        arr[i] = jstr0( obj, arr[i] )
     }
     return l
 }
 
 function jlist_str12arr(obj, keypath, range, arr,    i, l){
     l = jlist_id2arr(obj, keypath, range, arr)
-    for (i=1; i<=l; ++l) {
-        arr[i] = jstr1( obj[ arr[i] ] )
+    for (i=1; i<=l; ++i) {
+        arr[i] = jstr1( obj, arr[i] )
     }
     return l
 }
@@ -102,7 +102,7 @@ function jlist_grep(obj, keypath, key, reg,      _k, _len, _ret){
     if (_len <= 0) return
 
     for(_i=1; _i<=_len; ++_i){
-        if( match(json_str_unquote2( obj[ jpath(_k "." _i key) ] ), reg)){
+        if( match(json_str_unquote2( obj[ jpath(_k "." _i "." key) ] ), reg)){
             _ret = _ret "\n" json_stringify_format(obj, _k "." _i, 4)
         }
     }
@@ -114,11 +114,7 @@ function jlist_grep(obj, keypath, key, reg,      _k, _len, _ret){
 
 # TOTEST
 function jlist_join(sep, obj, keypath, range,      _ret_arr, i, l, _ret){
-    if (range == "") {
-        l = jlist_value2arr(obj, keypath, _ret_arr)
-    } else {
-        l = jlist_select2arr(obj, keypath, range, _ret_arr)
-    }
+    l = jlist_value2arr(obj, keypath, range, _ret_arr)
 
     ret = ""
     for (i=1; i<=l; ++i) {

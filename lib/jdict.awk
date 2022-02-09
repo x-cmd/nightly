@@ -8,7 +8,7 @@ function jdict_keys(arr, keypath, klist, _l){
 }
 
 function jdict_keys2arr(arr, keypath, klist, _l){
-    _l = split(arr[ keypath T_KEY ], klist, S)
+    _l = split(substr(arr[ keypath T_KEY ],2), klist, S)
     klist[ L ] = _l
     # TODO: klist[ L ] = _l-1
     return _l
@@ -54,7 +54,7 @@ function jdict_len(arr, keypath){
 function jdict_value2arr(obj, keypath, arr,    _keyarr, i, l){
     l = jdict_keys2arr(obj, keypath, _keyarr)
     for (i=1; i<=l; ++i) {
-        arr[i] = jstr(obj, keypath S i)
+        arr[i] = jstr(obj, keypath S _keyarr[i])
     }
     arr[ L ] = l
     return l

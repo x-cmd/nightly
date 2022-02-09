@@ -8,8 +8,8 @@
 
 BEGIN {
     T = "\002"
-    T_DICT = "\003"
-    T_LIST = "\004"
+    T_DICT = "{" # "\003"
+    T_LIST = "[" # "\004"
     T_PRI = "\005"
     T_ROOT = "\006"
 
@@ -56,6 +56,7 @@ function jkey(a1, a2, a3, a4, a5, a6, a7, a8, a9,
 }
 
 function jpath(_jpath,   _arr, _arrl, _i, _ret){
+    if (_jpath ~ S) return _jpath
     if (_jpath ~ /^\./) {
         _jpath = "1" _jpath
     }
@@ -231,7 +232,7 @@ function draw_space(num,     _i, _ret){
 
 # Section: jstr jstr0 jstr1
 # Human
-function jstr(){
+function jstr(arr, keypath){
     return json_stringify_format(arr, keypath)
 }
 
@@ -250,14 +251,11 @@ function jstr0(arr, keypath){
 # Section: Compact Stringify
 function ___json_stringify_compact_dict(arr, keypath,     _klist, _l, _i, _key, _val, _ret){
 
-    _l = json_dict_keys(arr, keypath, _klist)
+    _l = jdict_keys2arr(arr, keypath, _klist)
 
     if (_l == 0) return "{}"
-    _key = _klist[ 1 ]
-    _val = arr[ keypath S _key ]
-    _ret = _key ":" _val
 
-    for (_i=2; _i<=_l; _i++){
+    for (_i=1; _i<=_l; _i++){
         _key = _klist[ _i ]
         _val = arr[ keypath S _key ]
         _ret = _ret "," _key ":" ___json_stringify_compact_value( arr, keypath S _key )
@@ -307,19 +305,16 @@ function json_stringify_compact(arr, keypath,      _i, _len,_ret){
 # Section: Machine Stringify
 function ___json_stringify_machine_dict(arr, keypath,     _klist, _l, _i, _key, _val, _ret){
 
-    _l = json_dict_keys(arr, keypath, _klist)
+    _l = jdict_keys2arr(arr, keypath, _klist)
 
     if (_l == 0) return "{\n}"
-    _key = _klist[ 1 ]
-    _val = arr[ keypath S _key ]
-    _ret = _key "\n:\n" _val
 
-    for (_i=2; _i<=_l; _i++){
+    for (_i=1; _i<=_l; _i++){
         _key = _klist[ _i ]
         _val = arr[ keypath S _key ]
         _ret = _ret "\n,\n" _key "\n:\n" ___json_stringify_machine_value( arr, keypath S _key )
     }
-    _ret = substr(_ret, 7)
+    _ret = substr(_ret, 4)
     return "{\n" _ret "\n}"
 }
 
@@ -364,11 +359,11 @@ function json_stringify_machine(arr, keypath,    _i, _len,_ret){
 # Section: Format Stringify
 function ___json_stringify_format_dict(arr, keypath, indent,    _klist, _l, _i, _key, _val, _ret){
 
-    _l = json_dict_keys(arr, keypath, _klist)
+    _l = jdict_keys2arr(arr, keypath, _klist)
 
     if (_l == 0) return "{ }"
 
-    for (_i=2; _i<=_l; _i++){
+    for (_i=1; _i<=_l; _i++){
         _key = _klist[ _i ]
         _val = arr[ keypath S _key ]
         _ret = _ret ",\n" draw_space(indent) _key ": " ___json_stringify_format_value( arr, keypath S _key, indent+INDENT_LEN )
@@ -401,6 +396,7 @@ function ___json_stringify_format_value(arr, keypath, indent,   _t, _klist, _i, 
 }
 
 function json_stringify_format(arr, keypath, indent,       _i, _len,_ret){
+    if (indent == "") indent=4
     INDENT_LEN = indent
 
     if (keypath != "") {
@@ -419,4 +415,10 @@ function json_stringify_format(arr, keypath, indent,       _i, _len,_ret){
 }
 # EndSection
 
+function json_split2tokenarr(obj, text){
+    return split( json_to_machine_friendly(text), obj, "\n" )
+}
 
+function json_split2tokenarr_(text){
+    return json_split2tokenarr(_, text)
+}

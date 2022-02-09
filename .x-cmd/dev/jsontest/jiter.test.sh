@@ -2,43 +2,23 @@
 
 xrc awk
 
-# DSL: json_get(_, ".b")
+SSS="$(cat default.awk)$(cat json.awk jdict.awk jiparse.awk)"
 
-SSS="$(cat default.awk)$(cat json.awk jiter.awk)"
-
-f1(){
-    awk "$SSS"'
-    BEGIN{
-
-    }
-    {
-        if ($0 != "") {
-            jiter(_, $0)
-            # print ($0)
-        }
-    }
-    END{
-        # print json_stringify_machine(_, "1.1.commit")
-        # print json_stringify_compact(_)
-        print json_stringify_format(_, "1", 4)
-
-        # print jlen(_, "1")
-        # print jlen(_, "1.2")
-        # print jlen(_, "1.3")
-        # print jlen(_, "1.3.aaa")
-        # print jlen(_, "1.3.aaa.b1")
-    }
-    '
-}
 
 f(){
+awk -v RS="\t" "$SSS"'
 
 {
-    awk "$SSS
-    {
-        printf(\"%s\", json_to_machine_friendly(\$0) )
-    }" | f1
-} <<A
+    data = $0
+}
+
+END{
+    # jiparse_print_exact_after_tokenize(_, data, jpath("1.2"))
+    jiparse_after_tokenize_(data)
+    print jstr1(_, "1.1")
+}
+
+' <<A
 [
     {
         "name": "v1.0.2",
@@ -74,7 +54,8 @@ f(){
     }
 ]
 A
+
 }
 
-time f # >/dev/null
+time f
 

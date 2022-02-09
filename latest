@@ -16,7 +16,7 @@ ___x_cmd_awk_lib(){
     done | tr "\n" " "
 }
 
-___X_CMD_AWK_ALL_LIB="bit,math,ord,char,str,wcwidth,arr,ui,json,jiter,jiter_flat"
+___X_CMD_AWK_ALL_LIB="bit,math,ord,char,str,wcwidth,arr,ui,json,jiparse,jiparse_flat"
 ___X_CMD_AWK_IMPLEMENTATION=
 
 ___x_cmd_awk_detect_implemetation(){
