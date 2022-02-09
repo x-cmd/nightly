@@ -1,5 +1,5 @@
 # TODO: what is for ?
-function jfilter(obj, keypath, key, reg,      _k, _len, _ret){
+function jgrep(obj, keypath, key, reg,      _k, _len, _ret){
     _k = keypath
     keypath = jpath(keypath)
     if (obj[ keypath ] != T_LIST) {
@@ -11,7 +11,7 @@ function jfilter(obj, keypath, key, reg,      _k, _len, _ret){
     if (_len <= 0) return
 
     for(_i=1; _i<=_len; ++_i){
-        if( match(jjoin_str_unquote2(obj[jpath(_k "." _i key)]), reg)){
+        if( match(json_str_unquote2( obj[ jpath(_k "." _i key) ] ), reg)){
             _ret = _ret "\n" json_stringify_format(obj, _k "." _i, 4)
         }
     }

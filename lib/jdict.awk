@@ -59,3 +59,7 @@ function jdict_value2arr(obj, keypath, arr,    _keyarr, i, l){
     arr[ L ] = l
     return l
 }
+
+function jdict_grep(){
+
+}
