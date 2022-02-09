@@ -45,7 +45,7 @@ ___x_cmd_pandoc_bin_download_url(){
     if [ -z "$___X_CMD_WHICHNET" ]; then
         printf "%s/%s" "https://github.com/jgm/pandoc/releases/download" "$p"
     else
-        printf "%s/%s" "https://github.com.cnpmjs.org/jgm/pandoc/releases/download" "$p"
+        printf "%s/%s" "https://download.fastgit.org/jgm/pandoc/releases/download" "$p"
     fi
 }
 
