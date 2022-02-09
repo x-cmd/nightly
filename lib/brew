@@ -106,11 +106,12 @@ A
     proxy_log "$s"
     
     local i
+    local src
     for i in $HOME/.zshrc $HOME/.bashrc $HOME/.kshrc; do
         if [ ! -f "$i" ]; then
             continue
         fi
-        local src
+
         if src="$(grep -v "export HOMEBREW_BOTTLE_DOMAIN=" "$i")"; then
             printf "%s" "$src" > "$i"
         fi
