@@ -3,7 +3,7 @@
 ___x_cmd_nvm_install(){
     local VERSION="${1:?Provide node version}"
 
-    xrc os/latest
+    xrc os
     if [ "$(os name)-$(os arch)" = "darwin-arm64" ]; then
         # FIXME: If you use bash5 which installed by brew, it will not work.
         arch -x86_64 /bin/bash <<A
