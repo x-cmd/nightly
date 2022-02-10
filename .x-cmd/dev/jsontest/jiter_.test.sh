@@ -4,7 +4,7 @@ xrc awk
 
 # DSL: json_get(_, ".b")
 
-SSS="$(cat default.awk)$(cat json.awk jiparse.awk jdict.awk)"
+SSS="$(cat default.awk)$(cat json.awk jiter.awk jdict.awk)"
 
 f1(){
     awk "$SSS"'

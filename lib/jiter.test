@@ -1,15 +1,25 @@
 
-code="$(cat default.awk json.awk jiter.awk)"
+code="$(cat default.awk json.awk jiter.awk jdict.awk)"
 
 awk "$code"'
 
 function handle( token ){
     if (token == "") return
-    if ( jiter_target_eq_( token, jkey(1, "d", "a") ) == true ) {
-        print token
-        print( jstr( _ ) )
+    # if ( jiter_target_eq_( token, jkey(1, "d", "a") ) == true ) {
+    #     print jstr( _, "1" )
+    #     delete _
+    # }
+
+    if ( jiter_target_rmatch_( token, "d" ) == true ) {
+        print jstr( _, "1" )
         delete _
     }
+
+    # if ( jiter_print1_eq( token, jpath("1.d") ) == true ){
+    #     print "OK"
+    # }
+
+
 }
 
 {

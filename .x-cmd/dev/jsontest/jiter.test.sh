@@ -2,7 +2,7 @@
 
 xrc awk
 
-SSS="$(cat default.awk)$(cat json.awk jdict.awk jiparse.awk)"
+SSS="$(cat default.awk)$(cat json.awk jdict.awk jiter.awk)"
 
 
 f(){
@@ -13,8 +13,8 @@ awk -v RS="\t" "$SSS"'
 }
 
 END{
-    # jiparse_print_exact_after_tokenize(_, data, jpath("1.2"))
-    jiparse_after_tokenize_(data)
+    # jiter_print_exact_after_tokenize(_, data, jpath("1.2"))
+    jiter_after_tokenize_(data)
     print jstr1(_, "1.1")
 }
 

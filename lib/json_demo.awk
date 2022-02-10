@@ -26,35 +26,35 @@ function json_get_list_value(obj, keypath, key, type, arr,      _k, _i, _len, _r
     _k = keypath
     keypath = jpath(keypath)
 
-    if (obj[ keypath ] == T_LIST) {
-        _len = obj[ keypath T_LEN ]
-        if (_len > 0) {
-            for (_i=1; _i<=_len; ++_i) {
-
-                if (type == "format") {
-                    _list_key_arr = json_stringify_format(obj, _k "." _i key, 4)
-                } else if (type == "compact") {
-                    _list_key_arr = json_stringify_compact(obj, _k "." _i key, 4)
-                } else {
-                    _list_key_arr = json_stringify_machine(obj, _k "." _i key, 4)
-                }
-
-                if (_list_key_arr != ""){
-                    arr[ _i ] = _list_key_arr
-                    _ret = _ret "\n" _list_key_arr
-                }
-            }
-            _ret = substr(_ret, 2)
-            # print _ret
-            return _ret
-        }else {
-            exit(0)
-            return
-        }
-    } else {
+    if (obj[ keypath ] != T_LIST) {
         exit(0)
         return
     }
+
+    _len = obj[ keypath T_LEN ]
+    if (_len <= 0) {
+        exit(0)
+        return
+    }
+
+    for (_i=1; _i<=_len; ++_i) {
+        if (type == "format") {
+            _list_key_arr = json_stringify_format(obj, _k "." _i key, 4)
+        } else if (type == "compact") {
+            _list_key_arr = json_stringify_compact(obj, _k "." _i key, 4)
+        } else {
+            _list_key_arr = json_stringify_machine(obj, _k "." _i key, 4)
+        }
+
+        if (_list_key_arr != ""){
+            arr[ _i ] = _list_key_arr
+            _ret = _ret "\n" _list_key_arr
+        }
+    }
+    _ret = substr(_ret, 2)
+    # print _ret
+    return _ret
+
 }
 
 # EndSection

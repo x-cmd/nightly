@@ -124,5 +124,10 @@ function jlist_join(sep, obj, keypath, range,      _ret_arr, i, l, _ret){
     return ret
 }
 
+# TODO
+function jlist_totable(){
+    return true
+}
+
 # EndSection
 

@@ -55,6 +55,14 @@ function jkey(a1, a2, a3, a4, a5, a6, a7, a8, a9,
     return ret
 }
 
+function jpathr(_jpath,     _ret ){
+    _ret = jpath(_jpath)
+
+    # \034 = S
+    gsub(/\*/, "[^\001]+", _ret)
+    return _ret
+}
+
 function jpath(_jpath,   _arr, _arrl, _i, _ret){
     if (_jpath ~ S) return _jpath
     if (_jpath ~ /^\./) {
@@ -352,6 +360,8 @@ function json_stringify_machine(arr, keypath,    _i, _len,_ret){
     for (_i=1; _i<=_len; ++_i) {
         _ret = _ret "\n"___json_stringify_machine_value( arr,  S "\"" _i "\"")
     }
+
+    _ret = substr(_ret, 2)
     return _ret
 }
 # EndSection
@@ -411,6 +421,7 @@ function json_stringify_format(arr, keypath, indent,       _i, _len,_ret){
         _ret =  _ret "\n" ___json_stringify_format_value( arr, S "\"" _i "\"", indent )
     }
 
+    _ret = substr(_ret, 2)
     return _ret
 }
 # EndSection
@@ -422,3 +433,32 @@ function json_split2tokenarr(obj, text){
 function json_split2tokenarr_(text){
     return json_split2tokenarr(_, text)
 }
+
+# Section: jiter init save load
+function jiter_save( obj ) {
+    obj[ "FA_KEYPATH" ] = JITER_FA_KEYPATH
+    obj[ "STATE" ]      = JITER_STATE
+    obj[ "LAST_KP" ]    = JITER_LAST_KP
+    obj[ "LEVEL" ]      = JITER_LEVEL
+    obj[ "CURLEN" ]     = JITER_CURLEN
+    obj[ "LAST_KL" ]    = JITER_LAST_KL
+}
+
+function jiter_init( ) {
+    JITER_FA_KEYPATH    = ""
+    JITER_STATE         = T_ROOT
+    JITER_LAST_KP       = ""
+    JITER_LEVEL         = 1
+    JITER_CURLEN        = 0
+    JITER_LAST_KL       = ""
+}
+
+function jiter_load( obj ){
+    JITER_FA_KEYPATH    = obj[ "FA_KEYPATH" ]
+    JITER_STATE         = obj[ "STATE" ]
+    JITER_LAST_KP       = obj[ "LAST_KP" ]
+    JITER_LEVEL         = obj[ "LEVEL" ]
+    JITER_CURLEN        = obj[ "CURLEN" ]
+    JITER_LAST_KL       = obj[ "LAST_KL" ]
+}
+# EndSection
