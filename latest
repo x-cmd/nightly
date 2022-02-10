@@ -3,8 +3,38 @@
 
 # author:       Li Junhao           l@x-cmd.com
 
-xrc param
+xrc param static-build/lib/staticbin os
 
+___x_cmd_ffmpeg_download(){
+    local arch
+    arch="$(os arch)"
+    local osname
+    osname="$(os name)"
+    local exe
+    case "$osname" in
+        win)    exe=ffmpeg.x64.exe        ;;
+        *)      exe=ffmpeg.${osname}.${arch}  ;;
+    esac
+    ___x_cmd_staticbin_init \
+        ___x_cmd_ffmpeg_download \
+        "$___X_CMD_ROOT/.bin/ffmpeg" \
+        "$exe" \
+        "$(___x_cmd_pandoc_bin_download_url "$exe")" \
+        &&(
+            cd "$___X_CMD_ROOT/.bin/ffmpeg" && {
+                chmod +x "$exe"
+            }
+        )&& ___x_cmd_ffmpeg_download "$@"
+}
+
+___x_cmd_pandoc_bin_download_url(){
+    local exe="${1:?Provide app name}"
+    if [ -z "$___X_CMD_WHICHNET" ]; then
+        printf "%s/%s" "https://raw.githubusercontent.com/static-build/ffmpeg/main/bin" "$exe.7z"
+    else
+        printf "%s/%s" "https://gitcode.net/x-bash/ffmpeg/-/raw/master/bin" "$exe.7z"
+    fi
+}
 
 ___x_cmd_ffmpeg(){
     local op
@@ -38,3 +68,6 @@ ___x_cmd_ffmpeg_show(){
 
 }
 
+# EndSection
+
+xrc setmain ___x_cmd_pandoc
