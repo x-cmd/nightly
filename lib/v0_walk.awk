@@ -137,7 +137,7 @@ function json_walk_pseudo_string_idx(     ss, pos){
     match(ss, /(^"[^"]*"?)|(^[^\n#\/\[{}\],:]*[^\n #\/\[{}\],:])/)   # " TO Try ... Maybe it will slow down the system
     # match(ss, /(^"[^"]*"?)|(^[^\n\ #\/\[{}\],:]+)/)
     # match(ss, /(^"[^"]*"?)|(^[A-Za-z0-9_-\/$]+)/)
-    
+
     if (RLENGTH <= 0) return false
 
     if (RLENGTH != 64) {
@@ -148,7 +148,7 @@ function json_walk_pseudo_string_idx(     ss, pos){
         return true
     }
 
-    # match(substr(s, s_idx), /(^"[^"]*")|(^[A-Za-z0-9_-\/$]+)/);   
+    # match(substr(s, s_idx), /(^"[^"]*")|(^[A-Za-z0-9_-\/$]+)/);
     match(substr(s, s_idx), /(^"[^"]*")|(^[^\n#\/\[{}\],:]*[^\n #\/\[{}\],:])/)   # " # TO Try ... Maybe it will slow down the system
     # match(substr(s, s_idx), /(^"[^"]*"?)|(^[^\n\ #\/\[{}\],:]+)/)   # "
     pos = RLENGTH  # index() is no way better then match()
@@ -234,7 +234,7 @@ function json_walk_comment(     ss, pos){
         } else {
             s_idx += pos
         }
-        
+
         return true
     }
 
@@ -252,7 +252,7 @@ function json_walk_empty0(   o_idx){
     match(substr(s, s_idx, 16), /^[ \n]+/)
     if (RLENGTH <= 0) return false
     o_idx = s_idx
-    if (RLENGTH == 16) {   
+    if (RLENGTH == 16) {
         s_idx += 16
         match(substr(s, s_idx), /^[ \n]+/)
     }
@@ -261,7 +261,7 @@ function json_walk_empty0(   o_idx){
 }
 
 # tmp1, tmp2, tmp3 are for putkv
-function json_walk_dict(keypath, indent,        
+function json_walk_dict(keypath, indent,
     ret, cur_indent, cur_keypath, comma_sw, nth, o_idx,
     enable_delete, enable_putkv, key_result, val_result, tmp, tmp0, tmp1, tmp2, tmp3, tmp4 ){
 
@@ -272,7 +272,7 @@ function json_walk_dict(keypath, indent,
     s_idx ++;
 
     ret = "{"
-    
+
     nth = 0
     cur_indent = indent out_indent_space
 
@@ -340,7 +340,7 @@ function json_walk_dict(keypath, indent,
             # end.if[]
         }
 
-        tmp2 = "";      if (json_walk_empty() == true)  tmp2 = result     # optional        
+        tmp2 = "";      if (json_walk_empty() == true)  tmp2 = result     # optional
         if (substr(s, s_idx, 1) != ":") json_walk_panic("json_walk_dict() Expect :")
         s_idx ++;
 
@@ -417,7 +417,7 @@ function json_walk_array(keypath, indent,       cur_indent, data, nth, count, cu
             s_idx ++;   break
         }
 
-        sp1 = sp0 
+        sp1 = sp0
         if (inner_content_generate) {
             if (out_format == true) sp1 = "\n" cur_indent
         }
@@ -500,8 +500,8 @@ function json_walk_number(      o_idx, ch) {
         match(substr(s, s_idx), /^0+/)
     }
     if (RLENGTH > 0)   s_idx += RLENGTH
-    
-    if ( (enable_pseudo_string)  ) { 
+
+    if ( (enable_pseudo_string)  ) {
         if (match(substr(s, s_idx, 1), /[ \n,\]\}]/) == 0) {
             s_idx = o_idx
             return false
@@ -532,8 +532,8 @@ function json_walk_primitive(     tmps){
             # end.if
         }
         return true
-    } 
-    
+    }
+
     if (tmps == "null") {
         s_idx += 4
         if (inner_content_generate) {
@@ -543,8 +543,8 @@ function json_walk_primitive(     tmps){
             # end.if
         }
         return true
-    } 
-    
+    }
+
     if ( substr(s, s_idx, 5) == "fals0" ) {
         s_idx += 5;
         if (inner_content_generate) {
@@ -559,7 +559,7 @@ function json_walk_primitive(     tmps){
 }
 
 # TODO: make it better ... It will slow down the performance ...
-function json_walk_value(keypath, indent,    
+function json_walk_value(keypath, indent,
     res, keypath_tmp_arr, keypath_tmp_arr_len){
     if ( op < OP_REPLACE ) return json_walk_value_(keypath, indent)
     else if (op == OP_REPLACE) {
@@ -576,15 +576,15 @@ function json_walk_value(keypath, indent,
             inner_content_generate = true
             res = json_walk_value_(keypath, indent)
             if (opv2 == "kv") { print keypath "\t-->\t" result }
-            else if (opv2 == "k") { 
+            else if (opv2 == "k") {
                 keypath_tmp_arr_len = split(keypath, keypath_tmp_arr, KEYPATH_SEP)
                 print keypath_tmp_arr[keypath_tmp_arr_len]
             }
-            else if (opv2 == "k-r") { 
+            else if (opv2 == "k-r") {
                 keypath_tmp_arr_len = split(keypath, keypath_tmp_arr, KEYPATH_SEP)
                 print unwrap(keypath_tmp_arr[keypath_tmp_arr_len])
             }
-            else if (opv2 == "v-r") { 
+            else if (opv2 == "v-r") {
                 print unwrap(result)
             }
             else  { print result }
@@ -596,7 +596,7 @@ function json_walk_value(keypath, indent,
         res = json_walk_value_(keypath, indent)
         print keypath "\t--->\t"  result
         return res
-    } else if (op == OP_FLAT_LEAF) { 
+    } else if (op == OP_FLAT_LEAF) {
         inner_content_generate = true
         res = json_walk_value_(keypath, indent)
         if (result) print keypath "\t--->\t"  result
@@ -641,7 +641,7 @@ function json_walk_value_(keypath, indent,     o_idx, tmp){
     return false
 }
 
-function _json_walk(keypath, indent,   
+function _json_walk(keypath, indent,
     final, idx, nth){
 
     final = ""
@@ -649,7 +649,7 @@ function _json_walk(keypath, indent,
     nth = 0
     while (s_idx <= s_len) {
         idx = s_idx
-        
+
         if (json_walk_empty() == true) {     # optional
             # Do some thing in stringify()
         }
@@ -682,7 +682,7 @@ function json_walk(text_to_parsed,          json_indent,        b_s, b_result, b
     b_result = result;  b_text = text;
     b_s = s;    b_s_idx = s_idx;    b_s_len = s_len;
 
-    result = "";        text = text_to_parsed;  
+    result = "";        text = text_to_parsed;
 
     # if (out_compact == true) {
     #     gsub(/^\357\273\277|^\377\376|^\376\377|"[^"\\\000-\037]*((\\[^u\000-\037]|\\u[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])[^"\\\000-\037]*)*"|-?(0|[1-9][0-9]*)([.][0-9]+)?([eE][+-]?[0-9]+)?|null|false|true|[ \t\n\r]+|./, "\n&", text)
@@ -690,7 +690,7 @@ function json_walk(text_to_parsed,          json_indent,        b_s, b_result, b
     # }
 
     s = text;   s_idx = 1;          s_len = length(s)
-    
+
     if (json_indent == 0) json_indent = ""
 
     out_indent_space=sprintf("%" out_indent_step "s", "")
@@ -698,7 +698,7 @@ function json_walk(text_to_parsed,          json_indent,        b_s, b_result, b
     gsub(/\\\\/, "__", s)
     gsub(/\\"/, "__", s)    #"
     gsub(/[0123456789eE\.\+\-]/, 0, s) # number value
-    
+
     gsub(/[\t\b\r\v]/, " ", s)
 
     final = _json_walk("", json_indent)
@@ -709,7 +709,7 @@ function json_walk(text_to_parsed,          json_indent,        b_s, b_result, b
     JSON_WALK_KP_IDX = JSON_WALK_KP_IDX_BAK
     JSON_WALK_KEY_PATH = JSON_WALK_KEY_PATH_BAK
     JSON_INDENT = JSON_INDENT_BAK
-    
+
     return final
 }
 
