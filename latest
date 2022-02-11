@@ -175,7 +175,9 @@ $d2"
                                     for i in "$@"; do
                                         if ! ( x boot mod ls | grep "$i" >/dev/null); then
                                             xrc ui
-                                            if [ "$( ui 'select' answer "Not found in boot. Automatically import this module during boot: $*" "YES" "NO" )" = 1 ]; then
+                                            local answer
+                                            ui 'select' answer "Not found in boot. Automatically import this module during boot: $*" "YES" "NO"
+                                            if [ "$answer" = 1 ]; then
                                                 x boot mod add "$i"
                                             fi
                                         fi
