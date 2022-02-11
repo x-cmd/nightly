@@ -77,6 +77,33 @@ function jpath(_jpath,   _arr, _arrl, _i, _ret){
     return _ret
 }
 
+function jpatharr(arr, a1, a2, a3, a4, a5, a6, a7, a8, a9,
+    a10, a11, a12, a13, a14, a15, a16, a17, a18, a19 ){
+
+    if (a1 == "")   return 0;   arr[1] = q(a1)
+    if (a2 == "")   return 1;   arr[2] = q(a2)
+    if (a3 == "")   return 2;   arr[3] = q(a3)
+    if (a4 == "")   return 3;   arr[4] = q(a4)
+    if (a5 == "")   return 4;   arr[5] = q(a5)
+    if (a6 == "")   return 5;   arr[6] = q(a6)
+    if (a7 == "")   return 6;   arr[7] = q(a7)
+    if (a8 == "")   return 7;   arr[8] = q(a8)
+
+    if (a9 == "")   return 8;   arr[9] = q(a9)
+    if (a10 == "")  return 9;   arr[10] = q(a10)
+    if (a11 == "")  return 10;  arr[11] = q(a11)
+    if (a12 == "")  return 11;  arr[12] = q(a12)
+    if (a13 == "")  return 12;  arr[13] = q(a13)
+    if (a14 == "")  return 13;  arr[14] = q(a14)
+    if (a15 == "")  return 14;  arr[15] = q(a15)
+    if (a16 == "")  return 15;  arr[16] = q(a16)
+    if (a17 == "")  return 16;  arr[17] = q(a17)
+    if (a18 == "")  return 17;  arr[18] = q(a18)
+    if (a19 == "")  return 18;  arr[19] = q(a19)
+
+    return 19
+}
+
 function jget(arr, _jpath){
     _jpath = jpath(_jpath)
     if (arr[ _jpath ] == T_LIST || arr[ _jpath ] == T_DICT){
