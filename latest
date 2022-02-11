@@ -292,7 +292,7 @@ ___x_cmd_cd_origin(){
 
 #     ___X_CMD_CD_HISTORY="$(pwd | tee -a "$___X_CMD_ROOT/.tmp/cd/history")${___X_CMD_CD_HISTORY:+
 # }${___X_CMD_CD_HISTORY}"
-    printf "%s" "$PWD" >>"$___X_CMD_ROOT/.tmp/cd/history"
+    printf "%s\n" "$PWD" >>"$___X_CMD_ROOT/.tmp/cd/history"
     ___X_CMD_CD_HISTORY="$PWD${___X_CMD_CD_HISTORY:+
 }${___X_CMD_CD_HISTORY}"
 
