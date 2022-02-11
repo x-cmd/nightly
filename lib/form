@@ -46,11 +46,11 @@ ___x_cmd_ui_form(){
     ___x_cmd_ui_form_main "$@"
 }
 
-___x_cmd_ui_form \
-    "Accesstype" atype public                       "=" private public -- \
-    "RepoName" repo ""                              "=~" "abc1[0-9]+"   -- \
-    "Username" user ""                              "=~" "12[0-9]+" -- \
-    "Test multiple line argument" mul_line_arg  ""  -- \
-    "Provide repo name" repo ""                     "=~" "abc" "cde" "def" -- \
-    "Provide two repo name" repo2_1_1 ""            "=" "abc" "cde" "def" -- \
-    "Provide two repo name" repo2_1_2 ""            "=" "cde"
+# ___x_cmd_ui_form \
+#     "Accesstype" atype public                       "=" private public -- \
+#     "RepoName" repo ""                              "=~" "abc1[0-9]+"   -- \
+#     "Username" user ""                              "=~" "12[0-9]+" -- \
+#     "Test multiple line argument" mul_line_arg  ""  -- \
+#     "Provide repo name" repo ""                     "=~" "abc" "cde" "def" -- \
+#     "Provide two repo name" repo2_1_1 ""            "=" "abc" "cde" "def" -- \
+#     "Provide two repo name" repo2_1_2 ""            "=" "cde"
