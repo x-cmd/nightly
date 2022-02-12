@@ -2,23 +2,43 @@
 
 xrc awk
 
-SSS="$(cat default.awk)$(cat json.awk jdict.awk jiter.awk)"
+SSS="$(cat default.awk)$(cat json.awk jdict.awk jiparse.awk jiter.awk)"
 
+
+f1(){
+    awk "$SSS"'
+    {
+        pat[1] = q("1")
+        patl=1
+
+        if ($0 != "") {
+            # jiter_print_rmatch($0, "commi", "", "\n")
+
+
+
+            jiter_target_rmatch(_, $0, "comm")
+
+            # print jiter_target_rmatch_val($0, "comm")
+
+            # print ($0)
+        }
+    }
+    END{
+        for (i in _){
+            print i "\t\t\t" _[i]
+        }
+        print jstr(_)
+    }
+    '
+}
 
 f(){
-awk -v RS="\t" "$SSS"'
-
 {
-    data = $0
-}
-
-END{
-    # jiter_print_exact_after_tokenize(_, data, jpath("1.2"))
-    jiter_after_tokenize_(data)
-    print jstr1(_, "1.1")
-}
-
-' <<A
+    awk "$SSS
+    {
+        printf(\"%s\", json_to_machine_friendly(\$0) )
+    }" | f1
+}<<A
 [
     {
         "name": "v1.0.2",
@@ -48,13 +68,12 @@ END{
         "name": "v1.0.1",
         "message": null,
         "commit": {
-            "sha": "088ffaaf2808e34a4c108a5103e385ef5d853392",
+            "sha": "zz088ffaaf2808e34a4c108a5103e385ef5d853392",
             "date": "2021-08-01T07:32:52+00:00"
         }
     }
 ]
 A
-
 }
 
 time f

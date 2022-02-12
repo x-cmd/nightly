@@ -1,12 +1,4 @@
 BEGIN {
-    LEN = "\001"
-    L = LEN
-
-    KSEP = "\034"
-    S = KSEP
-
-    T = "\002"
-
     false = 0
     FALSE = 0
     true = 1
@@ -14,7 +6,8 @@ BEGIN {
 }
 
 function debug(msg){
-	print msg > "/dev/stderr"
+    # print msg > "/dev/stderr"
+	print "\033[31m" msg "\033[0m" > "/dev/stderr"
 }
 
 # function debug(msg){

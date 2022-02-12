@@ -5,19 +5,20 @@ xrc awk
 # awk -v data='abc
 # ' 'END { print data; }' <<< ""
 
-SSS="$(cat default.awk)$(cat json.awk jparse.awk jiter.awk jdict.awk jlist.awk)"
+SSS="$(cat default.awk)$(cat json.awk jiparse.awk jdict.awk jlist.awk)"
 
 
-f(){
-awk -v RS="\t" "$SSS"'
-
+f1(){
+awk "$SSS"'
 {
-    # debug(\$0)
-    data = $0
+    if ($0 != "") {
+        jiparse(arr, $0)
+        # print ($0)
+    }
 }
 
 END{
-    jparse(data, arr)
+    print jstr(arr)
     jdict_push(arr, S "\"" 1 "\"" S "\"" 2 "\"","\"d\"",9)
     jdict_rm(arr, jpath("1.2"), q("a"))
     jlist_push(arr, jpath("1.2.b"),9)
@@ -31,8 +32,17 @@ END{
     print json_stringify_machine(arr, "1.2.b")
     print json_stringify_compact(arr, ".")
 }
+'
+}
+f(){
 
-' <<A
+{
+    awk "$SSS
+    {
+        printf(\"%s\", json_to_machine_friendly(\$0) )
+    }" | f1
+} <<A
+[
 [
     { "a": 1, "b": 2, "c": 3 },
 {

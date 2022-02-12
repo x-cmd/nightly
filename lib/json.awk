@@ -247,6 +247,207 @@ function json_namedjpaths2arr(arr,
 }
 # EndSection
 
+# Section: jlist
+function jlist_push(arr, keypath, value,  _l){
+    _l = arr[ keypath T_LEN ] + 1
+    arr[ keypath S "\"" _l "\""] = value
+    arr[ keypath T_LEN ] = _l
+}
+
+function jlist_has(arr, keypath, value,  _l, _i) {
+    _l = arr[ keypath T_LEN ]
+    for (_i=1; _i<=_l; ++_i) {
+        if ( arr[keypath S "\""_i "\"" ] == value ) {
+            return true
+        }
+    }
+    return false
+}
+
+function jlist_rm(arr, keypath, value,  _l, _i, _found_idx) {
+    _l = arr[ keypath T_LEN ]
+    _found_idx = 0
+    for (_i=1; _i<=_l; ++_i) {
+        if (_found_idx != 0) {
+            arr[ keypath S "\"" _i - 1 "\"" ] = arr[ keypath S "\"" _i "\""]
+        }
+        if ( arr[keypath S "\""_i "\"" ] == value ) {
+            _found_idx = _i
+        }
+    }
+    if (_found_idx != 0) {
+        arr[ keypath T_LEN ] = arr[ keypath T_LEN ] - 1
+    }
+    return _found_idx
+}
+
+function jlist_len(arr, keypath){
+    return arr[ keypath T_LEN ]
+}
+
+function jlist_id2arr(obj, keypath, range, arr,    i, l){
+    jrange(range, obj[ keypath T_LEN ])
+
+    l=0
+    if (jrange_step > 0) {
+        for (i=jrange_start; i<=jrange_end; i=i+jrange_step) {
+            l = l + 1
+            arr[l] = keypath S q(i)
+        }
+    } else {
+        for (i=jrange_start; i>=jrange_end; i=i+jrange_step) {
+            l = l + 1
+            arr[l] = keypath S q(i)
+        }
+    }
+    return l
+}
+
+function jlist_value2arr(obj, keypath, range, arr,    i, l){
+    l = jlist_id2arr(obj, keypath, range, arr)
+    for (i=1; i<=l; ++i) {
+        arr[i] = obj[ arr[i] ]
+    }
+    return l
+}
+
+function jlist_str2arr(obj, keypath, range, arr,    i, l){
+    l = jlist_id2arr(obj, keypath, range, arr)
+    for (i=1; i<=l; ++i) {
+        arr[i] = jstr( obj, arr[i])
+    }
+    return l
+}
+
+function jlist_str02arr(obj, keypath, range, arr,    i, l){
+    l = jlist_id2arr(obj, keypath, range, arr)
+    for (i=1; i<=l; ++i) {
+        arr[i] = jstr0( obj, arr[i] )
+    }
+    return l
+}
+
+function jlist_str12arr(obj, keypath, range, arr,    i, l){
+    l = jlist_id2arr(obj, keypath, range, arr)
+    for (i=1; i<=l; ++i) {
+        arr[i] = jstr1( obj, arr[i] )
+    }
+    return l
+}
+
+# TOTEST
+function jlist_join(sep, obj, keypath, range,      _ret_arr, i, l, _ret){
+    l = jlist_value2arr(obj, keypath, range, _ret_arr)
+
+    ret = ""
+    for (i=1; i<=l; ++i) {
+        if (ret != "")  ret = ret sep _ret_arr[i]
+        else            ret = _ret_arr[i]
+    }
+    return ret
+}
+
+# TODO
+function jlist_totable(){
+    return true
+}
+
+function jlist_grep_to_arr( obj, keypath, reg,  arr,        _arrl,    _k, _len, _ret, _i, _tmp ){
+    _k = keypath
+    keypath = jpath(keypath)
+
+    _len = obj[ keypath T_LEN ]
+    for(_i=1; _i<=_len; ++_i){
+        _tmp = jpath(_k "." _i key)
+        if( match(json_str_unquote2( obj[ _tmp ] ), reg)){
+            arr[ ++_arrl ] = _tmp
+        }
+    }
+    return _arrl
+}
+
+# EndSection
+
+# Section: jdict
+# TODO: rename to jdict_keys2arr
+function jdict_keys(arr, keypath, klist, _l){
+    _l = split(arr[ keypath T_KEY ], klist, S)
+    klist[ L ] = _l
+    # TODO: klist[ L ] = _l-1
+    return _l
+}
+
+function jdict_keys2arr(arr, keypath, klist, _l){
+    _l = split(substr(arr[ keypath T_KEY ],2), klist, S)
+    klist[ L ] = _l
+    # TODO: klist[ L ] = _l-1
+    return _l
+}
+
+
+function jdict_rm(arr, keypath, key,  _key_str){
+    _key_str = arr[ keypath T_KEY]
+    if (match(_key_str, S key)){
+        arr[ keypath T_KEY ] = substr(_key_str, 1, RSTART - 1) substr(_key_str, RSTART + RLENGTH)
+        arr[ keypath T_LEN ] = arr[ keypath T_LEN ] - 1
+    }
+}
+
+# TODO: We should quote
+function jdict_push(arr, keypath, key, value,  _v){
+    _v = arr[keypath S key]
+    if ( _v != "" ) {
+        arr[keypath S key] = value
+    } else {
+        arr[ keypath T_LEN ] = arr[ keypath T_LEN ] + 1
+        arr[ keypath T_KEY ] = arr[ keypath T_KEY ] S key
+        # TODO: arr[ keypath T_KEY ] = arr[ keypath T_KEY ] key S
+        arr[keypath S key] = value
+    }
+    return _v
+}
+
+function jdict_has(arr, keypath, key,  _v) {
+    _v = arr[keypath S key]
+    return (_v == "") ? false : true
+}
+
+function jdict_get(arr, keypath, key){
+    return arr[keypath S key]
+}
+
+function jdict_len(arr, keypath){
+    return arr[ keypath T_LEN ]
+}
+
+# TODO: to check
+function jdict_value2arr(obj, keypath, arr,    _keyarr, i, l){
+    l = jdict_keys2arr(obj, keypath, _keyarr)
+    for (i=1; i<=l; ++i) {
+        arr[i] = jstr(obj, keypath S _keyarr[i])
+    }
+    arr[ L ] = l
+    return l
+}
+
+function jdict_grep_to_arr( obj, keypath, reg,  arr,    _arrl,  _klist, _k, _tmp, _len, _ret, _i ){
+    _k = keypath
+    keypath = jpath(keypath)
+
+    _l = split(substr(obj[ keypath T_KEY ],2), klist, S)
+
+    _arrl = 0
+    for(_i=1; _i<=_l; ++_i){
+        _tmp = _klist[_i]
+        if( match(json_str_unquote2( obj[ jpath(_k "." _tmp ) ] ), reg)){
+            arr[ ++ _arrl ] = _tmp
+        }
+    }
+    return _arrl
+}
+
+# EndSection
+
 # Section: json convert to machine friendly
 function json_to_machine_friendly(text){
     gsub(/"[^"\\\001-\037]*((\\[^u\001-\037]|\\u[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])[^"\\\001-\037]*)*"|-?(0|[1-9][0-9]*)([.][0-9]+)?([eE][+-]?[0-9]+)?|null|false|true|[ \t\n\r]+|./, "\n&", text)
@@ -282,6 +483,14 @@ function jstr0(arr, keypath){
 }
 # EndSection
 
+# Section
+function jdict_keys2arr(arr, keypath, klist, _l){
+    _l = split(substr(arr[ keypath T_KEY ],2), klist, S)
+    klist[ L ] = _l
+    # TODO: klist[ L ] = _l-1
+    return _l
+}
+# EndSection
 
 # Section: Compact Stringify
 function ___json_stringify_compact_dict(arr, keypath,     _klist, _l, _i, _key, _val, _ret){
@@ -384,11 +593,11 @@ function json_stringify_machine(arr, keypath,    _i, _len,_ret){
     _len = arr[ T_LEN ]
     if (_len < 1)  return ""
 
-    for (_i=1; _i<=_len; ++_i) {
+    _ret = ___json_stringify_machine_value( arr,  S "\"" 1 "\"")
+    for (_i=2; _i<=_len; ++_i) {
         _ret = _ret "\n"___json_stringify_machine_value( arr,  S "\"" _i "\"")
     }
 
-    _ret = substr(_ret, 2)
     return _ret
 }
 # EndSection
@@ -444,11 +653,11 @@ function json_stringify_format(arr, keypath, indent,       _i, _len,_ret){
     _len = arr[ T_LEN ]
     if (_len < 1)  return ""
 
-    for (_i=1; _i<=_len; ++_i) {
+    _ret = ___json_stringify_format_value( arr, S "\"" 1 "\"", indent )
+    for (_i=2; _i<=_len; ++_i) {
         _ret =  _ret "\n" ___json_stringify_format_value( arr, S "\"" _i "\"", indent )
     }
 
-    _ret = substr(_ret, 2)
     return _ret
 }
 # EndSection
@@ -471,11 +680,11 @@ function jiter_save( obj ) {
     obj[ "LAST_KL" ]    = JITER_LAST_KL
 }
 
-function jiter_init( ) {
-    JITER_FA_KEYPATH    = ""
+function jiter_init( keypath_prefix ) {
+    JITER_FA_KEYPATH    = keypath_prefix
     JITER_STATE         = T_ROOT
     JITER_LAST_KP       = ""
-    JITER_LEVEL         = 1
+    JITER_LEVEL         = 0
     JITER_CURLEN        = 0
     JITER_LAST_KL       = ""
 }
@@ -487,5 +696,25 @@ function jiter_load( obj ){
     JITER_LEVEL         = obj[ "LEVEL" ]
     JITER_CURLEN        = obj[ "CURLEN" ]
     JITER_LAST_KL       = obj[ "LAST_KL" ]
+}
+# EndSection
+
+# Section: still strange: should be global search
+
+# TODO: ...
+function jgrep_to_arr(obj, keypath, key, reg,      _type){
+    _k = keypath
+    keypath = jpath(keypath)
+
+    _type = obj[ keypath ]
+    if (_type == T_LIST) {
+        return jlist_grep(obj, keypath, key, reg)
+    }
+
+    if (_type == T_DICT) {
+        return jdict_grep(obj, keypath, key, reg)
+    }
+
+    return ""
 }
 # EndSection
