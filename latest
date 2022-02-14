@@ -1044,7 +1044,7 @@ ___x_cmd_main(){
 
 # Section : advise.json
 ___x_cmd_x_cmd_advise_json(){
-    xrc cat x-cmd/_v0/x.json
+    xrc cat x-cmd/lib/x.json
     return 126
 }
 # EndSection
@@ -1052,7 +1052,7 @@ ___x_cmd_x_cmd_advise_json(){
 # Section : help
 ___x_cmd_x_cmd_help(){
     xrc advise/lib/advise_get
-    ___x_cmd_advise_get_help "$(xrc which x-cmd/_v0/x.json)"
+    ___x_cmd_advise_get_help "$(xrc which x-cmd/lib/x.json)"
 }
 # EndSection
 
