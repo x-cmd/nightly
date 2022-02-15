@@ -4,7 +4,7 @@ BEGIN {
 
 
     LEN = "len"
-    # data 
+    # data
 
     # col_max = 0
     col_num = 0
@@ -12,23 +12,23 @@ BEGIN {
     if (HIGHROW != 0) {
         arr_len = split(HIGHROW, arr, ",")
         for (i=1; i<=arr_len; ++i) {
-            highrow[ arr[i] ] = 1 
+            highrow[ arr[i] ] = 1
         }
-    } 
+    }
 
     if (HIGHCOL != 0) {
         arr_len = split(HIGHCOL, arr, ",")
         for (i=1; i<=arr_len; ++i) {
             highcol[ arr[i] ] = 1
         }
-    } 
+    }
 }
 
 NR > 1{
     line_idx = NR - 1
 
     data[ LEN ] = line_idx
-    
+
     # TODO: Problably have to deal with \n
     arr_len = split($0, arr, "\003")
 

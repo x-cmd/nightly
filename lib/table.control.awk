@@ -165,43 +165,7 @@ function update_logical_table(  _cord, _elem, row_i, col_i, _ok){
 }
 # EndSection
 
-# Section: utilities
-
-function send_update(msg){
-    # mawk
-    if (ORS == "\n") {
-        # gsub("\n", "\001", msg)
-        gsub(/\n/, "\001", msg)
-    }
-
-    printf("%s %s %s" ORS, "UPDATE", max_col_size, max_row_size)
-    printf("%s" ORS, msg)
-
-    fflush()
-}
-
-function send_env(var, value){
-    # mawk
-    if (ORS == "\n") {
-        gsub(/\n/, "\001", value)
-    }
-
-    printf("%s %s" ORS, "ENV", var)
-    printf("%s" ORS, value)
-    # printf("%s %s\001", "ENV", var)
-    # printf("%s\001", value)
-    fflush()
-}
-# EndSection
-
 # Section: Get data
-function update_width_height(width, height) {
-    max_row_size = height
-    max_col_size = width
-    # TODO: if row less than 10 rows, we should exit.
-    max_row_in_page = max_row_size - 10
-}
-
 NR==1 {
     update_width_height( $2, $3 )
 }
@@ -352,9 +316,7 @@ function ctrl(char_type, char_value) {
 
 # Section: MSG Flow And End
 NR>2 {
-    if ($0~/^R:/) {
-        split($0, arr, ":")
-        update_width_height(arr[3], arr[4])
+    if (try_update_width_height( text ) == true) {
         update_logic_view()
     } else {
         cmd=$0

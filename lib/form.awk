@@ -153,13 +153,6 @@ function ctrl(type, char) {
 # EndSection
 
 # Section: view
-function send_update(msg){
-    printf("%s %s %s" ORS, "UPDATE", max_col_size, max_row_size)
-    printf("%s" ORS, msg)
-
-    fflush()
-}
-
 BEGIN{
     CLR_DESC = "\033[0;32m"
 
@@ -272,20 +265,6 @@ NR>1{
     }
 }
 
-# Section: set env
-function send_env(var, value){
-    # mawk
-    if (ORS == "\n") {
-        gsub(/\n/, "\001", value)
-        printf("%s %s" ORS, "ENV", var)
-        printf("%s" ORS, value)
-    } else{
-        printf("%s %s" ORS, "ENV", var)
-        printf("%s" ORS, value)
-    }
-    fflush()
-}
-
 END {
     for (i=1; i<=rulel; ++i) {
         var =       rule[ i ATT_VAR ]
@@ -294,4 +273,3 @@ END {
     }
     send_env("___X_CMD_UI_FORM_EXIT", exit_strategy_arr[ctrl_exit_strategy])
 }
-# EndSection

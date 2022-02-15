@@ -26,7 +26,8 @@ test_form(){
     printf "%s\n" "user: $user"
 }
 test_select(){
-    ui select "text" "Please select the app you want to install:"  "Install docker"  "Install k8s" "Install "  "Instaddll k8s"
+    ui select "num,text" "Please select the app you want to install:"  "Install docker"  "Install k8s" "Install "  "Instaddll k8s"
+    echo "$num: $text"
 }
 
 x log init ui

@@ -102,7 +102,7 @@ xrc awk
 # 2. Input json, then tranfer as primitive data to awk
 # 3. Using instruction to control table
 
-___X_CMD_UI_TABLE_CONTROL_AWK_PATH="$(x which ui/lib/table.control.awk)"
+___X_CMD_UI_TABLE_CONTROL_AWK_PATH="$(x which ui/lib/share.awk ui/lib/table.control.awk)"
 # ___X_CMD_UI_TABLE_CONTROL_AWK_PATH="./table.control.awk"
 
 if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
