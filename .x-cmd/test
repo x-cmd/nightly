@@ -12,7 +12,10 @@ test_table(){
         ui table + edwinjhlee       99999   5.9  1.7 57448804 293384   "??"  S    "2:25下午"  18:21.02 "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Renderer).app3"
     done
     ui table
-    printf "%s\n" "___X_CMD_UI_TABLE_final_command: $___X_CMD_UI_TABLE_final_command"
+    printf "%s\n" "___X_CMD_UI_TABLE_FINAL_COMMAND: $___X_CMD_UI_TABLE_FINAL_COMMAND"
+    printf "%s\n" "___X_CMD_UI_TABLE_CURRENT_ROW: $___X_CMD_UI_TABLE_CURRENT_ROW"
+    printf "%s\n" "___X_CMD_UI_TABLE_CURRENT_COLUMN: $___X_CMD_UI_TABLE_CURRENT_COLUMN"
+    printf "%s\n" "___X_CMD_UI_TABLE_CUR_LINE: $___X_CMD_UI_TABLE_CUR_LINE"
 }
 test_form(){
     ui form \

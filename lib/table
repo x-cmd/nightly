@@ -102,17 +102,17 @@ xrc awk
 # 2. Input json, then tranfer as primitive data to awk
 # 3. Using instruction to control table
 
-___X_CMD_UI_TABLE_CONTROL_AWK_PATH="$(x which ui/lib/share.awk ui/lib/table.control.awk)"
-# ___X_CMD_UI_TABLE_CONTROL_AWK_PATH="./table.control.awk"
+# ___X_CMD_UI_TABLE_CONTROL_AWK_PATH="$(xrc cat ./lib/share.awk ./lib/table.control.awk)"
+___X_CMD_UI_TABLE_CONTROL_AWK_PATH="$(xrc cat ui/lib/share.awk ui/lib/table.control.awk)"
 
 if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
 ___x_cmd_ui_table_control_awk(){
-    LC_ALL=en_US.UTF-8 USE=str,wcwidth,ui ___x_cmd_awk file "$___X_CMD_UI_TABLE_CONTROL_AWK_PATH" \
+    LC_ALL=en_US.UTF-8 USE=str,wcwidth,ui ___x_cmd_awk code "$___X_CMD_UI_TABLE_CONTROL_AWK_PATH" \
         -v EXIT_OP="$EXIT_OP" -W interactive
 }
 else
 ___x_cmd_ui_table_control_awk(){
-    LC_ALL=en_US.UTF-8 USE=str,wcwidth,ui ___x_cmd_awk file "$___X_CMD_UI_TABLE_CONTROL_AWK_PATH" \
+    LC_ALL=en_US.UTF-8 USE=str,wcwidth,ui ___x_cmd_awk code "$___X_CMD_UI_TABLE_CONTROL_AWK_PATH" \
         -v EXIT_OP="$EXIT_OP" -v RS="$___X_CMD_UI_REGION_RS" -v ORS="$___X_CMD_UI_REGION_RS"
 }
 fi
@@ -167,6 +167,11 @@ ___ui_table_out_func(){
 #     ___x_cmd_ui_table + edwinjhlee       99999   5.9  1.7 57448804 293384   "??"  S    "2:25下午"  18:21.02 "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Renderer).app3"
 # done
 # ___x_cmd_ui_table
+
+# printf "%s\n" "___X_CMD_UI_TABLE_FINAL_COMMAND: $___X_CMD_UI_TABLE_FINAL_COMMAND"
+# printf "%s\n" "___X_CMD_UI_TABLE_CURRENT_ROW: $___X_CMD_UI_TABLE_CURRENT_ROW"
+# printf "%s\n" "___X_CMD_UI_TABLE_CURRENT_COLUMN: $___X_CMD_UI_TABLE_CURRENT_COLUMN"
+# printf "%s\n" "___X_CMD_UI_TABLE_CUR_LINE: $___X_CMD_UI_TABLE_CUR_LINE"
 
 # prepare_data(){
 #     ___x_cmd_ui_table jsonfmt .table.abc name age gender math=score.math <<A

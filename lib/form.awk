@@ -53,9 +53,9 @@ NR==1{
     }
 
     for (i=1; i<=rulel; ++i) {
-        question =   rule[ i ATT_DESC ]
-        # answer =    rule[ i ATT_ANS ]
-        op =        rule[ i ATT_OP ]
+        question            = rule[ i ATT_DESC ]
+        rule[ i ATT_ANS ]   = rule[ i ATT_DEFAULT ]
+        op                  = rule[ i ATT_OP ]
         # printf("%-30s%-20s\n", question, op) >"/dev/stderr"
     }
 }
@@ -166,6 +166,14 @@ BEGIN{
     CLR_EXIT_ANSWER_SEL = "\033[33m"
 }
 
+function draw_secret_text(text,       _i,_ret){
+    _ret=""
+    for (_i=1; _i<=length(text); ++_i){
+        _ret=_ret "*"
+    }
+    return _ret
+}
+
 function view(  msg){
     if (rule[ ctrl_current ATT_OP ] == "=") {
         msg = "Press <Arrow-Up> and <Arrow-Down> to alternate question" "\n"
@@ -187,7 +195,11 @@ function view(  msg){
             data = "\033[4m"
             if (op != "=") {
                 data = sprintf(CLR_QUESTION_SEL "%" question_width "s", question) "\033[0m"
-                data = data ":  " CLR_ANSWER_SEL answer "\033[0m"
+                if (op ~ "*"){
+                    data = data ":  " CLR_ANSWER_SEL draw_secret_text(answer) "\033[0m"
+                } else {
+                    data = data ":  " CLR_ANSWER_SEL answer "\033[0m"
+                }
             } else {
                 if (answer == "") answer = 1
 
@@ -206,7 +218,11 @@ function view(  msg){
             data = ""
             if (op != "=") {
                 data = sprintf(CLR_QUESTION "%" question_width "s", question) "\033[0m"
-                data = data ":  " CLR_ANSWER answer "\033[0m"
+                if (op ~ "*"){
+                    data = data ":  " CLR_ANSWER_SEL draw_secret_text(answer) "\033[0m"
+                } else {
+                    data = data ":  " CLR_ANSWER_SEL answer "\033[0m"
+                }
             } else {
                 if (answer == "") answer = 1
                 data = sprintf(CLR_QUESTION "%" question_width "s", question) "\033[0m"

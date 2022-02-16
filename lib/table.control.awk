@@ -1,23 +1,16 @@
 
 # Section: Global data
 BEGIN {
-
     KSEP = "\001"
 
-    if (available_row == "") {
-        available_row = 10
-    }
+    if (available_cols_len == "")       available_cols_len = 30
 
-    if (available_cols_len == "") {
-        available_cols_len = 30
-    }
-
+    if (available_row == "")            available_row = 10
     max_row_in_page = available_row
 
     start_row = 1
 
-    cur_col = 1
-    cur_row = 0
+    # CURRENT_COLUMN = 1
 
     table_col = 0
 
@@ -32,35 +25,16 @@ BEGIN {
 # EndSection
 
 # Section: view
-BEGIN {
-    BUFFER = ""
-}
-
-function bufferln(data){
-    if (BUFFER == "") BUFFER = data
-    else BUFFER = BUFFER "\n" data
-}
-
-function buffer_append(data){
-    BUFFER = BUFFER data
-}
-
-function buffer_clear(          buf){
-    buf = BUFFER
-    BUFFER = ""
-    return buf
-}
-
 function update_view_print_cell(logic_row_i, row_i, col_i,       h, _size){
     cord = row_i KSEP col_i
-
-    if (cur_col == col_i) h = 1
+    if ( ctrl_rstate_get( CURRENT_COLUMN ) == col_i ) h = 1
 
     # if (highlight[ cord ]) h = 1
 
     if (h == 1) buffer_append( sprintf("%s",UI_TEXT_BOLD UI_FG_BLUE UI_TEXT_REV ) )
 
-    if (logic_row_i == cur_row) {
+    _tmp_currow = ctrl_rstate_get( CURRENT_ROW )
+    if ( logic_row_i == _tmp_currow ) {
         buffer_append( sprintf("%s", UI_FG_GREEN UI_TEXT_REV) )
     }
     if (col_max[ col_i ] > available_cols_len) {
@@ -73,47 +47,39 @@ function update_view_print_cell(logic_row_i, row_i, col_i,       h, _size){
 
     # if ((h == 1) && (highrow[ row_i ] != 1)) printf( UI_END )
 
-    if ((h == 1) && ( logic_row_i != cur_row )) buffer_append( sprintf( UI_END ) )
+    if ((h == 1) && ( logic_row_i != _tmp_currow )) buffer_append( sprintf( UI_END ) )
     buffer_append( sprintf( UI_END ) )
 }
 
 BEGIN{
     NEWLINE = "\n"
-    UI_KEY="\033[7m"
+
+    ctrl_help_item_put("ARROW UP/DOWN/LEFT/ROW", "to move focus")
+    ctrl_help_item_put("n/p", "for next/previous page")
+    ctrl_help_item_put("c/r/u/d", "for create/retrive/update/delete")
 }
 
-function get_help(key, msg) {
-    return UI_KEY key UI_END " " msg "; "
-}
+function update_logic_view(           logic_row_i, row_i, col_i, start_row, _row_in_page, _tmp_currow){
 
-function update_logic_view(           logic_row_i, row_i, col_i, start_row, _row_in_page){
-
-    _row_in_page = max_row_in_page
-
-    _msg = get_help("q", "to quit")
-
-    if (ctrl_help_toggle == true) {
-        _msg = get_help("h", "close help") _msg "\n"
-        _msg = _msg get_help("ARROW UP/DOWN/LEFT/ROW", "to move focus") "\n"
-        _msg = _msg get_help("n/p", "for next/previous page") "\n"
-        _msg = _msg get_help("c/r/u/d", "for create/retrive/update/delete")
-        _row_in_page = _row_in_page - 3
+    if ( ctrl_help_toggle_state() == true ) {
+        _row_in_page = max_row_in_page - 3
     } else {
-        _msg = get_help("h", "open  help") _msg
+        _row_in_page = max_row_in_page
     }
 
-    buffer_append( _msg "\n\n")
+    buffer_append( ctrl_help_get() "\n\n")
 
-    start_row = int( (cur_row - 2) / _row_in_page) * _row_in_page + 2
+    _tmp_currow = ctrl_rstate_get( CURRENT_ROW )
+    start_row = int( (_tmp_currow - 2) / _row_in_page) * _row_in_page + 2
 
-    buffer_append( sprintf("FILTER: %s" NEWLINE, filter[cur_col]) )
+    buffer_append( sprintf("FILTER: %s" NEWLINE, filter[ ctrl_rstate_get( CURRENT_COLUMN ) ]) )
 
     buffer_append( sprintf("%s     ", UI_TEXT_UNDERLINE UI_TEXT_BOLD) )
     for (col_i=1; col_i<=table_col; col_i++) {
         # limit the length
         if (col_max[ col_i ] > available_cols_len) {
             buffer_append( sprintf( "%s", str_pad_right( data[ 1 KSEP col_i ], available_cols_len + 6, data_wlen[ 1 KSEP col_i ] ) ) )
-        }else{
+        } else {
             buffer_append( sprintf( "%s  ", str_pad_right( data[ 1 KSEP col_i ], col_max[ col_i ], data_wlen[ 1 KSEP col_i ] ) ) )
         }
         # buffer_append( sprintf( "%s  ", str_pad_right( data[ 1 KSEP col_i ], col_max[ col_i ], data_wlen[ 1 KSEP col_i ] ) ) )
@@ -131,11 +97,10 @@ function update_logic_view(           logic_row_i, row_i, col_i, start_row, _row
         }
         buffer_append( sprintf("%s" NEWLINE, UI_END) )
     }
-    buffer_append( sprintf("SELECT: %s" NEWLINE, data[ cur_row KSEP cur_col ]) )
+    buffer_append( sprintf("SELECT: %s" NEWLINE, data[ _tmp_currow KSEP ctrl_rstate_get( CURRENT_COLUMN ) ]) )
     # buffer_append( NEWLINE )
 
     send_update( buffer_clear() )
-    BUFFER = ""
 }
 
 # EndSection
@@ -161,14 +126,13 @@ function update_logical_table(  _cord, _elem, row_i, col_i, _ok){
             logic_table[ logic_table_row ] = row_i
         }
     }
-    cur_row = 2
+
+    ctrl_rstate_init( CURRENT_ROW, 2, logic_table_row )
 }
 # EndSection
 
 # Section: Get data
-NR==1 {
-    update_width_height( $2, $3 )
-}
+NR==1 {     update_width_height( $2, $3 );      }
 
 function parse_data(text,
     row_i, col_i,
@@ -203,109 +167,48 @@ function parse_data(text,
         }
     }
 
+    ctrl_rstate_init( CURRENT_COLUMN, 1, table_col )
     update_logical_table()
 }
 
-NR==2 {
-    parse_data($0)
-    # update_view()
-}
+NR==2 {         parse_data($0);     }
 
 # EndSection
 
 # Section: ctrl
 BEGIN {
-    final_command = ""
-    ctrl_filter_edit_state = false
-    ctrl_help_toggle = false
+    ctrl_sw_init( FILTER_EDIT, false )
     # filter
-}
-
-function exit_with_elegant(command, item){
-    final_command = command
-    exit(0)
 }
 
 function ctrl_in_filter_state(char_type, char_value){
     if (char_value == "ENTER") {
-        ctrl_filter_edit_state = false
+        ctrl_sw_toggle( FILTER_EDIT)
         update_logical_table()
-    } else if (char_type == "ascii-delete") {
-        cur_filter = filter[ cur_col ]
-        filter[ cur_col ] = substr(cur_filter, 1, length(cur_filter) - 1)
-        # trigger filter: invocation cost much...
-    } else {
-        cur_filter = filter[ cur_col ]
-        filter[ cur_col ] = cur_filter char_value
+        return
     }
+    ctrl_lineedit_handle( filter, ctrl_rstate_get( CURRENT_COLUMN ), char_type, char_value )
 }
 
 function ctrl_not_in_filter_state(char_type, char_value){
-    if (char_type == "ascii-space") {
-        ctrl_filter_edit_state = true
-    } else if (char_value == "ENTER") {
-        exit_with_elegant( "enter" )
-        # ctrl_filter_edit_state = false
-    } else if (char_value == "h") {
-        ctrl_help_toggle = 1 - ctrl_help_toggle
-    } else if (char_value == "q") {
-        exit_with_elegant( "quit" )
-    } else if (char_value == "c") {
-        exit_with_elegant( "create" )
-    } else if (char_value == "r") {
-        exit_with_elegant( "retrieve" )
-    } else if (char_value == "u") {
-        # update
-        exit_with_elegant( "update" )
-    } else if (char_value == "d") {
-        # delete
-        exit_with_elegant( "delete" )
-    } else if (char_value == "e") {
-        # edit
-        exit_with_elegant( "edit" )
-    } else if (char_value == "f") {
-        # refresh
-        exit_with_elegant( "refresh" )
-    } else if (char_value == "n") {
-        # previous page
-        cur_row = cur_row + max_row_in_page
-        cur_row = ((cur_row - 2) % logic_table_row + 2)
-        # update_logical_table()
-    } else if (char_value == "p") {
-        cur_row = cur_row - max_row_in_page
-        cur_row = ((cur_row - 2) % logic_table_row + 2)
-        cur_row = ((cur_row + logic_table_row - 2) % logic_table_row +2 )
-        # update_logical_table()
-    } else if (char_value == "UP") {
-        cur_row = cur_row - 1
-        if (cur_row <= 1) cur_row = logic_table_row
-        # update_logical_table()
-    } else if (char_value == "DN") {
-        if (cur_row <= 1) {
-            cur_row = 2
-        } else {
-            cur_row = cur_row + 1
-            if (cur_row > logic_table_row) cur_row = 2
-        }
-        # update_logical_table()
-    } else if (char_value == "LEFT" ) {
-        # debug_file("RECV" command)
-        cur_col = cur_col - 1
-        if (cur_col <= 0) cur_col = table_col
-        # update_logical_table()
-    } else if (char_value == "RIGHT") {
-        if (cur_col <= 0) {
-            cur_col = 1
-        } else {
-            cur_col = cur_col + 1
-            if (cur_col > table_col) cur_col = 1
-        }
-        # update_logical_table()
-    }
+    exit_if_detected( char_value )
+
+    if (char_type == "ascii-space")                 return ctrl_sw_toggle( FILTER_EDIT )
+
+    if (char_value == "h")                          return ctrl_help_toggle()
+
+    if (char_value == "n")                          return ctrl_rstate_add( CURRENT_ROW, max_row_in_page )
+    if (char_value == "p")                          return ctrl_rstate_add( CURRENT_ROW, - max_row_in_page )
+
+    if (char_value == "UP")                         return ctrl_rstate_dec( CURRENT_ROW )
+    if (char_value == "DN")                         return ctrl_rstate_inc( CURRENT_ROW )
+
+    if (char_value == "LEFT" )                      return ctrl_rstate_dec( CURRENT_COLUMN )
+    if (char_value == "RIGHT")                      return ctrl_rstate_inc( CURRENT_COLUMN )
 }
 
 function ctrl(char_type, char_value) {
-    if (ctrl_filter_edit_state == true) {
+    if (ctrl_sw_get( FILTER_EDIT ) == true) {
         ctrl_in_filter_state(char_type, char_value)
     } else {
         ctrl_not_in_filter_state(char_type, char_value)
@@ -316,7 +219,7 @@ function ctrl(char_type, char_value) {
 
 # Section: MSG Flow And End
 NR>2 {
-    if (try_update_width_height( text ) == true) {
+    if (try_update_width_height( $0 ) == true) {
         update_logic_view()
     } else {
         cmd=$0
@@ -327,11 +230,13 @@ NR>2 {
 }
 
 END {
-    if (final_command != "") {
-        send_env("___X_CMD_UI_TABLE_final_command", final_command)
-        send_env("___X_CMD_UI_TABLE_CUR_ROW", cur_row)
-        send_env("___X_CMD_UI_TABLE_CUR_COL", cur_col)
-        send_env("___X_CMD_UI_TABLE_CUR_LINE", lines[cur_row])
+    if ( exit_is_with_cmd() == true ) {
+        _tmp_currow = ctrl_rstate_get( CURRENT_ROW )
+
+        send_env( "___X_CMD_UI_TABLE_FINAL_COMMAND",    exit_get_cmd() )
+        send_env( "___X_CMD_UI_TABLE_CURRENT_ROW",      _tmp_currow )
+        send_env( "___X_CMD_UI_TABLE_CURRENT_COLUMN",   ctrl_rstate_get( CURRENT_COLUMN ) )
+        send_env( "___X_CMD_UI_TABLE_CUR_LINE",         lines[ _tmp_currow ] )
     }
 }
 # EndSection
