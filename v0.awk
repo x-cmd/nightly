@@ -630,7 +630,7 @@ function parse_param_dsl(line,
             state = STATE_TYPE
         } else if (line ~ /^options?:/) {
             state = STATE_OPTION
-        } else if ( (line ~ /^subcommands?:/) || (line ~ /^subcmds?:/) ){
+        } else if (line ~ /^((subcommand)|(subcmd))s?:/) {
             state = STATE_SUBCOMMAND
         } else if (line ~ /^arguments?:/) {
             state = STATE_ARGUMENT
