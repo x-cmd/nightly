@@ -1,10 +1,10 @@
 # shellcheck shell=sh
 # shellcheck disable=SC2039,3043
 
-gt_repo(){
+___x_cmd_gt_repo(){
     param:scope     "gitee/$O"
     param:dsl       '
-subcommands:
+subcmd:
     new             "new repo client"
     create          "create repo"
     ls              "list repo of owner"
@@ -18,29 +18,29 @@ subcommands:
     param:run
 
     if [ -z "$PARAM_SUBCMD" ]; then
-        gt_log error "Command Not Found. Show help."
+        ___x_cmd_gt_log error "Command Not Found. Show help."
         return 0
     fi
     
-    "gt_repo_${PARAM_SUBCMD}" "$@" 
+    "___x_cmd_gt_repo_${PARAM_SUBCMD}" "$@" 
 }
 
-_gt_repo()(
-    gt_current_repo "${1:-repo}"
+____x_cmd_gt_repo()(
+    ___x_cmd_gt_current_repo "${1:-repo}"
     shift
-    gt_repo ${1:+"$@"}
+    ___x_cmd_gt_repo ${1:+"$@"}
 )
 
-gt_repo_new() {
+___x_cmd_gt_repo_new() {
     param:void
     local reponame="${1:?Provide object name}"
     local aliasname="${2:-$reponame}"
     # shellcheck disable=SC2139
-    alias "$aliasname=\"O=$O _gt_repo $reponame\""
+    alias "$aliasname=\"O=$O ____x_cmd_gt_repo $reponame\""
 }
 
 # arguments NAME
-gt_repo_create() {
+___x_cmd_gt_repo_create() {
     local O="${O:-GITEE_DEFAULT}"
 
     param:scope     "gitee/$O"
@@ -78,12 +78,12 @@ option:
     [ -n "$no_comment" ] && can_comment=false
     [ -n "$no_auto_init" ] && auto_init=false
 
-    [ $# -eq 0 ] && gt_log info "repo create name is null" && return
+    [ $# -eq 0 ] && ___x_cmd_gt_log info "repo create name is null" && return
     local name
     for name in "$@"; do
         {
             local data repo_id url repo_owner
-            data=$(___gt_post_json "/v5/user/repos" name="${name##*/}" description homepage has_issues has_wiki can_comment \
+            data=$(______x_cmd_gt_post_json "/v5/user/repos" name="${name##*/}" description homepage has_issues has_wiki can_comment \
             auto_init gitignore_template license_template path="$paths" private 2>/dev/null)
             ___json_awk_get repo_id=.id url=.html_url repo_owner=.owner.login <<A
             $data
@@ -91,7 +91,7 @@ A
             if [ -n "$repo_id" ];then
                 ui tf "true" "Creating repo $name success" "repo_id:$repo_id" "url:$url" "repo_owner:$repo_owner" 
             else
-                gt_log error "Creating repo failure: $name. Code is $code. " 
+                ___x_cmd_gt_log error "Creating repo failure: $name. Code is $code. " 
             fi
         }
     done
@@ -101,7 +101,7 @@ A
 # shellcheck disable=SC2154,SC2034
 
 # https://gitee.com/api/v5/swagger#/postV5OrgsOrgRepos
-gt_org_repo_create() {
+___x_cmd_gt_org_repo_create() {
     # TODO: I don't know what does path means for an organization repo
     # path is null default repo name as path
     param:scope     "gitee/$O"
@@ -142,17 +142,17 @@ option:
     # TODO:owner may be personal
     local name
     for name in "$@"; do
-        # name="$(___gt_param_normalize_repo "$name")"
+        # name="$(______x_cmd_gt_param_normalize_repo "$name")"
         # owner="$(echo "$name" | cut -d / -f 1)"
         # name="$(echo "$name" | cut -d / -f 2)"
         local resp
         {
-            ___gt_post_json "/v5/orgs/$org/repos" name description homepage has_issues has_wiki can_comment auto_init \
+            ______x_cmd_gt_post_json "/v5/orgs/$org/repos" name description homepage has_issues has_wiki can_comment auto_init \
              gitignore_template license_template path="$paths" public
             code=$?
             if [ $code -ne 0 ]; then
-                gt_log error "Creating repo failure: $name. Code is $code. "
-                # ___gt_resp_header "" >&2
+                ___x_cmd_gt_log error "Creating repo failure: $name. Code is $code. "
+                # ______x_cmd_gt_resp_header "" >&2
                 return $code
             fi
         } 
@@ -161,7 +161,7 @@ option:
 
 # https://gitee.com/api/v5/swagger#/postV5EnterprisesEnterpriseRepos
 # shellcheck disable=SC2154
-gt_enterprise_repo_create() {
+___x_cmd_gt_enterprise_repo_create() {
     param:scope     "gitee/$O"
     param:dsl       '
 type:
@@ -204,12 +204,12 @@ option:
     local name
     for name in "$@"; do
     {
-        ___gt_post_json "/v5/enterprises/${enterprise##*/}/repos" \
+        ______x_cmd_gt_post_json "/v5/enterprises/${enterprise##*/}/repos" \
             name description homepage has_issues can_comment auto_init \
             gitignore_template license_template path="$paths" private enterprise outsourced project_creator members
             code=$?
             if [ $code -ne 0 ]; then
-                gt_log error "Creating repo failure: $name. Code is $code. "
+                ___x_cmd_gt_log error "Creating repo failure: $name. Code is $code. "
                 return $code
             fi
         } | json_color
@@ -224,24 +224,24 @@ option:
 
 # gt repo list --access inner-source <owner>
 # gt enterprise repo list
-gt_repo_ls() {
+___x_cmd_gt_repo_ls() {
     param:void
     local owner
     owner="$1"
 
     if [ -z "$owner" ]; then
-        gt_user_repo "$@"
+        ___x_cmd_gt_user_repo "$@"
         return
     fi
 
     local owner_type
-    owner_type="$(___gt_owner_type_query "$owner")"
+    owner_type="$(______x_cmd_gt_owner_type_query "$owner")"
     if [ -n "$owner_type" ] && [ -n "$owner" ]; then
-        "gt_${owner_type}_repo" ls "$@"
+        "___x_cmd_gt_${owner_type}_repo" ls "$@"
         return
     fi
 
-    gt_log error "Please provide owner and owner_type\n"
+    ___x_cmd_gt_log error "Please provide owner and owner_type\n"
     return 1
     # param_help.show
 }
@@ -249,7 +249,7 @@ gt_repo_ls() {
 ############################
 # Section 7: Repo - Deletion & Info & Creation
 ############################
-gt_repo_info() {
+___x_cmd_gt_repo_info() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -257,13 +257,13 @@ options:
 '
     param:run
 
-    gt_param_init_owner_repo
-    ___gt_get "/v5/repos/${owner_repo}"
-    # ___gt_get "/v5/repos/${owner}/${repo}"
+    ___x_cmd_gt_param_init_owner_repo
+    ______x_cmd_gt_get "/v5/repos/${owner_repo}"
+    # ______x_cmd_gt_get "/v5/repos/${owner}/${repo}"
 }
 
 # https://gitee.com/api/v5/swagger#/deleteV5ReposOwnerRepo
-gt_repo_del() {
+___x_cmd_gt_repo_del() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -275,17 +275,17 @@ options:
     [ "$confirm" = "no" ] && return
     local i
     for i in "$@"; do
-        ___gt_param_normalize_repo "$i"
-        ___gt_delete "/v5/repos/$owner_repo" >/dev/null 
+        ______x_cmd_gt_param_normalize_repo "$i"
+        ______x_cmd_gt_delete "/v5/repos/$owner_repo" >/dev/null 
         if [ $? -eq 0 ]; then
             ui tf "true" "deleted repo $i"
         else
-            gt_log error "Code is $?. Deleting repo failure: $i. Probably because it desn't exists."
+            ___x_cmd_gt_log error "Code is $?. Deleting repo failure: $i. Probably because it desn't exists."
         fi
     done
 }
 
-gt_repo_clear() {
+___x_cmd_gt_repo_clear() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -293,15 +293,15 @@ options:
 '
     param:run
 
-    gt_param_init_owner_repo
+    ___x_cmd_gt_param_init_owner_repo
     local confirm
     confirm=$(ui select "text" "Are you sure you want to clear repo ${owner_repo}" "yes" "no")
     [ "$confirm" = "no" ] && return
-    ___gt_put_json "/v5/repos/${owner_repo}/clear" && ui tf "true" "Successfully clear ${owner_repo}" && return
-    gt_log error "clear repo failure: $owner_repo"
+    ______x_cmd_gt_put_json "/v5/repos/${owner_repo}/clear" && ui tf "true" "Successfully clear ${owner_repo}" && return
+    ___x_cmd_gt_log error "clear repo failure: $owner_repo"
 }
 
-gt_repo_review(){
+___x_cmd_gt_repo_review(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -312,6 +312,6 @@ options:
     --testers_number      "number of people tested"     <>:number="1"
 '
     param:run
-    gt_param_init_owner_repo
-    ___gt_put_json "/v5/repos/${owner_repo}/reviewer" assignees testers assignees_number testers_number
+    ___x_cmd_gt_param_init_owner_repo
+    ______x_cmd_gt_put_json "/v5/repos/${owner_repo}/reviewer" assignees testers assignees_number testers_number
 }

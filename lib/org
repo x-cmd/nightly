@@ -1,10 +1,10 @@
 # shellcheck shell=sh
 # shellcheck disable=SC2039,3043
 
-gt_org(){
+___x_cmd_gt_org(){
     param:scope     "gitee/$O"
     param:dsl       '
-subcommands:
+subcmd:
     new                     "new organization client"
     info                    "Show information"
     create                  "create org"
@@ -16,28 +16,28 @@ subcommands:
     param:run
 
     if [ -z "$PARAM_SUBCMD" ]; then
-        gt_log error "Command Not Found. Show help."
+        ___x_cmd_gt_log error "Command Not Found. Show help."
         return 0
     fi
       
-    "gt_org_${PARAM_SUBCMD}" "$@"
+    "___x_cmd_gt_org_${PARAM_SUBCMD}" "$@"
 }
 
-_gt_org()(
-    gt_current_owner "${1:?organziation name}" "org"
+____x_cmd_gt_org()(
+    ___x_cmd_gt_current_owner "${1:?organziation name}" "org"
     shift 1
-    gt_org ${1:+"$@"}
+    ___x_cmd_gt_org ${1:+"$@"}
 )
 
-gt_org_new() {
+___x_cmd_gt_org_new() {
     param:void
     local orgname="${1:?Provide orgname name}"
     local aliasname="${2:-$reponame}"
     # shellcheck disable=SC2139
-    alias "$aliasname=\"O=$O _gt_org $orgname\""
+    alias "$aliasname=\"O=$O ____x_cmd_gt_org $orgname\""
 }
 
-gt_org_info() {
+___x_cmd_gt_org_info() {
     param:scope     "gitee/$O"
     param:dsl       '
 type: 
@@ -48,17 +48,17 @@ options:
 
     admin=${admin:-false}
     if [ $# -eq 0 ]; then
-        ___gt_get_multi "/v5/user/orgs" admin page per_page
+        ______x_cmd_gt_get_multi "/v5/user/orgs" admin page per_page
         [ $? -eq 1 ] && return 1
     else
-        ___gt_get "/v5/orgs/${1:?Provide organization}"
+        ______x_cmd_gt_get "/v5/orgs/${1:?Provide organization}"
         [ $? -eq 1 ] && return 1
     fi
     return 0
 }
 
 # It is very rare TODO:batch?
-gt_org_create() {
+___x_cmd_gt_org_create() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -68,36 +68,36 @@ options:
 '
     param:run
     org=${org:-$1}
-    ___gt_post_json "/v5/users/organization" name="$1" org description  
+    ______x_cmd_gt_post_json "/v5/users/organization" name="$1" org description  
 }
 
-gt_org_repo(){
+___x_cmd_gt_org_repo(){
     param:dsl       '
-subcommands:
+subcmd:
     ls          "list repo"
     create      "org repo create"
 '
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
-        gt_log error "Command Not Found. Show help."
+        ___x_cmd_gt_log error "Command Not Found. Show help."
         return 0
     fi
-    "gt_org_repo_${PARAM_SUBCMD}" "$@"
+    "___x_cmd_gt_org_repo_${PARAM_SUBCMD}" "$@"
 }
 
 # https://gitee.com/api/v5/swagger#/getV5OrgsOrgRepos
-gt_org_repo_ls() {
+___x_cmd_gt_org_repo_ls() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
     --type     "type"     <>="all"    = all private public
 '
     param:run
-    ui table func ___gt_table "\"\$(O=$O ___gt_get_multi \"/v5/orgs/${1:?Provide organization}/repos\" type)\"" \
+    ui table func ______x_cmd_gt_table "\"\$(O=$O ______x_cmd_gt_get_multi \"/v5/orgs/${1:?Provide organization}/repos\" type)\"" \
         . id full_name ownerName=owner.name updatedTime="updated_at"
 }
 
-gt_org_quit() {
+___x_cmd_gt_org_quit() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -110,7 +110,7 @@ options:
     fi
         for org in "$@"; do
         {
-            ___gt_delete "/v5/user/memberships/orgs/${org##*/}"
+            ______x_cmd_gt_delete "/v5/user/memberships/orgs/${org##*/}"
         code=$?
             if [ $code -ne 0 ]; then
                 echo "Creating repo failure: $name. Code is $code. " >&2
@@ -131,9 +131,9 @@ options:
 # gt repo member add user-b
 
 # gt repo member +el:admin -user-a +user-b
-gt_org_member(){
+___x_cmd_gt_org_member(){
     param:dsl       '
-subcommands:
+subcmd:
     ls            "list member"
     user            "get org member user info"
     add             "add member"
@@ -142,14 +142,14 @@ subcommands:
     param:run
 
     if [ -z "$PARAM_SUBCMD" ]; then
-        echo "subcommand not found. show help." >&2
+        echo "subcmd not found. show help." >&2
         return 0
     fi
     
-    "gt_org_member_$PARAM_SUBCMD" "$@"
+    "___x_cmd_gt_org_member_$PARAM_SUBCMD" "$@"
 }
 
-gt_org_member_ls() {
+___x_cmd_gt_org_member_ls() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -157,10 +157,10 @@ options:
     --role          "Repo name"            <>="all"         = admin member all
 '
     param:run
-    ___gt_get_multi "/v5/orgs/${org##*/}/members" role page per_page  
+    ______x_cmd_gt_get_multi "/v5/orgs/${org##*/}/members" role page per_page  
 }
 
-gt_org_member_user() {
+___x_cmd_gt_org_member_user() {
     param:scope     "gitee/$O"
     param:dsl      '
 options:
@@ -169,10 +169,10 @@ options:
 '
     param:run
 
-    ___gt_get "/v5/orgs/${org##*/}/memberships/${username##*/}"  
+    ______x_cmd_gt_get "/v5/orgs/${org##*/}/memberships/${username##*/}"  
 }
 
-gt_org_member_add() {
+___x_cmd_gt_org_member_add() {
     param:scope     "gitee/$O"
     param:dsl       '
 type: 
@@ -184,7 +184,7 @@ options:
 '
     param:run
 
-    # repo="$(___gt_param_normalize_repo "$repo")" || return 1
+    # repo="$(______x_cmd_gt_param_normalize_repo "$repo")" || return 1
     if [ -z "$1" ];then
         echo "At least one user’s spatial address is needed"
         return 1
@@ -192,7 +192,7 @@ options:
 
         for username in "$@"; do
         {
-            ___gt_put_json "/v5/orgs/${org##*/}/memberships/${username##*/}" role
+            ______x_cmd_gt_put_json "/v5/orgs/${org##*/}/memberships/${username##*/}" role
             local code=$?
             if [ $code -ne 0 ]; then
                 echo "Creating repo failure: $username. Code is $code. " >&2
@@ -202,7 +202,7 @@ options:
     done
 }
 
-gt_org_member_del() {
+___x_cmd_gt_org_member_del() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -219,7 +219,7 @@ options:
     local username
     for username in "$@"; do
         {
-            ___gt_delete "/v5/orgs/${org##*/}/memberships/${username##*/}"
+            ______x_cmd_gt_delete "/v5/orgs/${org##*/}/memberships/${username##*/}"
             code=$?
             if [ $code -ne 0 ]; then
                 echo "Creating repo failure: $name. Code is $code. " >&2

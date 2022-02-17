@@ -1,10 +1,11 @@
 # shellcheck shell=sh
 # shellcheck disable=SC2039,3043
 
-gt_user(){
+
+___x_cmd_gt_user(){
     param:scope     "gitee/$O"
     param:dsl       '
-subcommands:
+subcmd:
     info        "Show information"
     repo        "List all repos"
     email       "get user email"
@@ -20,20 +21,22 @@ subcommands:
     # list issues of user
     # list projects of user
 
-    "gt_user_${PARAM_SUBCMD}" "$@"
+    "___x_cmd_gt_user_${PARAM_SUBCMD}" "$@"
 }
 
-# gt_users() {
+# Section: info repo email issue
+
+# ___x_cmd_gt_users() {
 #     local O="${O:-GITEE_DEFAULT}"
 #     param <<A
 # scope:  gitee/$O
 # options: 
 #     #1          "Provide owner"
 # A
-#     ___gt_get "/v5/users/$name" | json_extract "html_url"
+#     ______x_cmd_gt_get "/v5/users/$name" | json_extract "html_url"
 # }
 
-gt_user_info() {
+___x_cmd_gt_user_info() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -44,9 +47,9 @@ options:
     local owner="$1"
     local data name html_url types
     if [ -z "$owner" ]; then
-        data=$(___gt_get "/v5/user" )
+        data=$(______x_cmd_gt_get "/v5/user" )
     else
-        data=$(___gt_get "/v5/users/$1")
+        data=$(______x_cmd_gt_get "/v5/users/$1")
     fi
     
     ___json_awk_get name=.login html_url=.html_url types=.type <<A
@@ -56,8 +59,8 @@ A
 }
 
 # https://gitee.com/api/v5/swagger#/getV5UserRepos
-# gt_user_repo_list() {
-gt_user_repo() {
+# ___x_cmd_gt_user_repo_list() {
+___x_cmd_gt_user_repo() {
     param:scope     "gitee/$O"
     param:dsl       '
 type: 
@@ -73,23 +76,23 @@ options:
 '
     param:run
     if [ -t 1 ]; then
-        ui table func ___gt_table "\"\$(O=$O ___gt_get_multi \"/v5/user/repos\" visibility affiliation sort direction)\"" \
+        ui table func ______x_cmd_gt_table "\"\$(O=$O ______x_cmd_gt_get_multi \"/v5/user/repos\" visibility affiliation sort direction)\"" \
             . id full_name ownerName=owner.name updatedTime="updated_at"
     else
-        ___gt_get_multi "/v5/user/repos" visibility affiliation sort direction
+        ______x_cmd_gt_get_multi "/v5/user/repos" visibility affiliation sort direction
     fi
 }
 
 # https://gitee.com/api/v5/swagger#/getV5Emails
-gt_user_email(){
+___x_cmd_gt_user_email(){
     param:void
-    [ -t 1 ] && ui table func ___gt_table "\"\$(O=$O ___gt_get_multi \"/v5/emails\")\"" \
+    [ -t 1 ] && ui table func ______x_cmd_gt_table "\"\$(O=$O ______x_cmd_gt_get_multi \"/v5/emails\")\"" \
         . email state && return
 
-    ___gt_get_multi "/v5/emails"
+    ______x_cmd_gt_get_multi "/v5/emails"
 }
 
-gt_user_issue(){
+___x_cmd_gt_user_issue(){
     param:scope     "gitee/$O"
     param:dsl       '
 type: 
@@ -110,18 +113,19 @@ options:
     --finished_at   "finish date"                                  <>=""
 '
     param:run
-    ___gt_get_multi "/v5/user/issues" filter state labels direction since \
+    ______x_cmd_gt_get_multi "/v5/user/issues" filter state labels direction since \
         schedule deadline created_at finished_at  
 }
+
+# EndSection
 
 # Section: key
 
 # generate a key by openssl, then save it in the x-cmd cloud.
-
-gt_user_key(){
+___x_cmd_gt_user_key(){
     param:scope     "gitee/$O"
     param:dsl       '
-subcommands:
+subcmd:
     ls        "Show information"
     add         "List all repos"
     get         "get one key"
@@ -130,17 +134,17 @@ subcommands:
     param:run
 
     if [ -z "$PARAM_SUBCMD" ]; then
-        gt_log error "Command Not Found. Show help."
+        ___x_cmd_gt_log error "Command Not Found. Show help."
         return 0
     fi
 
     # list issues of user
     # list projects of user
 
-    "gt_user_key_${PARAM_SUBCMD}" "$@"
+    "___x_cmd_gt_user_key_${PARAM_SUBCMD}" "$@"
 }
 
-gt_user_key_ls(){
+___x_cmd_gt_user_key_ls(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -148,30 +152,30 @@ options:
     --per_page    "per_page"                <>:number=20
 '
     param:run
-    ___gt_get "v5/user/keys" page per_page
+    ______x_cmd_gt_get "v5/user/keys" page per_page
 }
 
-gt_user_key_get(){
+___x_cmd_gt_user_key_get(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
     --id        "provided key id"       <>:number
 '
     param:run
-    ___gt_get "v5/user/keys/$id"
+    ______x_cmd_gt_get "v5/user/keys/$id"
 }
 
-gt_user_key_del(){
+___x_cmd_gt_user_key_del(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
     --id        "provided key id"           <>:number
 '
     param:run
-    ___gt_delete "/v5/user/keys/$id"
+    ______x_cmd_gt_delete "/v5/user/keys/$id"
 }
 
-gt_user_key_add(){
+___x_cmd_gt_user_key_add(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -179,10 +183,10 @@ options:
     --title     "add key name"              <>
 '
     param:run
-    ___gt_post_json "/v5/user/keys" key title
+    ______x_cmd_gt_post_json "/v5/user/keys" key title
 }
 # TODO
-# gt_user_key(){
+# ___x_cmd_gt_user_key(){
 #     param <<A
 # scope:  gitee/$O
 # type: 
@@ -199,17 +203,17 @@ options:
 #             echo "ERROR:no provided key:$key or key title:$title"
 #             return 1
 #         fi
-#            ___gt_post_json "/v5/user/keys" key title
+#            ______x_cmd_gt_post_json "/v5/user/keys" key title
 #            ;;
 #         delete)
 #         if [ -z "$id" ];then
 #             echo "ERROR:no provided keyid:$id"
 #             return 1
 #         fi
-#             ___gt_delete "/v5/user/keys/$id"
+#             ______x_cmd_gt_delete "/v5/user/keys/$id"
 #             ;;
 #         get|*)
-#             ___gt_get "v5/user/keys/$id"  
+#             ______x_cmd_gt_get "v5/user/keys/$id"  
 #             ;;
 #     esac
 # }

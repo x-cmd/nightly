@@ -7,9 +7,9 @@
 # gt repo issue add user-b
 
 # gt repo issue +el:admin -user-a +user-b
-gt_issue(){
+___x_cmd_gt_issue(){
     param:dsl       '
-subcommands:
+subcmd:
     create          "create issue"
     update          "update issue"
     info            "get issue info"
@@ -20,14 +20,14 @@ subcommands:
     param:run
 
     if [ -z "$PARAM_SUBCMD" ]; then
-        echo "subcommand not found. show help." >&2
+        echo "subcmd not found. show help." >&2
         return 0
     fi
-    "gt_issue_$PARAM_SUBCMD" "$@"
+    "___x_cmd_gt_issue_$PARAM_SUBCMD" "$@"
 }
 
 
-gt_issue_create() {
+___x_cmd_gt_issue_create() {
     param:scope     "gitee/$O"
     param:dsl      '
 options:
@@ -45,11 +45,11 @@ options:
 '
     security=${security:-false}
     param:run
-    ___gt_post_json "/v5/repos/${owner##*/}/issues" repo title issue_type=$type body assignee \
+    ______x_cmd_gt_post_json "/v5/repos/${owner##*/}/issues" repo title issue_type=$type body assignee \
         collaborators milestone labels program security_hole=$security  
 }
 
-gt_issue_update() {
+___x_cmd_gt_issue_update() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -68,11 +68,11 @@ options:
 '
     param:run
     security=${security:-false}
-    ___gt_patch_json "/v5/repos/${owner##*/}/issues/${number}" repo title state body assignee \
+    ______x_cmd_gt_patch_json "/v5/repos/${owner##*/}/issues/${number}" repo title state body assignee \
         collaborators milestone labels program security_hole=$security  
 }
 
-gt_issue_logs(){
+___x_cmd_gt_issue_logs(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -82,7 +82,7 @@ options:
     --sort          "sort(asc、desc)"       <>="desc"
 '
     param:run
-    ___gt_get "/v5/repos/${owner##*/}/issues/${number}/operate_logs" repo sort  
+    ______x_cmd_gt_get "/v5/repos/${owner##*/}/issues/${number}/operate_logs" repo sort  
 }
 
 
@@ -91,7 +91,7 @@ options:
 # shellcheck disable=SC2039,3043
 
 # schedule、deadline、created_at、finished_at 用UI来处理
-gt_repo_issue() {
+___x_cmd_gt_repo_issue() {
     param:scope     "gitee/$O"
     param:dsl       '
 type:
@@ -109,17 +109,17 @@ options:
     --number        "repo issue number"         <>=""
 '
     param:run
-    gt_param_init_owner_repo
+    ___x_cmd_gt_param_init_owner_repo
     if [ -z $number ]; then
-        ___gt_get_multi "/v5/repos/${owner_repo}/issues" state labels sort direction \
+        ______x_cmd_gt_get_multi "/v5/repos/${owner_repo}/issues" state labels sort direction \
             milestone assignee creator program  
     else
-        ___gt_get "/v5/repos/${owner_repo}/issues/${number}"  
+        ______x_cmd_gt_get "/v5/repos/${owner_repo}/issues/${number}"  
     fi
     return
 }
 
-gt_org_issue(){
+___x_cmd_gt_org_issue(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -131,11 +131,11 @@ options:
     --org           "organization path"                            <>
 '
     param:run
-    ___gt_get "/v5/orgs/${org##*/}/issues" filter state labels sort direction since page per_page \
+    ______x_cmd_gt_get "/v5/orgs/${org##*/}/issues" filter state labels sort direction since page per_page \
         schedule deadline created_at finished_at  
 }
 
-gt_enterprise_issue(){
+___x_cmd_gt_enterprise_issue(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -151,17 +151,17 @@ options:
     --program       "program"                                      <>=""
 '
     param:run
-    ___gt_get "/v5/enterprises/${enterprise##*/}/issues" \
+    ______x_cmd_gt_get "/v5/enterprises/${enterprise##*/}/issues" \
         filter state labels sort direction since page per_page \
         schedule deadline created_at finished_at milestone assignee creator program      
 }
 
 # Section : comment
 
-gt_issue_comment(){
+___x_cmd_gt_issue_comment(){
     param:scope     "gitee/$O"
     param:dsl       '
-subcommands:
+subcmd:
     ls              "list all comment"
     create          "create a comment"
     update          "update a comment"
@@ -169,13 +169,13 @@ subcommands:
 '
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
-        echo "subcommand not found. show help." >&2
+        echo "subcmd not found. show help." >&2
         return 0
     fi
-    "gt_issue_comment_$PARAM_SUBCMD" "$@"
+    "___x_cmd_gt_issue_comment_$PARAM_SUBCMD" "$@"
 }
 
-gt_issue_comment_ls(){
+___x_cmd_gt_issue_comment_ls(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -188,10 +188,10 @@ options:
     --order         "order(asc、desc)"      <>="asc"
 '
     param:run
-    ___gt_get_multi "/v5/repos/${owner##*/}/${repo##*/}/issues/$number/comments"  since page per_page order  
+    ______x_cmd_gt_get_multi "/v5/repos/${owner##*/}/${repo##*/}/issues/$number/comments"  since page per_page order  
 }
 
-gt_issue_comment_create(){
+___x_cmd_gt_issue_comment_create(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -201,10 +201,10 @@ options:
     --body          "The contents of the comment."      <>
 '
     param:run
-    ___gt_post_json "/v5/repos/${owner##*/}/${repo##*/}/issues/$number/comments"  body  
+    ______x_cmd_gt_post_json "/v5/repos/${owner##*/}/${repo##*/}/issues/$number/comments"  body  
 }
 
-gt_issue_comment_update(){
+___x_cmd_gt_issue_comment_update(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -214,10 +214,10 @@ options:
     --body          "The contents of the comment."      <>
 '
     param:run
-    ___gt_patch_json "/v5/repos/${owner##*/}/${repo##*/}/issues/comments/${id}"  body  
+    ______x_cmd_gt_patch_json "/v5/repos/${owner##*/}/${repo##*/}/issues/comments/${id}"  body  
 }
 
-gt_issue_comment_delete(){
+___x_cmd_gt_issue_comment_delete(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -226,7 +226,7 @@ options:
     --id            "comments id"                       <>
 '
     param:run
-    ___gt_delete "/v5/repos/${owner##*/}/${repo##*/}/issues/comments/${id}"  
+    ______x_cmd_gt_delete "/v5/repos/${owner##*/}/${repo##*/}/issues/comments/${id}"  
 }
 
 # EndSection

@@ -1,9 +1,9 @@
 # shellcheck shell=sh
 # shellcheck disable=SC2039,3043
 
-gt_current(){
+___x_cmd_gt_current(){
     param:dsl       '
-subcommands:
+subcmd:
     repo        "Save the config in memory into file"
     owner       "get current owner"
     type        "get current owner type"
@@ -16,13 +16,13 @@ subcommands:
     fi
 
     case "${PARAM_SUBCMD}" in
-        type)       "gt_current_owner_${PARAM_SUBCMD}"   "$@"     ;;
-        *)          "gt_current_${PARAM_SUBCMD}"        "$@"     ;;
+        type)       "___x_cmd_gt_current_owner_${PARAM_SUBCMD}"   "$@"     ;;
+        *)          "___x_cmd_gt_current_${PARAM_SUBCMD}"        "$@"     ;;
     esac
 }
 
 # shellcheck disable=SC2120
-gt_current_repo() {
+___x_cmd_gt_current_repo() {
     param:void
     local O="${O:-GITEE_DEFAULT}"
 
@@ -35,27 +35,27 @@ gt_current_repo() {
 }
 
 # shellcheck disable=SC2120
-gt_current_owner() {
+___x_cmd_gt_current_owner() {
     param:void
     local O="${O:-GITEE_DEFAULT}"
     if [ -n "$1" ]; then
         param_default put "gitee_$O" owner "$1"
         param_default remove "gitee_$O" "owner_type"
         param_default dump "gitee_$O"
-        # gt_current_owner_type || echo "Fetch owner type wrong. Please manually set owner-type using 'gt_current_owner_type <owner_type>'." >&2
+        # ___x_cmd_gt_current_owner_type || echo "Fetch owner type wrong. Please manually set owner-type using '___x_cmd_gt_current_owner_type <owner_type>'." >&2
         return 0
     fi
     local owner
     owner="$(param_default get "gitee_$O" owner)"
     [ -n "$owner" ] && echo "$owner" && return
 
-    data=$(___gt_get "/v5/user")
+    data=$(______x_cmd_gt_get "/v5/user")
     [ -n "$data" ] && owner=$(json_query data.login) && param_default put "gitee_$O" owner "$owner"
     echo "$owner"
 }
 
 # shellcheck disable=SC2120
-gt_current_owner_type() {
+___x_cmd_gt_current_owner_type() {
     param:void
     local O="${O:-GITEE_DEFAULT}"
     if [ -n "$1" ]; then
@@ -67,13 +67,13 @@ gt_current_owner_type() {
     local data
     data="$(param_default get "gitee_$O" owner_type "$1")"
     if [ -z "$data" ]; then
-        owner="$(gt_current_owner)"
+        owner="$(___x_cmd_gt_current_owner)"
         if [ -z "$owner" ]; then
             echo "Owner is empty. While owner not set." >&2
             return 1
         fi
 
-        data=$(___gt_owner_type_query "$owner")
+        data=$(______x_cmd_gt_owner_type_query "$owner")
         [ -z "$data" ] && return 1
 
         param_default put "gitee_$O" owner_type "$data"
@@ -81,12 +81,12 @@ gt_current_owner_type() {
     printf "%s" "$data" 
 }
 
-___gt_owner_type_query() {
+______x_cmd_gt_owner_type_query() {
     param:void
     local owner="${1:?Provide owner name}"
     for types in "org" "enterprise" "user"
     do
-        gt_${types}_info "$owner" 1>/dev/null 2>&1 && [ $? -eq 0 ] && printf "%s" "$types" && return 0
+        ___x_cmd_gt_${types}_info "$owner" 1>/dev/null 2>&1 && [ $? -eq 0 ] && printf "%s" "$types" && return 0
     done
     return 1
 }

@@ -2,9 +2,9 @@
 # shellcheck disable=SC2039,3043
 
 
-gt_repo_pr(){
+___x_cmd_gt_repo_pr(){
     param:dsl       '
-subcommands:
+subcmd:
     ls              "list pull requests"
     info            "pull request info"
     log             "pull requests log"
@@ -19,17 +19,17 @@ subcommands:
     param:run
 
     if [ -z "$PARAM_SUBCMD" ]; then
-        gt_log error "Command Not Found. Show help."
+        ___x_cmd_gt_log error "Command Not Found. Show help."
         return 0
     fi
     
-    "gt_repo_pr_${PARAM_SUBCMD}" "$@"
+    "___x_cmd_gt_repo_pr_${PARAM_SUBCMD}" "$@"
 }
 
 
 # Section: ls info log commit view
 
-gt_repo_pr_ls() {
+___x_cmd_gt_repo_pr_ls() {
 
     param:scope     "gitee/$O"
     param:dsl       '
@@ -50,8 +50,8 @@ options:
 '
     param:run
 
-    gt_param_init_owner_repo
-    ___gt_get "/v5/repos/$owner_repo/pulls" state head base sort since \
+    ___x_cmd_gt_param_init_owner_repo
+    ______x_cmd_gt_get "/v5/repos/$owner_repo/pulls" state head base sort since \
         direction milestone_number labels page per_page 
 }
 
@@ -59,7 +59,7 @@ options:
 ___parse_pr_init_owner_repo_and_pr_main(){
     local pr_number=${pr##*/}
     owner_repo=${pr%/$pr_number}
-    ___gt_param_normalize_repo "$owner_repo"
+    ______x_cmd_gt_param_normalize_repo "$owner_repo"
     pr="$pr_number"
 }
 
@@ -69,7 +69,7 @@ alias ___parse_pr_init_owner_repo_and_pr='
     ___parse_pr_init_owner_repo_and_pr_main || return
 '
 
-gt_repo_pr_info() {
+___x_cmd_gt_repo_pr_info() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -79,11 +79,11 @@ options:
 
     ___parse_pr_init_owner_repo_and_pr
 
-    ___gt_get "/v5/repos/${owner_repo}/pulls/$pr"  
+    ______x_cmd_gt_get "/v5/repos/${owner_repo}/pulls/$pr"  
 }
 
 
-gt_repo_pr_log() {
+___x_cmd_gt_repo_pr_log() {
     param:scope     "gitee/$O"
     param:dsl       '
 type:
@@ -95,10 +95,10 @@ options:
     param:run
 
     ___parse_pr_init_owner_repo_and_pr
-    ___gt_get "/v5/repos/${owner_repo}/pulls/$pr/operate_logs" sort  
+    ______x_cmd_gt_get "/v5/repos/${owner_repo}/pulls/$pr/operate_logs" sort  
 }
 
-gt_repo_pr_commit() {
+___x_cmd_gt_repo_pr_commit() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -107,10 +107,10 @@ options:
     param:run
 
     ___parse_pr_init_owner_repo_and_pr
-    ___gt_get "/v5/repos/${owner_repo}/pulls/$pr/commits"  
+    ______x_cmd_gt_get "/v5/repos/${owner_repo}/pulls/$pr/commits"  
 }
 
-gt_repo_pr_view() {
+___x_cmd_gt_repo_pr_view() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -127,7 +127,7 @@ options:
 
 # Section: create update merge
 
-gt_repo_pr_create() {
+___x_cmd_gt_repo_pr_create() {
     local O="${O:-GITEE_DEFAULT}"
     param:scope     "gitee/$O"
     param:dsl       '
@@ -150,13 +150,13 @@ options:
 '
     param:run
     
-    gt_param_init_owner_repo
+    ___x_cmd_gt_param_init_owner_repo
 
-    ___gt_post_json "/v5/repos/$owner_repo/pulls" title head base body milestone_number\
+    ______x_cmd_gt_post_json "/v5/repos/$owner_repo/pulls" title head base body milestone_number\
         labels issue assignees testers assignees_number testers_number prune_source_branch  
 }
 
-gt_repo_pr_update() {
+___x_cmd_gt_repo_pr_update() {
     local O="${O:-GITEE_DEFAULT}"
     param:scope     "gitee/$O"
 ##TODO:state
@@ -176,11 +176,11 @@ options:
     param:run
 
     ___parse_pr_init_owner_repo_and_pr
-    ___gt_patch_json "/v5/repos/${owner_repo}/pulls/$pr" title body milestone_number\
+    ______x_cmd_gt_patch_json "/v5/repos/${owner_repo}/pulls/$pr" title body milestone_number\
         labels assignees_number testers_number state  
 }
 
-gt_repo_pr_merge() {
+___x_cmd_gt_repo_pr_merge() {
     param:scope     "gitee/$O"
     param:dsl       '
 type:
@@ -195,7 +195,7 @@ options:
     param:run
 
     ___parse_pr_init_owner_repo_and_pr
-    ___gt_put_json "/v5/repos/${owner_repo}/pulls/$pr/merge"  merge_method \
+    ______x_cmd_gt_put_json "/v5/repos/${owner_repo}/pulls/$pr/merge"  merge_method \
         prune_source_branch title description  
 }
 
@@ -203,10 +203,10 @@ options:
 
 # Section : assign
 
-gt_repo_pr_assign(){
+___x_cmd_gt_repo_pr_assign(){
     param:scope     "gitee/$O"
     param:dsl       '
-subcommand:
+subcmd:
     add             "Add assignee"
     del             "Del assignee"
     reset           "Reset all assignee"
@@ -214,14 +214,14 @@ subcommand:
 '
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
-        gt_repo_pr_assign help
+        ___x_cmd_gt_repo_pr_assign help
         return
     fi
 
-    "gt_repo_pr_assign_$PARAM_SUBCMD" "$@"
+    "___x_cmd_gt_repo_pr_assign_$PARAM_SUBCMD" "$@"
 }
 
-gt_repo_pr_assign_add() {
+___x_cmd_gt_repo_pr_assign_add() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -233,10 +233,10 @@ options:
     # TODO: interactive ui
 
     ___parse_pr_init_owner_repo_and_pr
-    ___gt_post_json "/v5/repos/${owner_repo}/pulls/$pr/assignees" assignees  
+    ______x_cmd_gt_post_json "/v5/repos/${owner_repo}/pulls/$pr/assignees" assignees  
 }
 
-gt_repo_pr_assign_del() {
+___x_cmd_gt_repo_pr_assign_del() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -246,10 +246,10 @@ options:
     param:run
 
     ___parse_pr_init_owner_repo_and_pr
-    ___gt_delete "/v5/repos/${owner_repo}/pulls/$pr/assignees?assignees=$assignees"  
+    ______x_cmd_gt_delete "/v5/repos/${owner_repo}/pulls/$pr/assignees?assignees=$assignees"  
 }
 
-gt_repo_pr_assign_reset() {
+___x_cmd_gt_repo_pr_assign_reset() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -261,10 +261,10 @@ options:
     ___parse_pr_init_owner_repo_and_pr
 
     reset_all=${reset_all:-false}
-    ___gt_patch_json "/v5/repos/${owner_repo}/pulls/$pr/assignees" reset_all  
+    ______x_cmd_gt_patch_json "/v5/repos/${owner_repo}/pulls/$pr/assignees" reset_all  
 }
 
-gt_repo_pr_assign_review() {
+___x_cmd_gt_repo_pr_assign_review() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -275,17 +275,17 @@ options:
 
     ___parse_pr_init_owner_repo_and_pr
 
-    ___gt_post_json "/v5/repos/${owner_repo}/pulls/$pr/review" force  
+    ______x_cmd_gt_post_json "/v5/repos/${owner_repo}/pulls/$pr/review" force  
 }
 
 # EndSection
 
 # Section : testers
 
-gt_repo_pr_testers(){
+___x_cmd_gt_repo_pr_testers(){
     param:scope     "gitee/$O"
     param:dsl       '
-subcommand:
+subcmd:
     add             "Add assignee"
     del             "Del assignee"
     reset           "Reset all assignee"
@@ -293,15 +293,15 @@ subcommand:
 '
 
     if [ -z "$PARAM_SUBCMD" ]; then
-        gt_repo_pr_assign help
+        ___x_cmd_gt_repo_pr_assign help
         return
     fi
 
-    "gt_repo_pr_assign_$PARAM_SUBCMD" "$@"
+    "___x_cmd_gt_repo_pr_assign_$PARAM_SUBCMD" "$@"
 }
 
 # https://gitee.com/api/v5/swagger#/postV5ReposOwnerRepoPullsNumberTesters
-gt_repo_pr_testers_add() {
+___x_cmd_gt_repo_pr_testers_add() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -311,10 +311,10 @@ options:
     param:run
 
     ___parse_pr_init_owner_repo_and_pr
-    ___gt_post_json "/v5/repos/${owner_repo}/pulls/$pr/testers" testers  
+    ______x_cmd_gt_post_json "/v5/repos/${owner_repo}/pulls/$pr/testers" testers  
 }
 
-gt_repo_pr_testers_delete() {
+___x_cmd_gt_repo_pr_testers_delete() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -324,10 +324,10 @@ options:
     param:run
 
     ___parse_pr_init_owner_repo_and_pr
-    ___gt_delete "/v5/repos/${owner_repo}/pulls/$pr/testers?testers=$testers"  
+    ______x_cmd_gt_delete "/v5/repos/${owner_repo}/pulls/$pr/testers?testers=$testers"  
 }
 
-gt_repo_pr_testers_reset() {
+___x_cmd_gt_repo_pr_testers_reset() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -338,10 +338,10 @@ options:
 
     ___parse_pr_init_owner_repo_and_pr
 
-    ___gt_patch_json "/v5/repos/${owner_repo}/pulls/$pr/testers" reset_all  
+    ______x_cmd_gt_patch_json "/v5/repos/${owner_repo}/pulls/$pr/testers" reset_all  
 }
 
-gt_repo_pr_testers_test() {
+___x_cmd_gt_repo_pr_testers_test() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -352,7 +352,7 @@ options:
 
     ___parse_pr_init_owner_repo_and_pr
 
-    ___gt_post_json "/v5/repos/${owner_repo}/pulls/$pr/test" force  
+    ______x_cmd_gt_post_json "/v5/repos/${owner_repo}/pulls/$pr/test" force  
 } 
 
 # EndSection
