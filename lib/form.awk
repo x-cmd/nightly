@@ -54,6 +54,9 @@ NR==1{
 
     for (i=1; i<=rulel; ++i) {
         question            = rule[ i ATT_DESC ]
+        if (rule[ i ATT_OP ] == "=" && rule[ i ATT_DEFAULT ] == "") {
+            rule[ i ATT_DEFAULT ] = 1
+        }
         rule[ i ATT_ANS ]   = rule[ i ATT_DEFAULT ]
         op                  = rule[ i ATT_OP ]
         # printf("%-30s%-20s\n", question, op) >"/dev/stderr"
@@ -121,7 +124,6 @@ function ctrl(type, char) {
     op = rule[ ctrl_current ATT_OP ]
 
     if (op == "=") {
-        if (answer == "") answer = 1
 
         if (char == "LEFT") {
             answer -= 1
@@ -191,73 +193,39 @@ function view(  msg){
         answer =    rule[ i ATT_ANS ]
         op =        rule[ i ATT_OP ]
 
-        if (ctrl_current == i) {
-            data = "\033[4m"
-            if (op != "=") {
-                data = sprintf(CLR_QUESTION_SEL "%" question_width "s", question) "\033[0m"
-                if (op ~ "*"){
-                    data = data ":  " CLR_ANSWER_SEL draw_secret_text(answer) "\033[0m"
-                } else {
-                    data = data ":  " CLR_ANSWER_SEL answer "\033[0m"
-                }
-            } else {
-                if (answer == "") answer = 1
-
-                data = sprintf(CLR_QUESTION_SEL "%" question_width "s", question) "\033[0m"
-                data = data ": "
-                for (j=1; j<=rule[ i ATT_OP_L ]; ++j) {
-                    # TODO: if it is too long, use multiple line
-                    if (answer == j) {
-                        data = data " " "\033[1;7m" CLR_ANSWER_SEL rule[ i ATT_OP j ] "\033[0m"
-                    } else {
-                        data = data " " "\033[0;2m" CLR_ANSWER_SEL rule[ i ATT_OP j ] "\033[0m"
-                    }
-                }
-            }
+        if ( ctrl_current == i ) {
+            STYLE_ANSWER_NOT    = "\033[0;2m"       CLR_ANSWER_SEL
+            STYLE_ANSWER        = "\033[1;7m"       CLR_ANSWER_SEL
         } else {
-            data = ""
-            if (op != "=") {
-                data = sprintf(CLR_QUESTION "%" question_width "s", question) "\033[0m"
-                if (op ~ "*"){
-                    data = data ":  " CLR_ANSWER_SEL draw_secret_text(answer) "\033[0m"
-                } else {
-                    data = data ":  " CLR_ANSWER_SEL answer "\033[0m"
-                }
-            } else {
-                if (answer == "") answer = 1
-                data = sprintf(CLR_QUESTION "%" question_width "s", question) "\033[0m"
-                data = data ": "
-                for (j=1; j<=rule[ i ATT_OP_L ]; ++j) {
-                    # TODO: if it is too long, use multiple line
-                    if (answer == j) {
-                        data = data " " "\033[1m" CLR_ANSWER rule[ i ATT_OP j ] "\033[0m"
-                    } else {
-                        data = data " " "\033[0;2;36m" CLR_ANSWER rule[ i ATT_OP j ] "\033[0m"
-                    }
-                }
+            STYLE_ANSWER_NOT    = "\033[0;2;36m"    CLR_ANSWER
+            STYLE_ANSWER        = "\033[1m"         CLR_ANSWER
+        }
+
+        data = sprintf(CLR_QUESTION_SEL "%" question_width "s", question)   "\033[0m" ": "
+        if (op != "=") {
+            data = data ( (op ~ "*") ? draw_secret_text(answer) : answer ) "\033[0m"
+        } else {
+            for (j=1; j<=rule[ i ATT_OP_L ]; ++j) {
+                # TODO: if it is too long, use multiple line
+                data = data " " ( (answer == j) ? STYLE_ANSWER_NOT : STYLE_ANSWER )    rule[ i ATT_OP j ]  "\033[0m"
             }
         }
+
         content = content "\n" data
     }
 
     if (ctrl_current == rulel+1) {
         data = "\033[0;36m"
-        for (i=1; i<=exit_strategy_arrl; ++i) {
-            if (ctrl_exit_strategy == i) {
-                data = data "   " "\033[7m" CLR_EXIT_ANSWER_SEL exit_strategy_arr[i] "\033[0m"
-            } else {
-                data = data "   "  CLR_EXIT_ANSWER_SEL exit_strategy_arr[i] "\033[0m"
-            }
-        }
+        STYLE_EXIT        = "\033[7m" CLR_EXIT_ANSWER
+        STYLE_EXIT_NOT    = CLR_EXIT_ANSWER
     } else {
         data = "\033[0m"
-        for (i=1; i<=exit_strategy_arrl; ++i) {
-            if (ctrl_exit_strategy == i) {
-                data = data "   " "\033[7m" CLR_EXIT_ANSWER exit_strategy_arr[i] "\033[0m"
-            } else {
-                data = data "   "  CLR_EXIT_ANSWER exit_strategy_arr[i] "\033[0m"
-            }
-        }
+        STYLE_EXIT        = "\033[7m" CLR_EXIT_ANSWER_SEL
+        STYLE_EXIT_NOT    = CLR_EXIT_ANSWER_SEL
+    }
+
+    for (i=1; i<=exit_strategy_arrl; ++i) {
+        data = data "   "   ( (ctrl_exit_strategy == i) ? STYLE_EXIT : STYLE_EXIT_NOT )   exit_strategy_arr[i] "\033[0m"
     }
 
     content = content "\n\n" data "\n"
@@ -284,7 +252,12 @@ NR>1{
 END {
     for (i=1; i<=rulel; ++i) {
         var =       rule[ i ATT_VAR ]
-        answer =    rule[ i ATT_ANS ]
+        # answer = rule[ i ATT_ANS ]
+        if (rule[ i ATT_OP ] == "="){
+            answer = rule[ i ATT_OP rule[ i ATT_ANS ] ]
+        } else{
+            answer = rule[ i ATT_ANS ]
+        }
         send_env(var, answer)
     }
     send_env("___X_CMD_UI_FORM_EXIT", exit_strategy_arr[ctrl_exit_strategy])

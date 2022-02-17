@@ -1,8 +1,7 @@
 
 # shellcheck shell=sh disable=SC3043
 
-# author:       Li Junhao           l@x-cmd.com    edwinjhlee.github.io
-# maintainer:   Li Junhao
+# author:       Li Junhao           l@x-cmd.com
 
 # Section: main
 ___x_cmd_ui_table(){
@@ -123,7 +122,7 @@ ___ui_table_json(){
 }
 
 ___x_cmd_ui_table_control_display(){
-    printf "%s" "$___X_CMD_UI_TABLE_DEFAULT"
+    printf "%s" "$___X_CMD_UI_TABLE_DEFAULT" | sed '\002' '\n'
 }
 
 ___ui_table_out3(){
