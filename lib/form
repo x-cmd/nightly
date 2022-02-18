@@ -51,7 +51,7 @@ ___x_cmd_ui_form(){
 #     "Text atype" atype 1                       "=" private public -- \
 #     "Text repo" repo "ddd"                              "=~" "abc1[0-9]+"   -- \
 #     "Text user" user ""                              "=~*" "12[0-9]+" -- \
-#     "Text mul_line_arg1" mul_line_arg1 "xxx"   "*"-- \
+#     "Text mul_line_arg1" mul_line_arg1 "xxx"   "*" -- \
 #     "Text mul_line_arg2" mul_line_arg2  ""  -- \
 #     "Text repo" repo ""                     "=~" "abc" "cde" "def" -- \
 #     "Text repo2_1_1" repo2_1_1 ""            "=" "abc" "cde" "def" -- \

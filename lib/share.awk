@@ -230,7 +230,7 @@ function ctrl_rstate_dec( obj,   m, v ){
 }
 
 function ctrl_rstate_get( obj ){
-    if ( obj[ "val" ] == "" )       obj[ "val" ] = obj[ "min" ]
+    # if (( obj[ "val" ] == "" )       obj[ "val" ] = obj[ "min" ]
     return obj[ "val" ]
 }
 
@@ -240,20 +240,20 @@ function ctrl_rstate_set( obj, val ){
 
 function ctrl_rstate_addchar( obj, val ) {
     v = obj[ "val" ] val
-    if ( ( v >= obj[ "min" ] ) && ( v <= obj[ "max" ] ) ) {
+    if ( ( int(v) >= int(obj[ "min" ]) ) && ( int(v) <= int(obj[ "max" ] )) ) {
         ctrl_rstate_set( obj,  v )
     }
 }
 
 function ctrl_rstate_delchar( obj ) {
-    v = ctrl_rstate_get( obj )
+    v = obj[ "val" ]
     ctrl_rstate_set( obj, substr(v, 1, length(v) - 1) )
 }
 
 function ctrl_rstate_handle_char( obj, char_type, char_value ) {
     if (char_type == "ascii-delete") {
         ctrl_rstate_delchar( obj )
-    } else if (index(char_value, "0123456789") > 0) {
+    } else if (index("0123456789", char_value) > 0) {
         ctrl_rstate_addchar( obj, char_value )
     } else {
         return false

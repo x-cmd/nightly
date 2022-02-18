@@ -1,0 +1,51 @@
+# shellcheck shell=sh disable=SC3043
+
+xrc ui/lib/region
+xrc ui/lib/getchar
+xrc awk
+
+___X_CMD_UI_SELECT_CONTROL_AWK_PATH="$(xrc cat ./lib/share.awk ./lib/select.awk)"
+# ___X_CMD_UI_REGION_AWK="./lib/region.awk"
+
+___x_cmd_ui_select_control_awk(){
+    LC_ALL=en_US.UTF-8 USE=str,wcwidth,ui ___x_cmd_awk code "$___X_CMD_UI_SELECT_CONTROL_AWK_PATH" \
+        -v EXIT_OP="$EXIT_OP" -v RS="$___X_CMD_UI_REGION_RS" -v ORS="$___X_CMD_UI_REGION_RS"
+}
+
+___x_cmd_ui_select_control_display(){
+    cat "./.x-cmd/dev/testcase/testlargedata" | awk -v REGION_RS="$___X_CMD_UI_REGION_RS" '{printf $0 REGION_RS}'
+    # cat "./.x-cmd/dev/testcase/testdata" | awk -v REGION_RS="$___X_CMD_UI_REGION_RS" '{printf $0 REGION_RS}'
+}
+___x_cmd_ui_select_control(){
+    {
+        "$@" | ___x_cmd_ui_region_send_update
+        cat
+    } | ___x_cmd_ui_select_control_awk
+}
+___ui_select_out_func(){
+    ___x_cmd_ui_region_autorefresh_with_keyboard ___x_cmd_ui_select_control "$@"
+}
+___ui_select_out(){
+    ___ui_select_out_func ___x_cmd_ui_select_control_display
+}
+
+# ___ui_select_out
+
+f(){
+    ___X_CMD_UI_SELECT_MULTIPLE_LEN=0
+    ___ui_select_out
+    echo "___X_CMD_UI_SELECT_FINAL_COMMAND:" "$___X_CMD_UI_SELECT_FINAL_COMMAND"
+    i=1
+    while [ "$i" -le "$___X_CMD_UI_SELECT_MULTIPLE_LEN" ];do
+
+        eval printf "\"___X_CMD_UI_SELECT_ITEM_INDEX$i:%s\n\"" "\"\$___X_CMD_UI_SELECT_ITEM_INDEX$i\""
+        eval printf "\"___X_CMD_UI_SELECT_ITEM$i:%s\n\"" "\"\$___X_CMD_UI_SELECT_ITEM$i\""
+        i=$((i+1))
+    done
+
+    echo "\n___X_CMD_UI_SELECT_CURRENT_ITEM_INDEX:" "$___X_CMD_UI_SELECT_CURRENT_ITEM_INDEX"
+    echo "___X_CMD_UI_SELECT_CURENT_ITEM:" "$___X_CMD_UI_SELECT_CURENT_ITEM"
+    echo "___X_CMD_UI_SELECT_MULTIPLE_LEN:" "$___X_CMD_UI_SELECT_MULTIPLE_LEN"
+}
+f
+

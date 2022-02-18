@@ -158,12 +158,6 @@ function ctrl(type, char) {
 BEGIN{
     CLR_DESC = "\033[0;32m"
 
-    CLR_QUESTION = "\033[0;34m"
-    CLR_ANSWER = "\033[34m"
-
-    CLR_QUESTION_SEL = "\033[7;33m"
-    CLR_ANSWER_SEL = "\033[33m"
-
     CLR_EXIT_ANSWER     = "\033[34m"
     CLR_EXIT_ANSWER_SEL = "\033[33m"
 }
@@ -194,20 +188,22 @@ function view(  msg){
         op =        rule[ i ATT_OP ]
 
         if ( ctrl_current == i ) {
-            STYLE_ANSWER_NOT    = "\033[0;2m"       CLR_ANSWER_SEL
-            STYLE_ANSWER        = "\033[1;7m"       CLR_ANSWER_SEL
+            STYLE_ANSWER_NOT    = "\033[0;7;33m"
+            STYLE_ANSWER        = "\033[0;2;33m"
+            CLR_QUESTION        = "\033[7;33m"
         } else {
-            STYLE_ANSWER_NOT    = "\033[0;2;36m"    CLR_ANSWER
-            STYLE_ANSWER        = "\033[1m"         CLR_ANSWER
+            STYLE_ANSWER_NOT    = "\033[0;2;34m"
+            STYLE_ANSWER        = "\033[1;34m"
+            CLR_QUESTION        = "\033[0;33m"
         }
 
-        data = sprintf(CLR_QUESTION_SEL "%" question_width "s", question)   "\033[0m" ": "
+        data = sprintf(CLR_QUESTION "%" question_width "s", question)   "\033[0m" ": "
         if (op != "=") {
             data = data ( (op ~ "*") ? draw_secret_text(answer) : answer ) "\033[0m"
         } else {
             for (j=1; j<=rule[ i ATT_OP_L ]; ++j) {
                 # TODO: if it is too long, use multiple line
-                data = data " " ( (answer == j) ? STYLE_ANSWER_NOT : STYLE_ANSWER )    rule[ i ATT_OP j ]  "\033[0m"
+                data = data ( (answer == j) ? STYLE_ANSWER_NOT : STYLE_ANSWER )    rule[ i ATT_OP j ]  "\033[0m "
             }
         }
 

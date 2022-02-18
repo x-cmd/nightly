@@ -7,6 +7,7 @@ BEGIN {
     ctrl_help_item_put("ARROW UP/DOWN/LEFT/ROW", "to move focus")
     ctrl_help_item_put("n/p", "for next/previous page")
     ctrl_help_item_put("c/r/u/d", "for create/retrive/update/delete")
+    ctrl_help_item_put("SPACE", "for filter")
 }
 # EndSection
 
@@ -35,9 +36,9 @@ function view_update_header(       col_i){
     for (col_i=1; col_i<=data_col_num; col_i++) {
         # limit the length
         if (col_max[ col_i ] > COL_MAX_SIZE) {
-            buffer_append( sprintf( "%s", str_pad_right( data_header_arr[ col_i ], COL_MAX_SIZE + 6, data_wlen[ 1 KSEP col_i ] ) ) )
+            buffer_append( sprintf( "%s", str_pad_right( data_header_arr[ col_i ], COL_MAX_SIZE + 6, data_header_arr_wlen[ 1 KSEP col_i ] ) ) )
         } else {
-            buffer_append( sprintf( "%s  ", str_pad_right( data_header_arr[ col_i ], col_max[ col_i ], data_wlen[ 1 KSEP col_i ] ) ) )
+            buffer_append( sprintf( "%s  ", str_pad_right( data_header_arr[ col_i ], col_max[ col_i ], data_header_arr_wlen[ 1 KSEP col_i ] ) ) )
         }
         # buffer_append( sprintf( "%s  ", str_pad_right( data[ 1 KSEP col_i ], col_max[ col_i ], data_wlen[ 1 KSEP col_i ] ) ) )
     }
@@ -47,17 +48,18 @@ function view_update_header(       col_i){
 
 function view_calcuate_geoinfo(){
     # command line >
-    # help: 1/3
+    # help: 2/4
     # empty line
     # Filter: 1
     # body:         view_body_row_num
+    # SELECT: 1
     # status-line
 
-    # 5, 7
+    # 7, 9
     if ( ctrl_help_toggle_state() == true ) {
-        view_body_row_num = max_row_size - 7
+        view_body_row_num = max_row_size - 8 - 2
     } else {
-        view_body_row_num = max_row_size - 5
+        view_body_row_num = max_row_size - 7 - 2
     }
 }
 
@@ -99,8 +101,7 @@ function model_generate(  _cord, _elem, row_i, col_i, _ok){
     for (col_i = 1; col_i <= data_col_num; col_i ++) {
         if (col_max[ col_i ] < data_header_arr_wlen[ col_i ])   col_max[ col_i ] = data_header_arr_wlen[ col_i ]
     }
-
-    for (row_i = 1; row_i <= table_row; row_i++) {
+    for (row_i = 1; row_i <= data_len; row_i++) {
         _ok = true
         for (col_i = 1; col_i <= data_col_num; col_i++) {
             _filter = filter[ col_i ]
@@ -119,7 +120,6 @@ function model_generate(  _cord, _elem, row_i, col_i, _ok){
             }
         }
     }
-
     ctrl_rstate_init( CURRENT_ROW, 1, model_row )
     DATA_HAS_CHANGED = true
 }
@@ -166,7 +166,7 @@ function ctrl(char_type, char_value) {
 
 # Section: consumer_item and consume_header
 function consumer_item() {
-    if (text == "---") {
+    if ($0 == "---") {
         ctrl_rstate_init( CURRENT_COLUMN, 1, data_col_num )
         model_generate()
 
@@ -174,7 +174,7 @@ function consumer_item() {
         return
     }
 
-    data_len += 1
+    data_line[ ++ data_len ] = $0
     item_arr_len = split($0, item_arr, "\003")
     for (i=1; i<=item_arr_len; i++) {
         elem = item_arr[i]
@@ -189,8 +189,8 @@ function consumer_item() {
 
     # Show the first screen to improve use experience
     if ( data_len == max_row_size ) {
+        ctrl_rstate_init( CURRENT_COLUMN, 1, data_col_num )
         model_generate()
-        view_update()
     }
 }
 
@@ -214,12 +214,12 @@ BEGIN {
     DATA_MODE = DATA_MODE_ITEM
 }
 
-NR==2 {  consume_header(); }
+NR==3 {  consume_header(); }
 
-NR>2 {
+NR>3 {
     if ( DATA_MODE == DATA_MODE_CTRL ) {
         if (try_update_width_height( $0 ) == true) {
-            update_logic_view()
+            # update_logic_view()
         } else {
             DATA_HAS_CHANGED = true
 
@@ -227,11 +227,12 @@ NR>2 {
             gsub(/^C:/, "", cmd)
             idx = index(cmd, ":")
             ctrl(substr(cmd, 1, idx-1), substr(cmd, idx+1))
+            update_logic_view()
         }
-        return
+        # return
+    } else {
+        consumer_item()
     }
-
-    consume_item($0);
 }
 
 END {
@@ -242,7 +243,7 @@ END {
         send_env( "___X_CMD_UI_TABLE_FINAL_COMMAND",    exit_get_cmd() )
         send_env( "___X_CMD_UI_TABLE_CURRENT_ROW",      _tmp_currow )
         send_env( "___X_CMD_UI_TABLE_CURRENT_COLUMN",   ctrl_rstate_get( CURRENT_COLUMN ) )
-        send_env( "___X_CMD_UI_TABLE_CUR_LINE",         data[ _tmp_currow ] )
+        send_env( "___X_CMD_UI_TABLE_CUR_LINE",         data_line[ _tmp_currow ] )
     }
 }
 # EndSection

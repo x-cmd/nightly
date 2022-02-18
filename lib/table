@@ -105,6 +105,7 @@ xrc awk
 ___X_CMD_UI_TABLE_CONTROL_AWK_PATH="$(xrc cat ui/lib/share.awk ui/lib/table.control.awk)"
 
 if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
+# 881 hh
 ___x_cmd_ui_table_control_awk(){
     LC_ALL=en_US.UTF-8 USE=str,wcwidth,ui ___x_cmd_awk code "$___X_CMD_UI_TABLE_CONTROL_AWK_PATH" \
         -v EXIT_OP="$EXIT_OP" -W interactive
@@ -122,7 +123,8 @@ ___ui_table_json(){
 }
 
 ___x_cmd_ui_table_control_display(){
-    printf "%s" "$___X_CMD_UI_TABLE_DEFAULT" | sed '\002' '\n'
+    # printf "%s \002---\002" "$___X_CMD_UI_TABLE_DEFAULT" | sed 's/\002/\n/g'
+    printf "%s \002---\002" "$___X_CMD_UI_TABLE_DEFAULT" | tr '\002' "$___X_CMD_UI_REGION_RS"
 }
 
 ___ui_table_out3(){
