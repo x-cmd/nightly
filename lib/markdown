@@ -14,4 +14,4 @@ ___ui_markdown(){
     fi | awk -v COLUMNS="$COLUMNS" "$(xrc cat awk/lib/wcwidth.awk)$(cat "$___X_BASH_UI_MARKDOWN_AWK")"
 }
 
-time (___ui_markdown "./.x-cmd/dev/testcase/testmarkdown.md")
+# time (___ui_markdown "./.x-cmd/dev/testcase/testmarkdown.md")
