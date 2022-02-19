@@ -121,9 +121,9 @@ ______x_cmd_gt_parse_owner_repo() {
     fi
 }
 
-______x_cmd_gt_cache(){
-    ccmd -- eval "$@"
-}
+# ______x_cmd_gt_cache(){
+#     ccmd -- eval "$@"
+# }
 
 ______x_cmd_gt_table() {
     local tmp

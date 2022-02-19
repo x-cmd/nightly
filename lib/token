@@ -8,7 +8,7 @@ ___x_cmd_gt_token() {
     param:void
     local O="${O:-GITEE_DEFAULT}"
     if [ $# -eq 0 ]; then
-        param_default get "gitee_$O" "token"
+        param_default get "gitee_$O" "token" 2>/dev/null || return 1
     else
         if [ "$1" = "false" ];then
             shift

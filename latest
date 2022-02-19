@@ -23,6 +23,7 @@ ____x_cmd_gt_xrc utils config current enterprise issue org  \
 x log init gt
 
 xrc gt/lib/_type/main
+# . lib/_type/main
 
 gt(){
     param:dsl       '
@@ -81,7 +82,7 @@ ___x_cmd_gt_make() {
     if [ $? -eq 0 ] && [ -n "$(O="$O_ORIGINAL" ___x_cmd_gt_token)" ]; then
         O="$O_ORIGINAL" ___x_cmd_gt_current_owner
     else
-        ___x_cmd_gt_log info "token is null"
+        gt_log warn "token is null"
     fi
     # local TOKEN=${2:-""}
     # if [ -n "$GITEE_TOKEN" ]; then

@@ -16,7 +16,7 @@ subcmd:
     param:run
 
     if [ -z "$PARAM_SUBCMD" ]; then
-        ___x_cmd_gt_log error "Command Not Found. Show help."
+        gt_log error "Command Not Found. Show help."
         return 0
     fi
       
@@ -79,7 +79,7 @@ subcmd:
 '
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
-        ___x_cmd_gt_log error "Command Not Found. Show help."
+        gt_log error "Command Not Found. Show help."
         return 0
     fi
     "___x_cmd_gt_org_repo_${PARAM_SUBCMD}" "$@"

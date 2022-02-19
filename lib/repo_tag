@@ -10,7 +10,7 @@ subcmd:
     param:run
 
     if [ -z "$PARAM_SUBCMD" ]; then
-        ___x_cmd_gt_log error "subcmd not found. show help."
+        gt_log error "subcmd not found. show help."
         return 0
     fi
     

@@ -18,7 +18,7 @@ subcmd:
     param:run
 
     if [ -z "$PARAM_SUBCMD" ]; then
-        ___x_cmd_gt_log error "Command Not Found. Show help."
+        gt_log error "Command Not Found. Show help."
         return 0
     fi
     
@@ -78,7 +78,7 @@ option:
     [ -n "$no_comment" ] && can_comment=false
     [ -n "$no_auto_init" ] && auto_init=false
 
-    [ $# -eq 0 ] && ___x_cmd_gt_log info "repo create name is null" && return
+    [ $# -eq 0 ] && gt_log info "repo create name is null" && return
     local name
     for name in "$@"; do
         {
@@ -91,7 +91,7 @@ A
             if [ -n "$repo_id" ];then
                 ui tf "true" "Creating repo $name success" "repo_id:$repo_id" "url:$url" "repo_owner:$repo_owner" 
             else
-                ___x_cmd_gt_log error "Creating repo failure: $name. Code is $code. " 
+                gt_log error "Creating repo failure: $name. Code is $code. " 
             fi
         }
     done
@@ -151,7 +151,7 @@ option:
              gitignore_template license_template path="$paths" public
             code=$?
             if [ $code -ne 0 ]; then
-                ___x_cmd_gt_log error "Creating repo failure: $name. Code is $code. "
+                gt_log error "Creating repo failure: $name. Code is $code. "
                 # ______x_cmd_gt_resp_header "" >&2
                 return $code
             fi
@@ -209,7 +209,7 @@ option:
             gitignore_template license_template path="$paths" private enterprise outsourced project_creator members
             code=$?
             if [ $code -ne 0 ]; then
-                ___x_cmd_gt_log error "Creating repo failure: $name. Code is $code. "
+                gt_log error "Creating repo failure: $name. Code is $code. "
                 return $code
             fi
         } | json_color
@@ -241,7 +241,7 @@ ___x_cmd_gt_repo_ls() {
         return
     fi
 
-    ___x_cmd_gt_log error "Please provide owner and owner_type\n"
+    gt_log error "Please provide owner and owner_type\n"
     return 1
     # param_help.show
 }
@@ -280,7 +280,7 @@ options:
         if [ $? -eq 0 ]; then
             ui tf "true" "deleted repo $i"
         else
-            ___x_cmd_gt_log error "Code is $?. Deleting repo failure: $i. Probably because it desn't exists."
+            gt_log error "Code is $?. Deleting repo failure: $i. Probably because it desn't exists."
         fi
     done
 }
@@ -298,7 +298,7 @@ options:
     confirm=$(ui select "text" "Are you sure you want to clear repo ${owner_repo}" "yes" "no")
     [ "$confirm" = "no" ] && return
     ______x_cmd_gt_put_json "/v5/repos/${owner_repo}/clear" && ui tf "true" "Successfully clear ${owner_repo}" && return
-    ___x_cmd_gt_log error "clear repo failure: $owner_repo"
+    gt_log error "clear repo failure: $owner_repo"
 }
 
 ___x_cmd_gt_repo_review(){

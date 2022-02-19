@@ -46,7 +46,7 @@ subcmd:
 '
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
-        ___x_cmd_gt_log error "Command Not Found. Show help."
+        gt_log error "Command Not Found. Show help."
         return 0
     fi
     "___x_cmd_gt_enterprise_repo_${PARAM_SUBCMD}" "$@"
@@ -104,7 +104,7 @@ subcmd:
     param:run
 
     if [ -z "$PARAM_SUBCMD" ]; then
-        ___x_cmd_gt_log error "subcmd not found. show help."
+        gt_log error "subcmd not found. show help."
         return 0
     fi
     
@@ -156,7 +156,7 @@ options:
     # repo="$(______x_cmd_gt_param_normalize_repo "$repo")" || return 1
 
     if [ -z "$1" ]; then
-        ___x_cmd_gt_log error "At least one user’s spatial address or email is needed"
+        gt_log error "At least one user’s spatial address or email is needed"
         return 1
     fi
 
@@ -187,7 +187,7 @@ options:
             ______x_cmd_gt_delete "/v5/enterprises/${enterprise##*/}/members/${username##*/}"
             code=$?
             if [ $code -ne 0 ]; then
-                ___x_cmd_gt_log error "Creating repo failure: $name. Code is $code. "
+                gt_log error "Creating repo failure: $name. Code is $code. "
                 return $code
             fi
         }  

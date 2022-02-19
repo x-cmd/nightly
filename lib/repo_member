@@ -17,7 +17,7 @@ subcmd:
     param:run
 
     if [ -z "$PARAM_SUBCMD" ]; then
-        ___x_cmd_gt_log error "subcmd not found. show help."
+        gt_log error "subcmd not found. show help."
         return 0
     fi
     
@@ -57,7 +57,7 @@ options:
             ______x_cmd_gt_put_json "/v5/repos/$owner_repo/collaborators/${username##*/}" permission 1>/dev/null
             local code=$?
             if [ $code -ne 0 ]; then
-                ___x_cmd_gt_log error "add user failure: $username. Code is $code. "
+                gt_log error "add user failure: $username. Code is $code. "
             else
                 ui tf "true" "add $username to $owner_repo successfully"
             fi
@@ -74,14 +74,14 @@ options:
     #n              "Username list"
 '
     param:run
-    [ -z "$1" ] && ___x_cmd_gt_log error "At least one user’s spatial address is needed" && return 1
+    [ -z "$1" ] && gt_log error "At least one user’s spatial address is needed" && return 1
 
     ___x_cmd_gt_param_init_owner_repo
     local username
     for username in "$@"; do
         ______x_cmd_gt_delete "/v5/repos/$owner_repo/collaborators/${username##*/}"
         if [ $? -ne 0 ];then
-            ___x_cmd_gt_log error "delete user failure: $username."
+            gt_log error "delete user failure: $username."
         else
             ui tf "true" "successfully deleted $username in $owner_repo"
         fi
