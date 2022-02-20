@@ -963,9 +963,7 @@ ___x_cmd_main(){
                                                 rm -rf "$___X_CMD_ROOT" ;;
         reinstall)                              x clear && RELOAD=1 x upgrade ;;
 
-        z)                                      (   xrc zuz && ___x_cmd_zuz z "$@"   ) ;;
-        uz)                                     (   xrc zuz && ___x_cmd_zuz uz "$@"  ) ;;
-        zl)                                     (   xrc zuz && ___x_cmd_zuz ls "$@"  ) ;;
+        z|uz|zl)                               (   xrc zuz && ___x_cmd_zuz "$subcmd" "$@"   ) ;;
 
         sh|bash|zsh|fish|ksh|dash|ash)          ___x_cmd_shell_exec "$subcmd" "$@" ;;
 
@@ -996,8 +994,8 @@ ___x_cmd_main(){
         ruby|rb)                                ruby "$(___x_cmd_official_which "$2")" "$@"      ;;
         lua)            ;;
 
-        7zd|7zr)                                    ( xrc p7zip/v0   &&  p7zd "$@" ) ;;
-        7z)                                     ___x_cmd_static_build_file      p7zip 7za               "$@"    ;;
+        7zd)                                    ( xrc p7zip/v0   &&  p7zd "$@" ) ;;
+        7z|7za|7zr)                             ___x_cmd_static_build_file      p7zip 7za               "$@"    ;;
 
         ls)                                     ___x_cmd_ls         "$@"        ;;
         ll)                                     ___x_cmd_static_build_file      exa exa  -l             "$@"    ;;
@@ -1007,13 +1005,12 @@ ___x_cmd_main(){
         cat)                                    ___x_cmd_static_build_help      bat bat                 "$@"    ;;
         bw)                                     ___x_cmd_static_build_file      bandwhich bandwhich     "$@"    ;;
         jq)                                     ___x_cmd_static_build_help      jq jq                   "$@"    ;;
-        yq)                                     ___x_cmd_static_build_file      yq yq                   "$@"    ;;
         # TODO: we will rename ___x_cmd_curl to make room for it
-        curl)                                   ___x_cmd_static_build_file      curl curl               "$@"    ;;
+        curl|yq|tmux|git|nmap|tesseract|magick)        ___x_cmd_static_build_file     "$subcmd" "$subcmd"      "$@"    ;;
+        ffmpeg)                                 xrc ffmpeg && ___x_cmd_ffmpeg_download       "$@"    ;;
+        pandoc)                                 xrc pandoc && ___x_cmd_pandoc                "$@"    ;;
+
         openssl|ssl)                            ___x_cmd_static_build_file      openssl openssl         "$@"    ;;
-        tmux)                                   ___x_cmd_static_build_file      tmux tmux               "$@"    ;;
-        git)                                    ___x_cmd_static_build_file      git git                 "$@"    ;;
-        nmap)                                   ___x_cmd_static_build_file      nmap nmap               "$@"    ;;
         ncat)                                   ___x_cmd_static_build_file      nmap ncat               "$@"    ;;
         nping)                                  ___x_cmd_static_build_file      nmap nping              "$@"    ;;
         traceroute)                             ___x_cmd_static_build_file      nmap traceroute         "$@"    ;;
