@@ -7,7 +7,7 @@ xrc awk
 # awk -v data='abc
 # ' 'END { print data; }' <<< ""
 
-SSS="$(cat default.awk)$(cat json.awk jiparse.awk)"
+SSS="$(cat default.awk)$(cat json.awk )"
 
 
 f(){

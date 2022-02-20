@@ -1,0 +1,25 @@
+
+
+xrc awk
+
+# DSL: json_get(_, ".b")
+
+SSS="$(cat default.awk)$(cat json.awk jparse.awk jiter.awk)"
+
+f1(){
+    awk "$SSS"'
+    {
+        jiparse_after_tokenize(_, $0)
+    }
+    END{
+        # print jstr(_)
+    }
+    '
+}
+
+f(){
+    x json data 10 | f1
+}
+
+time (f)
+

@@ -11,7 +11,7 @@ BEGIN {
     UI_BG_BLACK = "\033[40m"
     UI_BG_RED = "\033[41m"
     UI_BG_GREEN = "\033[42m"
-    UI_BG_YUI_ELLOW = "\033[43m"
+    UI_BG_YELLOW = "\033[43m"
     UI_BG_BLUE = "\033[44m"
     UI_BG_MAGENTA = "\033[45m"
     UI_BG_CYAN = "\033[46m"
@@ -58,6 +58,11 @@ function ui_goto_cursor0(){
 
 function ui_move_next_line(cur_row, cur_col){
     ui_goto_cursor(cur_row + 1, cur_col)
+}
+
+function ui_str_rep( str, time,   i, r ){
+    for (i=1; i<=time; ++i)     r = r str
+    return r
 }
 
 # BEGIN {

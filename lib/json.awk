@@ -136,7 +136,6 @@ function json_str_unquote2(str){
     if (str !~ /^"/) { # "
         return str
     }
-
     gsub(/\\\\/, "\001\001", str)
     gsub(/\\"/, /"/, str)
     gsub("\001\001", "\\\\", str)
@@ -377,14 +376,6 @@ function jdict_keys(arr, keypath, klist, _l){
     return _l
 }
 
-function jdict_keys2arr(arr, keypath, klist, _l){
-    _l = split(substr(arr[ keypath T_KEY ],2), klist, S)
-    klist[ L ] = _l
-    # TODO: klist[ L ] = _l-1
-    return _l
-}
-
-
 function jdict_rm(arr, keypath, key,  _key_str){
     _key_str = arr[ keypath T_KEY]
     if (match(_key_str, S key)){
@@ -434,12 +425,12 @@ function jdict_grep_to_arr( obj, keypath, reg,  arr,    _arrl,  _klist, _k, _tmp
     _k = keypath
     keypath = jpath(keypath)
 
-    _l = split(substr(obj[ keypath T_KEY ],2), klist, S)
+    _l = split(substr(obj[ keypath T_KEY ],2), _klist, S)
 
     _arrl = 0
     for(_i=1; _i<=_l; ++_i){
         _tmp = _klist[_i]
-        if( match(json_str_unquote2( obj[ jpath(_k "." _tmp ) ] ), reg)){
+        if( match( obj[ jpath(_k "." json_str_unquote2(_tmp)) ], reg)){
             arr[ ++ _arrl ] = _tmp
         }
     }
@@ -669,35 +660,6 @@ function json_split2tokenarr(obj, text){
 function json_split2tokenarr_(text){
     return json_split2tokenarr(_, text)
 }
-
-# Section: jiter init save load
-function jiter_save( obj ) {
-    obj[ "FA_KEYPATH" ] = JITER_FA_KEYPATH
-    obj[ "STATE" ]      = JITER_STATE
-    obj[ "LAST_KP" ]    = JITER_LAST_KP
-    obj[ "LEVEL" ]      = JITER_LEVEL
-    obj[ "CURLEN" ]     = JITER_CURLEN
-    obj[ "LAST_KL" ]    = JITER_LAST_KL
-}
-
-function jiter_init( keypath_prefix ) {
-    JITER_FA_KEYPATH    = keypath_prefix
-    JITER_STATE         = T_ROOT
-    JITER_LAST_KP       = ""
-    JITER_LEVEL         = 0
-    JITER_CURLEN        = 0
-    JITER_LAST_KL       = ""
-}
-
-function jiter_load( obj ){
-    JITER_FA_KEYPATH    = obj[ "FA_KEYPATH" ]
-    JITER_STATE         = obj[ "STATE" ]
-    JITER_LAST_KP       = obj[ "LAST_KP" ]
-    JITER_LEVEL         = obj[ "LEVEL" ]
-    JITER_CURLEN        = obj[ "CURLEN" ]
-    JITER_LAST_KL       = obj[ "LAST_KL" ]
-}
-# EndSection
 
 # Section: still strange: should be global search
 
