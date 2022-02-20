@@ -2,13 +2,13 @@
 
 xrc awk
 xrc ui/lib/region
+___X_CMD_UI_FORM_CONTROL_AWK_PATH="$(xrc cat ui/lib/share.awk ui/lib/form.awk)"
+# ___X_CMD_UI_FORM_CONTROL_AWK_PATH="$(xrc cat ./lib/share.awk ./lib/form.awk)"
 
 if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
 ___x_cmd_ui_form_control(){
-    # LC_ALL=en_US.UTF-8 USE=str,wcwidth,ui ___x_cmd_awk file "$___X_CMD_UI_TABLE_CONTROL_AWK_PATH" \
-    #     -v EXIT_OP="$EXIT_OP" -W interactive
-    command awk -W interactive -v ORS="$___X_CMD_UI_REGION_RS" "$(xrc cat ui/lib/share.awk ui/lib/form.awk)"
-        # -f ./form.awk # "$(xrc cat ui/lib/form.awk)" # -f ./form.awk
+    LC_ALL=en_US.UTF-8 USE=str,wcwidth,ui ___x_cmd_awk code "$___X_CMD_UI_FORM_CONTROL_AWK_PATH" \
+        -v EXIT_OP="$EXIT_OP" -W interactive
 }
 
 ___x_cmd_ui_form_awk(){
@@ -22,11 +22,8 @@ ___x_cmd_ui_form_awk(){
 
 else
 ___x_cmd_ui_form_control(){
-    # LC_ALL=en_US.UTF-8 USE=str,wcwidth,ui ___x_cmd_awk file "$___X_CMD_UI_TABLE_CONTROL_AWK_PATH" \
-    #     -v EXIT_OP="$EXIT_OP" -v RS="$___X_CMD_UI_REGION_RS" -v ORS="$___X_CMD_UI_REGION_RS"
-    # command awk -v RS="$___X_CMD_UI_REGION_RS" -v ORS="$___X_CMD_UI_REGION_RS" "$(xrc cat ui/lib/share.awk ./lib/form.awk)"
-    command awk -v RS="$___X_CMD_UI_REGION_RS" -v ORS="$___X_CMD_UI_REGION_RS" "$(xrc cat ui/lib/share.awk ui/lib/form.awk)"
-        # -f ./form.awk # "$(xrc cat ui/lib/form.awk)" # -f ./form.awk
+    LC_ALL=en_US.UTF-8 USE=str,wcwidth,ui ___x_cmd_awk code "$___X_CMD_UI_FORM_CONTROL_AWK_PATH" \
+        -v EXIT_OP="$EXIT_OP" -v RS="$___X_CMD_UI_REGION_RS" -v ORS="$___X_CMD_UI_REGION_RS"
 }
 
 ___x_cmd_ui_form_awk(){
@@ -65,3 +62,4 @@ ___x_cmd_ui_form(){
 # echo "$repo"
 # echo "$repo2_1_1"
 # echo "$repo2_1_2"
+# echo "___X_CMD_UI_FORM_EXIT:" "$___X_CMD_UI_FORM_EXIT"

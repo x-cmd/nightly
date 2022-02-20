@@ -134,7 +134,7 @@ function ctrl_in_filter_state(char_type, char_value){
         model_generate()
         return
     }
-    ctrl_lineedit_handle( filter, ctrl_rstate_get( CURRENT_COLUMN ), char_type, char_value )
+    ctrl_lineedit_handle( filter, char_type, char_value, ctrl_rstate_get( CURRENT_COLUMN ) )
 }
 
 function ctrl_in_normal_state(char_type, char_value){

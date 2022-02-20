@@ -1,16 +1,64 @@
+
 # shellcheck shell=sh disable=SC3043
+
+# author:       Li Junhao           l@x-cmd.com
 
 xrc ui/lib/region
 xrc ui/lib/getchar
 xrc awk
+# Section: main
+___x_cmd_ui_select(){
+    local O="${O:-___X_CMD_UI_SELECT_DEFAULT}"
+    case "${1}" in
+        -)          ___ui_select_clear                       ;;
+        +)          shift; ___ui_select_read      "$@"       ;;
+        func)       shift; ___ui_select_out_func  "$@"       ;;
+        *)          [ $# -gt 0 ] && shift; ___ui_select_out      "$@"       ;;
+    esac
+}
+
+___X_CMD_UI_SELECT_DEFAULT=0
+___ui_select_read(){
+
+    local O="${O:-___X_CMD_UI_SELECT_DEFAULT}"
+
+    eval "___X_CMD_UI_SELECT_DEFAULT_ROW_$O=\$((___X_CMD_UI_SELECT_DEFAULT_ROW_$O+1))"
+    local ttt
+    eval "ttt=\"\${___X_CMD_UI_SELECT_DEFAULT_COL_$O}\""
+    if [ "${ttt:-0}" -lt $# ]; then
+        eval "___X_CMD_UI_SELECT_DEFAULT_COL_$O=\$#"
+    fi
+
+    local s
+    local IFS
+    IFS=$(printf "\003")
+    local NR
+    NR=$(printf "\002")
+    s="$(eval echo \"\$"{$O}$NR$*"\")"
+    eval "$O=\"\$s\""
+}
+
+___ui_select_clear(){
+    local O="${O:-___X_CMD_UI_SELECT_DEFAULT}"
+    eval ___X_CMD_UI_SELECT_DEFAULT_ROW_$O=0
+    eval "$O="
+}
+
 
 ___X_CMD_UI_SELECT_CONTROL_AWK_PATH="$(xrc cat ./lib/share.awk ./lib/select.awk)"
-# ___X_CMD_UI_REGION_AWK="./lib/region.awk"
 
+if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
+# 881 hh
+___x_cmd_ui_select_control_awk(){
+    LC_ALL=en_US.UTF-8 USE=str,wcwidth,ui ___x_cmd_awk code "$___X_CMD_UI_SELECT_CONTROL_AWK_PATH" \
+        -v EXIT_OP="$EXIT_OP" -W interactive
+}
+else
 ___x_cmd_ui_select_control_awk(){
     LC_ALL=en_US.UTF-8 USE=str,wcwidth,ui ___x_cmd_awk code "$___X_CMD_UI_SELECT_CONTROL_AWK_PATH" \
         -v EXIT_OP="$EXIT_OP" -v RS="$___X_CMD_UI_REGION_RS" -v ORS="$___X_CMD_UI_REGION_RS"
 }
+fi
 
 ___x_cmd_ui_select_control_display(){
     cat "./.x-cmd/dev/testcase/testlargedata" | awk -v REGION_RS="$___X_CMD_UI_REGION_RS" '{printf $0 REGION_RS}'
@@ -33,7 +81,10 @@ ___ui_select_out(){
 
 f(){
     ___X_CMD_UI_SELECT_MULTIPLE_LEN=0
-    ___ui_select_out
+    # ___ui_select_out
+    ___x_cmd_ui_select -
+    ___x_cmd_ui_select func ___x_cmd_ui_select_control_display
+
     echo "___X_CMD_UI_SELECT_FINAL_COMMAND:" "$___X_CMD_UI_SELECT_FINAL_COMMAND"
     i=1
     while [ "$i" -le "$___X_CMD_UI_SELECT_MULTIPLE_LEN" ];do

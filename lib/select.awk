@@ -43,7 +43,8 @@ function view_update(          _selected_item_idx, _iter_item_idx, _data_item_id
     view_calcuate_geoinfo()
 
     buffer_append( ctrl_help_get() "\n\n" )
-    buffer_append( sprintf("Filter> %s\n", filter[""] ))
+    if (ctrl_sw_get(FILTER_EDIT) == true) buffer_append( sprintf("Filter> %s\n", filter[""] ))
+    if (ctrl_sw_get(FIND_EDIT) == true) buffer_append( sprintf("Find> %s\n", find[""] ))
     buffer_append( sprintf("%s\n", UI_FG_BLUE data_header UI_END))
 
     _selected_item_idx = ctrl_rstate_get( SELECTED_ITEM_IDX )
@@ -110,7 +111,19 @@ function handle_ctrl_in_filter_state(char_type, char_value){
         model_generate()
         return
     }
-    ctrl_lineedit_handle( filter, "", char_type, char_value )
+    ctrl_lineedit_handle( filter, char_type, char_value )
+}
+
+function handle_ctrl_in_find_state(char_type, char_value,      i, _find){
+    if (char_value == "ENTER")  {
+        ctrl_sw_toggle( FIND_EDIT )
+        _find = find[""]
+        for (i=1; i<=model_len; ++i) {
+            if (data[model[i]] ~ _find) return ctrl_rstate_set(SELECTED_ITEM_IDX, i)
+        }
+        return
+    }
+    ctrl_lineedit_handle( find, char_type, char_value )
 }
 
 function handle_ctrl_to_move_focus(char_type, char_value){
@@ -165,6 +178,8 @@ function handle_ctrl_in_normal_state(char_type, char_value) {
 function ctrl(char_type, char_value) {
     if (ctrl_sw_get( FILTER_EDIT ) == true) {
         handle_ctrl_in_filter_state(char_type, char_value)
+    } else if (ctrl_sw_get( FIND_EDIT ) == true) {
+        handle_ctrl_in_find_state(char_type, char_value)
     } else {
         handle_ctrl_in_normal_state(char_type, char_value)
     }

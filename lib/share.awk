@@ -176,21 +176,21 @@ function ctrl_state_set( obj, val ){
 # EndSection
 
 # Section: ctrl rstate
-function ctrl_rstate_init( obj, min, max ) {
-    obj[ "val" ] = min
-    obj[ "min" ] = min
-    obj[ "max" ] = max
+function ctrl_rstate_init( obj, min, max, _key_prefix ) {
+    obj[ _key_prefix "val" ] = min
+    obj[ _key_prefix "min" ] = min
+    obj[ _key_prefix "max" ] = max
 }
 
-function ctrl_rstate_inc( obj,   m ){
-    v = obj[ "val" ]
-    m = obj[ "max" ]
+function ctrl_rstate_inc( obj, _key_prefix,             m ){
+    v = obj[ _key_prefix "val" ]
+    m = obj[ _key_prefix "max" ]
     if (v < m) {
         v += 1
     } else {
-        v = obj[ "min" ]
+        v = obj[ _key_prefix "min" ]
     }
-    obj[ "val" ] = v
+    obj[ _key_prefix "val" ] = v
     return v
 }
 
@@ -204,57 +204,57 @@ function ctrl_rstate_inc( obj,   m ){
 # }
 
 
-function ctrl_rstate_add( obj, val,      mi, ma, mr ){
-    v = ctrl_rstate_get( obj )
-    ma = obj[ "max" ]
-    mi = obj[ "min" ]
+function ctrl_rstate_add( obj, val, _key_prefix,     mi, ma, mr ){
+    v = ctrl_rstate_get( obj, _key_prefix )
+    ma = obj[ _key_prefix "max" ]
+    mi = obj[ _key_prefix "min" ]
     v += val - mi
     mr = ma - mi + 1
     v = v % mr
     if (v < 0) v = v + mr
     v += mi
-    obj[ "val" ] = v
+    obj[ _key_prefix "val" ] = v
     return v
 }
 
-function ctrl_rstate_dec( obj,   m, v ){
-    v = ctrl_rstate_get( obj )
-    m = obj[ "min" ]
+function ctrl_rstate_dec( obj, _key_prefix,           m, v ){
+    v = ctrl_rstate_get( obj, _key_prefix )
+    m = obj[ _key_prefix "min" ]
     if (v > m) {
         v -= 1
     } else {
-        v = obj[ "max" ]
+        v = obj[ _key_prefix "max" ]
     }
-    obj[ "val" ] = v
+    obj[ _key_prefix "val" ] = v
     return v
 }
 
-function ctrl_rstate_get( obj ){
+function ctrl_rstate_get( obj, _key_prefix ){
     # if (( obj[ "val" ] == "" )       obj[ "val" ] = obj[ "min" ]
-    return obj[ "val" ]
+    return obj[ _key_prefix "val" ]
 }
 
-function ctrl_rstate_set( obj, val ){
-    obj[ "val" ] = val
+function ctrl_rstate_set( obj, val, _key_prefix ){
+    obj[ _key_prefix "val" ] = val
 }
 
-function ctrl_rstate_addchar( obj, val ) {
-    v = obj[ "val" ] val
-    if ( ( int(v) >= int(obj[ "min" ]) ) && ( int(v) <= int(obj[ "max" ] )) ) {
+function ctrl_rstate_addchar( obj, val, _key_prefix ) {
+    v = obj[ _key_prefix "val" ] val
+    if ( ( int(v) >= int(obj[ _key_prefix "min" ]) ) && ( int(v) <= int(obj[ _key_prefix "max" ] )) ) {
         ctrl_rstate_set( obj,  v )
     }
 }
 
-function ctrl_rstate_delchar( obj ) {
-    v = obj[ "val" ]
-    ctrl_rstate_set( obj, substr(v, 1, length(v) - 1) )
+function ctrl_rstate_delchar( obj, _key_prefix ) {
+    v = obj[ _key_prefix "val" ]
+    ctrl_rstate_set( obj, substr(v, 1, length(v) - 1), _key_prefix )
 }
 
-function ctrl_rstate_handle_char( obj, char_type, char_value ) {
+function ctrl_rstate_handle_char( obj, char_type, char_value, _key_prefix ) {
     if (char_type == "ascii-delete") {
-        ctrl_rstate_delchar( obj )
+        ctrl_rstate_delchar( obj, _key_prefix )
     } else if (index("0123456789", char_value) > 0) {
-        ctrl_rstate_addchar( obj, char_value )
+        ctrl_rstate_addchar( obj, char_value, _key_prefix )
     } else {
         return false
     }
@@ -283,21 +283,25 @@ function ctrl_sw_get( obj ) {
 # EndSection
 
 # Section: ctrl sw
-function ctrl_lineedit_init( obj, prefix ) {
-    obj[ prefix ] = ""
+function ctrl_lineedit_init( obj, _key_prefix ) {
+    obj[ _key_prefix ] = ""
 }
 
-function ctrl_lineedit_handle( obj, prefix, char_type, char_value,  d ) {
-    d = obj[ prefix ]
+function ctrl_lineedit_handle( obj, _key_prefix, char_type, char_value,  d ) {
+    d = obj[ _key_prefix ]
     if (char_type == "ascii-delete") {
-        obj[ prefix ] = substr(d, 1, length(d) - 1)
+        obj[ _key_prefix ] = substr(d, 1, length(d) - 1)
     } else {
-        obj[ prefix ] = d char_value
+        obj[ _key_prefix ] = d char_value
     }
 }
 
-function ctrl_lineedit_get( obj, prefix ) {
-    return obj[ prefix ]
+function ctrl_lineedit_get( obj, _key_prefix ) {
+    return obj[ _key_prefix ]
+}
+
+function ctrl_lineedit_put( obj, val, _key_prefix ) {
+    obj[ _key_prefix ] = val
 }
 # EndSection
 
