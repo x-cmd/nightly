@@ -1,6 +1,6 @@
 xrc awk
 
-SSS="$(cat default.awk)$(cat json.awk jparse.awk jiter.awk)"
+SSS="$(cat default.awk)$(cat json.awk jiter.awk)"
 
 
 data='[
@@ -42,5 +42,5 @@ A
 
 }
 
-json_join
+time (json_join)
 

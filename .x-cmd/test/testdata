@@ -2,9 +2,7 @@
 
 xrc awk
 
-# DSL: json_get(_, ".b")
-
-SSS="$(cat default.awk)$(cat json.awk jparse.awk jiter.awk)"
+SSS="$(xrc cat awk/lib/default.awk awk/lib/json.awk awk/lib/jiter.awk)"
 
 f1(){
     awk "$SSS"'
@@ -18,7 +16,7 @@ f1(){
 }
 
 f(){
-    x json data 10 | f1
+    x json data | f1
 }
 
 time (f)

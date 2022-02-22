@@ -12,7 +12,6 @@ f(){
 awk -v RS="\t" "$SSS"'
 
 {
-    # debug(\$0)
     data = $0
 }
 
@@ -29,7 +28,7 @@ END{
     for(i=1; i<=arrlen; ++i){
         print arr[i]
     }
-    
+
     print jstr(_)
 }
 
@@ -67,4 +66,4 @@ A
 
 }
 
-time f
+time (f)

@@ -17,10 +17,10 @@ f1(){
     parl = 3
 
     if ($0 != "") {
-        # jiter_eqarr_print( $0, patl, pat, "", "\n")
+        jiter_eqarr_print( $0, patl, pat, "", "\n")
         # jiter_eqarr_parse( _, $0, patl, pat)
 
-        jiter_regexarr_print( $0, parl, par, "", "\n")
+        # jiter_regexarr_print( $0, parl, par, "", "\n")
         # if (jiter_regexarr_parse(_, $0,  parl, par) == true ){
         #     print jstr(_)
         #     delete _

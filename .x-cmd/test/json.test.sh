@@ -1,11 +1,6 @@
 
 
-xrc awk
-
-# awk -v data='abc
-# ' 'END { print data; }' <<< ""
-
-SSS="$(cat default.awk)$(cat json.awk jiter.awk )"
+SSS="$(xrc cat awk/lib/default.awk awk/lib/json.awk awk/lib/jiter.awk)"
 
 
 f1(){
