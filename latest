@@ -150,12 +150,16 @@ ___x_cmd_log_logger_func(){
     local logger="${O:-DEFAULT}"
     local level="${1:?Please provide logger level}"
 
+    local type_color
     local level_code=0
+    local msg_color="${___X_CMD_LOG_COLORIZED_MSG}"
     case "$level" in
-        debug|DEBUG|verbose)    level="DBG";                    type_color="$___X_CMD_LOG_COLORIZED_DEBUG";      shift ;;
-        info|INFO)              level="INF";    level_code=1;   type_color="$___X_CMD_LOG_COLORIZED_INFO";       shift ;;
-        warn|WARN)              level="WRN";    level_code=2;   type_color="$___X_CMD_LOG_COLORIZED_WARN";       shift ;;
-        error|ERROR)            level="ERR";    level_code=3;   type_color="$___X_CMD_LOG_COLORIZED_ERROR";      shift ;;
+        debug|DEBUG|verbose)    level="DBG";                    type_color="$___X_CMD_LOG_COLORIZED_DEBUG";          shift ;;
+        info|INFO)              level="INF";    level_code=1;   type_color="$___X_CMD_LOG_COLORIZED_INFO";           shift ;;
+        warn|WARN)              level="WRN";    level_code=2;   type_color="$___X_CMD_LOG_COLORIZED_WARN"
+                                                                msg_color="\\033[1m${___X_CMD_LOG_COLORIZED_WARN}";  shift ;;
+        error|ERROR)            level="ERR";    level_code=3;   type_color="$___X_CMD_LOG_COLORIZED_ERROR"
+                                                                msg_color="\\033[1m${___X_CMD_LOG_COLORIZED_ERROR}"; shift ;;
         *)                      level="DBG"     ;;
     esac
 
@@ -180,10 +184,10 @@ ___x_cmd_log_logger_func(){
         fi
 
         if [ $# -eq 0 ]; then
-            printf "${timestamp}\033[${type_color}[%s] <%s>:" "$level" "$logger"
+            printf "${timestamp}${type_color}[%s] <%s>:" "$level" "$logger"
             cat | awk 'NR==1{ print($0) }; NR>=2{ print("> " $0); }; END{ printf("%s", "\033[0m"); }'
         else
-            printf "${timestamp}\033[${type_color}[%s] <%s>: \033[0m${___X_CMD_LOG_COLORIZED_MSG}%s\033[0m\n" "$level" "$logger" "$*"
+            printf "${timestamp}${type_color}[%s] <%s>: \033[0m${msg_color}%s\033[0m\n" "$level" "$logger" "$*"
         fi
     else
         [ -n "$___X_CMD_LOG_LOGGER_TIMESTAMP_FORMAT" ] && timestamp="$(date "${___X_CMD_LOG_LOGGER_TIMESTAMP_FORMAT}") "
