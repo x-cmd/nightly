@@ -22,7 +22,7 @@ case "$1" in
     local)
         param_log info "copy all files from ./* to ~/.x-cmd/param/"
         x ws install
-        . ./testcase/v0_test
+        . "$(x wsroot)/.x-cmd/testcases/v0_test"
         ;;
     cross)
         x test local
