@@ -289,6 +289,7 @@ function ctrl_lineedit_init( obj, _key_prefix ) {
 
 function ctrl_lineedit_handle( obj, _key_prefix, char_type, char_value,  d ) {
     d = obj[ _key_prefix ]
+    if (char_type == "special") return
     if (char_type == "ascii-delete") {
         obj[ _key_prefix ] = substr(d, 1, length(d) - 1)
     } else {
@@ -336,3 +337,7 @@ function exit_if_detected( char_value ){
 }
 
 # EndSection
+
+function th( style, text ){
+    return style text UI_END
+}

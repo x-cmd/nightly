@@ -3,6 +3,7 @@
 
 # author:       Li Junhao           l@x-cmd.com
 
+# . ./lib/region
 xrc ui/lib/region
 xrc ui/lib/getchar
 xrc awk
@@ -45,7 +46,7 @@ ___ui_select_clear(){
 }
 
 
-___X_CMD_UI_SELECT_CONTROL_AWK_PATH="$(xrc cat ./lib/share.awk ./lib/select.awk)"
+___X_CMD_UI_SELECT_CONTROL_AWK_PATH="$(xrc cat ./lib/share.awk ./lib/theme.awk ./lib/select.awk)"
 
 if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
 # 881 hh
@@ -66,6 +67,10 @@ ___x_cmd_ui_select_control_display(){
 }
 ___x_cmd_ui_select_control(){
     {
+        # printf "UPDATE %s %s${___X_CMD_UI_REGION_RS}" "${COLUMNS}" "${LINES}"
+        # IFS="$(printf "$___X_CMD_UI_REGION_RS")"
+        # printf "%s%s" "$*" "$___X_CMD_UI_REGION_RS"
+
         "$@" | ___x_cmd_ui_region_send_update
         cat
     } | ___x_cmd_ui_select_control_awk
@@ -76,14 +81,32 @@ ___ui_select_out_func(){
 ___ui_select_out(){
     ___ui_select_out_func ___x_cmd_ui_select_control_display
 }
+___ui_select_out1(){
+    ___ui_select_out_func "$@"
+}
 
 # ___ui_select_out
 
 f(){
     ___X_CMD_UI_SELECT_MULTIPLE_LEN=0
-    # ___ui_select_out
     ___x_cmd_ui_select -
     ___x_cmd_ui_select func ___x_cmd_ui_select_control_display
+
+    # ___ui_select_out1 \
+    # "Please select the app you want to install:" \
+    # "Install docker" \
+    # "Install k8s" \
+    # "Install minikube" \
+    # "Install jvm" \
+    # "Install nvm" \
+    # "---" \
+    # "It's the 1 app descriptor." \
+    # "It's the 2 app descriptor." \
+    # "It's the 3 app descriptor." \
+    # "It's the 4 app descriptor." \
+    # "It's the 5 app descriptor." \
+    # "---"
+
 
     echo "___X_CMD_UI_SELECT_FINAL_COMMAND:" "$___X_CMD_UI_SELECT_FINAL_COMMAND"
     i=1

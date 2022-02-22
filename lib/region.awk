@@ -92,7 +92,7 @@ function end(){
     if (ALREAD_END == 1) return
     ALREAD_END = 1
     printf(UI_CURSOR_RESTORE) > "/dev/stderr"
-    printf( "%s", cal_empty_line(LAST_OUTPUT_LINE_COUNT, KNOWN_WIDTH)) > "/dev/stderr"
+    printf( "%s", cal_empty_line(OUTPUT_LINE_COUNT, KNOWN_WIDTH)) > "/dev/stderr"
     printf(UI_CURSOR_RESTORE) > "/dev/stderr"
 
     printf "\033[34h\033[?25h" > "/dev/stderr"

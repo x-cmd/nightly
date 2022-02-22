@@ -2,8 +2,8 @@
 
 xrc awk
 xrc ui/lib/region
-___X_CMD_UI_FORM_CONTROL_AWK_PATH="$(xrc cat ui/lib/share.awk ui/lib/form.awk)"
-# ___X_CMD_UI_FORM_CONTROL_AWK_PATH="$(xrc cat ./lib/share.awk ./lib/form.awk)"
+___X_CMD_UI_FORM_CONTROL_AWK_PATH="$(xrc cat ui/lib/share.awk ui/lib/theme.awk ui/lib/form.awk)"
+# ___X_CMD_UI_FORM_CONTROL_AWK_PATH="$(xrc cat ./lib/share.awk ./lib/theme.awk ./lib/form.awk)"
 
 if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
 ___x_cmd_ui_form_control(){

@@ -17,14 +17,24 @@ test_table(){
 }
 test_form(){
     ui form \
-    "Accesstype" atype public "=" private public "--" \
-    "RepoName" repo "" "=~" "abc1[0-9]+"   "--" \
-    "Username" user "xxx" "=~" "12[0-9]+" "--" \
-    "Test multiple line argument" mul_line_arg ""  "--" \
-    "Provide repo name" repo ""  "=~" "abc" "cde" "def" "--" \
-    "Provide two repo name" repo2_1_1 ""  "=" "mbc" "cde" "def" "--" \
-    "Provide two repo name" repo2_1_2 ""  "=" "cde"
-    printf "%s\n" "user: $user"
+    "Text atype" atype 1                       "=" private public -- \
+    "Text repo" repo "ddd"                              "=~" "abc1[0-9]+"   -- \
+    "Text user" user ""                              "=~*" "12[0-9]+" -- \
+    "Text mul_line_arg1" mul_line_arg1 "xxx"   "*" -- \
+    "Text mul_line_arg2" mul_line_arg2  ""  -- \
+    "Text repo" repo ""                     "=~" "abc" "cde" "def" -- \
+    "Text repo2_1_1" repo2_1_1 ""            "=" "abc" "cde" "def" -- \
+    "Text repo2_1_2" repo2_1_2 ""            "=" "cde"
+
+echo "$atype"
+echo "$repo"
+echo "$user"
+echo "$mul_line_arg1"
+echo "$mul_line_arg2"
+echo "$repo"
+echo "$repo2_1_1"
+echo "$repo2_1_2"
+echo "___X_CMD_UI_FORM_EXIT:" "$___X_CMD_UI_FORM_EXIT"
 }
 test_select(){
     ui select "num,text" "Please select the app you want to install:"  "Install docker"  "Install k8s" "Install "  "Instaddll k8s"

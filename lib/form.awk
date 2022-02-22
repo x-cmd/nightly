@@ -119,7 +119,7 @@ function view_help( _ctrl_current, data ){
     return th_help_text( data "\n" )
 }
 
-function view_body( _ctrl_current,                          question_width, data, _question, _line, _tmp, _is_focused, _is_selected  i, j ){
+function view_body( _ctrl_current,                          question_width, data, _question, _line, _tmp, _is_focused, _is_selected,  i, j ){
     question_width = 30
     for (i=1; i<=rulel; ++i) {
         _question       =  sprintf( "%-" question_width "s",   rule[ i ATT_DESC ] )
@@ -127,12 +127,12 @@ function view_body( _ctrl_current,                          question_width, data
 
         if ( _is_focused ) {
             STYLE_ANSWER_SELECTED       = TH_QA_A_FOCUSED_SELECTED
-            STYLE_ANSWER_UNSELECTED     = TH_QA_A_FOCUSED_UNSELECTED
-            _line                       = th( TH_QA_Q_FOCUSED,   _question )
+            STYLE_ANSWER_UNSELECTED     = TH_QA_A_FOCUSED_NOTSELECTED
+            _line                       = th( TH_QA_Q_FOCUSED,   _question ) " "
         } else {
             STYLE_ANSWER_SELECTED       = TH_QA_A_UNFOCUSED_SELECTED
-            STYLE_ANSWER_UNSELECTED     = TH_QA_A_UNFOCUSED_UNSELECTED
-            _line                       = th( TH_QA_Q_UNFOCUSED,   _question )
+            STYLE_ANSWER_UNSELECTED     = TH_QA_A_UNFOCUSED_NOTSELECTED
+            _line                       = th( TH_QA_Q_UNFOCUSED,   _question ) " "
         }
 
         op = rule[ i ATT_OP ]
@@ -145,7 +145,7 @@ function view_body( _ctrl_current,                          question_width, data
             for (j=1; j<=rule[ i ATT_OP_L ]; ++j) {
                 # TODO: if it is too long, use multiple line
                 _is_selected    = _answer == j
-                _line           = _line th( _is_selected ? STYLE_ANSWER_SELECTED: STYLE_ANSWER_UNSELECTED, rule[ i ATT_OP j ] )
+                _line           = _line th( _is_selected ? STYLE_ANSWER_SELECTED: STYLE_ANSWER_UNSELECTED, rule[ i ATT_OP j ] ) " "
             }
         }
         data = data "\n" _line

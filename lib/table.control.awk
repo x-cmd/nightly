@@ -12,40 +12,6 @@ BEGIN {
 # EndSection
 
 # Section: view
-function update_view_print_cell(model_row_i, data_row_i, col_i,       h, _size, _tmp_currow){
-
-    if ( ctrl_rstate_get( CURRENT_COLUMN ) == col_i )           buffer_append( sprintf("%s",UI_TEXT_BOLD UI_FG_BLUE UI_TEXT_REV ) )
-    if ( ctrl_rstate_get( CURRENT_ROW ) == model_row_i )        buffer_append( sprintf("%s", UI_FG_GREEN UI_TEXT_REV) )
-
-    cord = data_row_i KSEP col_i
-    if (col_max[ col_i ] <= COL_MAX_SIZE) {
-        buffer_append( sprintf( "%s", str_pad_right( data[ cord ], col_max[ col_i ], data_wlen[ cord ] ) ) )
-    } else {
-        if (data_wlen[ cord ] > COL_MAX_SIZE){
-            buffer_append( sprintf( "%s", str_pad_right( substr(data[ cord ], 1, COL_MAX_SIZE) "...", COL_MAX_SIZE + 3, COL_MAX_SIZE + 3) ) )
-        } else {
-            buffer_append( sprintf( "%s", str_pad_right( data[ cord ], COL_MAX_SIZE + 3, data_wlen[ cord ] ) ) )
-        }
-    }
-    buffer_append( sprintf( "%s", "  " ) )
-    buffer_append( sprintf( UI_END ) )
-}
-
-function view_update_header(       col_i){
-    buffer_append( sprintf("%s     ", UI_TEXT_UNDERLINE UI_TEXT_BOLD) )
-    for (col_i=1; col_i<=data_col_num; col_i++) {
-        # limit the length
-        if (col_max[ col_i ] > COL_MAX_SIZE) {
-            buffer_append( sprintf( "%s", str_pad_right( data_header_arr[ col_i ], COL_MAX_SIZE + 6, data_header_arr_wlen[ 1 KSEP col_i ] ) ) )
-        } else {
-            buffer_append( sprintf( "%s  ", str_pad_right( data_header_arr[ col_i ], col_max[ col_i ], data_header_arr_wlen[ 1 KSEP col_i ] ) ) )
-        }
-        # buffer_append( sprintf( "%s  ", str_pad_right( data[ 1 KSEP col_i ], col_max[ col_i ], data_wlen[ 1 KSEP col_i ] ) ) )
-    }
-
-    buffer_append( sprintf("%s\n", UI_END) )
-}
-
 function view_calcuate_geoinfo(){
     # command line >
     # help: 2/4
@@ -63,34 +29,76 @@ function view_calcuate_geoinfo(){
     }
 }
 
-function update_logic_view(           model_row_i, row_i, col_i, model_start_row, _row_in_page, _tmp_currow){
+function view(){
     if (DATA_HAS_CHANGED == false)    return
     DATA_HAS_CHANGED = false
-
     view_calcuate_geoinfo()
 
-    buffer_append( ctrl_help_get() "\n\n" )
-    buffer_append( sprintf("FILTER: %s\n", filter[ ctrl_rstate_get( CURRENT_COLUMN ) ]) )
+    _component_help   = view_help()
+    _component_filter = view_filter( )
+    _component_header = view_header()
+    _component_body   = view_body()
 
+
+    send_update( _component_help "\n\n" _component_filter _component_header _component_body )
+}
+
+function view_help(){
+    return th_help_text( ctrl_help_get() )
+}
+function view_filter(       data){
+    return th_statusline_text( sprintf("FILTER: %s\n", filter[ ctrl_rstate_get( CURRENT_COLUMN ) ]) )
+}
+
+function view_header(       col_i, data){
+    data = "     "
+    for (col_i=1; col_i<=data_col_num; col_i++) {
+        # limit the length
+        if (col_max[ col_i ] > COL_MAX_SIZE) {
+            data = data sprintf( "%s", str_pad_right( data_header_arr[ col_i ], COL_MAX_SIZE + 6, data_header_arr_wlen[ 1 KSEP col_i ] ) )
+        } else {
+            data = data sprintf( "%s  ", str_pad_right( data_header_arr[ col_i ], col_max[ col_i ], data_header_arr_wlen[ 1 KSEP col_i ] ) )
+        }
+        # buffer_append( sprintf( "%s  ", str_pad_right( data[ 1 KSEP col_i ], col_max[ col_i ], data_wlen[ 1 KSEP col_i ] ) ) )
+    }
+
+    return th( TH_TABLE_HEADER_ITEM_NORMA, data) "\n"
+}
+
+function view_body(             model_row_i, col_i, model_start_row, _tmp_currow, _data){
     _tmp_currow = ctrl_rstate_get( CURRENT_ROW )
     model_start_row = int( (_tmp_currow - 1) / view_body_row_num) * view_body_row_num + 1
-
-    view_update_header()
 
     # view_update_table
     for (model_row_i = model_start_row; model_row_i <= model_start_row + view_body_row_num; model_row_i ++) {
         if (model_row_i > model_row) break
         data_row_i = model[ model_row_i ]
-        buffer_append( sprintf("%s", str_pad_right( data_row_i, 5 )) )
+        _data = _data sprintf("%s", str_pad_right( data_row_i, 5 ))
         for (col_i=1; col_i<=data_col_num; col_i++) {
-            update_view_print_cell( model_row_i, data_row_i, col_i )
-            # buffer_append( sprintf( "%s", "  " ) )
+            _data = _data update_view_print_cell( model_row_i, data_row_i, col_i )
         }
-        buffer_append( sprintf("%s\n", UI_END) )
+        _data = _data "\n"
     }
-    buffer_append( sprintf("SELECT: %s\n", data[ _tmp_currow KSEP ctrl_rstate_get( CURRENT_COLUMN ) ]) )
+    return _data th_statusline_text( sprintf("SELECT: %s\n", data[ _tmp_currow KSEP ctrl_rstate_get( CURRENT_COLUMN ) ]) )
+}
 
-    send_update( buffer_clear() )
+function update_view_print_cell(model_row_i, data_row_i, col_i,       h, _size, _tmp_currow, _data){
+
+    if ( ctrl_rstate_get( CURRENT_COLUMN ) == col_i )           _data = sprintf("%s", TH_TABLE_SELECTED_COL )
+    if ( ctrl_rstate_get( CURRENT_ROW ) == model_row_i )        _data = _data sprintf("%s", TH_TABLE_SELECTED_ROW)
+
+    cord = data_row_i KSEP col_i
+    if (col_max[ col_i ] <= COL_MAX_SIZE) {
+        _data =_data sprintf( "%s", str_pad_right( data[ cord ], col_max[ col_i ], data_wlen[ cord ] ) )
+    } else {
+        if (data_wlen[ cord ] > COL_MAX_SIZE){
+            _data =_data sprintf( "%s", str_pad_right( substr(data[ cord ], 1, COL_MAX_SIZE) "...", COL_MAX_SIZE + 3, COL_MAX_SIZE + 3) )
+        } else {
+            _data =_data sprintf( "%s", str_pad_right( data[ cord ], COL_MAX_SIZE + 3, data_wlen[ cord ] ) )
+        }
+    }
+    _data =_data sprintf( "%s", "  " )
+    return th(TH_TABLE_LINE_ITEM_FOCUSED, _data )
 }
 # EndSection
 
@@ -134,7 +142,7 @@ function ctrl_in_filter_state(char_type, char_value){
         model_generate()
         return
     }
-    ctrl_lineedit_handle( filter, char_type, char_value, ctrl_rstate_get( CURRENT_COLUMN ) )
+    ctrl_lineedit_handle( filter, ctrl_rstate_get( CURRENT_COLUMN ) , char_type, char_value)
 }
 
 function ctrl_in_normal_state(char_type, char_value){
@@ -219,7 +227,7 @@ NR==3 {  consume_header(); }
 NR>3 {
     if ( DATA_MODE == DATA_MODE_CTRL ) {
         if (try_update_width_height( $0 ) == true) {
-            # update_logic_view()
+            # view()
         } else {
             DATA_HAS_CHANGED = true
 
@@ -227,7 +235,7 @@ NR>3 {
             gsub(/^C:/, "", cmd)
             idx = index(cmd, ":")
             ctrl(substr(cmd, 1, idx-1), substr(cmd, idx+1))
-            update_logic_view()
+            view()
         }
         # return
     } else {
