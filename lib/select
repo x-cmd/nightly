@@ -12,29 +12,13 @@ ___x_cmd_ui_select(){
         -)          ___ui_select_clear                       ;;
         +)          shift; ___ui_select_read      "$@"       ;;
         func)       shift; ___ui_select_out_func  "$@"       ;;
-        *)          [ $# -gt 0 ] && shift; ___ui_select_out      "$@"       ;;
+        *)          ___ui_select_out "$@"                    ;;
     esac
 }
 
 ___X_CMD_UI_SELECT_DEFAULT=0
 ___ui_select_read(){
-
-    local O="${O:-___X_CMD_UI_SELECT_DEFAULT}"
-
-    eval "___X_CMD_UI_SELECT_DEFAULT_ROW_$O=\$((___X_CMD_UI_SELECT_DEFAULT_ROW_$O+1))"
-    local ttt
-    eval "ttt=\"\${___X_CMD_UI_SELECT_DEFAULT_COL_$O}\""
-    if [ "${ttt:-0}" -lt $# ]; then
-        eval "___X_CMD_UI_SELECT_DEFAULT_COL_$O=\$#"
-    fi
-
-    local s
-    local IFS
-    IFS=$(printf "\003")
-    local NR
-    NR=$(printf "\002")
-    s="$(eval echo \"\$"{$O}$NR$*"\")"
-    eval "$O=\"\$s\""
+:
 }
 
 ___ui_select_clear(){
@@ -49,13 +33,35 @@ ___X_CMD_UI_SELECT_CONTROL_AWK_PATH="$(xrc cat ./lib/share.awk ./lib/theme.awk .
 if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
 # 881 hh
 ___x_cmd_ui_select_control_awk(){
-    LC_ALL=en_US.UTF-8 USE=str,wcwidth,ui ___x_cmd_awk code "$___X_CMD_UI_SELECT_CONTROL_AWK_PATH" \
-        -v EXIT_OP="$EXIT_OP" -W interactive
+    # LC_ALL=en_US.UTF-8 USE=str,wcwidth,ui ___x_cmd_awk code "$___X_CMD_UI_SELECT_CONTROL_AWK_PATH" \
+    #     -v EXIT_OP="$EXIT_OP" -W interactive
+    LC_ALL=en_US.UTF-8 command awk \
+        -W interactive \
+        -v EXIT_OP="$EXIT_OP" \
+        -f "$___X_CMD_ROOT/awk/lib/default.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/str.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/wcwidth.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/ui.awk" \
+        -f "$___X_CMD_ROOT/ui/lib/share.awk" \
+        -f "$___X_CMD_ROOT/ui/lib/theme.awk" \
+        -f "$___X_CMD_ROOT/ui/lib/select.awk" \
+        -f "$___X_CMD_UI_REGION_AWK"
 }
 else
 ___x_cmd_ui_select_control_awk(){
-    LC_ALL=en_US.UTF-8 USE=str,wcwidth,ui ___x_cmd_awk code "$___X_CMD_UI_SELECT_CONTROL_AWK_PATH" \
-        -v EXIT_OP="$EXIT_OP" -v RS="$___X_CMD_UI_REGION_RS" -v ORS="$___X_CMD_UI_REGION_RS"
+    # LC_ALL=en_US.UTF-8 USE=str,wcwidth,ui ___x_cmd_awk code "$___X_CMD_UI_SELECT_CONTROL_AWK_PATH" \
+    #     -v EXIT_OP="$EXIT_OP" -v RS="$___X_CMD_UI_REGION_RS" -v ORS="$___X_CMD_UI_REGION_RS"
+    LC_ALL=en_US.UTF-8 command awk \
+        -v EXIT_OP="$EXIT_OP" \
+        -v RS="$___X_CMD_UI_REGION_RS" -v ORS="$___X_CMD_UI_REGION_RS" \
+        -f "$___X_CMD_ROOT/awk/lib/default.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/str.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/wcwidth.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/ui.awk" \
+        -f "$___X_CMD_ROOT/ui/lib/share.awk" \
+        -f "$___X_CMD_ROOT/ui/lib/theme.awk" \
+        -f "$___X_CMD_ROOT/ui/lib/select.awk" \
+        -f "$___X_CMD_UI_REGION_AWK"
 }
 fi
 
@@ -84,3 +90,34 @@ ___ui_select_out1(){
 }
 
 # ___ui_select_out
+f(){
+    ___ui_select_out1 \
+    "Please select the app you want to install:" \
+    "Install docker" \
+    "Install k8s" \
+    "Install minikube" \
+    "Install jvm" \
+    "Install nvm" \
+    "---" \
+    "It's the 1 app descriptor." \
+    "It's the 2 app descriptor." \
+    "It's the 3 app descriptor." \
+    "It's the 4 app descriptor." \
+    "It's the 5 app descriptor." \
+    "---"
+
+
+    echo "___X_CMD_UI_SELECT_FINAL_COMMAND:" "$___X_CMD_UI_SELECT_FINAL_COMMAND"
+    i=1
+    while [ "$i" -le "$___X_CMD_UI_SELECT_MULTIPLE_LEN" ];do
+
+        eval printf "\"___X_CMD_UI_SELECT_ITEM_INDEX$i:%s\n\"" "\"\$___X_CMD_UI_SELECT_ITEM_INDEX$i\""
+        eval printf "\"___X_CMD_UI_SELECT_ITEM$i:%s\n\"" "\"\$___X_CMD_UI_SELECT_ITEM$i\""
+        i=$((i+1))
+    done
+
+    echo "\n___X_CMD_UI_SELECT_CURRENT_ITEM_INDEX:" "$___X_CMD_UI_SELECT_CURRENT_ITEM_INDEX"
+    echo "___X_CMD_UI_SELECT_CURENT_ITEM:" "$___X_CMD_UI_SELECT_CURENT_ITEM"
+    echo "___X_CMD_UI_SELECT_MULTIPLE_LEN:" "$___X_CMD_UI_SELECT_MULTIPLE_LEN"
+}
+# f

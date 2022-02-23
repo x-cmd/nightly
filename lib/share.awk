@@ -1,13 +1,36 @@
 BEGIN{
     false = 0
+    FALSE = 0
     true = 1
+    TRUE = 1
+    S = "\001"
+    T = "\002"
+    L = "\003"
+}
+
+BEGIN{
+    max_row_size_prev = 0
+    max_col_size_prev = 0
+    max_row_size = 1
+    max_col_size = 1
 }
 
 function update_width_height(width, height) {
+    max_row_size_prev = max_row_size
+    max_col_size_prev = max_col_size
+
     max_row_size = height
     max_col_size = width
     # TODO: if row less than 10 rows, we should exit.
     max_row_in_page = max_row_size - 10
+}
+
+function is_height_change(width, height) {
+    if ( max_row_size_prev != max_row_size ) {
+        return true
+    } else {
+        return false
+    }
 }
 
 function try_update_width_height(text){
@@ -126,51 +149,50 @@ function ctrl_help_get(     i, l,_msg){
 # EndSection
 
 # Section: ctrl state
-function ctrl_state_init( obj, min, max ) {
-    obj[ "val" ] = min
-    obj[ "min" ] = min
-    obj[ "max" ] = max
+function ctrl_state_init( obj, min, max, _key_prefix ) {
+    obj[ _key_prefix "val" ] = min
+    obj[ _key_prefix "min" ] = min
+    obj[ _key_prefix "max" ] = max
 }
 
-function ctrl_state_inc( obj,   m ){
-    v = obj[ "val" ]
-    m = obj[ "max" ]
+function ctrl_state_inc( obj, _key_prefix,   m, v ){
+    v = obj[ _key_prefix "val" ]
+    m = obj[ _key_prefix "max" ]
     if (v < m) {
         v += 1
-        obj[ "val" ] = v
+        obj[ _key_prefix "val" ] = v
     }
     return v
 }
 
-# function ctrl_state_add( obj, val,      mi, ma, mr ){
-#     v = obj[ "val" ]
-#     ma = obj[ "max" ]
-#     mi = obj[ "min" ]
-#     v += val - mi
-#     mr = ma - mi + 1
-#     v = v % mr
-#     if (v < 0) v = v + mr
-#     v += mi
-#     obj[ "val" ] = v
-#     return v
-# }
+# TODO: check
+function ctrl_state_add( obj, val, _key_prefix,     mi, ma, mr, v ){
+    v = obj[ _key_prefix "val" ]
+    ma = obj[ _key_prefix "max" ]
+    mi = obj[ _key_prefix "min" ]
+    v += val
+    if (v < mi) v = mi
+    else if (v > ma) v = ma
+    obj[ _key_prefix "val" ] = v
+    return v
+}
 
-function ctrl_state_dec( obj,   m, v ){
-    v = obj[ "val" ]
-    m = obj[ "min" ]
+function ctrl_state_dec( obj, _key_prefix,  m, v ){
+    v = obj[ _key_prefix "val" ]
+    m = obj[ _key_prefix "min" ]
     if (v > m) {
         v -= 1
-        obj[ "val" ] = v
+        obj[ _key_prefix "val" ] = v
     }
     return v
 }
 
-function ctrl_state_get( obj ){
-    return obj[ "val" ]
+function ctrl_state_get( obj, _key_prefix ){
+    return obj[ _key_prefix "val" ]
 }
 
-function ctrl_state_set( obj, val ){
-    obj[ "val" ] = val
+function ctrl_state_set( obj, val, _key_prefix ){
+    obj[ _key_prefix "val" ] = val
 }
 
 # EndSection
@@ -204,7 +226,7 @@ function ctrl_rstate_inc( obj, _key_prefix,             m ){
 # }
 
 
-function ctrl_rstate_add( obj, val, _key_prefix,     mi, ma, mr ){
+function ctrl_rstate_add( obj, val, _key_prefix,     mi, ma, mr, v ){
     v = ctrl_rstate_get( obj, _key_prefix )
     ma = obj[ _key_prefix "max" ]
     mi = obj[ _key_prefix "min" ]
@@ -282,7 +304,7 @@ function ctrl_sw_get( obj ) {
 }
 # EndSection
 
-# Section: ctrl sw
+# Section: ctrl lineedit
 function ctrl_lineedit_init( obj, _key_prefix ) {
     obj[ _key_prefix ] = ""
 }
@@ -304,6 +326,54 @@ function ctrl_lineedit_get( obj, _key_prefix ) {
 function ctrl_lineedit_put( obj, val, _key_prefix ) {
     obj[ _key_prefix ] = val
 }
+# EndSection
+
+# Section: ctrl windows movement
+
+function ctrl_win_init(  obj, min, max, size, _key_prefix ){
+    obj[ _key_prefix "min" ]    = min
+    obj[ _key_prefix "max" ]    = max
+    obj[ _key_prefix "size" ]   = size
+    obj[ _key_prefix "off" ]    = min
+
+    _val = obj[ _key_prefix "val" ]
+    if (_val == "") {
+        obj[ _key_prefix "val" ]    = min
+    } else {
+        obj[ _key_prefix "off" ]    = _val
+    }
+}
+
+function ctrl_win_inc( obj, _key_prefix,  _val, _max, _off, _size ) {
+    _val = obj[ _key_prefix "val" ]
+    _max = obj[ _key_prefix "max" ]
+    _off = obj[ _key_prefix "off" ]
+    _size = obj[ _key_prefix "size" ]
+    if (_val > _max)                    _val = _max
+    if (_val > _off+_size)              obj[ _key_prefix "off" ] = _val - size
+}
+
+function ctrl_win_dec( obj, _key_prefix,  _val, _min, _off, _size ) {
+    _val = obj[ _key_prefix "val" ]
+    _min = obj[ _key_prefix "min" ]
+    _off = obj[ _key_prefix "off" ]
+    _size = obj[ _key_prefix "size" ]
+    if (_val < _min)              _val = _min
+    if (_val < _off)              obj[ _key_prefix "off" ] = _val
+}
+
+function ctrl_win_val( obj, _key_prefix ){
+    return obj[ _key_prefix "val" ]
+}
+
+function ctrl_win_begin( obj, _key_prefix ){
+    return obj[ _key_prefix "off" ]
+}
+
+function ctrl_win_end( obj, _key_prefix ){
+    return obj[ _key_prefix "off" ] + obj[ _key_prefix "size" ] - 1
+}
+
 # EndSection
 
 # Section: exit detect

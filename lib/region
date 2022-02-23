@@ -121,11 +121,23 @@ ___x_cmd_ui_region_update_awk(){
 
 if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
 ___x_cmd_ui_region_update_awk_(){
-    LC_ALL=en_US.UTF-8 USE=str,ui ___x_cmd_awk file "$___X_CMD_UI_REGION_AWK" -W interactive
+    # LC_ALL=en_US.UTF-8 USE=str,ui ___x_cmd_awk file "$___X_CMD_UI_REGION_AWK" -W interactive
+    LC_ALL=en_US.UTF-8 command awk \
+        -W interactive \
+        -f "$___X_CMD_ROOT/awk/lib/default.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/str.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/ui.awk" \
+        -f "$___X_CMD_UI_REGION_AWK"
 }
 else
 ___x_cmd_ui_region_update_awk_(){
-    LC_ALL=en_US.UTF-8 USE=str,ui ___x_cmd_awk file "$___X_CMD_UI_REGION_AWK" -v RS="$___X_CMD_UI_REGION_RS"
+    # LC_ALL=en_US.UTF-8 USE=str,ui ___x_cmd_awk file "$___X_CMD_UI_REGION_AWK" -v RS="$___X_CMD_UI_REGION_RS"
+    LC_ALL=en_US.UTF-8 command awk \
+        -v RS="$___X_CMD_UI_REGION_RS" \
+        -f "$___X_CMD_ROOT/awk/lib/default.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/str.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/ui.awk" \
+        -f "$___X_CMD_UI_REGION_AWK"
 }
 fi
 

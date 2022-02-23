@@ -35,7 +35,7 @@ function view(){
     view_calcuate_geoinfo()
 
     _component_help   = view_help()
-    _component_filter = view_filter( )
+    _component_filter = view_filter()
     _component_header = view_header()
     _component_body   = view_body()
 

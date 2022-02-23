@@ -11,7 +11,7 @@ ___ui_markdown(){
         cat "$@"
     else
         cat
-    fi | awk -v COLUMNS="$COLUMNS" "$(xrc cat awk/lib/wcwidth.awk)$(cat "$___X_BASH_UI_MARKDOWN_AWK")"
+    fi | awk -v COLUMNS="$COLUMNS" -f "$___X_CMD_ROOT/awk/lib/wcwidth.awk)" -f "$___X_BASH_UI_MARKDOWN_AWK"
 }
 
 # time (___ui_markdown "./.x-cmd/dev/testcase/testmarkdown.md")
