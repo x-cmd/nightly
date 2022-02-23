@@ -1,22 +1,12 @@
 # shellcheck shell=sh
 
-# author:       Li Junhao           l@x-cmd.com    edwinjhlee.github.io
-# maintainer:   Li Junhao
-
-############################
-# Section 1: Global definitions
-# Section 2: param_marg -- Helper for param user: Handle param marg
-# Section 3: param type definition
-# Section 4: param default management
-# Section 5: param main
-# Section 6: param subcmd
-############################
+# author:       Li Junhao           l@x-cmd.com
 
 xrc dict/latest
 
 # Section 1: Global definitions
 ############################
-PARAM_AWK_PATH="$(xrc which param/v0.awk)"
+PARAM_AWK_PATH="$(xrc which param/lib/main.awk)"
 PARAM_DEFAULT_VAR_PREFIX=___X_CMD_X_BASH_PARAM_DEFAULT___
 PARAM_TYPE_VAR_PREFIX=___X_CMD_X_BASH_PARAM_TYPE___
 PARAM_SUBCMD_VAR_PREFIX=___X_CMD_X_BASH_PARAM_SUBCMD___
@@ -68,11 +58,20 @@ param_marg_seq() {
 # param_type    gitee     repo
 # param_type    gitee     user    =~  [A-Za-z0-9_]+
 # param_type    gitee     access  =   private         public          inner-public
+# param_type    gitee     License   =-   <"$(xrc cat gh/lib/_type/license)"
 
+# TODO: check
 param_type(){
     local app_name="${1:?Provide app name}"
     shift
-    local result="$*"
+
+    local result
+    if [ "$2" != =- ]; then
+        result="$*"
+    else
+        result="$1 = $(cat | awk '{ print "\"" gsub($0, "\"", "\\\"")  "\"" }')"
+    fi
+
     local varname="${PARAM_TYPE_VAR_PREFIX}${app_name}"
     eval "$varname=\"\${$varname}\${PARAM_ARG_SEP}\${result}\""
 }
@@ -200,9 +199,9 @@ _param_main() {
     local ___X_CMD_PARAM_IS_INTERACTIVE=0
     # Maybe for JUDGE
     # TO OPTIMIZE
-    if [ -t 0 ] && [ "${-#*i}" != "$-" ]; then
-        ___X_CMD_PARAM_IS_INTERACTIVE=1
-    fi
+    # if [ -t 0 ] && [ "${-#*i}" != "$-" ]; then
+    #     ___X_CMD_PARAM_IS_INTERACTIVE=1
+    # fi
 
     local ___X_CMD_PARAM_STDERR_IS_TTY=0
     if [ -t 2 ] ; then
