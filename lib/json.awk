@@ -7,7 +7,6 @@
 # arr[ "a" T ]
 
 BEGIN {
-    T = "\002"
     T_DICT = "{" # "\003"
     T_LIST = "[" # "\004"
     T_PRI = "\005"
@@ -15,8 +14,6 @@ BEGIN {
 
     T_KEY = "\007"
     T_LEN = "\010"
-
-    S="\001"
 }
 
 # Section: handler: jkey, _jpath,

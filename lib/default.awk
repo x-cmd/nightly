@@ -3,6 +3,9 @@ BEGIN {
     FALSE = 0
     true = 1
     TRUE = 1
+    S = "\001"
+    T = "\002"
+    L = "\003"
 }
 
 function debug(msg){

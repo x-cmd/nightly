@@ -196,6 +196,16 @@ function jiter_print_rmatch( item, keypath, sep1, sep2,   _ret ){
     return true
 }
 
+function jiter_print_eqarr_after_tokenize( item, keypath, sep1, sep2,     _arr, _arrl, _par, _parl){
+    keypath = substr(jpath(keypath), 2)
+    _parl = split(keypath, _par, S)
+    _arrl = json_split2tokenarr( _arr, item )
+    for (i=1; i<=_arrl; ++i) {
+        jiter_eqarr_print( _arr[i], _parl, _par, sep1, sep2)
+    }
+}
+
+
 function jiter_target_rmatch_val( item, keypath_regex ){
     _ret = jiter( item, JITER_STACK_FOR_GRID_CHECK )
     if ( _ret == "" ) return
