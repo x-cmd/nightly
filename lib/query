@@ -57,7 +57,7 @@ A
 
 : <<'DOCTEST'
 > b={a:1,b:2,c:3}
-> ___x_cmd_json_values b
+> ___x_cmd_json_keys b
 a
 b
 c
@@ -111,11 +111,5 @@ A
     fi
 }
 
-: <<'DOCTEST'
-> b=[1,2,3]
-> ___x_cmd_json_pop b
-> echo $b # ___x_cmd_json_pop
-[1,2]
-DOCTEST
 
 # EndSection

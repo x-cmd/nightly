@@ -70,7 +70,7 @@ BEGIN{
 }
 {
     a=$0
-    gsub(/\"/, "\\\"", a)
+    gsub(/"/, "\\\"", a)
     gsub(/\n/, "\\n", a)
     gsub(/\r/, "\\r", a)
     gsub(/\b/, "\\b", a)
