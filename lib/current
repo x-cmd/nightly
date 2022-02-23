@@ -42,7 +42,6 @@ ___x_cmd_gt_current_owner() {
         param_default put "gitee_$O" owner "$1"
         param_default remove "gitee_$O" "owner_type"
         param_default dump "gitee_$O"
-        # ___x_cmd_gt_current_owner_type || echo "Fetch owner type wrong. Please manually set owner-type using '___x_cmd_gt_current_owner_type <owner_type>'." >&2
         return 0
     fi
     local owner
@@ -50,7 +49,7 @@ ___x_cmd_gt_current_owner() {
     [ -n "$owner" ] && echo "$owner" && return
 
     data=$(______x_cmd_gt_get "/v5/user")
-    [ -n "$data" ] && owner=$(json_query data.login) && param_default put "gitee_$O" owner "$owner"
+    [ -n "$data" ] && owner=$(___x_cmd_gt_json_query "$data" .login) && param_default put "gitee_$O" owner "$owner"
     echo "$owner"
 }
 

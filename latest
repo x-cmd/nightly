@@ -69,7 +69,7 @@ ___x_cmd_gt_new() {
 
 ___x_cmd_gt_make() {
     param:void
-    local O_ORIGINAL=${1:?Provide client name by O environment}
+    local O_ORIGINAL="${1:?Provide client name by O environment}"
 
     # if [ -n "$GITEE_DEFAULT" ] && [ "$O_ORIGINAL" = "GITEE_DEFAULT" ]; then
     #     echo "Name 'GITEE_DEFAULT' is reserved for internal use."
@@ -81,7 +81,9 @@ ___x_cmd_gt_make() {
     http "@$O_ORIGINAL" header type "application/json;charset=utf-8"
     O=$O_ORIGINAL ___x_cmd_gt_config_load >/dev/null
     if [ $? -eq 0 ] && [ -n "$(O="$O_ORIGINAL" ___x_cmd_gt_token)" ]; then
-        O="$O_ORIGINAL" ___x_cmd_gt_current_owner
+        local user
+        user="$(O="$O_ORIGINAL" ___x_cmd_gt_current_owner)"
+        gt_log info "Hi $user! You've successfully authenticated."
     else
         local info
         info=$(printf "\n\033[0m\033[33m%s\033[0m \033[36m%s\033[0m \n\033[4;33m%s\033[0m" \

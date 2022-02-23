@@ -42,11 +42,10 @@ ___x_cmd_gt_org_info() {
     param:dsl       '
 type: 
 options:
-    --admin      "admin"       <>:bool
+    --admin      "admin"       <>:bool=false
 '
     param:run
 
-    admin=${admin:-false}
     if [ $# -eq 0 ]; then
         ______x_cmd_gt_get_multi "/v5/user/orgs" admin page per_page
         [ $? -eq 1 ] && return 1

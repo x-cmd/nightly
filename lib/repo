@@ -241,7 +241,7 @@ ___x_cmd_gt_repo_ls() {
         return
     fi
 
-    gt_log error "Please provide owner and owner_type\n"
+    gt_log error "Please provide owner and owner_type"
     return 1
     # param_help.show
 }
