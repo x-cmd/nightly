@@ -29,13 +29,13 @@ BEGIN {
     # Section: question and answer
     TH_QA_Q                         =       UI_FG_YELLOW
 
-    TH_QA_Q_FOCUSED   = UI_TEXT_REV UI_FG_YELLOW
-    TH_QA_Q_UNFOCUSED = UI_FG_YELLOW
+    TH_QA_Q_FOCUSED   =  UI_FG_CYAN
+    TH_QA_Q_UNFOCUSED =  UI_END
 
-    TH_QA_A_FOCUSED_SELECTED                   =       UI_TEXT_REV UI_FG_YELLOW
-    TH_QA_A_FOCUSED_NOTSELECTED                =       UI_TEXT_DIM UI_FG_YELLOW
-    TH_QA_A_UNFOCUSED_SELECTED                 =       UI_FG_BLUE
-    TH_QA_A_UNFOCUSED_NOTSELECTED              =       UI_TEXT_DIM UI_FG_BLUE
+    TH_QA_A_FOCUSED_SELECTED                   =       UI_TEXT_REV UI_FG_CYAN
+    TH_QA_A_FOCUSED_NOTSELECTED                =       UI_TEXT_DIM UI_FG_CYAN
+    TH_QA_A_UNFOCUSED_SELECTED                 =       UI_TEXT_UNDERLINE UI_FG_CYAN
+    TH_QA_A_UNFOCUSED_NOTSELECTED              =       UI_END
 
     TH_QA_A_FOCUSED_VALID             = ""
     TH_QA_A_FOCUSED_INVALID           = ""
@@ -57,7 +57,7 @@ BEGIN {
     TH_TABLE_LINE_ITEM_HIGHLIGHT_1      =       UI_END
 
     # Section: select
-    TH_SELECT_HEADER_NORMAL           =       UI_FG_BLUE UI_TEXT_REV
+    TH_SELECT_HEADER_NORMAL           =       UI_FG_CYAN
     TH_SELECT_ITEM_FOCUSED            =       UI_FG_GREEN UI_TEXT_REV
     TH_SELECT_ITEM_SELECTED           =       UI_FG_GREEN
     # EndSection

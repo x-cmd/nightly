@@ -116,7 +116,7 @@ function view_help( _ctrl_current, data ){
     if (rule[ _ctrl_current ATT_OP ] == "=") {
         data = data "Press <Arrow-Left> and <Arrow-Right> to alternative choice, or input digit."
     }
-    return th_help_text( data "\n" )
+    return th_help_text( data )
 }
 
 function view_body( _ctrl_current,                          question_width, data, _question, _line, _tmp, _is_focused, _is_selected,  i, j ){
@@ -128,11 +128,11 @@ function view_body( _ctrl_current,                          question_width, data
         if ( _is_focused ) {
             STYLE_ANSWER_SELECTED       = TH_QA_A_FOCUSED_SELECTED
             STYLE_ANSWER_UNSELECTED     = TH_QA_A_FOCUSED_NOTSELECTED
-            _line                       = th( TH_QA_Q_FOCUSED,   _question ) " "
+            _line                       = th( TH_QA_Q_FOCUSED,   "> "_question ) th(UI_TEXT_DIM, ":") " "
         } else {
             STYLE_ANSWER_SELECTED       = TH_QA_A_UNFOCUSED_SELECTED
             STYLE_ANSWER_UNSELECTED     = TH_QA_A_UNFOCUSED_NOTSELECTED
-            _line                       = th( TH_QA_Q_UNFOCUSED,   _question ) " "
+            _line                       = th( TH_QA_Q_UNFOCUSED,  "  " _question ) ": "
         }
 
         op = rule[ i ATT_OP ]
@@ -163,13 +163,11 @@ BEGIN{
 function view_exit( _ctrl_current,  data,           _is_focused, _is_selected ){
     _is_focused = _ctrl_current == rulel+1
     if ( _is_focused ) {
-        data = "\033[36m"
-        STYLE_EXIT      = "\033[7m" CLR_EXIT_ANSWER
-        STYLE_EXIT_NOT  = CLR_EXIT_ANSWER
+        STYLE_EXIT      = TH_QA_A_FOCUSED_SELECTED
+        STYLE_EXIT_NOT  = TH_QA_A_FOCUSED_NOTSELECTED
     } else {
-        data = ""
-        STYLE_EXIT      = "\033[7m" CLR_EXIT_ANSWER_SEL
-        STYLE_EXIT_NOT  = CLR_EXIT_ANSWER_SEL
+        STYLE_EXIT      = TH_QA_A_UNFOCUSED_SELECTED
+        STYLE_EXIT_NOT  = TH_QA_A_UNFOCUSED_NOTSELECTED
     }
     _ctrl_exit_strategy = ctrl_rstate_get( EXIT )
     for (i=1; i<=exit_strategy_arrl; ++i) {

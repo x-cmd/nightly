@@ -2,13 +2,9 @@
 
 xrc awk
 xrc ui/lib/region
-___X_CMD_UI_FORM_CONTROL_AWK_PATH="$(xrc cat ui/lib/share.awk ui/lib/theme.awk ui/lib/form.awk)"
-# ___X_CMD_UI_FORM_CONTROL_AWK_PATH="$(xrc cat ./lib/share.awk ./lib/theme.awk ./lib/form.awk)"
 
 if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
 ___x_cmd_ui_form_control(){
-    # LC_ALL=en_US.UTF-8 USE=str,wcwidth,ui ___x_cmd_awk code "$___X_CMD_UI_FORM_CONTROL_AWK_PATH" \
-    #     -v EXIT_OP="$EXIT_OP" -W interactive
     LC_ALL=en_US.UTF-8 command awk \
         -W interactive \
         -v EXIT_OP="$EXIT_OP" \
@@ -32,9 +28,6 @@ ___x_cmd_ui_form_awk(){
 
 else
 ___x_cmd_ui_form_control(){
-    # LC_ALL=en_US.UTF-8 USE=str,wcwidth,ui ___x_cmd_awk code "$___X_CMD_UI_FORM_CONTROL_AWK_PATH" \
-    #     -v EXIT_OP="$EXIT_OP" -v RS="$___X_CMD_UI_REGION_RS" -v ORS="$___X_CMD_UI_REGION_RS"
-
     LC_ALL=en_US.UTF-8 command awk \
         -v EXIT_OP="$EXIT_OP" \
         -v RS="$___X_CMD_UI_REGION_RS" -v ORS="$___X_CMD_UI_REGION_RS" \
@@ -45,6 +38,8 @@ ___x_cmd_ui_form_control(){
         -f "$___X_CMD_ROOT/ui/lib/share.awk" \
         -f "$___X_CMD_ROOT/ui/lib/theme.awk" \
         -f "$___X_CMD_ROOT/ui/lib/form.awk"
+        # -f "./lib/theme.awk" \
+        # -f "./lib/form.awk"
 }
 
 ___x_cmd_ui_form_awk(){

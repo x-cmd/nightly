@@ -28,13 +28,9 @@ ___ui_select_clear(){
 }
 
 
-___X_CMD_UI_SELECT_CONTROL_AWK_PATH="$(xrc cat ./lib/share.awk ./lib/theme.awk ./lib/select.awk)"
-
 if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
 # 881 hh
 ___x_cmd_ui_select_control_awk(){
-    # LC_ALL=en_US.UTF-8 USE=str,wcwidth,ui ___x_cmd_awk code "$___X_CMD_UI_SELECT_CONTROL_AWK_PATH" \
-    #     -v EXIT_OP="$EXIT_OP" -W interactive
     LC_ALL=en_US.UTF-8 command awk \
         -W interactive \
         -v EXIT_OP="$EXIT_OP" \
@@ -44,13 +40,10 @@ ___x_cmd_ui_select_control_awk(){
         -f "$___X_CMD_ROOT/awk/lib/ui.awk" \
         -f "$___X_CMD_ROOT/ui/lib/share.awk" \
         -f "$___X_CMD_ROOT/ui/lib/theme.awk" \
-        -f "$___X_CMD_ROOT/ui/lib/select.awk" \
-        -f "$___X_CMD_UI_REGION_AWK"
+        -f "$___X_CMD_ROOT/ui/lib/select.awk"
 }
 else
 ___x_cmd_ui_select_control_awk(){
-    # LC_ALL=en_US.UTF-8 USE=str,wcwidth,ui ___x_cmd_awk code "$___X_CMD_UI_SELECT_CONTROL_AWK_PATH" \
-    #     -v EXIT_OP="$EXIT_OP" -v RS="$___X_CMD_UI_REGION_RS" -v ORS="$___X_CMD_UI_REGION_RS"
     LC_ALL=en_US.UTF-8 command awk \
         -v EXIT_OP="$EXIT_OP" \
         -v RS="$___X_CMD_UI_REGION_RS" -v ORS="$___X_CMD_UI_REGION_RS" \
@@ -59,9 +52,9 @@ ___x_cmd_ui_select_control_awk(){
         -f "$___X_CMD_ROOT/awk/lib/wcwidth.awk" \
         -f "$___X_CMD_ROOT/awk/lib/ui.awk" \
         -f "$___X_CMD_ROOT/ui/lib/share.awk" \
-        -f "$___X_CMD_ROOT/ui/lib/theme.awk" \
         -f "$___X_CMD_ROOT/ui/lib/select.awk" \
-        -f "$___X_CMD_UI_REGION_AWK"
+        -f "$___X_CMD_ROOT/ui/lib/theme.awk"
+        # -f "./lib/theme.awk"
 }
 fi
 

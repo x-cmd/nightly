@@ -101,7 +101,7 @@ BEGIN{
     NEWLINE = "\n"
     UI_KEY="\033[7m"
     UI_END="\033[0m"
-    L = "len"
+    # L = "len"
 
     # CTRL_HELP_ITEM_ARR
 
@@ -115,7 +115,7 @@ function ctrl_help_item_stringify(key, msg) {
 
 function ctrl_help_item_put(k, v) {
     l = CTRL_HELP_ITEM_ARR[ L ]
-    if (l  == "" ) l = 0
+    # if (l  == "" ) l = 0
     l = l + 1
     CTRL_HELP_ITEM_ARR[ l "K" ] = k
     CTRL_HELP_ITEM_ARR[ l "V" ] = v
@@ -330,7 +330,7 @@ function ctrl_lineedit_put( obj, val, _key_prefix ) {
 
 # Section: ctrl windows movement
 
-function ctrl_win_init(  obj, min, max, size, _key_prefix ){
+function ctrl_win_init(  obj, _key_prefix, min, max, size ){
     obj[ _key_prefix "min" ]    = min
     obj[ _key_prefix "max" ]    = max
     obj[ _key_prefix "size" ]   = size
@@ -349,8 +349,11 @@ function ctrl_win_inc( obj, _key_prefix,  _val, _max, _off, _size ) {
     _max = obj[ _key_prefix "max" ]
     _off = obj[ _key_prefix "off" ]
     _size = obj[ _key_prefix "size" ]
+    _val += 1
     if (_val > _max)                    _val = _max
-    if (_val > _off+_size)              obj[ _key_prefix "off" ] = _val - size
+    if (_val >= _off+_size)             obj[ _key_prefix "off" ] = _off + _size
+    obj[ _key_prefix "val" ] = _val
+    return _val
 }
 
 function ctrl_win_dec( obj, _key_prefix,  _val, _min, _off, _size ) {
@@ -358,8 +361,11 @@ function ctrl_win_dec( obj, _key_prefix,  _val, _min, _off, _size ) {
     _min = obj[ _key_prefix "min" ]
     _off = obj[ _key_prefix "off" ]
     _size = obj[ _key_prefix "size" ]
+    _val -= 1
     if (_val < _min)              _val = _min
-    if (_val < _off)              obj[ _key_prefix "off" ] = _val
+    if (_val < _off)             obj[ _key_prefix "off" ] = _off - _size
+    obj[ _key_prefix "val" ] = _val
+    return _val
 }
 
 function ctrl_win_val( obj, _key_prefix ){
