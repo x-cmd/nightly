@@ -963,7 +963,8 @@ ___x_cmd_main(){
                                                 rm -rf "$___X_CMD_ROOT" ;;
         reinstall)                              x clear && RELOAD=1 x upgrade ;;
 
-        z|uz|zl)                               (   xrc zuz && ___x_cmd_zuz "$subcmd" "$@"   ) ;;
+        z|uz)                                   ( xrc zuz && ___x_cmd_zuz "$subcmd" "$@" ) ;;
+        zl)                                     ( xrc zuz && ___x_cmd_zuz_ls "$@"        ) ;;
 
         sh|bash|zsh|fish|ksh|dash|ash)          ___x_cmd_shell_exec "$subcmd" "$@" ;;
 
