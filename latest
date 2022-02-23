@@ -1,7 +1,5 @@
-# shellcheck shell=sh disable=SC3043
-
-# author:       Li Junhao           l@x-cmd.com
-# maintainer:   Li Junhao
+# Author:       Li Junhao   l@x-cmd.com     # xrc
+# shellcheck    shell=sh    disable=SC3043
 
 # Section : Unfinished ___x_cmd_official_which
 
@@ -869,12 +867,12 @@ ___x_cmd_main_otherwise(){
             workspace)      ___x_cmd_exe_workspace "$p" "$@" ;;
             local)          ___x_cmd_run_by_file "$p" "$@" ;;
             hub)            ___x_cmd_run_by_file "$p" "$@" ;;
-            official)
-                ___x_cmd_run_by_file "$p" "$@" ;;
+            official)       ___x_cmd_run_by_file "$p" "$@" ;;
         esac
         return
     else
         printf "%s" "Error" >&2
+        return 1
     fi
     printf "%s" "$p"
 }
@@ -937,6 +935,7 @@ ___x_cmd_main(){
                                                 ___x_cmd_x_cmd_help
                                                 return 0
 ;;
+        \.)                                     command code . ;;
 
         alias)                                  ___x_cmd_alias      ___x_cmd "$@"   ;;
         unalias)                                ___x_cmd_unalias    ___x_cmd "$@"   ;;
