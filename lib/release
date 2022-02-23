@@ -172,7 +172,17 @@ ___x_cmd_os_release_all(){
 
 # EndSection
 
-# Section: name and arch
+# Section: name
+___x_cmd_os_lsname(){
+    printf "%s" "linux
+darwin
+sunos
+freebsd
+openbsd
+aix
+win"
+}
+
 
 # code from nvm
 ___x_cmd_os_name() {
@@ -185,6 +195,16 @@ ___x_cmd_os_name() {
         AIX\ *)                     printf "%s" aix ;;
         CYGWIN* | MSYS* | MINGW*)   printf "%s" win ;;
     esac
+}
+
+# EndSection
+
+# Section: arch
+___x_cmd_os_lsarch(){
+    printf "%s" "linux
+x64
+x64
+arm64"
 }
 
 # code from nvm
