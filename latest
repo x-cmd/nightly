@@ -1,4 +1,4 @@
-# shellcheck shell=sh
+# shellcheck shell=sh disable=SC2039,SC2142,SC3043
 
 # author:       Li Junhao           l@x-cmd.com
 
@@ -66,7 +66,7 @@ param_type(){
     shift
 
     local result
-    if [ "$2" != =- ]; then
+    if [ "$2" != - ]; then
         result="$*"
     else
         result="$1 = $(cat | awk '{ print "\"" gsub($0, "\"", "\\\"")  "\"" }')"
@@ -247,3 +247,52 @@ _param_main() {
 # EndSections
 
 # Section 6: param plugin
+
+param_plugin(){
+    local op="$1";      shift
+    case "$op" in
+        add)        ___param_plugin_define "$@"     ;;
+        del)        ___param_plugin_del "$@"        ;;
+        unset)      ___param_plugin_unset "$@"      ;;
+        pprint)     ___param_plugin_pprint "$@"     ;;
+        *) printf "%s" "param_plugin: Unknown operation '$op'" ;;
+    esac
+}
+
+___param_plugin_define() {
+    # FIXME: To use no app name to add the subcmd plugin.
+    local plugin_id="$___X_CMD_PARAM_PLUGIN_ID"
+    local subcmd="${1:?Provide subcmd}"
+    local desc="${2:?Provide description}"
+
+    local varname="${PARAM_SUBCMD_VAR_PREFIX}${plugin_id}"
+    local result="$subcmd $desc"
+    eval "$varname=\"\${$varname}\${PARAM_ARG_SEP}\${result}\""
+}
+
+# Maybe using dict?
+___param_plugin_del() {
+    # FIXME: To use no app name to add the subcmd plugin.
+    local plugin_id="$___X_CMD_PARAM_PLUGIN_ID"
+    local subcmd="${1:?Provide subcmd}"
+
+    # TODO: Not provided
+}
+
+___param_plugin_unset() {
+    local plugin_id="$___X_CMD_PARAM_PLUGIN_ID"
+    local varname="${PARAM_SUBCMD_VAR_PREFIX}${plugin_id}"
+    eval "$varname="
+}
+
+___param_plugin_pprint() {
+    ___param_plugin_print "$@" | tr "$PARAM_ARG_SEP" "\n"
+}
+
+___param_plugin_print() {
+    local plugin_id="${1:?Provide plugin id}"
+    local varname="${PARAM_SUBCMD_VAR_PREFIX}${plugin_id}"
+    eval echo "\"\$$varname\""
+}
+
+# EndSection
