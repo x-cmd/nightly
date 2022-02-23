@@ -89,10 +89,15 @@ A
 
     if [ "$(id -u)" -ne 0 ]; then
         proxy_log info "using sudo"
-        sudo ___proxy_rollback /etc/apt/sources.list apt "$1"
+        IS_ROOT=1 ___proxy_rollback /etc/apt/sources.list apt "$1"
     else
         ___proxy_rollback /etc/apt/sources.list apt "$1"
     fi 
+}
+
+___x_cmd_proxy_apt_rollback_ls() {
+    param:void
+    ___proxy_rollback_ls apt
 }
 
 ___x_cmd_proxy_apt_tutorial(){

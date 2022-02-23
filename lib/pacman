@@ -39,10 +39,10 @@ A
     param:run
 
     case "${PARAM_SUBCMD:-ustc}" in
-        qinghua|qh|tsinghua|tuna)   printf "https://mirrors.tuna.tsinghua.edu.cn/archlinux/";;
-        ustc)                       printf "https://mirrors.ustc.edu.cn/archlinux/"         ;;
-        aliyun)                     printf "https://mirrors.aliyun.com/archlinux/"          ;;
-        bfsu)                       printf "https://mirrors.bfsu.edu.cn/archlinux/"         ;;
+        qinghua|qh|tsinghua|tuna)   printf "https://mirrors.tuna.tsinghua.edu.cn/archlinux";;
+        ustc)                       printf "https://mirrors.ustc.edu.cn/archlinux"         ;;
+        aliyun)                     printf "https://mirrors.aliyun.com/archlinux"          ;;
+        bfsu)                       printf "https://mirrors.bfsu.edu.cn/archlinux"         ;;
         *)                          printf "Unrecognized source name"; return 1
     esac
 }
@@ -58,7 +58,7 @@ A
     param:run
 
     local url
-    if url="$(___x_cmd_proxy_pacman_url "${PARAM_SUBCOM:-tuna}")";then
+    if url="$(___x_cmd_proxy_pacman_url "${PARAM_SUBCMD:-tuna}")";then
         proxy_log info "Setting ___x_cmd_proxy_pacman mirror :
         $url"
 
@@ -71,10 +71,10 @@ A
 
         if [ "$(id -u)" -ne 0 ]; then
             proxy_log info "using sudo"
-            printf "%s" "" | sudo awk -v tmp="$tmp" 'BEGIN { tmp=tmp "\nServer = https://mirrors.tuna.tsinghua.edu.cn/archlinux/$repo/os/$arch";print tmp}' | sudo tee "$src_path"
+            printf "%s" "" | sudo awk -v tmp="$tmp" -v url="$url" 'BEGIN { url=url "/$repo/os/$arch";tmp=tmp "\nServer = " url;print tmp}' | sudo tee "$src_path"
             sudo pacman -Syy
         else
-            printf "%s" "" | awk -v tmp="$tmp" 'BEGIN { tmp=tmp "\nServer = https://mirrors.tuna.tsinghua.edu.cn/archlinux/$repo/os/$arch";print tmp}' > "$src_path"
+            printf "%s" "" | awk -v tmp="$tmp" -v url="$url" 'BEGIN { url=url "/$repo/os/$arch";tmp=tmp "\nServer = " url;print tmp}' > "$src_path"
             pacman -Syy
         fi      
     fi
@@ -100,10 +100,15 @@ A
 
     if [ "$(id -u)" -ne 0 ]; then
         proxy_log info "using sudo"
-        sudo ___proxy_rollback /etc/pacman.d/mirrorlist pacman "$1"
+        IS_ROOT=1 ___proxy_rollback /etc/pacman.d/mirrorlist pacman "$1"
     else
         ___proxy_rollback /etc/pacman.d/mirrorlist pacman "$1"
     fi 
+}
+
+___x_cmd_proxy_pacman_rollback_ls() {
+    param:void
+    ___proxy_rollback_ls pacman
 }
 
 ___x_cmd_proxy_pacman_tutorial(){

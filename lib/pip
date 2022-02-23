@@ -72,7 +72,7 @@ A
     param:run
 
     local url
-    if url="$(___x_cmd_proxy_pip_url "$PARAM_SUBCMD")"; then
+    if url="$(___x_cmd_proxy_pip_url "${PARAM_SUBCMD:-ustc}")"; then
         pip config set global.index-url "$url"
     else
         proxy_log error "Unrecognized source name"

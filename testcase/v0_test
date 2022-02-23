@@ -6,7 +6,7 @@ x ws install
 xrc assert
 x log init proxy
 x log proxy
- ___X_CMD_XRC_MODULE_IMPORTED=
+___X_CMD_XRC_MODULE_IMPORTED=
 xrc proxy
 
 

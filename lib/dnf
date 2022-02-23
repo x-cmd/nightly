@@ -120,12 +120,17 @@ A
 
     if [ "$(id -u)" -ne 0 ]; then
         proxy_log info "using sudo"
-        sudo ___proxy_rollback /etc/yum.repos.d dnf "$1"
+        IS_ROOT=1 ___proxy_rollback /etc/yum.repos.d dnf "$1"
         sudo dnf makecache
     else
         ___proxy_rollback /etc/yum.repos.d dnf "$1"
         dnf makecache
     fi  
+}
+
+___x_cmd_proxy_dnf_rollback_ls() {
+    param:void
+    ___proxy_rollback_ls dnf
 }
 
 ___x_cmd_proxy_dnf_tutorial(){

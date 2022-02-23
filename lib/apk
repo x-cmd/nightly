@@ -74,10 +74,11 @@ A
 
     if [ "$(id -u)" -ne 0 ]; then
         proxy_log info "using sudo"
-        sudo ___proxy_rollback /etc/apk/repositories apk "$1"
+        IS_ROOT=1 ___proxy_rollback /etc/apk/repositories apk "$1"
     else
         ___proxy_rollback /etc/apk/repositories apk "$1"
-    fi 
+    fi
+
 }
 
 ___x_cmd_proxy_apk_rollback_ls() {

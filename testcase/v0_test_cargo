@@ -2,7 +2,7 @@
 
 test_proxy_cargo(){
     . ~/.x-cmd/xrc/latest
-    . ./testcase/v0_test_base
+    . ./testcase/v0_test
 
     if command -v mdbook >/dev/null ; then
         cargo uninstall mdbook

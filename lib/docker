@@ -34,7 +34,7 @@ ___x_cmd_proxy_docker_url(){
 subcommands:
     ustc                            "USTC mirror"
     netease                         "NETEASE mirror"
-    tencentyun                      "tencentyun mirror"
+    docker-cn                       "docker-cn mirror"
     aliyun                          "aliyun mirror"
 A
     param:run
@@ -42,7 +42,7 @@ A
     case "${PARAM_SUBCMD:-ustc}" in
         ustc)                       printf "https://docker.mirrors.ustc.edu.cn/"            ;;
         netease)                    printf "https://hub-mirror.c.163.com/"                  ;;
-        tencentyun)                 printf "https://mirror.ccs.tencentyun.com"              ;;
+        docker-cn)                  printf "https://registry.docker-cn.com"                 ;;
         aliyun)                     printf "https://mirrors.aliyun.com/docker-ce/"          ;;
         *)                          printf "Unrecognized source name"; return 1
     esac
@@ -59,7 +59,7 @@ A
     param:run
 
     local url
-    if url="$(___x_cmd_proxy_docker_url "${PARAM_SUBCOM:-ustc}")";then
+    if url="$(___x_cmd_proxy_docker_url "${PARAM_SUBCMD:-ustc}")";then
         proxy_log info "Setting proxy_docker mirror :
         $url"
 
@@ -109,10 +109,15 @@ A
 
     if [ "$(id -u)" -ne 0 ]; then
         proxy_log info "using sudo"
-        sudo ___proxy_rollback /etc/docker/daemon.json docker "$1"
+        IS_ROOT=1 ___proxy_rollback /etc/docker/daemon.json docker "$1"
     else
         ___proxy_rollback /etc/docker/daemon.json docker "$1"
     fi 
+}
+
+___x_cmd_proxy_docker_rollback_ls() {
+    param:void
+    ___proxy_rollback_ls docker
 }
 
 ___x_cmd_proxy_docker_tutorial(){
