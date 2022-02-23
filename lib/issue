@@ -18,11 +18,12 @@ subcmd:
     comment         "comment management"
 '
     param:run
-
     if [ -z "$PARAM_SUBCMD" ]; then
-        echo "subcmd not found. show help." >&2
-        return 0
+        gt_log warn "Subcmd Not Found."
+        ___x_cmd_gt_issue _param_help_doc
+        return 1
     fi
+
     "___x_cmd_gt_issue_$PARAM_SUBCMD" "$@"
 }
 

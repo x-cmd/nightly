@@ -14,10 +14,10 @@ subcmd:
     member                  "member management"
 '
     param:run
-
     if [ -z "$PARAM_SUBCMD" ]; then
-        gt_log error "Command Not Found. Show help."
-        return 0
+        gt_log warn "Subcmd Not Found."
+        ___x_cmd_gt_org _param_help_doc
+        return 1
     fi
       
     "___x_cmd_gt_org_${PARAM_SUBCMD}" "$@"
@@ -78,10 +78,13 @@ subcmd:
     create      "org repo create"
 '
     param:run
+
     if [ -z "$PARAM_SUBCMD" ]; then
-        gt_log error "Command Not Found. Show help."
-        return 0
+        gt_log warn "Subcmd Not Found."
+        ___x_cmd_gt_org_repo _param_help_doc
+        return 1
     fi
+
     "___x_cmd_gt_org_repo_${PARAM_SUBCMD}" "$@"
 }
 

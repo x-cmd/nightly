@@ -12,10 +12,10 @@ subcmd:
     build       "Build page"
 '
     param:run
-
     if [ -z "$PARAM_SUBCMD" ]; then
-        gt_log error "Command Not Found. Show help."
-        return 0
+        gt_log warn "Subcmd Not Found."
+        ___x_cmd_gt_repo_page _param_help_doc
+        return 1
     fi
 
     "___x_cmd_gt_repo_page_${PARAM_SUBCMD}" "$@"

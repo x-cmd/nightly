@@ -14,8 +14,9 @@ subcmd:
 '
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
-        echo "Command Not Found. Show help." >&2
-        return 0
+        gt_log warn "Subcmd Not Found."
+        ___x_cmd_gt_user _param_help_doc
+        return 1
     fi
 
     # list issues of user
@@ -134,8 +135,9 @@ subcmd:
     param:run
 
     if [ -z "$PARAM_SUBCMD" ]; then
-        gt_log error "Command Not Found. Show help."
-        return 0
+        gt_log warn "Subcmd Not Found."
+        ___x_cmd_gt_user_key _param_help_doc
+        return 1
     fi
 
     # list issues of user

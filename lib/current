@@ -9,10 +9,10 @@ subcmd:
     type        "get current owner type"
 '
     param:run
-
     if [ -z "$PARAM_SUBCMD" ]; then
-        echo "Command Not Found. Show help." >&2
-        return 0
+        gt_log warn "Subcmd Not Found."
+        ___x_cmd_gt_current _param_help_doc
+        return 1
     fi
 
     case "${PARAM_SUBCMD}" in

@@ -15,9 +15,9 @@ subcmd:
     del|remove      "Remove member"
 '
     param:run
-
     if [ -z "$PARAM_SUBCMD" ]; then
-        gt_log error "subcmd not found. show help."
+        gt_log warn "Subcmd Not Found."
+        ___x_cmd_gt_repo_member _param_help_doc
         return 0
     fi
     

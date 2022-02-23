@@ -4,14 +4,15 @@
 # author:       Li Junhao           edwin.jh.lee@gmail.com    edwinjhlee.github.io
 # maintainer:   Li Junhao
 
-xrc http param json str ui ccmd
+# TODO: wait ccmd fix
+# xrc http param json str ui ccmd
+xrc http param json str ui
 
 # TODO: Precompile it into one file.
 ____x_cmd_gt_xrc(){
     local i
     for i in "$@"; do
-    xrc "gitee/lib/$i"
-    # . "lib/$i"
+    xrc "gt/lib/$i"
     done
 }
 
@@ -23,9 +24,8 @@ ____x_cmd_gt_xrc utils config current enterprise issue org  \
 x log init gt
 
 xrc gt/lib/_type/main
-# . lib/_type/main
 
-gt(){
+___x_cmd_gt(){
     param:dsl       '
 subcmd:
     repo                                    "repo command"
@@ -43,9 +43,10 @@ subcmd:
     new                                     "new client"
 '
     param:run
-    if [ -z "${PARAM_SUBCMD}" ]; then
-        echo "Command Not Found. Show help." >&2
-        return 0
+    if [ -z "$PARAM_SUBCMD" ]; then
+        gt_log warn "Subcmd Not Found."
+        ___x_cmd_gt _param_help_doc
+        return 1
     fi
 
     case "${PARAM_SUBCMD}" in
@@ -82,7 +83,13 @@ ___x_cmd_gt_make() {
     if [ $? -eq 0 ] && [ -n "$(O="$O_ORIGINAL" ___x_cmd_gt_token)" ]; then
         O="$O_ORIGINAL" ___x_cmd_gt_current_owner
     else
-        gt_log warn "token is null"
+        local info
+        info=$(printf "\n\033[0m\033[33m%s\033[0m \033[36m%s\033[0m \n\033[4;33m%s\033[0m" \
+                "$(ui yellow 'You need run command to add token:')" \
+                "$(ui bold cyan "\`gt token <token>\`")" \
+                "$(ui yellow underline 'https://gitee.com/profile/personal_access_tokens')"
+              )
+        gt_log warn "Token is null.${info}"
     fi
     # local TOKEN=${2:-""}
     # if [ -n "$GITEE_TOKEN" ]; then
@@ -95,8 +102,5 @@ if [ -z "$DO_NOT_INIT_GITEE_DEFAULT" ]; then
     ___x_cmd_gt_make "GITEE_DEFAULT" && DO_NOT_INIT_GITEE_DEFAULT="true"
 fi
 
-if [ -z "$XRC_NO_ADVISE" ] && [ -n "${BASH_VERSION}${ZSH_VERSION}" ] && [ "${-#*i}" != "$-" ]; then
-    xrc advise/latest
-    advise gt
-fi
+xrc setmain ___x_cmd_gt
 

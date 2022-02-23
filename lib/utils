@@ -121,13 +121,23 @@ ______x_cmd_gt_parse_owner_repo() {
     fi
 }
 
-# ______x_cmd_gt_cache(){
-#     ccmd -- eval "$@"
-# }
-
 ______x_cmd_gt_table() {
     local tmp
     tmp=$1
     shift
     echo "$tmp" 2>&1 | ui table jsonfmt "$@"
+}
+
+___x_cmd_gh_json_query(){
+    local awkfile
+    awkfile="$(xrc cat awk/lib/default.awk awk/lib/json.awk awk/lib/jiter.awk )"
+    local data="$1"
+    shift
+    while [ $# -gt 0 ];do
+    print "$data"| awk "$awkfile""
+{
+    jiter_print_eqarr_after_tokenize(\$0,\"$1\", \"\n\")
+}"
+    shift
+    done
 }
