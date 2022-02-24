@@ -37,7 +37,7 @@ ___ui_selectn_out_func(){
 ___ui_selectn_out(){
     ___ui_selectn_out_func ___x_cmd_ui_selectn_control_display
 }
-___ui_selectn_out
+# # ___ui_selectn_out
 
-echo "___X_CMD_UI_SELECTN_FINAL_COMMAND:" "$___X_CMD_UI_SELECTN_FINAL_COMMAND"
-echo "___X_CMD_UI_SELECTN_CURRENT_ITEM:" "$___X_CMD_UI_SELECTN_CURRENT_ITEM"
+# echo "___X_CMD_UI_SELECTN_FINAL_COMMAND:" "$___X_CMD_UI_SELECTN_FINAL_COMMAND"
+# echo "___X_CMD_UI_SELECTN_CURRENT_ITEM:" "$___X_CMD_UI_SELECTN_CURRENT_ITEM"

@@ -1,8 +1,8 @@
-xrc ui/lib/table
 
-# test.txt 22K
-
-f(){
-    cat ./.x-cmd/dev/testcase/test.txt | ___x_cmd_ui_table_control >/dev/null
+f1(){
+    cat ./.x-cmd/dev/testcase/test.txt | awk \
+    -f "~/.x-cmd/awk/lib/wcwidth.awk" \
+    -f "./.x-cmd/dev/testcase/aaa.awk"
 }
-time (f)
+# time f1
+f1

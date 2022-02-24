@@ -46,10 +46,10 @@ function view_help(){
     return sprintf("%s\n", th_help_text( ctrl_help_get() ) )
 }
 function view_header(){
-    return sprintf("%s\n", th(TH_SELECT_HEADER_NORMAL, data_header) )
+    return sprintf("%s\n", th(UI_FG_GREEN, data_header) )
 }
 
-function view_body(             _selected_item_idx, _iter_item_idx, _data_item_idx, _select_text, _data){
+function view_body(             _selected_item_idx, _iter_item_idx, _data_item_idx, _item_index, _select_text, _data, _data_info){
     view_item_len = model_item_max + 3      # left 3 space
 
     view_body_col_num = int((max_col_size -1) / view_item_len)
@@ -69,22 +69,27 @@ function view_body(             _selected_item_idx, _iter_item_idx, _data_item_i
 
             _data_item_idx = model[ _iter_item_idx ]
             _item_text = str_pad_right( data[ _data_item_idx ], view_item_len, data_wlen[ _data_item_idx ] )
+            if ( ITEM_INDEX_STATE == true ) _item_index = _data_item_idx ": "
+            # if ( ITEM_INDEX_STATE == true ) _item_index = th(UI_FG_GREEN, _data_item_idx ": ")
             if ( _iter_item_idx != _selected_item_idx ) {
-                _data = _data _item_text
+                _data = _data _item_index _item_text
             } else {
-                _data = _data th(TH_SELECT_ITEM_FOCUSED, _item_text)
+                _data = _data _item_index th(TH_SELECT_ITEM_FOCUSED, _item_text)
             }
             _iter_item_idx += max_data_row_num
         }
         _data = _data "\n"
     }
     # ctrl_rstate_set( SELECTED_ITEM_IDX, model[ _selected_item_idx ] )
-    _data = _data "INFO: " th(TH_SELECT_ITEM_SELECTED data_info[model[ _selected_item_idx ]])"\n"
+    _data_info = data_info[model[ _selected_item_idx ]]
+    if ( _data_info != "" ) _data = _data "INFO: " th(TH_SELECT_ITEM_SELECTED, _data_info)"\n"
     if ( multiselect_len>0 ) {
         for (i=1; i<=multiselect_len; i ++) {
             _select_text = _select_text th(TH_SELECT_ITEM_FOCUSED, data[ multiselect[i] ]) " "
         }
         _data = _data sprintf("SELECT: %s\n",  _select_text ) UI_END
+    } else {
+        _data = _data sprintf("SELECT: %s\n",  model[ _selected_item_idx ] ) UI_END
     }
     return _data
 }

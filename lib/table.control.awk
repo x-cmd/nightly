@@ -62,7 +62,7 @@ function view_header(       col_i, data){
         # buffer_append( sprintf( "%s  ", str_pad_right( data[ 1 KSEP col_i ], col_max[ col_i ], data_wlen[ 1 KSEP col_i ] ) ) )
     }
 
-    return th( TH_TABLE_HEADER_ITEM_NORMA, data) "\n"
+    return th( TH_TABLE_HEADER_ITEM_NORMAL, data) "\n"
 }
 
 function view_body(             model_row_i, col_i, model_start_row, _tmp_currow, _data){

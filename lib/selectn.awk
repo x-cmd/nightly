@@ -12,6 +12,9 @@ BEGIN {
 function view_help(){
     return sprintf("%s\n", th_help_text( ctrl_help_get() ) )
 }
+function view_header(){
+    return sprintf("%s", th(TH_SELECT_HEADER_NORMAL, data_header) )
+}
 
 # function view_body(         i, _key_fa, data, _i_for_this_column, _offset_for_this_column, _selected_index_of_this_column, _value_of_this_column ){
 #     for (i=1; i<=VIEW_BODY_ROW_SIZE; ++i) {
@@ -44,11 +47,11 @@ function view_body(         i, j, _key_fa, data, _i_for_this_column, _offset_for
         for (i=1; i<=VIEW_BODY_ROW_SIZE; ++i) {
             _i_for_this_column = _offset_for_this_column + i - 1
             _tmp = str_pad_right( DATA[ _key_fa L _i_for_this_column ], _max_column_size )
+            if (j == FOCUS_COL) _tmp = UI_TEXT_REV _tmp UI_END
             if ( _selected_index_of_this_column == _i_for_this_column ) {
-                _tmp = UI_FG_GREEN _tmp UI_END
-                if (j == FOCUS_COL) _tmp = UI_TEXT_REV _tmp
+                _tmp =  UI_TEXT_UNDERLINE UI_FG_GREEN _tmp UI_END
             }
-            _data[ j ] = _data[ j ] _tmp
+            _data[ i ] = _data[ i ] _tmp
         }
     }
 
@@ -62,9 +65,10 @@ function view(){
     DATA_HAS_CHANGED = false
 
     _component_help         = view_help()
+    _component_header       = view_header()
     _component_body         = view_body()
 
-    send_update( _component_help "\n" _component_body  )
+    send_update( _component_help _component_header  _component_body  )
 }
 
 # EndSection
@@ -221,7 +225,7 @@ function consume_ctrl(  _cmd){
     ctrl(substr(_cmd, 1, idx-1), substr(_cmd, idx+1))
     view()
 }
-
+NR==2 {  data_header = str_trim($0) }
 NR>2 {
     if (DATA_MODE == DATA_MODE_DATA) {
         if ($0 != "---")    {

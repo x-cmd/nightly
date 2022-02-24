@@ -137,11 +137,6 @@ ___x_cmd_ui_table_control_awk(){
 }
 fi
 
-___ui_table_json(){
-    # cat | json_to_table
-    :
-}
-
 ___x_cmd_ui_table_control_display(){
     # printf "%s \002---\002" "$___X_CMD_UI_TABLE_DEFAULT" | sed 's/\002/\n/g'
     printf "%s \002---\002" "$___X_CMD_UI_TABLE_DEFAULT" | tr '\002' "$___X_CMD_UI_REGION_RS"
@@ -149,7 +144,6 @@ ___x_cmd_ui_table_control_display(){
 
 ___ui_table_out3(){
     ___ui_table_out_func ___x_cmd_ui_table_control_display
-    # eval "$(___ui_table_out_func ___x_cmd_ui_table_control_display)"
 }
 
 ___ui_table_json_to_table(){
@@ -285,3 +279,54 @@ ___ui_table_out_func(){
 
 # EndSection
 
+# Section: json to table
+CODE="$(xrc cat awk/lib/default.awk awk/lib/json.awk awk/lib/jiter.awk )"
+___x_cmd_ui_json2table(){
+    local cmd="$1" ;shift
+    IFS=$(printf "\003")
+    eval "$cmd" | awk "$CODE
+    {
+        printf(\"%s\", json_to_machine_friendly(\$0) )
+    }" | awk -v args="$*" -v UI_REGION_RS="${___X_CMD_UI_REGION_RS}" "$CODE"'
+    BEGIN{
+        arrl=split(args, arr, "\003")
+        for(j in arr) {
+            idx = index(arr[j], "=")
+            if (idx == 0) {
+                head_text = head_text "\003" arr[j]
+                continue
+            }
+            head_text = head_text "\003" substr(arr[j], 1, idx-1)
+            arr[j] = substr(arr[j], idx+1)
+        }
+        printf UI_REGION_RS substr(head_text, 2) UI_REGION_RS
+    }
+    {
+        par[1] = ""
+        par[2] = ""
+        parl = 2
+        if ($0 != "") {
+            if (jiter_regexarr_parse(_, $0,  parl, par) == true ){
+                ret=""
+                item_text=""
+                for (i=1; i<=arrl; i++) {
+                    item_text = jget(_, arr[i])
+                    gsub(/"/, "", item_text)
+                    ret = ret "\003" item_text
+                }
+                printf substr(ret, 2) UI_REGION_RS
+                delete _
+            }
+        }
+    }
+    END{
+        printf "---" UI_REGION_RS
+    }
+    '
+}
+
+___ui_table_json(){
+    ___ui_table_out_func ___x_cmd_ui_json2table "$@"
+}
+
+# EndSection
