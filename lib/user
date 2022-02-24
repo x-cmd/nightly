@@ -52,6 +52,8 @@ options:
     else
         data=$(______x_cmd_gt_get "/v5/users/$1")
     fi
+
+    # TODO: wait json_awk
     local name
     local html_url
     local types

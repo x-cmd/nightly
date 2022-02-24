@@ -59,47 +59,28 @@ subcmd:
 ############################
 # Section 10: Instantiation
 ############################
-
-___x_cmd_gt_new() {
-    param:void
-    local name="${1:?Provide object name}"
-    # shellcheck disable=SC2139
-    alias "$name=\"O=$name gt\""
-}
-
 ___x_cmd_gt_make() {
     param:void
     local O_ORIGINAL="${1:?Provide client name by O environment}"
 
-    # if [ -n "$GITEE_DEFAULT" ] && [ "$O_ORIGINAL" = "GITEE_DEFAULT" ]; then
-    #     echo "Name 'GITEE_DEFAULT' is reserved for internal use."
-    #     return 1
-    # fi
-
     local O="___x_cmd_gt_$O_ORIGINAL"
-    http "@$O" make  'https://gitee.com/api'
-    http "@$O_ORIGINAL" header type "application/json;charset=utf-8"
     O=$O_ORIGINAL ___x_cmd_gt_config_load >/dev/null
+    
     if [ $? -eq 0 ] && [ -n "$(O="$O_ORIGINAL" ___x_cmd_gt_token)" ]; then
         local user
-        user="$(O="$O_ORIGINAL" ___x_cmd_gt_current_owner)"
+        user="$(O="$O_ORIGINAL" ___x_cmd_gt_current_owner)" || return 1
         gt_log info "Hi $user! You've successfully authenticated."
-    else
-        local info
-        info=$(printf "\n\033[0m\033[33m%s\033[0m \033[36m%s\033[0m \n\033[4;33m%s\033[0m" \
-                "$(ui yellow 'You need run command to add token:')" \
-                "$(ui bold cyan "\`gt token <token>\`")" \
-                "$(ui yellow underline 'https://gitee.com/profile/personal_access_tokens')"
-              )
-        gt_log warn "Token is null.${info}"
+        return 0
     fi
-    # local TOKEN=${2:-""}
-    # if [ -n "$GITEE_TOKEN" ]; then
-    #     printf "Init token with env GITEE_TOKEN\n" >&2
-    #     O=$O_ORIGINAL ___x_cmd_gt_token.set "$GITEE_TOKEN"
-    # else    #     ___x_cmd_gt_config_load default
-    # fi
+
+    local info
+    info=$(printf "\n\033[0m\033[33m%s\033[0m \033[36m%s\033[0m \n\033[4;33m%s\033[0m" \
+         "$(ui yellow 'You need run command to add token:')" \
+         "$(ui bold cyan "\`gt token <token>\`")" \
+         "$(ui yellow underline 'https://gitee.com/profile/personal_access_tokens')")
+    gt_log warn "Token is null.${info}"
 }
+
 if [ -z "$DO_NOT_INIT_GITEE_DEFAULT" ]; then
     ___x_cmd_gt_make "GITEE_DEFAULT" && DO_NOT_INIT_GITEE_DEFAULT="true"
 fi

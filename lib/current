@@ -46,11 +46,11 @@ ___x_cmd_gt_current_owner() {
     fi
     local owner
     owner="$(param_default get "gitee_$O" owner)"
-    [ -n "$owner" ] && echo "$owner" && return
+    [ -n "$owner" ] && printf "%s" "$owner" && return
 
     data=$(______x_cmd_gt_get "/v5/user")
     [ -n "$data" ] && owner=$(___x_cmd_gt_json_query "$data" .login) && param_default put "gitee_$O" owner "$owner"
-    echo "$owner"
+    printf "%s" "$owner"
 }
 
 # shellcheck disable=SC2120
@@ -68,7 +68,7 @@ ___x_cmd_gt_current_owner_type() {
     if [ -z "$data" ]; then
         owner="$(___x_cmd_gt_current_owner)"
         if [ -z "$owner" ]; then
-            echo "Owner is empty. While owner not set." >&2
+            gt_log error "Owner is empty. While owner not set." >&2
             return 1
         fi
 

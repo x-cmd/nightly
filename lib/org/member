@@ -1,0 +1,103 @@
+
+
+# shellcheck shell=sh
+# shellcheck disable=SC2039,3043
+
+# Should be like this.
+# gt repo member add el:admin
+# gt repo member remove user-a
+# gt repo member add user-b
+
+# gt repo member +el:admin -user-a +user-b
+___x_cmd_gt_org_member(){
+    param:dsl       '
+subcmd:
+    ls            "list member"
+    user            "get org member user info"
+    add             "add member"
+    del|remove      "Remove member"
+'
+    param:run
+
+    if [ -z "$PARAM_SUBCMD" ]; then
+        gt_log warn "subcmd not found. show help." >&2
+        return 1
+    fi
+
+    "___x_cmd_gt_org_member_$PARAM_SUBCMD" "$@"
+}
+
+___x_cmd_gt_org_member_ls() {
+    param:scope     "gitee/$O"
+    param:dsl       '
+options:
+    #1|--org        "org space address"    <>:address
+    --role          "Repo name"            <>="all"         = admin member all
+'
+    param:run
+    ______x_cmd_gt_get_multi "/v5/orgs/${org##*/}/members" role page per_page
+}
+
+___x_cmd_gt_org_member_user() {
+    param:scope     "gitee/$O"
+    param:dsl      '
+options:
+    #1|--org            "org space address"              <>:address
+    --username          "username: user space address"   <>:name
+'
+    param:run
+
+    ______x_cmd_gt_get "/v5/orgs/${org##*/}/memberships/${username##*/}"
+}
+
+___x_cmd_gt_org_member_add() {
+    param:scope     "gitee/$O"
+    param:dsl       '
+type:
+    role = admin member
+options:
+    --org           "org"       <>:address
+    --role          "role"      <>:role="member"
+    #n              "username"
+'
+    param:run
+
+    if [ -z "$1" ];then
+        gt_log error "At least one user’s spatial address is needed"
+        return 1
+    fi
+
+        for username in "$@"; do
+        {
+            ______x_cmd_gt_put_json "/v5/orgs/${org##*/}/memberships/${username##*/}" role
+
+            [ $? -ne 0 ] && gt_log error "Add $username failure"     &&  return 1
+                            gt_log info  "Add $username successfully";   return 0
+        }
+    done
+}
+
+___x_cmd_gt_org_member_del() {
+    param:scope     "gitee/$O"
+    param:dsl       '
+options:
+    --org       "org space address"         <>:address
+    #n          "username"
+'
+    param:run
+
+    if [ -z "$1" ];then
+        gt_log error "At least one user’s spatial address is needed"
+        return 1
+    fi
+
+    local username
+    for username in "$@"; do
+        {
+            ______x_cmd_gt_delete "/v5/orgs/${org##*/}/memberships/${username##*/}"
+            [ $? -ne 0 ] && gt_log error "Remove $username failure"     &&  return 1
+                            gt_log info  "Remove $username successfully.";  return 0
+        }
+    done
+}
+

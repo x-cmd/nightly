@@ -1,0 +1,120 @@
+# shellcheck shell=sh
+# shellcheck disable=SC2039,3043
+
+___x_cmd_gt_org(){
+    param:scope     "gitee/$O"
+    param:dsl       '
+subcmd:
+    info                    "Show information"
+    create                  "create org"
+    repo                    "List all repos"
+    quit                    "quit org"
+    issue                   "List all issues"
+    member                  "member management"
+'
+    param:run
+    if [ -z "$PARAM_SUBCMD" ]; then
+        gt_log warn "Subcmd Not Found."
+        ___x_cmd_gt_org _param_help_doc
+        return 1
+    fi
+
+    "___x_cmd_gt_org_${PARAM_SUBCMD}" "$@"
+}
+
+# TODO: rename "ls"?
+___x_cmd_gt_org_info() {
+    param:scope     "gitee/$O"
+    param:dsl       '
+type:
+options:
+    --admin      "admin"       <>:bool=false
+'
+    param:run
+
+    if [ $# -eq 0 ]; then
+        ______x_cmd_gt_get_multi "/v5/user/orgs" admin page per_page
+        [ $? -eq 1 ] && return 1
+    else
+        ______x_cmd_gt_get "/v5/orgs/${1:?Provide organization}"
+        [ $? -eq 1 ] && return 1
+    fi
+    return 0
+}
+
+# It is very rare TODO: batch?
+___x_cmd_gt_org_create() {
+    param:scope     "gitee/$O"
+    param:dsl       '
+options:
+    #1              "organization name"     <>:name
+    --org           "organization path"     <>=""
+    --description   "description"           <>=""
+'
+    param:run
+    org=${org:-$1}
+    ______x_cmd_gt_post_json "/v5/users/organization" name="$1" org description
+    local code=$?
+    if [ $code -ne 0 ]; then
+        # TODO: printf http error msg
+        gt_log error "Creating organization failure: $1. Code is $code. "
+        return $code
+    fi
+}
+
+___x_cmd_gt_org_repo(){
+    param:dsl       '
+subcmd:
+    ls          "list repo"
+    create      "org repo create"
+'
+    param:run
+
+    if [ -z "$PARAM_SUBCMD" ]; then
+        gt_log warn "Subcmd Not Found."
+        ___x_cmd_gt_org_repo _param_help_doc
+        return 1
+    fi
+
+    "___x_cmd_gt_org_repo_${PARAM_SUBCMD}" "$@"
+}
+
+# https://gitee.com/api/v5/swagger#/getV5OrgsOrgRepos
+___x_cmd_gt_org_repo_ls() {
+    param:scope     "gitee/$O"
+    param:dsl       '
+options:
+    --type     "type"     <>="all"    = all private public
+'
+    param:run
+    if [ -z "$1" ]; then
+        gt_log error "Please provide organization"
+        return 1
+    fi
+    O=$O ______x_cmd_gt_get_multi "/v5/orgs/${1:?Provide organization}/repos"
+    # ui table func ______x_cmd_gt_table "\"\$(O=$O ______x_cmd_gt_get_multi \"/v5/orgs/${1:?Provide organization}/repos\" type)\"" \
+        # . id full_name ownerName=owner.name updatedTime="updated_at"
+}
+
+___x_cmd_gt_org_quit() {
+    param:scope     "gitee/$O"
+    param:dsl       '
+options:
+    #n      "orgs"
+'
+    param:run
+    if [ -z "$1" ];then
+        gt_log error "At least one org spatial address is needed."
+        return 1
+    fi
+
+    for org in "$@"; do
+    {
+        ______x_cmd_gt_delete "/v5/user/memberships/orgs/${org##*/}"
+
+        [ $? -ne 0 ] && gt_log error "Quit $org organization failure"     &&   return 1
+                        gt_log info  "Quit $org organization successfully.";   return 0
+    }
+    done
+}
+

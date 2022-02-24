@@ -20,12 +20,16 @@ ______x_cmd_gt_get() {
 ______x_cmd_gt_get_multi() {
     if [ -n "$page" ] || [ -n "$per_page" ]; then
         ______x_cmd_gt_get "$@" page per_page
-        return
+        return "$?"
     fi
     local i=1
     local total_page=100000
     while [ "$i" -le "$total_page" ]; do
         ______x_cmd_gt_get "$@" page="$i" per_page=100
+        local code="$?"
+        if [ "$code" -ne 0 ];then
+            return $code
+        fi
         total_page="$(______x_cmd_gt_resp_header "total_page")"
         [ -z "$total_page" ] && return
         # echo "total_page:$total_page" >&2
@@ -33,18 +37,16 @@ ______x_cmd_gt_get_multi() {
     done
 }
 
-# ___x_cmd_gt_post(){ O="___x_cmd_gt_${O:-GITEE_DEFAULT}" http_post "$@"; }
 ______x_cmd_gt_post_json() {
-    http "@___x_cmd_gt_${O:-GITEE_DEFAULT}" post  json "$@"
+    http "@___x_cmd_gt_${O:-GITEE_DEFAULT}" post    json "$@"
 }
 
-# ___x_cmd_gt_put(){ O="___x_cmd_gt_${O:-GITEE_DEFAULT}" http_put "$@"; }
 ______x_cmd_gt_put_json() {
-    http "@___x_cmd_gt_${O:-GITEE_DEFAULT}" put json "$@"
+    http "@___x_cmd_gt_${O:-GITEE_DEFAULT}" put     json "$@"
 }
 
 ______x_cmd_gt_patch_json() {
-    http "@___x_cmd_gt_${O:-GITEE_DEFAULT}" patch json "$@"
+    http "@___x_cmd_gt_${O:-GITEE_DEFAULT}" patch   json "$@"
 }
 
 ______x_cmd_gt_delete() {
@@ -125,7 +127,7 @@ ______x_cmd_gt_table() {
     local tmp
     tmp=$1
     shift
-    echo "$tmp" 2>&1 | ui table jsonfmt "$@"
+    printf "%s" "$tmp" 2>&1 | ui table jsonfmt "$@"
 }
 
 ___x_cmd_gt_json_query(){
@@ -134,7 +136,7 @@ ___x_cmd_gt_json_query(){
     local data="$1"
     shift
     while [ $# -gt 0 ];do
-    print "$data"| awk "$awkfile""
+    printf "%s" "$data"| awk "$awkfile""
 {
     jiter_print_eqarr_after_tokenize(\$0,\"$1\", \"\n\")
 }"

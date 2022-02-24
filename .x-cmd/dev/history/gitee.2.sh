@@ -500,13 +500,13 @@ gt.repo.create(){
     fi
 
     local name
+    local code
     for name in "${_rest_argv[@]}"; do
         { 
             gt.post.json "/v5/user/repos" name has_issues has_wiki private 2>/dev/null
             code=$?
             if [ $code -ne 0 ]; then
                 echo "Creating repo failure: $name. Code is $code. " >&2
-                # gt.resp.header "" >&2
                 return $code
             fi
         } | jq -r .full_name

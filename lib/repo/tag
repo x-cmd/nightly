@@ -4,7 +4,7 @@
 ___x_cmd_gt_repo_tag(){
     param:dsl    '
 subcmd:
-    ls            "list tag"
+    ls              "list tag"
     add             "add tag"
 '
     param:run

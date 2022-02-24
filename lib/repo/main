@@ -5,16 +5,14 @@ ___x_cmd_gt_repo(){
     param:scope     "gitee/$O"
     param:dsl       '
 subcmd:
-    new             "new repo client"
     create          "create repo"
     ls              "list repo of owner"
     info            "Show detailed information of repo"
     del             "Remove repo"
     clear           "clear repo"
     issue           "get repo issue"
-    release         "release"
-    review          "review repo"
 '
+    # TODO: add release: release  review: "review repo"
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
         gt_log warn "Subcmd Not Found."
@@ -85,9 +83,13 @@ option:
             local data repo_id url repo_owner
             data=$(______x_cmd_gt_post_json "/v5/user/repos" name="${name##*/}" description homepage has_issues has_wiki can_comment \
             auto_init gitignore_template license_template path="$paths" private 2>/dev/null)
-            ___json_awk_get repo_id=.id url=.html_url repo_owner=.owner.login <<A
-            $data
-A
+            # TODO: wait awk json to handle json_awk_get
+            local repo_id
+            local url
+            local repo_owner
+            repo_id="$(___x_cmd_gt_json_query "$data" .id)"
+            url="$(___x_cmd_gt_json_query "$data" .html_url)"
+            repo_owner="$(___x_cmd_gt_json_query "$data" .owner.login)"
             if [ -n "$repo_id" ];then
                 ui tf "true" "Creating repo $name success" "repo_id:$repo_id" "url:$url" "repo_owner:$repo_owner" 
             else
@@ -139,12 +141,10 @@ option:
     [ -n "$no_wiki" ] && has_wiki=false
     [ -n "$no_comment" ] && can_comment=false
     [ -n "$no_auto_init" ] && auto_init=false
-    # TODO:owner may be personal
+    # TODO: owner may be personal
     local name
+    local code
     for name in "$@"; do
-        # name="$(______x_cmd_gt_param_normalize_repo "$name")"
-        # owner="$(echo "$name" | cut -d / -f 1)"
-        # name="$(echo "$name" | cut -d / -f 2)"
         local resp
         {
             ______x_cmd_gt_post_json "/v5/orgs/$org/repos" name description homepage has_issues has_wiki can_comment auto_init \
@@ -154,6 +154,9 @@ option:
                 gt_log error "Creating repo failure: $name. Code is $code. "
                 # ______x_cmd_gt_resp_header "" >&2
                 return $code
+            else
+                gt_log info "Creating $name repo successfully."
+                return 0
             fi
         } 
     done
@@ -202,6 +205,7 @@ option:
 
     # TODO
     local name
+    local code
     for name in "$@"; do
     {
         ______x_cmd_gt_post_json "/v5/enterprises/${enterprise##*/}/repos" \
@@ -209,10 +213,10 @@ option:
             gitignore_template license_template path="$paths" private enterprise outsourced project_creator members
             code=$?
             if [ $code -ne 0 ]; then
-                gt_log error "Creating repo failure: $name. Code is $code. "
+                gt_log error "Creating $name repo failure. Code is $code. "
                 return $code
             fi
-        } | json_color
+    }
     done
     return 0
 }
@@ -271,8 +275,9 @@ options:
 '
     param:run
     local confirm
-    confirm=$(ui select "text" "Are you sure you want to delete repo $*" "yes" "no")
-    [ "$confirm" = "no" ] && return
+    # TODO: wait fix | input all name then can do it
+    # confirm=$(ui select "text" "Are you sure you want to delete repo $*" "yes" "no")
+    # [ "$confirm" != "yes" ] && return
     local i
     for i in "$@"; do
         ______x_cmd_gt_param_normalize_repo "$i"
@@ -294,9 +299,10 @@ options:
     param:run
 
     ___x_cmd_gt_param_init_owner_repo
-    local confirm
-    confirm=$(ui select "text" "Are you sure you want to clear repo ${owner_repo}" "yes" "no")
-    [ "$confirm" = "no" ] && return
+    # TODO: wait fix | input all name then can do it
+    # local confirm
+    # confirm=$(ui select "text" "Are you sure you want to clear repo ${owner_repo}" "yes" "no")
+    # [ "$confirm" != "yes" ] && return
     ______x_cmd_gt_put_json "/v5/repos/${owner_repo}/clear" && ui tf "true" "Successfully clear ${owner_repo}" && return
     gt_log error "clear repo failure: $owner_repo"
 }

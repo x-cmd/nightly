@@ -22,7 +22,9 @@ ___x_cmd_gt_token() {
     if [ -n "$1" ]; then
         # setter
         local token="$1"
-        http "@___x_cmd_gt_${O:-GITEE_DEFAULT}" qs put access_token "$token"
-        http "@___x_cmd_gt_${O:-GITEE_DEFAULT}" body put access_token "$token"
+        http "@___x_cmd_gt_${O:-GITEE_DEFAULT}" make    'https://gitee.com/api'
+        http "@___x_cmd_gt_${O:-GITEE_DEFAULT}" header  type "application/json;charset=utf-8"
+        http "@___x_cmd_gt_${O:-GITEE_DEFAULT}" body    put access_token "$token"
+        http "@___x_cmd_gt_${O:-GITEE_DEFAULT}" qs      put access_token "$token"
     fi
 }

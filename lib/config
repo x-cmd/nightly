@@ -21,7 +21,7 @@ subcmd:
 ___x_cmd_gt_config_which() {
     param:void
     local O="${O:-GITEE_DEFAULT}"
-    echo "$HOME/.x-cmd/.config/x-bash/app.gitee.config/$O"
+    printf "%s" "$HOME/.x-cmd/.config/x-bash/app.gitee.config/$O"
 }
 
 # TODO:config 

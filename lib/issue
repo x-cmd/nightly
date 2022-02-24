@@ -170,8 +170,8 @@ subcmd:
 '
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
-        echo "subcmd not found. show help." >&2
-        return 0
+        gt_log warn "subcmd not found. show help." >&2
+        return 1
     fi
     "___x_cmd_gt_issue_comment_$PARAM_SUBCMD" "$@"
 }

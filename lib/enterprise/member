@@ -1,0 +1,131 @@
+
+# Section : member
+# Should be like this.
+# gt repo member add el:admin
+# gt repo member remove user-a
+# gt repo member add user-b
+
+# gt repo member +el:admin -user-a +user-b
+___x_cmd_gt_enterprise_member(){
+    param:dsl       '
+subcmd:
+    ls              "list member"
+    user            "get member user info"
+    add             "add member"
+    del|remove      "Remove member"
+    access          "Change the member access"
+'
+    param:run
+
+    if [ -z "$PARAM_SUBCMD" ]; then
+        gt_log error "subcmd not found. show help."
+        return 0
+    fi
+
+    "___x_cmd_gt_enterprise_member_$PARAM_SUBCMD" "$@"
+}
+
+___x_cmd_gt_enterprise_member_ls() {
+    param:scope     "gitee/$O"
+    param:dsl       '
+type:
+    role = all member admin
+options:
+    --enterprise    "enterprise space address"          <>:address
+    --role          "role type"                         <>:role="all"
+'
+    param:run
+# TODO: | json_table remark role user.login
+
+    ______x_cmd_gt_get_multi "/v5/enterprises/${enterprise##*/}/members" role page per_page
+}
+
+___x_cmd_gt_enterprise_member_user() {
+    param:scope     "gitee/$O"
+    param:dsl       '
+options:
+    #1|--enterprise    "enterprise: space address"  <>:address
+    #2|--username      "username: space address"    <>:name
+'
+    param:run
+
+    # TODO: FIX :https://gitee.com/api/v5/swagger#/getV5EnterprisesEnterpriseMembersSearch
+    ______x_cmd_gt_get_multi "/v5/enterprises/${enterprise}/members/${username}"
+}
+
+
+___x_cmd_gt_enterprise_member_add() {
+    param:scope     "gitee/$O"
+    param:dsl       '
+type:
+    role =  member  outsourced admin
+    mode =  username email
+options:
+    --enterprise|-e   "enterprise"              <>:address
+    --role            "role"                    <>:role
+    --mode            "username or email"       <>:mode="username"
+    #n                "real name"
+'
+    param:run
+
+    # repo="$(______x_cmd_gt_param_normalize_repo "$repo")" || return 1
+
+    if [ -z "$1" ]; then
+        gt_log error "At least one user’s spatial address or email is needed"
+        return 1
+    fi
+
+    local username
+    for username in "$@"; do
+        ______x_cmd_gt_post_json "/v5/enterprises/${enterprise}/members" \
+         role $mode="$username"
+    done
+}
+
+___x_cmd_gt_enterprise_member_del() {
+    param:scope     "gitee/$O"
+    param:dsl       '
+options:
+    --enterprise|-e    "enterprise space address"      <>:address
+'
+    param:run
+
+    if [ -z "$1" ];then
+        gt_log error "At least one user’s spatial address is needed"
+        return 1
+    fi
+
+    local username
+    local code
+    for username in "$@"; do
+        {
+            ______x_cmd_gt_delete "/v5/enterprises/${enterprise##*/}/members/${username##*/}"
+            code=$?
+            if [ $code -ne 0 ]; then
+                gt_log error "Remove user failure: $username. Code is $code. "
+                return $code
+            else
+                gt_log info "Remove user successfully: $username"
+                return 0
+            fi
+        }
+    done
+}
+
+
+___x_cmd_gt_enterprise_member_access() {
+    param:scope     "gitee/$O"
+    param:dsl       '
+options:
+    --enterprise|-e     "enterprise path"                    <>:address
+    --username          "username: space address"            <>:name
+    --role              "role"                               <>="member"     = member outsourced admin
+    --name              "real name"                          <>=""
+    --active            "Access to corporate resources"
+'
+    param:run
+    active=${active:-false}
+    ______x_cmd_gt_put_json "/v5/enterprises/${enterprise##*/}/members/${username##*/}" name role active
+}
+
+# EndSection
