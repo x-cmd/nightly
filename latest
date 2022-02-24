@@ -16,7 +16,7 @@
 # cd ,<pattern> = find
 
 # cd /u/l/
-xrc ui
+xrc ui/lib/select
 
 ___x_cmd_cd_set_domain(){
     local varname="$1"
@@ -133,11 +133,9 @@ ___x_cmd_cd_choose(){
         printf "%s\n" "cd: no such directory: $p " >&2
         return 1
     fi
-
-    local result
-
+    local ___X_CMD_UI_SELECT_CURENT_ITEM
     local adir
-    local text="ui select ,result \"Which to cd into:\""
+    local text="___x_cmd_ui_select num \"Select an option to change directory:\""
     local IFS="
 "
     while read -r adir; do
@@ -146,9 +144,12 @@ ___x_cmd_cd_choose(){
     done <<A
 $1
 A
-
+    text="$text \\
+\"---\" \\
+\"---\"
+"
     eval "$text"
-    ___x_cmd_cd_origin "$result"
+    ___x_cmd_cd_origin "$___X_CMD_UI_SELECT_CURENT_ITEM"
 }
 # EndSection
 
