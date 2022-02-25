@@ -1234,20 +1234,6 @@ NR==4 {
 
     # Optimization
     append_code_assignment( "PARAM_SUBCMD", "" )
-    if ( (EXISTS_REQUIRED_OPTION == false) && (subcmd_map[ subcmd_id_lookup[ arg_arr[1] ] ] != "") ) {
-        split(subcmd_id_lookup[ arg_arr[1] ], _tmp, "|")
-        append_code_assignment( "PARAM_SUBCMD", _tmp[1] )
-        append_code( "shift " 1 )
-
-        tmp = ""
-        # reset the rest_argv
-        for (j=2; j<=arg_arr_len; ++j) {
-            tmp = tmp " " quote_string(arg_arr[j])
-        }
-        append_code("set -- " tmp)
-        exit_now("000")
-    }
-
     if ( arg_arr[1] == "_param_list_subcmd" ) {
         for (i=1; i <= subcmd_arr[ LEN ]; ++i) {
             subcmd_elearr_len = split( subcmd_arr[ i ], subcmd_elearr, "|" )
@@ -1432,10 +1418,20 @@ function handle_arguments_restargv(         final_rest_argv_len, i, nth_rule, ar
                 # TODO: Why can't exit here???
                 if (false == IS_INTERACTIVE)   return panic_required_value_error( option_id )
 
-                append_query_code( "_X_CMD_PARAM_ARG_" i,
-                    option_arr[ option_id KSEP OPTION_DESC ],
-                    oparr_join( optarg_id KSEP OPTARG_OPARR )   )
-                set_arg_namelist[ i ] = "_X_CMD_PARAM_ARG_" i
+                tmp = option_arr[ option_id KSEP OPTION_NAME ]
+                gsub(/^--?/, "", tmp)
+                debug( "tmp: " tmp )
+                if( tmp != "" ) {
+                    append_query_code( tmp,
+                        option_arr[ option_id KSEP OPTION_DESC ],
+                        oparr_join( optarg_id KSEP OPTARG_OPARR ) )
+                    set_arg_namelist[ i ] = tmp
+                } else {
+                    append_query_code( "_X_CMD_PARAM_ARG_" i,
+                        option_arr[ option_id KSEP OPTION_DESC ],
+                        oparr_join( optarg_id KSEP OPTARG_OPARR ) )
+                    set_arg_namelist[ i ] = "_X_CMD_PARAM_ARG_" i
+                }
                 _need_set_arg = true
                 continue
             } else {
@@ -1459,6 +1455,11 @@ function handle_arguments_restargv(         final_rest_argv_len, i, nth_rule, ar
 
     #TODO: You should set the default value, if you have no .
 
+    if (QUERY_CODE != ""){
+        QUERY_CODE="___x_cmd_ui form " substr(QUERY_CODE, 9)
+        append_code(QUERY_CODE)
+    }
+
     if (_need_set_arg == true) {
         tmp = "set -- "
         for ( _index=1; _index<=final_rest_argv_len; ++_index ) {
@@ -1478,6 +1479,7 @@ function handle_arguments(          i, j, arg_name, arg_name_short, arg_val, opt
     while (i <= arg_arr_len) {
 
         arg_name = arg_arr[ i ]
+        debug("arg_name: " arg_name)
         # ? Notice: EXIT: Consider unhandled arguments are rest_argv
         if ( arg_name == "--" )  break
 
@@ -1599,10 +1601,6 @@ END{
     }
     if (EXIT_CODE == 0) {
         handle_arguments()
-        if (QUERY_CODE != ""){
-            QUERY_CODE="ui form " substr(QUERY_CODE, 9)
-            append_code(QUERY_CODE)
-        }
         print_code()
     }
 }

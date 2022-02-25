@@ -21,7 +21,7 @@ param_log info "Testing : $1"
 case "$1" in
     local)
         param_log info "copy all files from ./* to ~/.x-cmd/param/"
-        x ws install
+        xws install
         . "$(x wsroot)/.x-cmd/testcases/v0_test"
         ;;
     cross)

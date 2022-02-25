@@ -56,9 +56,9 @@ param_marg_seq() {
 # Section 3: param type definition
 # Example:
 # param_type    gitee     repo
-# param_type    gitee     user    =~  [A-Za-z0-9_]+
-# param_type    gitee     access  =   private         public          inner-public
-# param_type    gitee     License   =-   <"$(xrc cat gh/lib/_type/license)"
+# param_type    gitee     user      =~  [A-Za-z0-9_]+
+# param_type    gitee     access    =   private         public          inner-public
+# param_type    gitee     License   =-  <"$(xrc cat gh/lib/_type/license)"
 
 # TODO: check
 param_type(){
@@ -199,9 +199,9 @@ _param_main() {
     local ___X_CMD_PARAM_IS_INTERACTIVE=0
     # Maybe for JUDGE
     # TO OPTIMIZE
-    # if [ -t 0 ] && [ "${-#*i}" != "$-" ]; then
-    #     ___X_CMD_PARAM_IS_INTERACTIVE=1
-    # fi
+    if [ -t 0 ] && [ "${-#*i}" != "$-" ]; then
+        ___X_CMD_PARAM_IS_INTERACTIVE=1
+    fi
 
     local ___X_CMD_PARAM_STDERR_IS_TTY=0
     if [ -t 2 ] ; then
