@@ -19,8 +19,8 @@ subcmd:
         ___x_cmd_gt_repo _param_help_doc
         return 1
     fi
-    
-    "___x_cmd_gt_repo_${PARAM_SUBCMD}" "$@" 
+
+    "___x_cmd_gt_repo_${PARAM_SUBCMD}" "$@"
 }
 
 ____x_cmd_gt_repo()(
@@ -52,7 +52,7 @@ option:
     --no_issues             "Provide issue"
     --no_wiki               "Provide wiki"
     --no_comment            "Provide can_comment"
-    --no_auto_init          "auto init README"
+    --no_auto_init          "Not auto init README"
     --gitignore_template    "Git Ignore"                    <>:Ignore=" "
     --license_template      "license"                       <>:license=" "
     --paths                 "repo path"                     <>:url_type=""
@@ -91,9 +91,9 @@ option:
             url="$(___x_cmd_gt_json_query "$data" .html_url)"
             repo_owner="$(___x_cmd_gt_json_query "$data" .owner.login)"
             if [ -n "$repo_id" ];then
-                ui tf "true" "Creating repo $name success" "repo_id:$repo_id" "url:$url" "repo_owner:$repo_owner" 
+                ui tf "true" "Creating repo $name success" "repo_id: $repo_id" "repo_owner: $repo_owner" "url: $url"
             else
-                gt_log error "Creating repo failure: $name. Code is $code. " 
+                gt_log error "Creating repo failure: $name. Code is $code. "
             fi
         }
     done
@@ -148,17 +148,16 @@ option:
         local resp
         {
             ______x_cmd_gt_post_json "/v5/orgs/$org/repos" name description homepage has_issues has_wiki can_comment auto_init \
-             gitignore_template license_template path="$paths" public
+             gitignore_template license_template path="$paths" public 1>/dev/null
             code=$?
             if [ $code -ne 0 ]; then
                 gt_log error "Creating repo failure: $name. Code is $code. "
-                # ______x_cmd_gt_resp_header "" >&2
                 return $code
             else
                 gt_log info "Creating $name repo successfully."
                 return 0
             fi
-        } 
+        }
     done
 }
 
@@ -221,38 +220,31 @@ option:
     return 0
 }
 
-
 ############################
-# Section 5: List Repos TODO:
+# Section 5: List Repos
 ############################
-
-# gt repo list --access inner-source <owner>
-# gt enterprise repo list
+# shellcheck disable=SC2154,SC2145
 ___x_cmd_gt_repo_ls() {
     param:void
-    local owner
-    owner="$1"
-
-    if [ -z "$owner" ]; then
-        ___x_cmd_gt_user_repo "$@"
-        return
-    fi
-
     local owner_type
-    owner_type="$(______x_cmd_gt_owner_type_query "$owner")"
-    if [ -n "$owner_type" ] && [ -n "$owner" ]; then
-        "___x_cmd_gt_${owner_type}_repo" ls "$@"
-        return
+    if [ $# -eq 0 ];then
+        owner_type=user
+    else
+        local owner="$1"
+        owner_type="$(______x_cmd_gt_owner_type_query "$owner")"
     fi
+
+    ___ui_table_json "$(printf "%s" "___x_cmd_gt_${owner_type}_repo ls $@ || return 1" )" \
+        Id=.id Name=.name Owner=.owner.login Url=.html_url && return 0
 
     gt_log error "Please provide owner and owner_type"
     return 1
-    # param_help.show
 }
 
 ############################
 # Section 7: Repo - Deletion & Info & Creation
 ############################
+# shellcheck disable=SC2154
 ___x_cmd_gt_repo_info() {
     param:scope     "gitee/$O"
     param:dsl       '
@@ -261,31 +253,45 @@ options:
 '
     param:run
 
+    # TODO: FIX form not data. wait param debug
+    # get owner_repo by repo
     ___x_cmd_gt_param_init_owner_repo
-    ______x_cmd_gt_get "/v5/repos/${owner_repo}"
-    # ______x_cmd_gt_get "/v5/repos/${owner}/${repo}"
+    local data
+    data=$(______x_cmd_gt_get "/v5/repos/${owner_repo}" || return 1)
+    local id
+    local name
+    local html_url
+    id="$(___x_cmd_gt_json_query "$data" .id)"
+    name="$(___x_cmd_gt_json_query "$data" .name)"
+    html_url="$(___x_cmd_gt_json_query "$data" .html_url)"
+#     ___json_awk_get name=.login html_url=.html_url types=.type <<A
+#     $data
+# A
+    [ -n "$name" ] && ui tf "true" "Success" "id: $id" "name: $name" "url: $html_url" && return 0
+                      gt_log "error" "Fail. Couldn't find any repo: $repo"            && return 1
 }
 
 # https://gitee.com/api/v5/swagger#/deleteV5ReposOwnerRepo
+# shellcheck disable=SC2181
 ___x_cmd_gt_repo_del() {
+    # TODO: -y force del
     param:scope     "gitee/$O"
     param:dsl       '
 options:
     #n      "Provide repo list"    <>
 '
     param:run
-    local confirm
     # TODO: wait fix | input all name then can do it
-    # confirm=$(ui select "text" "Are you sure you want to delete repo $*" "yes" "no")
-    # [ "$confirm" != "yes" ] && return
+    ___x_cmd_ui_select nohelp "Are you sure you want to $(ui bold red delete repo) $(ui bold "$*")" "yes" "no" "---" "---"
+    [ "$___X_CMD_UI_SELECT_CURRENT_ITEM" != "yes" ] && gt_log info "Delete repo has been canceled" &&  return 0
     local i
     for i in "$@"; do
         ______x_cmd_gt_param_normalize_repo "$i"
-        ______x_cmd_gt_delete "/v5/repos/$owner_repo" >/dev/null 
+        ______x_cmd_gt_delete "/v5/repos/$owner_repo" >/dev/null
         if [ $? -eq 0 ]; then
-            ui tf "true" "deleted repo $i"
+            ui tf "true" "Deleted repo $i successfully"
         else
-            gt_log error "Code is $?. Deleting repo failure: $i. Probably because it desn't exists."
+            gt_log error "Deleting repo failure: $i. Probably because it desn't exists."
         fi
     done
 }
@@ -300,11 +306,10 @@ options:
 
     ___x_cmd_gt_param_init_owner_repo
     # TODO: wait fix | input all name then can do it
-    # local confirm
-    # confirm=$(ui select "text" "Are you sure you want to clear repo ${owner_repo}" "yes" "no")
-    # [ "$confirm" != "yes" ] && return
-    ______x_cmd_gt_put_json "/v5/repos/${owner_repo}/clear" && ui tf "true" "Successfully clear ${owner_repo}" && return
-    gt_log error "clear repo failure: $owner_repo"
+    ___x_cmd_ui_select nohelp "Are you sure you want to $(ui bold red clear repo) $(ui bold "${owner_repo}")" "yes" "no" "---" "---"
+    [ "$___X_CMD_UI_SELECT_CURRENT_ITEM" != "yes" ] && gt_log info "Clear repo has been canceled" &&  return 0
+    ______x_cmd_gt_put_json "/v5/repos/${owner_repo}/clear" && ui tf "true" "Successfully clear ${owner_repo}" && return 0
+                                                             gt_log error "Clearing repo failure: $owner_repo" && return 1
 }
 
 ___x_cmd_gt_repo_review(){

@@ -4,9 +4,12 @@
 # author:       Li Junhao           edwin.jh.lee@gmail.com    edwinjhlee.github.io
 # maintainer:   Li Junhao
 
+# loading dependencies
 # TODO: wait ccmd fix
 # xrc http param json str ui ccmd
 xrc http param json str ui
+xrc ui/lib/table
+
 
 # TODO: Precompile it into one file.
 ____x_cmd_gt_xrc(){
@@ -16,15 +19,23 @@ ____x_cmd_gt_xrc(){
     done
 }
 
-____x_cmd_gt_xrc utils config current enterprise issue org  \
-        repo issue repo_member repo_page repo_pr repo_release repo_tag   \
-        repo_utils token user
+____x_cmd_gt_xrc utils config token user current repo/utils
 
- 
+
+# define lazy loader
+___x_cmd_definelazyloader   ___x_cmd_gt_issue            gt/lib/issue
+___x_cmd_definelazyloader   ___x_cmd_gt_repo             gt/lib/repo/main
+___x_cmd_definelazyloader   ___x_cmd_gt_repo_pr          gt/lib/repo/pr/main
+___x_cmd_definelazyloader   ___x_cmd_gt_repo_release     gt/lib/repo/realse/main
+___x_cmd_definelazyloader   ___x_cmd_gt_repo_member      gt/lib/repo/member
+___x_cmd_definelazyloader   ___x_cmd_gt_repo_tag         gt/lib/repo/tag
+___x_cmd_definelazyloader   ___x_cmd_gt_repo_page        gt/lib/repo/page
+___x_cmd_definelazyloader   ___x_cmd_gt_org              gt/lib/org/main
+___x_cmd_definelazyloader   ___x_cmd_gt_enterprise       gt/lib/enterprise/main
+
+
 x log init gt
-
 xrc gt/lib/_type/main
-
 ___x_cmd_gt(){
     param:dsl       '
 subcmd:
@@ -65,7 +76,7 @@ ___x_cmd_gt_make() {
 
     local O="___x_cmd_gt_$O_ORIGINAL"
     O=$O_ORIGINAL ___x_cmd_gt_config_load >/dev/null
-    
+
     if [ $? -eq 0 ] && [ -n "$(O="$O_ORIGINAL" ___x_cmd_gt_token)" ]; then
         local user
         user="$(O="$O_ORIGINAL" ___x_cmd_gt_current_owner)" || return 1
@@ -74,10 +85,10 @@ ___x_cmd_gt_make() {
     fi
 
     local info
-    info=$(printf "\n\033[0m\033[33m%s\033[0m \033[36m%s\033[0m \n\033[4;33m%s\033[0m" \
+    info=$(printf "\n%s %s \n%s" \
          "$(ui yellow 'You need run command to add token:')" \
          "$(ui bold cyan "\`gt token <token>\`")" \
-         "$(ui yellow underline 'https://gitee.com/profile/personal_access_tokens')")
+         "$(ui 'https://gitee.com/profile/personal_access_tokens')")
     gt_log warn "Token is null.${info}"
 }
 

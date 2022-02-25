@@ -1,6 +1,9 @@
 # shellcheck shell=sh
 # shellcheck disable=SC2039,3043
 
+# define lazy loader
+___x_cmd_definelazyloader   ___x_cmd_gt_org_member           gt/lib/org/member
+
 ___x_cmd_gt_org(){
     param:scope     "gitee/$O"
     param:dsl       '
@@ -33,16 +36,33 @@ options:
     param:run
 
     if [ $# -eq 0 ]; then
-        ______x_cmd_gt_get_multi "/v5/user/orgs" admin page per_page
+        ___ui_table_json "$(printf "%s" "______x_cmd_gt_get_multi \"/v5/user/orgs\" admin page per_page || return 1" )" \
+            Id=.id Name=.name FollowCount=.follow_count Url=.repos_url && return 0
         [ $? -eq 1 ] && return 1
     else
-        ______x_cmd_gt_get "/v5/orgs/${1:?Provide organization}"
-        [ $? -eq 1 ] && return 1
+        local data
+        data="$(______x_cmd_gt_get "/v5/orgs/${1:?Provide organization}")"
+        local id
+        local name
+        local follow_count
+        local public
+        local owner
+        id="$(___x_cmd_gt_json_query "$data" .id)"
+        name="$(___x_cmd_gt_json_query "$data" .name)"
+        public="$(___x_cmd_gt_json_query "$data" .public)"
+        follow_count="$(___x_cmd_gt_json_query "$data" .follow_count)"
+        owner="$(___x_cmd_gt_json_query "$data" .owner.name)"
+        if [ -n "$id" ];then
+            ui tf "true" "Success" "id: $id" "name: $name" "public: $public" "follow_count: $follow_count" "owner: $owner" && return 0
+        else
+            gt_log "err" "Getting organization info failure by $1"   && return 1
+        fi
     fi
     return 0
 }
 
 # It is very rare TODO: batch?
+# shellcheck disable=SC2181
 ___x_cmd_gt_org_create() {
     param:scope     "gitee/$O"
     param:dsl       '
@@ -53,13 +73,9 @@ options:
 '
     param:run
     org=${org:-$1}
-    ______x_cmd_gt_post_json "/v5/users/organization" name="$1" org description
-    local code=$?
-    if [ $code -ne 0 ]; then
-        # TODO: printf http error msg
-        gt_log error "Creating organization failure: $1. Code is $code. "
-        return $code
-    fi
+    ______x_cmd_gt_post_json "/v5/users/organization" name="$1" org description  1>/dev/null
+    [ $? -ne 0 ] && gt_log error "Creating organization failure: $1." && return 1
+                    gt_log info  "Creating organization Successfully" && return 0
 }
 
 ___x_cmd_gt_org_repo(){
@@ -91,9 +107,8 @@ options:
         gt_log error "Please provide organization"
         return 1
     fi
-    O=$O ______x_cmd_gt_get_multi "/v5/orgs/${1:?Provide organization}/repos"
-    # ui table func ______x_cmd_gt_table "\"\$(O=$O ______x_cmd_gt_get_multi \"/v5/orgs/${1:?Provide organization}/repos\" type)\"" \
-        # . id full_name ownerName=owner.name updatedTime="updated_at"
+     ___ui_table_json "$(printf "%s" "O=$O ______x_cmd_gt_get_multi \"/v5/orgs/${1:?Provide organization}/repos\" type || return 1" )" \
+            Id=.id Name=.name public=.public OwnerName=.owner.name DefaultBranch=".default_branch" OpenIssuesCount=.open_issues_count license=.license Url=.html_url && return 0
 }
 
 ___x_cmd_gt_org_quit() {
@@ -117,4 +132,3 @@ options:
     }
     done
 }
-
