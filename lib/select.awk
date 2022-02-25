@@ -1,12 +1,14 @@
 
 # Section: help
 BEGIN {
-    ctrl_help_item_put("ARROW UP/DOWN/LEFT/ROW", "to move focus")
-    ctrl_help_item_put("n/p", "for next/previous page")
-    ctrl_help_item_put("ENTER", "for enter")
-    ctrl_help_item_put("%", "for filter")
-    ctrl_help_item_put("/", "for find")
-    ctrl_help_item_put("SPACE", "for multiple select")
+    if (SELECT_HELP_STATE == true){
+        ctrl_help_item_put("ARROW UP/DOWN/LEFT/ROW", "to move focus")
+        ctrl_help_item_put("n/p", "for next/previous page")
+        ctrl_help_item_put("ENTER", "for enter")
+        ctrl_help_item_put("%", "for filter")
+        ctrl_help_item_put("/", "for find")
+        if ( SELECT_MULTIPLE_STATE == true ) ctrl_help_item_put("SPACE", "for multiple select")
+    }
 }
 # EndSection
 
@@ -29,37 +31,47 @@ function view_calcuate_geoinfo( ){
     }
 }
 
-function view(){
+function view(          _data){
     if (DATA_HAS_CHANGED == false)    return
     DATA_HAS_CHANGED = false
 
     view_calcuate_geoinfo()
 
-    _component_help         = view_help()
+    if (model_len == 0){
+        _data = "We couldn’t find any data ..."
+        _data = str_pad_left(_data, int(max_col_size/2), int(length(_data)/2))
+        return send_update( th(TH_TABLE_UINFIND, _data) )
+    }
+
+    if (SELECT_HELP_STATE == true) _component_help = view_help()
     _component_header       = view_header()
     _component_body         = view_body()
     _component_statusline   = view_statusline()
 
-    send_update(  _component_help "\n" _component_header _component_body _component_statusline )
+    send_update(  _component_help _component_header _component_body _component_statusline )
 }
 function view_help(){
-    return sprintf("%s\n", th_help_text( ctrl_help_get() ) )
+    return sprintf("%s\n\n", th_help_text( ctrl_help_get() ) )
 }
 function view_header(){
-    return sprintf("%s\n", th(UI_FG_GREEN, data_header) )
+    return sprintf("%s\n", th(TH_SELECT_HEADER_NORMAL, data_header) )
 }
 
-function view_body(             _selected_item_idx, _iter_item_idx, _data_item_idx, _item_index, _select_text, _data, _data_info){
+function view_body(             _selected_item_idx, _iter_item_idx, _data_item_idx, _item_index, _select_text, _data, _data_info, _data_idx){
+    if (model_len == 0){
+        _data = "We couldn’t find any data ..."
+        _data = str_pad_left(_data, int(max_col_size/2), int(length(_data)/2))
+        return th(TH_TABLE_UINFIND, _data)
+    }
     view_item_len = model_item_max + 3      # left 3 space
 
-    view_body_col_num = int((max_col_size -1) / view_item_len)
+    view_body_col_num = int((max_col_size -1 -2) / view_item_len)
     view_page_item_num = view_body_col_num * view_body_row_num
 
     view_page_num = int( ( model_len - 1 ) / view_page_item_num ) + 1
     _selected_item_idx = ctrl_rstate_get( SELECTED_ITEM_IDX )
     page_index = int( (_selected_item_idx - 1) / view_page_item_num ) + 1
     page_begin = int( (page_index - 1) * view_page_item_num)
-
     for (i=1; i<=view_body_row_num; i ++ ) {
         if (i > model_len) break
         for (j=0; j<view_body_col_num; j++ ) {
@@ -78,20 +90,22 @@ function view_body(             _selected_item_idx, _iter_item_idx, _data_item_i
             }
             _iter_item_idx += max_data_row_num
         }
-        _data = _data "\n"
+        if (i != model_len) _data = _data "\n  "
+        else _data = _data "\n"
     }
     # ctrl_rstate_set( SELECTED_ITEM_IDX, model[ _selected_item_idx ] )
-    _data_info = data_info[model[ _selected_item_idx ]]
-    if ( _data_info != "" ) _data = _data "INFO: " th(TH_SELECT_ITEM_SELECTED, _data_info)"\n"
+    _data_idx = model[ _selected_item_idx ]
+    _data_info = data_info[ _data_idx ]
+    if ( _data_info != "" ) _data = _data "INFO: " th(TH_SELECT_ITEM_SELECTED, _data_info) "\n"
     if ( multiselect_len>0 ) {
         for (i=1; i<=multiselect_len; i ++) {
             _select_text = _select_text th(TH_SELECT_ITEM_FOCUSED, data[ multiselect[i] ]) " "
         }
         _data = _data sprintf("SELECT: %s\n",  _select_text ) UI_END
     } else {
-        _data = _data sprintf("SELECT: %s\n",  model[ _selected_item_idx ] ) UI_END
+        _data = _data sprintf("SELECT: %s\n", data[ _data_idx ] ) UI_END
     }
-    return _data
+    return "  " _data
 }
 
 function view_statusline(){
@@ -181,14 +195,14 @@ function handle_ctrl_in_normal_state(char_type, char_value) {
     EXIT_CHAR_LIST = ",q,"
     exit_if_detected( char_value )
 
-    if (char_type == "ascii-space") {
+    if (char_type == "ascii-space" && SELECT_MULTIPLE_STATE == true) {
         (ctrl_sw_get( MULTIPLE_EDIT ) == false) ? ctrl_sw_toggle( MULTIPLE_EDIT ) : exit_with_elegant( char_value )
         return
     }
-    if (char_value == "/")                          return ctrl_sw_toggle( FIND_EDIT )    # find
-    if (char_value == "%")                          return ctrl_sw_toggle( FILTER_EDIT )    # filter
+    if (char_value == "/")                                  return ctrl_sw_toggle( FIND_EDIT )    # find
+    if (char_value == "%")                                  return ctrl_sw_toggle( FILTER_EDIT )    # filter
 
-    if (char_value == "h")                          return ctrl_help_toggle()
+    if (char_value == "h" && SELECT_HELP_STATE == true)     return ctrl_help_toggle()
 
     handle_ctrl_to_move_focus(char_type, char_value)    # ARROW UP/DOWN/LEFT/ROW/n/p
     handle_ctrl_to_select_item(char_value)      # select item
@@ -267,21 +281,21 @@ NR>2 {
 
 END {
     if ( exit_is_with_cmd() == true ) {
-        if ( multiselect_len > 0 ) {
-            send_env( "___X_CMD_UI_SELECT_FINAL_COMMAND",           exit_get_cmd() )
+        if (multiselect_len > 0 ) {
             for (i=1; i<=multiselect_len; ++ i) {
-                _tmp_cur_iter_item_idx = multiselect[ i ]
-                send_env( "___X_CMD_UI_SELECT_ITEM_INDEX" i,      _tmp_cur_iter_item_idx )
-                send_env( "___X_CMD_UI_SELECT_ITEM" i,             data[ _tmp_cur_iter_item_idx ] )
+                _item_idx = multiselect[ i ]
+                _tmp_cur_iter_item_idx = _tmp_cur_iter_item_idx "\003" _item_idx
+                _tmp_cur_iter_item = _tmp_cur_iter_item "\003" data[ _item_idx ]
             }
-            send_env( "___X_CMD_UI_SELECT_MULTIPLE_LEN",           multiselect_len )
+        } else {
+            _tmp_cur_iter_item_idx = ctrl_rstate_get( SELECTED_ITEM_IDX )
+            _tmp_cur_iter_item_idx = model[ _tmp_cur_iter_item_idx ]
+            _tmp_cur_iter_item = data[ _tmp_cur_iter_item_idx ]
         }
-        _tmp_cur_iter_item_idx = ctrl_rstate_get( SELECTED_ITEM_IDX )
-        _tmp_cur_iter_item_idx = model[ _tmp_cur_iter_item_idx ]
 
         send_env( "___X_CMD_UI_SELECT_FINAL_COMMAND",           exit_get_cmd() )
         send_env( "___X_CMD_UI_SELECT_CURRENT_ITEM_INDEX",      _tmp_cur_iter_item_idx )
-        send_env( "___X_CMD_UI_SELECT_CURENT_ITEM",             data[ _tmp_cur_iter_item_idx ] )
+        send_env( "___X_CMD_UI_SELECT_CURRENT_ITEM",             _tmp_cur_iter_item )
     }
 
 }

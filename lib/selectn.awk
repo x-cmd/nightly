@@ -13,7 +13,7 @@ function view_help(){
     return sprintf("%s\n", th_help_text( ctrl_help_get() ) )
 }
 function view_header(){
-    return sprintf("%s", th(TH_SELECT_HEADER_NORMAL, data_header) )
+    return sprintf("%s", th(TH_SELECTN_HEADER_NORMAL, data_header) )
 }
 
 # function view_body(         i, _key_fa, data, _i_for_this_column, _offset_for_this_column, _selected_index_of_this_column, _value_of_this_column ){
@@ -47,28 +47,43 @@ function view_body(         i, j, _key_fa, data, _i_for_this_column, _offset_for
         for (i=1; i<=VIEW_BODY_ROW_SIZE; ++i) {
             _i_for_this_column = _offset_for_this_column + i - 1
             _tmp = str_pad_right( DATA[ _key_fa L _i_for_this_column ], _max_column_size )
-            if (j == FOCUS_COL) _tmp = UI_TEXT_REV _tmp UI_END
-            if ( _selected_index_of_this_column == _i_for_this_column ) {
-                _tmp =  UI_TEXT_UNDERLINE UI_FG_GREEN _tmp UI_END
+            if (j == FOCUS_COL) {
+                STYLE_SELECTN_SELECTED      =   TH_SELECTN_ITEM_FOCUSED_SELECT
+                STYLE_SELECTN_UNSELECTED    =   TH_SELECTN_ITEM_FOCUSED_UNSELECT
+            } else {
+                STYLE_SELECTN_SELECTED      =   TH_SELECTN_ITEM_UNFOCUSED_SELECT
+                STYLE_SELECTN_UNSELECTED    =   TH_SELECTN_ITEM_UNFOCUSED_UNSELECT
             }
+            if ( _selected_index_of_this_column == _i_for_this_column ) _tmp = th(STYLE_SELECTN_SELECTED, _tmp)
+            else _tmp = th(STYLE_SELECTN_UNSELECTED, _tmp)
             _data[ i ] = _data[ i ] _tmp
         }
     }
 
     _tmp = ""
-    for (i=1; i<=VIEW_BODY_ROW_SIZE; ++i)   _tmp = _tmp UI_END "\n" _data[ i ]
+    for (i=1; i<=VIEW_BODY_ROW_SIZE; ++i) _tmp = _tmp UI_END "\n" "  " _data[ i ]
     return _tmp
 }
 
-function view(){
+function view_calcuate_geoinfo(){
+    if ( VIEW_BODY_ROW_SIZE > MAX_DATA_ROW_NUM ) return
+    if ( ctrl_help_toggle_state() == true ) {
+        VIEW_BODY_ROW_SIZE = max_row_size - 9
+    } else {
+        VIEW_BODY_ROW_SIZE = max_row_size - 8
+    }
+}
+
+function view(      _component_help, _component_header, _component_body){
     if (DATA_HAS_CHANGED == false)    return
     DATA_HAS_CHANGED = false
+    view_calcuate_geoinfo()
 
     _component_help         = view_help()
     _component_header       = view_header()
     _component_body         = view_body()
 
-    send_update( _component_help _component_header  _component_body  )
+    send_update( _component_help "\n" _component_header  _component_body  )
 }
 
 # EndSection
@@ -127,7 +142,6 @@ function ctrl(char_type, char_value,      i, _selected_keypath_fa ){
     if (char_value == "RIGHT") {
         _selected_keypath_fa = SELECTED_KEYPATH_STACK[ FOCUS_COL ]
         if (FOCUS_COL == MAX_DATA_COL_NUM || DATA[ _selected_keypath_fa L ] == "") return
-
         i = ctrl_win_val( SELECTED_IDX, _selected_keypath_fa )
 
         ++ FOCUS_COL
@@ -199,7 +213,6 @@ function handle_item(           i, j, l, _len, k){
 
         l = DATA[ _key L ] + 1
         DATA[ _key L ] = l
-
         if (l > MAX_DATA_ROW_NUM)   MAX_DATA_ROW_NUM = l
 
         DATA[ _key L l ] = $i
@@ -234,7 +247,8 @@ NR>2 {
             DATA_MODE = DATA_MODE_CTRL
             reinit_selected_index()
             ctrl_cal_colwinsize_by_focus(FOCUS_COL)
-            SELECTED_KEYPATH_STACK[1] = DATA[L 1]
+            SELECTED_KEYPATH_STACK[0] = ""
+            SELECTED_KEYPATH_STACK[1] = S DATA[L 1]
         }
     } else {
         consume_ctrl()

@@ -4,15 +4,25 @@
 xrc ui/lib/region
 xrc ui/lib/getchar
 xrc awk
-___X_CMD__UI_SELECT_DISPLAY_ITEM_INDEX=0
+___X_CMD_UI_SELECT_DISPLAY_ITEM_INDEX=0
+___X_CMD_UI_SELECT_MULTIPLE_STATE=0
+___X_CMD_UI_SELECT_HELP_STATE=1
 # Section: main
 ___x_cmd_ui_select(){
     local O="${O:-___X_CMD_UI_SELECT_DEFAULT}"
     case "${1}" in
-        num)        ___X_CMD__UI_SELECT_DISPLAY_ITEM_INDEX=1
+        num)        ___X_CMD_UI_SELECT_DISPLAY_ITEM_INDEX=1
                     shift && ___x_cmd_ui_select_out "$@"
                     ;;
-        *)          ___x_cmd_ui_select_out "$@"                    ;;
+        multiple)   ___X_CMD_UI_SELECT_MULTIPLE_STATE=1
+                    shift && ___x_cmd_ui_select_out "$@"
+                    ;;
+        nohelp)     ___X_CMD_UI_SELECT_HELP_STATE=0
+                    shift && ___x_cmd_ui_select_out "$@"
+                    ;;
+        *)          ___X_CMD_UI_SELECT_DISPLAY_ITEM_INDEX=0
+                    ___x_cmd_ui_select_out "$@"
+                    ;;
     esac
 }
 
@@ -22,7 +32,7 @@ if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
 ___x_cmd_ui_select_control_awk(){
     LC_ALL=en_US.UTF-8 command awk \
         -W interactive \
-        -v EXIT_OP="$EXIT_OP" -v ITEM_INDEX_STATE="$___X_CMD__UI_SELECT_DISPLAY_ITEM_INDEX" \
+        -v EXIT_OP="$EXIT_OP" -v ITEM_INDEX_STATE="$___X_CMD_UI_SELECT_DISPLAY_ITEM_INDEX" \
         -f "$___X_CMD_ROOT/awk/lib/default.awk" \
         -f "$___X_CMD_ROOT/awk/lib/str.awk" \
         -f "$___X_CMD_ROOT/awk/lib/wcwidth.awk" \
@@ -35,7 +45,10 @@ else
 ___x_cmd_ui_select_control_awk(){
     LC_ALL=en_US.UTF-8 command awk \
         -v EXIT_OP="$EXIT_OP" \
-        -v RS="$___X_CMD_UI_REGION_RS" -v ORS="$___X_CMD_UI_REGION_RS" -v ITEM_INDEX_STATE="$___X_CMD__UI_SELECT_DISPLAY_ITEM_INDEX" \
+        -v RS="$___X_CMD_UI_REGION_RS" -v ORS="$___X_CMD_UI_REGION_RS" \
+        -v ITEM_INDEX_STATE="$___X_CMD_UI_SELECT_DISPLAY_ITEM_INDEX" \
+        -v SELECT_MULTIPLE_STATE="$___X_CMD_UI_SELECT_MULTIPLE_STATE" \
+        -v SELECT_HELP_STATE="$___X_CMD_UI_SELECT_HELP_STATE" \
         -f "$___X_CMD_ROOT/awk/lib/default.awk" \
         -f "$___X_CMD_ROOT/awk/lib/str.awk" \
         -f "$___X_CMD_ROOT/awk/lib/wcwidth.awk" \
@@ -43,7 +56,7 @@ ___x_cmd_ui_select_control_awk(){
         -f "$___X_CMD_ROOT/ui/lib/share.awk" \
         -f "$___X_CMD_ROOT/ui/lib/theme.awk" \
         -f "$___X_CMD_ROOT/ui/lib/select.awk"
-        # -f "../ui/lib/select.awk"
+        # -f "../ui/lib/select.awk" \
         # -f "./lib/theme.awk"
 }
 fi

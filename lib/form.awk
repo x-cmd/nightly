@@ -1,7 +1,5 @@
 # Section: NR==1    DATA SOURCE parsing
 BEGIN {
-    S = "\001"
-
     ATT_DESC    = "\003"
     ATT_VAR     = "\004"
 
@@ -24,8 +22,9 @@ NR==1{
     rulel = 0
     for (i=1; i<=argl; ++i) {
         rulel = rulel + 1
-        # printf("===>" i ": %s\n", args[i]) >"/dev/stderr"
         rule[ rulel ATT_DESC ]              = args[i]
+        l = wcswidth(args[i])
+        if (question_width < l) question_width = l
         rule[ rulel ATT_VAR ]               = args[i+1]
         rule[ rulel ATT_DEFAULT ]           = args[i+2]
         if (args[i+3] == "--") {
@@ -119,10 +118,9 @@ function view_help( _ctrl_current, data ){
     return th_help_text( data )
 }
 
-function view_body( _ctrl_current,                          question_width, data, _question, _line, _tmp, _is_focused, _is_selected,  i, j ){
-    question_width = 30
+function view_body( _ctrl_current,                          data, _question, _line, _tmp, _is_focused, _is_selected,  i, j ){
     for (i=1; i<=rulel; ++i) {
-        _question       =  sprintf( "%-" question_width "s",   rule[ i ATT_DESC ] )
+        _question       =  sprintf( "%-" question_width + 2 "s",   rule[ i ATT_DESC ] )
         _is_focused     =  _ctrl_current == i
 
         if ( _is_focused ) {
@@ -151,12 +149,6 @@ function view_body( _ctrl_current,                          question_width, data
         data = data "\n" _line
     }
     return data
-}
-
-BEGIN{
-    CLR_DESC = "\033[0;32m"
-    CLR_EXIT_ANSWER     = "\033[34m"
-    CLR_EXIT_ANSWER_SEL = "\033[33m"
 }
 
 # I don't know ... It has not been well-designed yet.

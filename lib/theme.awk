@@ -50,6 +50,8 @@ BEGIN {
     TH_TABLE_LINE_ITEM_FOCUSED          =       UI_TEXT_BOLD
     TH_TABLE_SELECTED_COL               =       UI_FG_BLUE UI_TEXT_REV
     TH_TABLE_SELECTED_ROW               =       UI_FG_GREEN UI_TEXT_REV
+    TH_TABLE_SELECTED_ROW_COL           =       UI_FG_CYAN UI_TEXT_REV
+    TH_TABLE_UINFIND                    =       UI_TEXT_DIM
     # EndSection
 
     # Find item
@@ -57,9 +59,17 @@ BEGIN {
     TH_TABLE_LINE_ITEM_HIGHLIGHT_1      =       UI_END
 
     # Section: select
-    TH_SELECT_HEADER_NORMAL           =       UI_FG_CYAN
-    TH_SELECT_ITEM_FOCUSED            =       UI_FG_GREEN UI_TEXT_REV
+    TH_SELECT_HEADER_NORMAL           =       UI_TEXT_BOLD
+    TH_SELECT_ITEM_FOCUSED            =       UI_TEXT_REV UI_FG_GREEN
     TH_SELECT_ITEM_SELECTED           =       UI_FG_GREEN
+    # EndSection
+
+    # Section: selectn
+    TH_SELECTN_HEADER_NORMAL            =       UI_TEXT_UNDERLINE
+    TH_SELECTN_ITEM_FOCUSED_SELECT      =       UI_TEXT_BOLD UI_FG_GREEN UI_TEXT_REV
+    TH_SELECTN_ITEM_FOCUSED_UNSELECT    =       UI_TEXT_BOLD UI_TEXT_REV UI_FG_BLUE
+    TH_SELECTN_ITEM_UNFOCUSED_SELECT    =       UI_TEXT_UNDERLINE UI_FG_GREEN
+    TH_SELECTN_ITEM_UNFOCUSED_UNSELECT  =       ""
     # EndSection
 
     # help panel

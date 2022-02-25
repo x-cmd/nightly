@@ -1,6 +1,6 @@
 
-xrc ui/lib/selectn
-# . ./lib/selectn
+# xrc ui/lib/selectn
+. ./lib/selectn
 
 ___x_cmd_ui_selectn_control_display(){
     cat "./lib/selectndata" | command awk -v REGION_RS="$___X_CMD_UI_REGION_RS" '{printf $0 REGION_RS}'
@@ -9,5 +9,5 @@ ___x_cmd_ui_selectn_control_display(){
 
 ___ui_selectn_out
 
-echo "___X_CMD_UI_SELECTN_FINAL_COMMAND:" "$___X_CMD_UI_SELECTN_FINAL_COMMAND"
-echo "___X_CMD_UI_SELECTN_CURRENT_ITEM:" "$___X_CMD_UI_SELECTN_CURRENT_ITEM"
+# echo "___X_CMD_UI_SELECTN_FINAL_COMMAND:" "$___X_CMD_UI_SELECTN_FINAL_COMMAND"
+# echo "___X_CMD_UI_SELECTN_CURRENT_ITEM:" "$___X_CMD_UI_SELECTN_CURRENT_ITEM"

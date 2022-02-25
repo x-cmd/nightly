@@ -36,18 +36,19 @@ function view(){
 
     _component_help   = view_help()
     _component_filter = view_filter()
-    _component_header = view_header()
+    # _component_header = view_header()
     _component_body   = view_body()
 
 
-    send_update( _component_help "\n\n" _component_filter _component_header _component_body )
+    send_update( _component_help "\n\n" _component_filter  _component_body )
 }
 
 function view_help(){
     return th_help_text( ctrl_help_get() )
 }
 function view_filter(       data){
-    return th_statusline_text( sprintf("FILTER: %s\n", filter[ ctrl_rstate_get( CURRENT_COLUMN ) ]) )
+    if (ctrl_sw_get( FILTER_EDIT ) == true) return th_statusline_text( sprintf("FILTER: %s\n", filter[ ctrl_rstate_get( CURRENT_COLUMN ) ]) )
+    else return
 }
 
 function view_header(       col_i, data){
@@ -66,9 +67,15 @@ function view_header(       col_i, data){
 }
 
 function view_body(             model_row_i, col_i, model_start_row, _tmp_currow, _data){
+    if (model_row == 0) {
+        _data = "We couldn’t find any data ..."
+        _data = str_pad_left(_data, int(max_col_size/2), int(length(_data)/2))
+        return th(TH_TABLE_UINFIND, _data)
+    }
+    _data = view_header()
+
     _tmp_currow = ctrl_rstate_get( CURRENT_ROW )
     model_start_row = int( (_tmp_currow - 1) / view_body_row_num) * view_body_row_num + 1
-
     # view_update_table
     for (model_row_i = model_start_row; model_row_i <= model_start_row + view_body_row_num; model_row_i ++) {
         if (model_row_i > model_row) break
@@ -84,8 +91,11 @@ function view_body(             model_row_i, col_i, model_start_row, _tmp_currow
 
 function update_view_print_cell(model_row_i, data_row_i, col_i,       h, _size, _tmp_currow, _data){
 
-    if ( ctrl_rstate_get( CURRENT_COLUMN ) == col_i )           _data = sprintf("%s", TH_TABLE_SELECTED_COL )
-    if ( ctrl_rstate_get( CURRENT_ROW ) == model_row_i )        _data = _data sprintf("%s", TH_TABLE_SELECTED_ROW)
+    if ( ctrl_rstate_get( CURRENT_COLUMN ) == col_i )           _data = TH_TABLE_SELECTED_COL
+    if ( ctrl_rstate_get( CURRENT_ROW ) == model_row_i ) {
+        _data = _data TH_TABLE_SELECTED_ROW
+        if ( ctrl_rstate_get( CURRENT_COLUMN ) == col_i )  _data = _data TH_TABLE_SELECTED_ROW_COL
+    }
 
     cord = data_row_i KSEP col_i
     if (col_max[ col_i ] <= COL_MAX_SIZE) {
@@ -199,6 +209,7 @@ function consumer_item() {
     if ( data_len == max_row_size ) {
         ctrl_rstate_init( CURRENT_COLUMN, 1, data_col_num )
         model_generate()
+        view()
     }
 }
 
@@ -245,12 +256,15 @@ NR>3 {
 
 END {
     if ( exit_is_with_cmd() == true ) {
-        _tmp_currow = ctrl_rstate_get( CURRENT_ROW )
+        if (model_row != 0) {
+            _tmp_currow = ctrl_rstate_get( CURRENT_ROW )
+            _tmp_curcol = ctrl_rstate_get( CURRENT_COLUMN )
+        }
         _tmp_currow = model[ _tmp_currow ]
 
         send_env( "___X_CMD_UI_TABLE_FINAL_COMMAND",    exit_get_cmd() )
         send_env( "___X_CMD_UI_TABLE_CURRENT_ROW",      _tmp_currow )
-        send_env( "___X_CMD_UI_TABLE_CURRENT_COLUMN",   ctrl_rstate_get( CURRENT_COLUMN ) )
+        send_env( "___X_CMD_UI_TABLE_CURRENT_COLUMN",   _tmp_curcol )
         send_env( "___X_CMD_UI_TABLE_CUR_LINE",         data_line[ _tmp_currow ] )
     }
 }

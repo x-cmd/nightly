@@ -1,5 +1,5 @@
-xrc ui/lib/table
-# . ./lib/table
+# xrc ui/lib/table
+. ./lib/table
 
 f1(){
     ___x_cmd_ui_table -

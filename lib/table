@@ -134,6 +134,8 @@ ___x_cmd_ui_table_control_awk(){
         -f "$___X_CMD_ROOT/ui/lib/share.awk" \
         -f "$___X_CMD_ROOT/ui/lib/theme.awk" \
         -f "$___X_CMD_ROOT/ui/lib/table.control.awk"
+        # -f "./lib/theme.awk" \
+        # -f "./lib/table.control.awk"
 }
 fi
 
@@ -290,7 +292,7 @@ ___x_cmd_ui_json2table(){
     }" | awk -v args="$*" -v UI_REGION_RS="${___X_CMD_UI_REGION_RS}" "$CODE"'
     BEGIN{
         arrl=split(args, arr, "\003")
-        for(j in arr) {
+        for(j=1; j<=arrl; j++) {
             idx = index(arr[j], "=")
             if (idx == 0) {
                 head_text = head_text "\003" arr[j]
