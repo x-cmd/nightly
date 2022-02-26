@@ -1,0 +1,91 @@
+# shellcheck shell=sh
+# shellcheck disable=SC2039,3043
+# define lazy loader
+# ___x_cmd_definelazyloader   ___x_cmd_gt_enterprise_member        gt/lib/enterprise/member
+
+___x_cmd_gt_enterprise(){
+    param:scope     "gitee/$O"
+    param:dsl       '
+subcmd:
+    info            "Show information"
+    repo            "List all repos"
+    issue           "List all issues"
+    member          "enterprise member management"
+'
+    param:run
+    if [ -z "$PARAM_SUBCMD" ]; then
+        gt_log warn "Subcmd Not Found."
+        ___x_cmd_gt_enterprise _param_help_doc
+        return 1
+    fi
+
+    # list issues of user
+    # list projects of user
+
+    "___x_cmd_gt_enterprise_${PARAM_SUBCMD}" "$@"
+}
+
+____x_cmd_gt_enterprise()(
+    ___x_cmd_gt_current_owner "${1:?enterprise name}" "enterprise"
+    shift 1
+    ___x_cmd_gt_enterprise ${1:+"$@"}
+)
+
+___x_cmd_gt_enterprise_repo(){
+    param:dsl       '
+subcmd:
+    ls          "list repo"
+    create      "enterprise repo create"
+'
+    param:run
+    if [ -z "$PARAM_SUBCMD" ]; then
+        gt_log warn "Subcmd Not Found."
+        ___x_cmd_gt_enterprise_repo _param_help_doc
+        return 1
+    fi
+
+    "___x_cmd_gt_enterprise_repo_${PARAM_SUBCMD}" "$@"
+}
+
+# TODO: rename ls?
+# shellcheck disable=SC2154
+___x_cmd_gt_enterprise_info() {
+    param:scope     "gitee/$O"
+    param:dsl       '
+
+options:
+    --admin      "list only managed enterprise"     <>:bool=false
+'
+    param:run
+    if [ "$#" -eq 0 ]; then
+        ___ui_table_json "$(printf "%s" "______x_cmd_gt_get_multi \"/v5/user/enterprises\" admin || return 1" )" \
+                Id=.id Name=.name Path=.path && return 0
+        [ $? -eq 1 ] && return 1
+    else
+        local data
+        data="$(______x_cmd_gt_get "/v5/repos/${owner_repo}/issues/${number}")"
+        ___x_cmd_gt_json_query_rename "$data" id=.id name=.name path=.path
+        [ -n "$id" ] && ___x_cmd_ui tf "true" "Success" "id: $id" "name: $name" "path: $path" && return 0
+                        gt_log "err" "Getting organization info failure by $1"                && return 1
+    fi
+    return 0
+}
+
+# https://gitee.com/api/v5/swagger#/getV5EnterprisesEnterpriseRepos
+___x_cmd_gt_enterprise_repo_ls() {
+    param:scope     "gitee/$O"
+    param:dsl       '
+type:
+    genre = all public internal private
+options:
+    --repo_type     "type"          <>:genre="all"
+    --direct        "direct"        <>:bool="false"
+'
+    param:run
+    if [ -z "$1" ]; then
+        gt_log error "Please provide enterprise path"
+        return 1
+    fi
+    ___ui_table_json "$(printf "%s" "O=$O ______x_cmd_gt_get_multi \"/v5/enterprises/${1:?Provide enterprise path}/repos\" repo_type direct page per_page || return 1" )" \
+            Id=.id Name=.name public=.public OwnerName=.owner.name DefaultBranch=".default_branch" OpenIssuesCount=.open_issues_count license=.license Url=.html_url && return 0
+}

@@ -1,0 +1,244 @@
+# shellcheck shell=sh
+# shellcheck disable=SC2039,3043
+
+# Should be like this.
+# gt repo issue add el:admin
+# gt repo issue remove user-a
+# gt repo issue add user-b
+
+# gt repo issue +el:admin -user-a +user-b
+___x_cmd_gt_issue(){
+    param:dsl       '
+subcmd:
+    create          "create issue"
+    update          "update issue"
+    logs            "get issue logs"
+    comment         "comment management"
+'
+    param:run
+    if [ -z "$PARAM_SUBCMD" ]; then
+        gt_log warn "Subcmd Not Found."
+        ___x_cmd_gt_issue _param_help_doc
+        return 1
+    fi
+
+    "___x_cmd_gt_issue_$PARAM_SUBCMD" "$@"
+}
+
+
+___x_cmd_gt_issue_create() {
+    param:scope     "gitee/$O"
+    param:dsl      '
+options:
+    --owner         "owner"                         <>
+    --title         "title"                         <>
+    --body          "issue describe"                <>=""
+    --repo          "repo path"                     <>
+    --type          "issue type"                    <>=""
+    --assignee      "assignee space address"        <>=""
+    --collaborators "collaborators space address"   <>=""
+    --milestone     "milestone serial number"       <>=""
+    --labels        "labels"                        <>=""
+    --program       "project ID"                    <>=""
+    --security      "is it private"
+'
+    security=${security:-false}
+    param:run
+    ______x_cmd_gt_post_json "/v5/repos/${owner##*/}/issues" repo=$repo title issue_type=$type body assignee \
+        collaborators milestone labels program security_hole=$security
+}
+
+___x_cmd_gt_issue_update() {
+    param:scope     "gitee/$O"
+    param:dsl       '
+options:
+    --owner         "owner"                         <>
+    --number        "issue number"                  <>
+    --repo          "repo path"                     <>=""
+    --title         "title"                         <>=""
+    --state         "issue state"                   <>=""
+    --body          "issue describe"                <>=""
+    --assignee      "assignee space address"        <>=""
+    --collaborators "collaborators space address"   <>=""
+    --milestone     "milestone serial number"       <>=""
+    --labels        "labels"                        <>=""
+    --program       "project ID"                    <>=""
+    --security      "is it private"
+'
+    param:run
+    security=${security:-false}
+    ______x_cmd_gt_patch_json "/v5/repos/${owner##*/}/issues/${number}" repo title state body assignee \
+        collaborators milestone labels program security_hole=$security
+}
+
+___x_cmd_gt_issue_logs(){
+    param:scope     "gitee/$O"
+    param:dsl       '
+options:
+    --owner         "owner"                 <>
+    --repo          "repo path"             <>
+    --number        "issue number"          <>
+    --sort          "sort(asc、desc)"       <>="desc"
+'
+    param:run
+    ______x_cmd_gt_get "/v5/repos/${owner##*/}/issues/${number}/operate_logs" repo sort
+}
+
+# shellcheck shell=sh
+# shellcheck disable=SC2039,3043,SC2154
+
+# schedule、deadline、created_at、finished_at 用UI来处理
+___x_cmd_gt_repo_issue() {
+    param:scope     "gitee/$O"
+    param:dsl       '
+type:
+    state = open progressing closed rejected all
+options:
+    --repo          "Repo name"                 <>
+    --state         "issue state"               <>:state=all
+    --labels        "labels"                    <>=""
+    --milestone     "milestone"                 <>=""
+    --assignee      "assignee"                  <>=""
+    --creator       "creator"                   <>=""
+    --program       "program"                   <>=""
+    --sort          "sort"                      <>="created"
+    --direction     "direction"                 <>="desc"
+    --number        "repo issue number"         <>=""
+'
+    param:run
+    ___x_cmd_gt_param_init_owner_repo
+    if [ -z $number ]; then
+        ___ui_table_json "$(printf "%s" "______x_cmd_gt_get_multi \"/v5/repos/${owner_repo}/issues\" state labels sort direction|| return 1" )" \
+            IssueNumber=.number Title=.title State=.issue_state Assigner=.assignee.name body=.body && return 0
+    else
+        local data
+        data="$(______x_cmd_gt_get "/v5/repos/${owner_repo}/issues/${number}")"
+        ___x_cmd_gt_json_query_rename "$data" id=.number title=.title state=.state assignee=.assignee.name
+        if [ -n "$id" ];then
+            ___x_cmd_ui tf "true" "Success" "id: $id" "title: $title" "state: $state" "assignee: $assignee"
+            return 0
+        else
+            gt_log "err" "Getting repo issue info failure by $owner_repo $number"
+            return 1
+        fi
+    fi
+    return
+}
+
+# shellcheck disable=SC2154
+___x_cmd_gt_org_issue(){
+    param:scope     "gitee/$O"
+    param:dsl       '
+options:
+    --filter        "filter(assigned,created,all)"                 <>="assigned"
+    --state         "state(open,progerssing,closed,rejected)"      <>="open"
+    --labels        "labels"                                       <>=""
+    --sort          "sort(created,updated)"                        <>="created"
+    --direction     "direction(asc、desc)"                         <>="desc"
+    --org           "organization path"                            <>
+'
+    param:run
+
+    ___ui_table_json "$(printf "%s" "______x_cmd_gt_get_multi \"/v5/orgs/${org##*/}/issues\" filter state labels sort direction since page per_page || return 1" )" \
+        IssueNumber=.number State=.issue_state Assigner=.assignee.name Repository=.repository.full_name Type=.issue_type Title=.title Url=.html_url && return 0
+}
+
+___x_cmd_gt_enterprise_issue(){
+    param:scope     "gitee/$O"
+    param:dsl       '
+options:
+    --enterprise    "enterprise path"                              <>
+    --filter        "filter(assigned,created,all)"                 <>="assigned"
+    --state         "state(open,progerssing,closed,rejected)"      <>="open"
+    --labels        "labels"                                       <>=""
+    --sort          "sort(created,updated)"                        <>="created"
+    --direction     "direction(asc、desc)"                         <>="desc"
+    --milestone     "milestone"                                    <>=""
+    --assignee      "assignee"                                     <>=""
+    --creator       "creator"                                      <>=""
+    --program       "program"                                      <>=""
+'
+    param:run
+    # param form bug
+    [ -z "$enterprise" ] && gt_log error "enterprise path is empty" && return 1
+    ______x_cmd_gt_get "/v5/enterprises/${enterprise##*/}/issues" > aaa
+    ___ui_table_json "$(printf "%s" "______x_cmd_gt_get \"/v5/enterprises/${enterprise##*/}/issues\" filter state labels sort direction since page per_page schedule deadline created_at finished_at milestone assignee creator program  || return 1" )" \
+        IssueNumber=.number State=.issue_state Assigner=.assignee.name AssignerMarkName=.assignee.remark Repository=.repository.full_name Type=.issue_type Title=.title Url=.html_url && return 0
+}
+
+# Section : comment
+
+___x_cmd_gt_issue_comment(){
+    param:scope     "gitee/$O"
+    param:dsl       '
+subcmd:
+    ls              "list all comment"
+    create          "create a comment"
+    update          "update a comment"
+    delete          "delete a comment"
+'
+    param:run
+    if [ -z "$PARAM_SUBCMD" ]; then
+        gt_log warn "subcmd not found. show help." >&2
+        return 1
+    fi
+    "___x_cmd_gt_issue_comment_$PARAM_SUBCMD" "$@"
+}
+
+___x_cmd_gt_issue_comment_ls(){
+    param:scope     "gitee/$O"
+    param:dsl       '
+options:
+    --owner         "owner"                 <>
+    --repo          "repo path"             <>
+    --number        "issue number"          <>
+    --since         "since"                 <>=""
+    --page          "page"                  <>=1
+    --per_page      "per_page"              <>=100
+    --order         "order(asc、desc)"      <>="asc"
+'
+    param:run
+    ___ui_table_json "$(printf "%s" "______x_cmd_gt_get_multi \"/v5/repos/${owner##*/}/${repo##*/}/issues/$number/comments\" since page per_page order || return 1" )" \
+        IssueNumber=.target.issue.number Title=.target.issue.title User=.user.login body=.body && return 0
+}
+
+___x_cmd_gt_issue_comment_create(){
+    param:scope     "gitee/$O"
+    param:dsl       '
+options:
+    --owner         "owner"                             <>
+    --repo          "repo path"                         <>
+    --number        "issue number"                      <>
+    --body          "The contents of the comment."      <>
+'
+    param:run
+    ______x_cmd_gt_post_json "/v5/repos/${owner##*/}/${repo##*/}/issues/$number/comments"  body
+}
+
+___x_cmd_gt_issue_comment_update(){
+    param:scope     "gitee/$O"
+    param:dsl       '
+options:
+    --owner         "owner"                            <>
+    --repo          "repo path"                        <>
+    --id            "comments id"                       <>
+    --body          "The contents of the comment."      <>
+'
+    param:run
+    ______x_cmd_gt_patch_json "/v5/repos/${owner##*/}/${repo##*/}/issues/comments/${id}"  body
+}
+
+___x_cmd_gt_issue_comment_delete(){
+    param:scope     "gitee/$O"
+    param:dsl       '
+options:
+    --owner         "owner"                            <>
+    --repo          "repo path"                        <>
+    --id            "comments id"                       <>
+'
+    param:run
+    ______x_cmd_gt_delete "/v5/repos/${owner##*/}/${repo##*/}/issues/comments/${id}"
+}
+
+# EndSection
+

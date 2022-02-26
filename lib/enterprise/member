@@ -1,0 +1,145 @@
+# shellcheck shell=sh
+# shellcheck disable=SC2039,3043
+
+# Should be like this.
+# gt repo member add el:admin
+# gt repo member remove user-a
+# gt repo member add user-b
+
+# gt repo member +el:admin -user-a +user-b
+___x_cmd_gt_enterprise_member(){
+    param:dsl       '
+subcmd:
+    ls              "list member"
+    user            "get member user info"
+    add             "add member"
+    del|remove      "Remove member"
+    access          "Change the member access"
+'
+    param:run
+
+    if [ -z "$PARAM_SUBCMD" ]; then
+        gt_log error "subcmd not found. show help."
+        return 0
+    fi
+
+    "___x_cmd_gt_enterprise_member_$PARAM_SUBCMD" "$@"
+}
+
+# shellcheck disable=SC2154
+___x_cmd_gt_enterprise_member_ls() {
+    param:scope     "gitee/$O"
+    param:dsl       '
+type:
+    role = all member admin
+options:
+    --enterprise    "enterprise space address"          <>:address
+    --role          "role type"                         <>:role="all"
+'
+    param:run
+
+    ___ui_table_json "$(printf "%s" "______x_cmd_gt_get_multi \"/v5/enterprises/${enterprise##*/}/members\" role page per_page || return 1" )" \
+            NameSpace=.user.login Name=.user.name MarkName=.remark IsOutSourced=.outsourced Role=.role && return 0
+    [ $? -eq 1 ] && return 1
+}
+
+# shellcheck disable=SC2154
+___x_cmd_gt_enterprise_member_user() {
+    param:scope     "gitee/$O"
+    param:dsl       '
+options:
+    #1|--enterprise    "enterprise: space address"  <>:address
+    #2|--username      "username: space address"    <>:name
+'
+    param:run
+    # param form bug
+    [ -z "$enterprise" ] && [ -z "$username" ] && gt_log error "Get enterprise user info options is empty" && return 1
+
+    local data
+    data="$(______x_cmd_gt_get_multi "/v5/enterprises/${enterprise}/members/${username}")"
+    ___x_cmd_gt_json_query_rename "$data" name_space=.user.login mark_name=.remark role=.role is_active=.active is_out_sourced=.outsourced
+    if [ -n "$name_space" ];then
+        ___x_cmd_ui tf "true" "Success" "NameSpace: $name_space" "MarkName: $mark_name" "Role: $role" "IsActive: $is_active" "IsOutSourced: $is_out_sourced"
+        return 0
+    else
+        gt_log "err" "Getting organization info failure by ${enterprise} ${username}"
+        return 1
+    fi
+}
+
+# shellcheck disable=SC2181,SC2086,SC2154
+___x_cmd_gt_enterprise_member_add() {
+    param:scope     "gitee/$O"
+    param:dsl       '
+type:
+    role =  member  outsourced admin
+    mode =  username email
+options:
+    --enterprise|-e   "enterprise"              <>:address
+    --role            "role"                    <>:role
+    --mode            "username or email"       <>:mode="username"
+    #n                "real name"
+'
+    param:run
+
+    # repo="$(______x_cmd_gt_param_normalize_repo "$repo")" || return 1
+
+    if [ -z "$1" ]; then
+        gt_log error "At least one user’s spatial address or email is needed"
+        return 1
+    fi
+
+    local username
+    for username in "$@"; do
+    {
+        ______x_cmd_gt_post_json "/v5/enterprises/${enterprise}/members" \
+            role $mode="$username" 1>/dev/null 2>&1
+
+        [ $? -ne 0 ] && gt_log error "Add $username failure"      &&   return 1
+                        gt_log info  "Add $username successfully" &&   return 0
+    }
+    done
+}
+
+# shellcheck disable=SC2181
+___x_cmd_gt_enterprise_member_del() {
+    param:scope     "gitee/$O"
+    param:dsl       '
+options:
+    --enterprise|-e    "enterprise space address"      <>:address
+'
+    param:run
+
+    if [ -z "$1" ];then
+        gt_log error "At least one user’s spatial address is needed"
+        return 1
+    fi
+
+    local username
+    for username in "$@"; do
+        {
+            ______x_cmd_gt_delete "/v5/enterprises/${enterprise##*/}/members/${username##*/}" 1>/dev/null 2>&1
+            [ $? -ne 0 ] && gt_log error "Remove user failure by $username $enterprise" &&   return 1
+                            gt_log info  "Remove user successfully: $username"          &&   return 0
+        }
+    done
+}
+
+# shellcheck disable=SC2181
+___x_cmd_gt_enterprise_member_access() {
+    param:scope     "gitee/$O"
+    param:dsl       '
+options:
+    --enterprise|-e     "enterprise path"                    <>:address
+    --username          "username space address"             <>:name
+    --role              "role"                               <>="member"     = member outsourced admin
+    --name              "real name"                          <>=""
+    --active            "Access to corporate resources"
+'
+    param:run
+    active=${active:-false}
+
+    ______x_cmd_gt_put_json "/v5/enterprises/${enterprise##*/}/members/${username##*/}" name role active 1>/dev/null 2>&1
+    [ $? -ne 0 ] && gt_log error "Modify access failure by $username $enterprise" &&   return 1
+                    gt_log info  "Modify access successfully: $username"          &&   return 0
+}
