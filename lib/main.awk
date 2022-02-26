@@ -1268,7 +1268,6 @@ NR==4 {
 
     if ( arg_arr[1] == "_x_cmd_advise_json" ) {
         generate_advise_json()
-        # debug(CODE)
         exit_now(1)
     }
 
@@ -1420,7 +1419,6 @@ function handle_arguments_restargv(         final_rest_argv_len, i, nth_rule, ar
 
                 tmp = option_arr[ option_id KSEP OPTION_NAME ]
                 gsub(/^--?/, "", tmp)
-                debug( "tmp: " tmp )
                 if( tmp != "" ) {
                     append_query_code( tmp,
                         option_arr[ option_id KSEP OPTION_DESC ],
@@ -1479,7 +1477,6 @@ function handle_arguments(          i, j, arg_name, arg_name_short, arg_val, opt
     while (i <= arg_arr_len) {
 
         arg_name = arg_arr[ i ]
-        debug("arg_name: " arg_name)
         # ? Notice: EXIT: Consider unhandled arguments are rest_argv
         if ( arg_name == "--" )  break
 
