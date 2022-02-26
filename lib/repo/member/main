@@ -1,0 +1,88 @@
+# shellcheck shell=sh
+# shellcheck disable=SC2039,3043
+
+# Should be like this.
+# gh repo member add el:admin
+# gh repo member remove user-a
+# gh repo member add user-b
+
+# gh repo member +el:admin -user-a +user-b
+___x_cmd_gh_repo_member(){
+    param:dsl       '
+subcmd:
+    ls              "list member"
+    add             "add member"
+    del|remove      "Remove member"
+'
+    param:run
+
+    if [ -z "$PARAM_SUBCMD" ]; then
+        gh_log error "subcommand not found. show help."
+        return 0
+    fi
+
+    "___x_cmd_gh_repo_member_$PARAM_SUBCMD" "$@"
+}
+
+___x_cmd_gh_repo_member_ls() {
+    param:scope     "github/$O"
+    param:dsl       '
+options:
+    #1|--repo          "Repo name"         <>:repo
+'
+    param:run
+    ___x_cmd_gh_param_init_owner_repo
+    ___ui_table_json "$(printf "%s" "___x_cmd_gh_get_multi "/repos/${owner_repo}/collaborators" || return 1" )" \
+        Id=.id Name=.login role=.role_name Push=.permissions.push && return 0
+}
+
+___x_cmd_gh_repo_member_add() {
+    param:scope     "github/$O"
+    param:dsl       '
+options:
+    --repo           "Repo name"             <>:repo
+    --permission     "permission"            <>:permission=push
+    #n               "Username list"         <>
+'
+    param:run
+
+    ___x_cmd_gh_param_init_owner_repo
+    if [ -z "$1" ];then
+        echo "At least one user’s spatial address is needed"
+        return 1
+    fi
+    local username
+    for username in "$@"; do
+        {
+            ___x_cmd_gh_put_json "/repos/$owner_repo/collaborators/${username##*/}" permission 1>/dev/null
+            local code=$?
+            if [ $code -ne 0 ]; then
+                gh_log error "add user failure: $username. Code is $code. "
+            else
+                ui tf "true" "add $username to $owner_repo successfully"
+            fi
+        }
+    done
+}
+
+___x_cmd_gh_repo_member_del() {
+    param:scope     "github/$O"
+    param:dsl       '
+options:
+    --repo|-r       "Repo name"            <>:repo
+    #n              "Username list"
+'
+    param:run
+    [ -z "$1" ] && gh_log error "At least one user’s spatial address is needed" && return 1
+
+    ___x_cmd_gh_param_init_owner_repo
+    local username
+    for username in "$@"; do
+        ___x_cmd_gh_delete "/repos/$owner_repo/collaborators/${username##*/}"
+        if [ $? -ne 0 ];then
+            ___x_cmd_ui_tf "false" "delete user failure: $username."
+        else
+            ___x_cmd_ui_tf "true"  "successfully deleted $username in $owner_repo"
+        fi
+    done
+}

@@ -1,0 +1,192 @@
+# shellcheck shell=sh
+# shellcheck disable=SC2039,3043
+
+___x_cmd_gh_repo(){
+    param:scope     "github/$O"
+    param:dsl       '
+subcmd:
+    create          "create repo"
+    ls              "list repo of owner"
+    info            "Show detailed information of repo"
+    del             "Remove repo"
+    member          "manage member"
+    pr              "manage pr"
+'
+    param:run
+
+    if [ -z "$PARAM_SUBCMD" ]; then
+        gh_log warn "Command Not Found. Show help."
+        ___x_cmd_gh_repo _param_help_doc
+        return 1
+    fi
+
+    "___x_cmd_gh_repo_${PARAM_SUBCMD}" "$@"
+}
+
+# arguments NAME
+___x_cmd_gh_repo_create() {
+    local O="${O:-GITHUB_DEFAULT}"
+
+    param:scope     "github/$O"
+    param:dsl       '
+type:
+    access  =   private public
+option:
+    --access                "private,public"                <>:access=private
+    --description           "description"                   <>=""
+    --homepage              "homepage"                      <>=""
+    --no_issues             "Provide issue"
+    --no_wiki               "Provide wiki"
+    --no_projects            "Provide has_projects"
+    --no_auto_init          "auto init README"
+    --gitignore_template    "Git Ignore"                    <>:Ignore=" "
+    --license_template      "license"                       <>:License=" "
+    --team_id               "the id of the team that will be granted access to this repository"   <>=""
+    #n                      "repo names"
+'
+    param:run
+
+    local private=true
+    [ "$access" = "public" ] && private=false
+
+    local has_issues=true
+    local has_wiki=true
+    local has_projects=true
+    local auto_init=true
+    [ -n "$no_issues" ] &&      has_issues=false
+    [ -n "$no_wiki" ] &&        has_wiki=false
+    [ -n "$no_projects" ] &&     has_projects=false
+    [ -n "$no_auto_init" ] &&   auto_init=false
+
+    [ $# -eq 0 ] && gh_log info "repo create name is null" && return
+    local name
+    for name in "$@"; do
+        {
+            local data
+            data="$(___x_cmd_gh_post_json "/user/repos" name="${name##*/}")"
+            [ $? -ne 0 ] && ___x_cmd_ui_tf "false" "Creating repo failure: $name." && return 1
+            local repo_id
+            local url
+            local repo_owner
+            ___x_cmd_gh_json_query_rename "$data" repo_id=.id url=.html_url repo_owner=.owner.login
+            ___x_cmd_ui_tf  "true" "Creating repo $name success" "repo_id: $repo_id" "repo_owner: $repo_owner" "url: $url"
+        }
+    done
+}
+
+___x_cmd_gh_org_repo_create() {
+# TODO:option lack
+    param:scope     "github/$O"
+    param:dsl       '
+type:
+    access  =   private public internal
+option:
+    --org                   "organization create repo"      <>:name
+    --description           "description"                   <>=""
+    --homepage              "homepage"                      <>:URL=""
+    --access                "private,public"                <>:access=private
+    --no_issues             "Provide issue"
+    --no_projects            "Provide has_projects"
+    --no_wiki               "Provide wiki"
+    --no_auto_init          "auto init README"
+    --is_template           "make this repo available as a template" <>:Bool=false
+    --gitignore_template    "Git Ignore"                    <>:Ignore=""
+    --license_template      "license"                       <>:License=""
+    --team_id               "the id of the team that will be granted access to this repository"   <>=""
+    #n                      "repo names"
+'
+    param:run
+
+    local private=true
+    [ "$access" = "public" ] && private=false
+
+    local has_issues=true
+    local has_wiki=true
+    local has_projects=true
+    local auto_init=true
+    [ -n "$no_issues" ] && has_issues=false
+    [ -n "$no_wiki" ] && has_wiki=false
+    [ -n "$no_projects" ] && has_projects=false
+    [ -n "$no_auto_init" ] && auto_init=false
+    # TODO:owner may be personal
+    local name
+    for name in "$@"; do
+        {
+            ___x_cmd_gh_post_json "/orgs/$org/repos" name description homepage has_issues has_wiki has_projects auto_init  visibility="$access"\
+             gitignore_template license_template
+            code=$?
+            if [ $code -ne 0 ]; then
+                gh_log error "Creating repo failure: $name. Code is $code. "
+                return $code
+            fi
+        }
+    done
+}
+
+
+############################
+# Section 5: List Repos TODO:
+############################
+
+___x_cmd_gh_repo_ls() {
+    param:void
+    local owner_type
+    if [ $# -eq 0 ];then
+        owner_type=user
+    else
+        local owner="$1"
+        owner_type="$(___x_cmd_gh_owner_type_query "$owner")"
+    fi
+
+    ___ui_table_json "$(printf "%s" "___x_cmd_gh_${owner_type}_repo ls $@ || return 1" )" \
+        Id=.id Name=.name Owner=.owner.login Url=.html_url && return 0
+
+    gh_log error "Please provide owner and owner_type"
+    return 1
+}
+
+############################
+# Section 7: Repo - Deletion & Info & Creation
+############################
+___x_cmd_gh_repo_info() {
+    param:scope     "github/$O"
+    param:dsl       '
+options:
+    #1|--repo          "Repo name"         <>:repo
+'
+    param:run
+
+    ___x_cmd_gh_param_init_owner_repo
+    local data
+    data="$(___x_cmd_gh_get "/repos/${owner_repo}")"
+
+    [ $? -ne 0 ] && ___x_cmd_ui_tf "false" "Fail. Couldn't find any repo: ${owner_repo}" && return 1
+    local id
+    local name
+    local html_url
+    ___x_cmd_gh_json_query_rename "$data" id=.id html_url=.html_url name=.full_name
+    ___x_cmd_ui_tf  "true" "Creating repo $name success" "repo_id: $id" "name: $name" "url: $html_url"
+}
+
+___x_cmd_gh_repo_del() {
+    param:scope     "github/$O"
+    param:dsl       '
+options:
+    #n      "Provide repo list"    <>
+'
+    param:run
+
+    ___x_cmd_ui_select "Are you sure you want to delete repo $*" "yes" "no" "---" "---"
+    [ "$___X_CMD_UI_SELECT_CURRENT_ITEM" = "yes" ] || return
+
+    local i
+    for i in "$@"; do
+        ___x_cmd_gh_param_normalize_repo "$i"
+        ___x_cmd_gh_delete "/repos/$owner_repo" >/dev/null
+
+        if [ $? -eq 0 ]; then
+                ___x_cmd_ui_tf "true"  "deleted repo $owner_repo"
+        else    ___x_cmd_ui_tf "false" "Deleting repo failure: $owner_repo. Probably because it desn't exists."
+        fi
+    done
+}
