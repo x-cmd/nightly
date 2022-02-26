@@ -1,0 +1,146 @@
+###: ___x_cmd_ui_selectnlazy_test_func_ls
+###: 0
+###: send_newlist: 1 0 ccclatestlibLICENSE_v0
+###: curlist: ccclatestlibLICENSE_v0
+###: ___x_cmd_ui_selectnlazy_test_func_ls ccc
+###: ls: ccc
+###: -1
+###: send_newlist: 2 -1
+###: curlist: ccclatestlibLICENSE_v0
+###: ___x_cmd_ui_selectnlazy_test_func_ls _v0
+###: ls: _v0
+###: 0
+###: send_newlist: 2 0 awk.default.debug.log
+
+###: ___x_cmd_ui_selectnlazy_test_func_ls
+###: 0
+###: send_newlist: 1 0 ccc
+latest
+lib
+LICENSE
+_v0
+###: curlist: ccc
+latest
+lib
+LICENSE
+_v0 curidx:1
+###: cur: ccc curlistl: 5
+###: ___x_cmd_ui_selectnlazy_test_func_ls ccc
+###: ls: ccc
+###: -1
+###: send_newlist: 2 -1
+###: curlist: ccc
+latest
+lib
+LICENSE
+_v0 curidx:2
+###: ___x_cmd_ui_selectnlazy_test_func_ls latest
+###: ls: latest
+###: -1
+###: send_newlist: 2 -1
+###: curlist: ccc
+latest
+lib
+LICENSE
+_v0 curidx:3
+###: ___x_cmd_ui_selectnlazy_test_func_ls lib
+###: ls: lib
+###: 0
+###: send_newlist: 2 0 form
+form.awk
+form_sh
+getchar
+help
+markdown
+markdown.awk
+prompt
+question
+region
+region.awk
+select
+select.awk
+selectn
+selectn.awk
+selectndata
+selectnlazy
+selectnlazy.awk
+select_sh
+select_test_sh
+share.awk
+table
+table.awk
+table.control.awk
+theme.awk
+truefalse
+varctl
+###: curlist: ccc
+latest
+lib
+LICENSE
+_v0 curidx:4
+###: ___x_cmd_ui_selectnlazy_test_func_ls LICENSE
+###: ls: LICENSE
+###: -1
+###: send_newlist: 2 -1
+###: curlist: ccc
+latest
+lib
+LICENSE
+_v0 curidx:5
+###: ___x_cmd_ui_selectnlazy_test_func_ls _v0
+###: ls: _v0
+###: 0
+###: send_newlist: 2 0 awk.default.debug.log
+###: curlist: ccc
+latest
+lib
+LICENSE
+_v0 curidx:1
+###: ___x_cmd_ui_selectnlazy_test_func_ls ccc
+###: ls: ccc
+###: -1
+###: send_newlist: 2 -1
+###: curlist: ccc
+latest
+lib
+LICENSE
+_v0 curidx:2
+###: ___x_cmd_ui_selectnlazy_test_func_ls latest
+###: ls: latest
+###: -1
+###: send_newlist: 2 -1
+###: curlist: ccc
+latest
+lib
+LICENSE
+_v0 curidx:3
+###: ___x_cmd_ui_selectnlazy_test_func_ls lib
+###: ls: lib
+###: 0
+###: send_newlist: 2 0 form
+form.awk
+form_sh
+getchar
+help
+markdown
+markdown.awk
+prompt
+question
+region
+region.awk
+select
+select.awk
+selectn
+selectn.awk
+selectndata
+selectnlazy
+selectnlazy.awk
+select_sh
+select_test_sh
+share.awk
+table
+table.awk
+table.control.awk
+theme.awk
+truefalse
+varctl

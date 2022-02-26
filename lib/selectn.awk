@@ -84,6 +84,7 @@ function view(      _component_help, _component_header, _component_body){
     _component_body         = view_body()
 
     send_update( _component_help "\n" _component_header  _component_body  )
+    # print "\n" _component_help "\n" _component_body >> "bbb"
 }
 
 # EndSection

@@ -10,6 +10,8 @@ f1
 
 # time . ./.x-cmd/dev/testcase/testutf-8
 
+# test.txt                                            100K 的中文文档
+# wcswdith($0)
 # windows busybox                                     0.31s
 # ubuntu gawk                                         0.014s
 # git bash                                            0.049s

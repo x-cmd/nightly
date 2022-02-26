@@ -1,8 +1,13 @@
+. ./lib/region
+. ./lib/varctl
 
 ___x_cmd_ui_selectnlazy(){
     ___x_cmd_ui_selectnlazy_mainloop "$@"
 }
 
+fff(){
+    print "###:" "$*" >> ccc
+}
 ___x_cmd_ui_selectnlazy_test_func_ls(){
     if [ "$#" -eq 0 ]; then
         ls .
@@ -12,7 +17,6 @@ ___x_cmd_ui_selectnlazy_test_func_ls(){
     local IFS="/"
     local p="$*"
     [ ! -d "$p" ] && return 1
-
     ls "$p"
     return 0
 }
@@ -33,36 +37,48 @@ ___x_cmd_ui_selectnlazy_mainloop_recursive_len(){
 ___x_cmd_ui_selectnlazy_mainloop_recursive_first(){
     local nextlist
     {
-        ___x_cmd_ui_selectnlazy_mainloop_recursive_update_nextlist .
+        ___x_cmd_ui_selectnlazy_mainloop_recursive_update_nextlist
         ___x_cmd_ui_selectnlazy_mainloop_recursive 1
-    } | awk './selectnlazy.awk'
+    } | LC_ALL=en_US.UTF-8 command awk \
+        -v RS="$___X_CMD_UI_REGION_RS" \
+        -f "$___X_CMD_ROOT/awk/lib/default.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/str.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/wcwidth.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/ui.awk" \
+        -f "./lib/share.awk" \
+        -f "./lib/theme.awk" \
+        -f "./lib/selectnlazy.awk"
 }
 
 ___x_cmd_ui_send_newlist(){
-    printf "%s %d" "---" "$1" "$2"
+    printf "%s %d %d$___X_CMD_UI_REGION_RS" "---" "$1" "$2"
     shift 2
-    printf "%s\n" "$*"
-    printf "%s\n" "---"
+    local IFS="$___X_CMD_UI_REGION_RS"
+    printf "%s" "$*" | while read xxx;do
+        printf "${#xxx} $xxx$___X_CMD_UI_REGION_RS"
+    done
+    printf "%s$___X_CMD_UI_REGION_RS" "---"
 }
 
 ___x_cmd_ui_send_data(){
-    printf "%s\n" "$*"
+    printf "%s$___X_CMD_UI_REGION_RS" "$*"
 }
 
 ___x_cmd_ui_selectnlazy_mainloop_recursive_sendview(){
+    ticks="$((ticks+1))"
     printf "R:%s:%s:%s%s" "$ticks" "$COLUMNS" "$LINES" "$___X_CMD_UI_REGION_RS" # send view
 }
 
 ___x_cmd_ui_selectnlazy_mainloop_recursive_update_nextlist(){
     nextlist="$("$func" "$@")"
     expandable=$?
+    ___x_cmd_ui_selectnlazy_mainloop_recursive_sendview
 
     if [ "$expandable" = 0 ]; then
         ___x_cmd_ui_send_newlist "$((curlevel+1))" 0 "$nextlist"
     else
         ___x_cmd_ui_send_newlist "$((curlevel+1))" -1
     fi
-    ___x_cmd_ui_selectnlazy_mainloop_recursive_sendview
 }
 
 # Using calling stack to simulate list to avoid lacking of efficient array support in Posix Sh. Proudly implemented by me
@@ -99,11 +115,13 @@ ___x_cmd_ui_selectnlazy_mainloop_recursive()(
             RIGHT)
                 if [ "$expandable" = 0  ]; then
                     ___x_cmd_ui_send_data "C:$___X_CMD_UI_GETCHAR_TYPE:$___X_CMD_UI_GETCHAR_CHAR"
-                    ___x_cmd_ui_selectnlazy_mainloop_recursive "$((curlevel+1))" "$@" "$cur"
+                    ___x_cmd_ui_selectnlazy_mainloop_recursive_sendview "$((curlevel+1))" "$@" "$cur"
                 fi
                 ;;
+            *)  ___x_cmd_ui_send_data "C:$___X_CMD_UI_GETCHAR_TYPE:$___X_CMD_UI_GETCHAR_CHAR" ;;
         esac
     done
 )
 
 
+___x_cmd_ui_selectnlazy ___x_cmd_ui_selectnlazy_test_func_ls
