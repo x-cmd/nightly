@@ -133,7 +133,7 @@ ___x_cmd_cd_choose(){
         printf "%s\n" "cd: no such directory: $p " >&2
         return 1
     fi
-    local ___X_CMD_UI_SELECT_CURENT_ITEM
+    local ___X_CMD_UI_SELECT_CURRENT_ITEM
     local adir
     local text="___x_cmd_ui_select num \"Select an option to change directory:\""
     local IFS="
@@ -149,7 +149,7 @@ A
 \"---\"
 "
     eval "$text"
-    ___x_cmd_cd_origin "$___X_CMD_UI_SELECT_CURENT_ITEM"
+    ___x_cmd_cd_origin "$___X_CMD_UI_SELECT_CURRENT_ITEM"
 }
 # EndSection
 
