@@ -362,7 +362,39 @@ function ctrl_win_dec( obj, _key_prefix,  _val, _min, _off, _size ) {
     _off = obj[ _key_prefix "off" ]
     _size = obj[ _key_prefix "size" ]
     _val -= 1
-    if (_val < _min)              _val = _min
+    if (_val < _min)             _val = _min
+    if (_val < _off)             obj[ _key_prefix "off" ] = _off - _size
+    obj[ _key_prefix "val" ] = _val
+    return _val
+}
+
+function ctrl_win_rinc( obj, _key_prefix,  _val, _max, _min, _off, _size ) {
+    _val = obj[ _key_prefix "val" ]
+    _min = obj[ _key_prefix "min" ]
+    _max = obj[ _key_prefix "max" ]
+    _off = obj[ _key_prefix "off" ]
+    _size = obj[ _key_prefix "size" ]
+    _val += 1
+    if (_val > _max) {
+        _val = _min
+        if (_val < _off)  obj[ _key_prefix size"off" ] = _min
+    }
+    if (_val >= _off+_size)             obj[ _key_prefix "off" ] = _off + _size
+    obj[ _key_prefix "val" ] = _val
+    return _val
+}
+
+function ctrl_win_rdec( obj, _key_prefix,  _val, _min, _max, _off, _size ) {
+    _val = obj[ _key_prefix "val" ]
+    _min = obj[ _key_prefix "min" ]
+    _max = obj[ _key_prefix "max" ]
+    _off = obj[ _key_prefix "off" ]
+    _size = obj[ _key_prefix "size" ]
+    _val -= 1
+    if (_val < _min) {
+        _val = _max
+        if (_val >= _off+_size)  obj[ _key_prefix size"off" ] = _max - _size
+    }
     if (_val < _off)             obj[ _key_prefix "off" ] = _off - _size
     obj[ _key_prefix "val" ] = _val
     return _val
@@ -379,6 +411,11 @@ function ctrl_win_begin( obj, _key_prefix ){
 function ctrl_win_end( obj, _key_prefix ){
     return obj[ _key_prefix "off" ] + obj[ _key_prefix "size" ] - 1
 }
+
+function ctrl_win_set( obj, val, _key_prefix ){
+    obj[ _key_prefix "val" ] = val
+}
+
 
 # EndSection
 

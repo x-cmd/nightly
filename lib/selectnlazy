@@ -1,13 +1,12 @@
-. ./lib/region
-. ./lib/varctl
+# . ./lib/region
+# . ./lib/varctl
+xrc ui/lib/region
+xrc ui/lib/varctl
 
 ___x_cmd_ui_selectnlazy(){
     ___x_cmd_ui_selectnlazy_mainloop "$@"
 }
 
-fff(){
-    print "###:" "$*" >> ccc
-}
 ___x_cmd_ui_selectnlazy_test_func_ls(){
     if [ "$#" -eq 0 ]; then
         ls .
@@ -17,7 +16,7 @@ ___x_cmd_ui_selectnlazy_test_func_ls(){
     local IFS="/"
     local p="$*"
     [ ! -d "$p" ] && return 1
-    ls "$p"
+    ls "$p" 2>/dev/null
     return 0
 }
 
@@ -41,20 +40,26 @@ ___x_cmd_ui_selectnlazy_mainloop_recursive_first(){
         ___x_cmd_ui_selectnlazy_mainloop_recursive 1
     } | LC_ALL=en_US.UTF-8 command awk \
         -v RS="$___X_CMD_UI_REGION_RS" \
+        -v ORS="$___X_CMD_UI_REGION_RS" \
         -f "$___X_CMD_ROOT/awk/lib/default.awk" \
         -f "$___X_CMD_ROOT/awk/lib/str.awk" \
         -f "$___X_CMD_ROOT/awk/lib/wcwidth.awk" \
         -f "$___X_CMD_ROOT/awk/lib/ui.awk" \
-        -f "./lib/share.awk" \
-        -f "./lib/theme.awk" \
-        -f "./lib/selectnlazy.awk"
+        -f "$___X_CMD_ROOT/ui/lib/share.awk" \
+        -f "$___X_CMD_ROOT/ui/lib/theme.awk" \
+        -f "$___X_CMD_ROOT/ui/lib/selectnlazy.awk"
+        # -f "/home/qiakai/ui/lib/share.awk" \
+        # -f "/home/qiakai/ui/lib/theme.awk" \
+        # -f "/home/qiakai/ui/lib/selectnlazy.awk"
+
+    # printf "\n end" >> "ccc"
 }
 
 ___x_cmd_ui_send_newlist(){
     printf "%s %d %d$___X_CMD_UI_REGION_RS" "---" "$1" "$2"
     shift 2
     local IFS="$___X_CMD_UI_REGION_RS"
-    printf "%s" "$*" | while read xxx;do
+    printf "%s\n" "$*" | while read xxx;do
         printf "${#xxx} $xxx$___X_CMD_UI_REGION_RS"
     done
     printf "%s$___X_CMD_UI_REGION_RS" "---"
@@ -88,7 +93,6 @@ ___x_cmd_ui_selectnlazy_mainloop_recursive()(
     curlistl="$(___x_cmd_ui_selectnlazy_mainloop_recursive_len)"
     curidx=1
     cur="$(___x_cmd_ui_selectnlazy_mainloop_recursive_cur)"
-
     ___x_cmd_ui_selectnlazy_mainloop_recursive_update_nextlist "$@" "$cur"
 
     while ___x_cmd_ui_getchar; do
@@ -115,7 +119,7 @@ ___x_cmd_ui_selectnlazy_mainloop_recursive()(
             RIGHT)
                 if [ "$expandable" = 0  ]; then
                     ___x_cmd_ui_send_data "C:$___X_CMD_UI_GETCHAR_TYPE:$___X_CMD_UI_GETCHAR_CHAR"
-                    ___x_cmd_ui_selectnlazy_mainloop_recursive_sendview "$((curlevel+1))" "$@" "$cur"
+                    ___x_cmd_ui_selectnlazy_mainloop_recursive "$((curlevel+1))" "$@" "$cur"
                 fi
                 ;;
             *)  ___x_cmd_ui_send_data "C:$___X_CMD_UI_GETCHAR_TYPE:$___X_CMD_UI_GETCHAR_CHAR" ;;

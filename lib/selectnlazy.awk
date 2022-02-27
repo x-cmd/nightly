@@ -16,16 +16,15 @@ function view_header(){
 }
 
 function view_body(         i, j, _i_for_this_column, _offset_for_this_column, _selected_index_of_this_column, _max_column_size, _tmp, _data ){
-    debug("WIN_BEGIN:" WIN_BEGIN " WIN_END:" WIN_END)
     for (j=WIN_BEGIN; j<=WIN_END; ++j) {
-        # _key_fa = SELECTED_COL_STACK[ j-1 ]
         _offset_for_this_column = ctrl_win_begin( data, j )
-        _max_column_size = data_maxcollen(j) + 3
+        _max_column_size = data[ j S ] + 3
         _selected_index_of_this_column = ctrl_win_val( data, j )
 
         for (i=1; i<=VIEW_BODY_ROW_SIZE; ++i) {
             _i_for_this_column = _offset_for_this_column + i - 1
-            _tmp = str_pad_right(data[ j L _i_for_this_column ], _max_column_size)
+            if ( _i_for_this_column <= data[ j L ] ) _tmp = str_pad_right(data[ j L _i_for_this_column ], _max_column_size)
+            else _tmp = ui_str_rep(" ", _max_column_size)
             if (j == FOCUS_COL) {
                 STYLE_SELECTN_SELECTED      =   TH_SELECTN_ITEM_FOCUSED_SELECT
                 STYLE_SELECTN_UNSELECTED    =   TH_SELECTN_ITEM_FOCUSED_UNSELECT
@@ -47,15 +46,13 @@ function view_body(         i, j, _i_for_this_column, _offset_for_this_column, _
 function view_calcuate_geoinfo(){
     if ( VIEW_BODY_ROW_SIZE > MAX_DATA_ROW_NUM ) return
     if ( ctrl_help_toggle_state() == true ) {
-        VIEW_BODY_ROW_SIZE = max_row_size - 9
+        VIEW_BODY_ROW_SIZE = max_row_size - 9 -1
     } else {
-        VIEW_BODY_ROW_SIZE = max_row_size - 8
+        VIEW_BODY_ROW_SIZE = max_row_size - 8 -1
     }
 }
 
 function view(      _component_help, _component_header, _component_body){
-    if (DATA_HAS_CHANGED == false)    return
-    DATA_HAS_CHANGED = false
     view_calcuate_geoinfo()
 
     _component_help         = view_help()
@@ -63,7 +60,6 @@ function view(      _component_help, _component_header, _component_body){
     _component_body         = view_body()
 
     send_update( _component_help "\n" _component_body  )
-    # print "\n" _component_help "\n" _component_body >> "aaa"
 }
 
 # EndSection
@@ -73,7 +69,7 @@ function calculate_offset_from_end( end,       i, s, t ){
     # if (end == "")  end = MAX_DATA_COL_NUM
     s = 0
     for (i=end; i>=1; --i) {
-        s += data_maxcollen(i) + 3 # 3 is column width
+        s += data[ i S ] + 3 # 3 is column width
         if (s > max_col_size) return i+1
     }
     return 1
@@ -81,35 +77,25 @@ function calculate_offset_from_end( end,       i, s, t ){
 
 
 function ctrl_cal_colwinsize_by_focus( col,            _selected_keypath ){
-    #
-    if (data[ col L ] >= 0) {
+    if (data[ col L ] > 0) {
         WIN_END = col + 1
     } else {
         WIN_END = col
     }
     # WIN_BEGIN might be WIN_END + 1
     WIN_BEGIN = calculate_offset_from_end( WIN_END )
-    # debug("FOCUS_COL: " FOCUS_COL "WIN_BEGIN:" WIN_BEGIN "WIN_END:" WIN_END)
 }
 
 function ctrl(char_type, char_value){
-    # for (i in data) {
-    #     debug("\n i:" i "\t\t\t" data[i])
-    # }
-    # debug("char: " char_type char_value)
     EXIT_CHAR_LIST = ",q,ENTER,"
     exit_if_detected( char_value )
 
     if (char_value == "UP")  {
-        i = ctrl_win_dec( data, FOCUS_COL )
-        d = data[ FOCUS_COL L i ]
-        SELECTED_COL_STACK[ FOCUS_COL ] = d
+        ctrl_win_rdec( data, FOCUS_COL )
         return ctrl_cal_colwinsize_by_focus( FOCUS_COL )
     }
     if (char_value == "DN") {
-        i = ctrl_win_inc( data, FOCUS_COL )
-        d = data[ FOCUS_COL L i ]
-        SELECTED_COL_STACK[ FOCUS_COL ] = d
+        ctrl_win_rinc( data, FOCUS_COL )
         return ctrl_cal_colwinsize_by_focus( FOCUS_COL )
     }
 
@@ -120,6 +106,7 @@ function ctrl(char_type, char_value){
     }
 
     if (char_value == "RIGHT") {
+        if (FOCUS_COL >= input_level) return
         ++ FOCUS_COL
         return ctrl_cal_colwinsize_by_focus( FOCUS_COL )
     }
@@ -138,34 +125,27 @@ BEGIN{
     FOCUS_COL=1
 }
 
-function data_maxcollen( col ){
-    # debug("max:" _maxcollen[ col ])
-    return _maxcollen[ col ]
-}
-
 function reinit_selected_index( col ) {
     # TODO: 10 reserve space
     VIEW_BODY_ROW_SIZE = max_row_size - 10
     if ( VIEW_BODY_ROW_SIZE > MAX_DATA_ROW_NUM )     VIEW_BODY_ROW_SIZE = MAX_DATA_ROW_NUM
-    # reinit_selected_index_( VIEW_BODY_ROW_SIZE )
     l = data[ col L ]
+    if ( l == 0 ) return
     ctrl_win_init( data, col, 1, l, VIEW_BODY_ROW_SIZE)
 }
 
 function consume_ctrl(){
     if ($0 == "---") return
-    # debug( "\nctrlNR: " NR ":" $0)
     if ($1 == "---") {
         input_level = $2
         data[ input_level L ] = ($3 == -1) ? -1 : 0
+        ctrl_win_set(data, "", input_level)
         _maxcollen[ input_level ] = 0
         input_state = INPUT_STATE_DATA
     } else if (try_update_width_height( $0 ) == true) {
         return
     } else {
-        DATA_HAS_CHANGED = true
         _cmd=$0
-        # print "\n_cmd:" _cmd >> "ccc"
         gsub(/^C:/, "", _cmd)
         idx = index(_cmd, ":")
         ctrl(substr(_cmd, 1, idx-1), substr(_cmd, idx+1))
@@ -174,18 +154,13 @@ function consume_ctrl(){
 }
 
 function consume_data(){
-    # debug( "\ndataNR: " NR ":" $0)
     if ($0 == "---") {
         data[ input_level S ] = _maxcollen[ input_level ]
         input_state = INPUT_STATE_CTRL
-        if ( DATA_HAS_CHANGED == true ) {
-            reinit_selected_index( input_level )
-            # ctrl_cal_colwinsize_by_focus(input_level)
-            view()
-        }
+        reinit_selected_index( input_level )
+        view()
         return
     } else {
-        DATA_HAS_CHANGED = true
         l = data[ input_level L ] + 1
         data[ input_level L ] = l
         if (l > MAX_DATA_ROW_NUM)   MAX_DATA_ROW_NUM = l
@@ -202,4 +177,14 @@ input_state==INPUT_STATE_CTRL{
     consume_ctrl()
 }
 # EndSection
+
+END {
+    if ( exit_is_with_cmd() == true ) {
+        for (i=1; i<input_level; i++) {
+            _key_path = _key_path S data[ i L ctrl_win_val( data, i ) ]
+        }
+        send_env( "___X_CMD_UI_SELECTN_FINAL_COMMAND",    exit_get_cmd() )
+        send_env( "___X_CMD_UI_SELECTN_CURRENT_ITEM",         _key_path )
+    }
+}
 
