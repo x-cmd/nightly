@@ -27,11 +27,11 @@ ___x_cmd_gh_current_repo() {
     local O="${O:-GITHUB_DEFAULT}"
 
     if [ -n "$1" ]; then
-        param_default set "github_$O" "repo" "$@"
+        ___x_cmd_gh_default set "github_$O" "repo" "$@"
         return
     fi
 
-    param_default get "github_$O" "repo"
+    ___x_cmd_gh_default get "github_$O" "repo"
 }
 
 # shellcheck disable=SC2120
@@ -39,18 +39,18 @@ ___x_cmd_gh_current_owner() {
     param:void
     local O="${O:-GITHUB_DEFAULT}"
     if [ -n "$1" ]; then
-        param_default put     "github_$O" "owner" "$1"
-        param_default remove  "github_$O" "owner_type"
-        param_default dump    "github_$O"
+        ___x_cmd_gh_default put     "github_$O" "owner" "$1"
+        ___x_cmd_gh_default remove  "github_$O" "owner_type"
+        ___x_cmd_gh_default dump    "github_$O"
         return 0
     fi
 
     local owner
-    owner="$(param_default get "github_$O" owner)"
+    owner="$(___x_cmd_gh_default get "github_$O" owner)"
     [ -n "$owner" ] && echo "$owner" && return
 
     data=$(___x_cmd_gh_get "/user")
-    [ -n "$data" ] && owner=$(___x_cmd_gh_json_query "$data" ".login") && param_default put "github_$O" owner "$owner"
+    [ -n "$data" ] && owner=$(___x_cmd_gh_json_query "$data" ".login") && ___x_cmd_gh_default put "github_$O" owner "$owner"
     echo "$owner"
 }
 
@@ -60,12 +60,12 @@ ___x_cmd_gh_current_owner_type() {
     local O="${O:-GITHUB_DEFAULT}"
     if [ -n "$1" ]; then
         # Set owner type
-        param_default put "github_$O" owner_type "$1"
+        ___x_cmd_gh_default put "github_$O" owner_type "$1"
         return
     fi
 
     local data
-    data="$(param_default get "github_$O" owner_type "$1")"
+    data="$(___x_cmd_gh_default get "github_$O" owner_type "$1")"
     if [ -z "$data" ]; then
         owner="$(___x_cmd_gh_current_owner)"
         if [ -z "$owner" ]; then
@@ -76,9 +76,9 @@ ___x_cmd_gh_current_owner_type() {
         data=$(___x_cmd_gh_owner_type_query "$owner")
         [ -z "$data" ] && return 1
 
-        param_default put "github_$O" owner_type "$data"
+        ___x_cmd_gh_default put "github_$O" owner_type "$data"
     fi
-    printf "%s" "$data" 
+    printf "%s" "$data"
 }
 
 ___x_cmd_gh_owner_type_query() {

@@ -53,8 +53,8 @@ ____x_cmd_gh_make() {
     local O_ORIGINAL=${1:?Provide client name by O environment}
     local O="___x_cmd_gh_$O_ORIGINAL"
 
-    http "@$O"          make  'https://api.github.com'
-    http "@$O_ORIGINAL" header Accept "application/vnd.github.v3+json"
+    http "@$O" make  'https://api.github.com'
+    http "@$O" header Accept "application/vnd.github.v3+json"
 
     O=$O_ORIGINAL ___x_cmd_gh_config_load >/dev/null
 

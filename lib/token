@@ -8,13 +8,13 @@ ___x_cmd_gh_token() {
     param:void
     local O="${O:-GITHUB_DEFAULT}"
     if [ $# -eq 0 ]; then
-        param_default get "github_$O" "token" 2>/dev/null || return 1
+        ___x_cmd_gh_default get "github_$O" "token" 2>/dev/null || return 1
     else
         if [ "$1" = "false" ];then
             shift
-            param_default put "github_$O" "token" "$@"
+            ___x_cmd_gh_default put "github_$O" "token" "$@"
           else
-            param_default put "github_$O" "token" "$@"
+            ___x_cmd_gh_default put "github_$O" "token" "$@"
             ___x_cmd_gh_config_save
         fi
     fi

@@ -142,3 +142,7 @@ ___x_cmd_gh_json_query_rename(){
         shift
     done
 }
+
+___x_cmd_gh_default(){
+    param_default "$@"
+}

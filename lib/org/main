@@ -44,12 +44,16 @@ options:
 '
     param:run
 
-    [ "$org" = "" ] && gh_log error "Organization name is required" && return 1
+    local data
+    data="$(___x_cmd_gh_get "/orgs/$org")"
 
-    ___x_cmd_gh_get "/orgs/$org" && return 0
+    [ $? -ne 0 ] &&  ___x_cmd_ui_tf "false" "get $org organizations info fail" && return 1
 
-    __x_cmd_ui_tf "false" "get $1 organizations info fail"
-    return 1
+    local id
+    local name
+    local html_url
+    ___x_cmd_gh_json_query_rename "$data" id=.id html_url=.html_url name=.login
+    ___x_cmd_ui_tf  "true" "get $org organizations info success" "Id: $id" "Name: $name" "Url: $html_url"
 }
 
 ___x_cmd_gh_org_repo(){
@@ -70,18 +74,23 @@ ___x_cmd_gh_org_repo_ls() {
     param:scope     "github/$O"
     param:dsl       '
 options:
-    --type     "type"     <>="all"    = all private public
+    --type     "type"                   <>="all"    = all private public
+    #1|--org   "org space address"      <>:address
 '
     param:run
-    ___x_cmd_gh_get_multi "/orgs/${1:?Provide organization}/repos" type
+     ___ui_table_json "$(printf "%s" "___x_cmd_gh_get_multi "/orgs/$org/repos" type || return 1" )" \
+      Id=.id Name=.name OwnerName=.owner.login IsPrivate=.private && return 0
+
+    ___x_cmd_ui_tf "false" "Please provide owner and owner_type"
+    return 1
 }
 
-# Section: Member
+    # Section: Member
 
 ___x_cmd_gh_org_member(){
     param:dsl       '
 subcmd:
-    ls            "list member"
+    ls              "list member"
     user            "get org member user info"
     add             "add member"
     del|remove      "Remove member"
@@ -117,7 +126,17 @@ options:
     #1|--org            "org space address"         <>:address
 '
     param:run
-    ___x_cmd_gh_get "/orgs/${org##*/}/memberships/${username##*/}"
+    local data
+    data="$(___x_cmd_gh_get "/orgs/${org##*/}/memberships/${username##*/}")"
+
+    [ $? -ne 0 ] &&  ___x_cmd_ui_tf "false" "get $username in organizations info fail" && return 1
+
+    local role
+    local url
+    local name
+    local state
+    ___x_cmd_gh_json_query_rename "$data" role=.role url=.organization_url name=.user.login state=.state
+    ___x_cmd_ui_tf  "true" "get $username in organizations info  success" "Name: $name" "Role: $role" "state: $state" "Url: $url"
 }
 
 ___x_cmd_gh_org_member_add() {
@@ -131,21 +150,12 @@ options:
     #n              "username"
 '
     param:run
-
-    # repo="$(___x_cmd_gh_param_normalize_repo "$repo")" || return 1
-    if [ -z "$1" ];then
-        echo "At least one user’s spatial address is needed"
-        return 1
-    fi
-
-        for username in "$@"; do
+    [ $# -eq 0 ] && gt_log error "provide at least one username" && return 1
+    for username in "$@"; do
         {
-            ___x_cmd_gh_put_json "/orgs/${org##*/}/memberships/${username##*/}" role
-            local code=$?
-            if [ $code -ne 0 ]; then
-                echo "Creating repo failure: $username. Code is $code. " >&2
-                return $code
-            fi
+            ___x_cmd_gh_put_json "/orgs/${org##*/}/memberships/${username##*/}" role 1>/dev/null 2>&1
+            [ $? -ne 0 ] && ___x_cmd_ui_tf "false" "add $username to organizations fail" && return 1
+            ___x_cmd_ui_tf  "true" "add $username to organizations  success"
         }
     done
 }
@@ -159,20 +169,16 @@ options:
 '
     param:run
 
-    if [ -z "$1" ];then
-        echo "At least one user’s spatial address is needed"
-        return 1
-    fi
+    [ $# -eq 0 ] && gt_log error "provide at least one username" && return 1
 
     local username
     for username in "$@"; do
         {
-            ___x_cmd_gh_delete "/orgs/${org##*/}/memberships/${username##*/}"
-            code=$?
-            if [ $code -ne 0 ]; then
-                echo "Creating repo failure: $name. Code is $code. " >&2
-                return $code
-            fi
+            ___x_cmd_gh_delete "/orgs/${org##*/}/memberships/${username##*/}" 1>/dev/null 2>&1
+
+            [ $? -ne 0 ] && ___x_cmd_ui_tf "false" "del $username to organizations fail" && return 1
+
+            ___x_cmd_ui_tf  "true" "del $username to organizations  success"
         }
     done
 }

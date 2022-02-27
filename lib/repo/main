@@ -112,13 +112,15 @@ option:
     local name
     for name in "$@"; do
         {
-            ___x_cmd_gh_post_json "/orgs/$org/repos" name description homepage has_issues has_wiki has_projects auto_init  visibility="$access"\
-             gitignore_template license_template
-            code=$?
-            if [ $code -ne 0 ]; then
-                gh_log error "Creating repo failure: $name. Code is $code. "
-                return $code
-            fi
+            local data
+            data="$(___x_cmd_gh_post_json "/orgs/$org/repos" name description homepage has_issues \
+                has_wiki has_projects auto_init  visibility="$access" gitignore_template license_template)"
+            [ $? -ne 0 ] && ___x_cmd_ui_tf "false" "Creating repo failure: $name." && return 1
+            local repo_id
+            local url
+            local repo_owner
+            ___x_cmd_gh_json_query_rename "$data" repo_id=.id url=.html_url repo_owner=.owner.login
+            ___x_cmd_ui_tf  "true" "Creating repo $name success" "repo_id: $repo_id" "repo_owner: $repo_owner" "url: $url"
         }
     done
 }
@@ -141,7 +143,7 @@ ___x_cmd_gh_repo_ls() {
     ___ui_table_json "$(printf "%s" "___x_cmd_gh_${owner_type}_repo ls $@ || return 1" )" \
         Id=.id Name=.name Owner=.owner.login Url=.html_url && return 0
 
-    gh_log error "Please provide owner and owner_type"
+    ___x_cmd_ui_tf "false" "Please provide owner and owner_type"
     return 1
 }
 
