@@ -4,12 +4,10 @@
 BEGIN {
     ctrl_help_item_put("ARROW UP/DOWN/LEFT/ROW", "to move focus")
     ctrl_help_item_put("ENTER", "for enter")
-    WIN_BEGIN = 1
-    WIN_END = 1
 }
 
 function view_help(){
-    return sprintf("%s\n", th_help_text( ctrl_help_get() ) )
+    return sprintf("%s", th_help_text( ctrl_help_get() ) )
 }
 function view_header(){
     return sprintf("%s", th(TH_SELECTN_HEADER_NORMAL, data_header) )
@@ -44,7 +42,7 @@ function view_body(         i, j, _i_for_this_column, _offset_for_this_column, _
 }
 
 function view_calcuate_geoinfo(){
-    if ( VIEW_BODY_ROW_SIZE > MAX_DATA_ROW_NUM ) return
+    if ( VIEW_BODY_ROW_SIZE >= MAX_DATA_ROW_NUM ) return
     if ( ctrl_help_toggle_state() == true ) {
         VIEW_BODY_ROW_SIZE = max_row_size - 9 -1
     } else {
@@ -56,7 +54,6 @@ function view(      _component_help, _component_header, _component_body){
     view_calcuate_geoinfo()
 
     _component_help         = view_help()
-    # _component_header       = view_header()
     _component_body         = view_body()
 
     send_update( _component_help "\n" _component_body  )
@@ -77,11 +74,12 @@ function calculate_offset_from_end( end,       i, s, t ){
 
 
 function ctrl_cal_colwinsize_by_focus( col,            _selected_keypath ){
-    if (data[ col L ] > 0) {
-        WIN_END = col + 1
+    if (data[ col L ] <= 0) {
+        WIN_END = col - 1
     } else {
         WIN_END = col
     }
+    # WIN_END = col
     # WIN_BEGIN might be WIN_END + 1
     WIN_BEGIN = calculate_offset_from_end( WIN_END )
 }
@@ -139,7 +137,7 @@ function consume_ctrl(){
     if ($1 == "---") {
         input_level = $2
         data[ input_level L ] = ($3 == -1) ? -1 : 0
-        ctrl_win_set(data, "", input_level)
+        ctrl_win_set(data, 1, input_level)
         _maxcollen[ input_level ] = 0
         input_state = INPUT_STATE_DATA
     } else if (try_update_width_height( $0 ) == true) {
@@ -157,6 +155,7 @@ function consume_data(){
     if ($0 == "---") {
         data[ input_level S ] = _maxcollen[ input_level ]
         input_state = INPUT_STATE_CTRL
+        ctrl_cal_colwinsize_by_focus( input_level )
         reinit_selected_index( input_level )
         view()
         return
@@ -181,7 +180,7 @@ input_state==INPUT_STATE_CTRL{
 END {
     if ( exit_is_with_cmd() == true ) {
         for (i=1; i<input_level; i++) {
-            _key_path = _key_path S data[ i L ctrl_win_val( data, i ) ]
+            _key_path = _key_path L data[ i L ctrl_win_val( data, i ) ]
         }
         send_env( "___X_CMD_UI_SELECTN_FINAL_COMMAND",    exit_get_cmd() )
         send_env( "___X_CMD_UI_SELECTN_CURRENT_ITEM",         _key_path )
