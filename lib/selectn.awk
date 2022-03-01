@@ -117,8 +117,7 @@ function ctrl_cal_colwinsize_by_focus( col,            _selected_keypath ){
 }
 
 function ctrl(char_type, char_value,      i, _selected_keypath_fa ){
-    EXIT_CHAR_LIST = ",q,ENTER,"
-    exit_if_detected( char_value )
+    exit_if_detected( char_value, ",q,ENTER," )
 
     if (char_value == "UP")  {
         _selected_keypath_fa = SELECTED_KEYPATH_STACK[ FOCUS_COL - 1 ]

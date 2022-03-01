@@ -85,30 +85,17 @@ function ctrl_cal_colwinsize_by_focus( col,            _selected_keypath ){
 }
 
 function ctrl(char_type, char_value){
-    EXIT_CHAR_LIST = ",q,ENTER,"
-    exit_if_detected( char_value )
+    exit_if_detected( char_value, ",q,ENTER," )
 
-    if (char_value == "UP")  {
-        ctrl_win_rdec( data, FOCUS_COL )
-        return ctrl_cal_colwinsize_by_focus( FOCUS_COL )
-    }
-    if (char_value == "DN") {
-        ctrl_win_rinc( data, FOCUS_COL )
-        return ctrl_cal_colwinsize_by_focus( FOCUS_COL )
-    }
+    if (char_value == "h")                                              return ctrl_help_toggle()
 
-    if (char_value == "LEFT" )  {
-        if (FOCUS_COL == 1)     return
-        -- FOCUS_COL
-        return ctrl_cal_colwinsize_by_focus( FOCUS_COL )
-    }
+    if (char_value == "UP")                                             ctrl_win_rdec( data, FOCUS_COL )
+    else if (char_value == "DN")                                        ctrl_win_rinc( data, FOCUS_COL )
+    else if ((char_value == "LEFT") && (FOCUS_COL != 1))                -- FOCUS_COL
+    else if ((char_value == "RIGHT") && (FOCUS_COL < input_level))      ++ FOCUS_COL
+    else                                                                return
 
-    if (char_value == "RIGHT") {
-        if (FOCUS_COL >= input_level) return
-        ++ FOCUS_COL
-        return ctrl_cal_colwinsize_by_focus( FOCUS_COL )
-    }
-    if (char_value == "h")      return ctrl_help_toggle()
+    return ctrl_cal_colwinsize_by_focus( FOCUS_COL )
 }
 
 # EndSection
@@ -140,15 +127,15 @@ function consume_ctrl(){
         ctrl_win_set(data, 1, input_level)
         _maxcollen[ input_level ] = 0
         input_state = INPUT_STATE_DATA
-    } else if (try_update_width_height( $0 ) == true) {
         return
-    } else {
-        _cmd=$0
-        gsub(/^C:/, "", _cmd)
-        idx = index(_cmd, ":")
-        ctrl(substr(_cmd, 1, idx-1), substr(_cmd, idx+1))
-        view()
     }
+
+    if (try_update_width_height( $0 ) == true)  return
+    _cmd=$0
+    gsub(/^C:/, "", _cmd)
+    idx = index(_cmd, ":")
+    ctrl(substr(_cmd, 1, idx-1), substr(_cmd, idx+1))
+    view()
 }
 
 function consume_data(){

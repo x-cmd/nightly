@@ -192,8 +192,7 @@ function handle_ctrl_to_select_item(char_value) {
 }
 
 function handle_ctrl_in_normal_state(char_type, char_value) {
-    EXIT_CHAR_LIST = ",q,"
-    exit_if_detected( char_value )
+    exit_if_detected( char_value, ",q," )
 
     if (char_type == "ascii-space" && SELECT_MULTIPLE_STATE == true) {
         (ctrl_sw_get( MULTIPLE_EDIT ) == false) ? ctrl_sw_toggle( MULTIPLE_EDIT ) : exit_with_elegant( char_value )

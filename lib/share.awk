@@ -445,7 +445,7 @@ function exit_get_cmd(command, item){
 
 # TODO: not well designed
 # Maybe using some unseen character
-function exit_if_detected( char_value ){
+function exit_if_detected( char_value, EXIT_CHAR_LIST ){
     if (index(EXIT_CHAR_LIST, "," char_value ",") > 0) return exit_with_elegant( char_value )
 }
 

@@ -156,7 +156,7 @@ function ctrl_in_filter_state(char_type, char_value){
 }
 
 function ctrl_in_normal_state(char_type, char_value){
-    exit_if_detected( char_value )
+    exit_if_detected( char_value, EXIT_CHAR_LIST )
 
     if (char_type == "ascii-space")                 return ctrl_sw_toggle( FILTER_EDIT )
 
