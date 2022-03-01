@@ -1,4 +1,4 @@
-# github：Gitee's Missing CLI
+# github：GitHub's Missing CLI
 
 ## 安装教程
 

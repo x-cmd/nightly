@@ -68,7 +68,7 @@ ____x_cmd_gh_make() {
     local info
     info=$(printf "\n%s %s \n%s" \
          "$(ui yellow 'You need run command to add token:')" \
-         "$(ui bold cyan "\`gt token <token>\`")" \
+         "$(ui bold cyan "\`gh token <token>\`")" \
          "$(ui 'https://github.com/settings/tokens')")
     gh_log warn "Token is null.${info}"
 }

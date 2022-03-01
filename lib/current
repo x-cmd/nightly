@@ -41,17 +41,18 @@ ___x_cmd_gh_current_owner() {
     if [ -n "$1" ]; then
         ___x_cmd_gh_default put     "github_$O" "owner" "$1"
         ___x_cmd_gh_default remove  "github_$O" "owner_type"
-        ___x_cmd_gh_default dump    "github_$O"
         return 0
     fi
 
     local owner
     owner="$(___x_cmd_gh_default get "github_$O" owner)"
-    [ -n "$owner" ] && echo "$owner" && return
+    [ -n "$owner" ] && printf "%s\n" "$owner" && return 0
 
-    data=$(___x_cmd_gh_get "/user")
-    [ -n "$data" ] && owner=$(___x_cmd_gh_json_query "$data" ".login") && ___x_cmd_gh_default put "github_$O" owner "$owner"
-    echo "$owner"
+    local data
+    data=$(___x_cmd_gh_get "/user") || return 1
+    owner=$(___x_cmd_gh_json_query "$data" ".login")
+    ___x_cmd_gh_default put "github_$O" owner "$owner"
+    printf "%s\n" "$owner"
 }
 
 # shellcheck disable=SC2120
@@ -78,7 +79,7 @@ ___x_cmd_gh_current_owner_type() {
 
         ___x_cmd_gh_default put "github_$O" owner_type "$data"
     fi
-    printf "%s" "$data"
+    printf "%s\n" "$data"
 }
 
 ___x_cmd_gh_owner_type_query() {
