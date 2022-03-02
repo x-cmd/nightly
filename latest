@@ -16,7 +16,7 @@
 # cd ,<pattern> = find
 
 # cd /u/l/
-xrc ui/lib/select
+xrc ui/lib/gridselect
 
 ___x_cmd_cd_set_domain(){
     local varname="$1"
@@ -135,7 +135,7 @@ ___x_cmd_cd_choose(){
     fi
     local ___X_CMD_UI_SELECT_CURRENT_ITEM
     local adir
-    local text="___x_cmd_ui_select num \"Select an option to change directory:\""
+    local text="___x_cmd_ui_gridselect num \"Select an option to change directory:\""
     local IFS="
 "
     while read -r adir; do
@@ -149,7 +149,7 @@ A
 \"---\"
 "
     eval "$text"
-    ___x_cmd_cd_origin "$___X_CMD_UI_SELECT_CURRENT_ITEM"
+    ___x_cmd_cd_origin "$___X_CMD_UI_GRIDSELECT_CURRENT_ITEM"
 }
 # EndSection
 
