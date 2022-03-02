@@ -1,7 +1,6 @@
 
 # The work present here should be done by jfreeparse | jawk
 
-# Section: Query: Should be give up
 
 # jo b.b
 ___x_cmd_json_query(){
@@ -110,6 +109,3 @@ A
         awk -v op=length -v opv1="$opv1" -f "$___X_CMD_JSON_AWK_PATH"
     fi
 }
-
-
-# EndSection
