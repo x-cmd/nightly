@@ -187,13 +187,13 @@ win"
 # code from nvm
 ___x_cmd_os_name() {
     case "$(command uname -a)" in
-        Linux\ *)                   printf "%s" linux ;;
-        Darwin\ *)                  printf "%s" darwin ;;
-        SunOS\ *)                   printf "%s" sunos ;;
-        FreeBSD\ *)                 printf "%s" freebsd ;;
-        OpenBSD\ *)                 printf "%s" openbsd ;;         # TODO: Netbsd?
-        AIX\ *)                     printf "%s" aix ;;
-        CYGWIN* | MSYS* | MINGW*)   printf "%s" win ;;
+        Linux\ *)                   printf "%s\n" linux ;;
+        Darwin\ *)                  printf "%s\n" darwin ;;
+        SunOS\ *)                   printf "%s\n" sunos ;;
+        FreeBSD\ *)                 printf "%s\n" freebsd ;;
+        OpenBSD\ *)                 printf "%s\n" openbsd ;;         # TODO: Netbsd?
+        AIX\ *)                     printf "%s\n" aix ;;
+        CYGWIN* | MSYS* | MINGW*)   printf "%s\n" win ;;
     esac
 }
 
@@ -252,12 +252,12 @@ ___x_cmd_os_arch() {
         src="${arg%%=*}"
         tgt="${arg#*=}"
         if [ "$src" = "$ARCH" ]; then
-            printf "%s" "$tgt"
+            printf "%s\n" "$tgt"
             return 0
         fi
     done
 
-    printf "%s" "${ARCH}"
+    printf "%s\n" "${ARCH}"
 }
 
 # EndSection
