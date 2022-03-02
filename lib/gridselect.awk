@@ -40,7 +40,7 @@ function view(          _data){
     if (model_len == 0){
         _data = "We couldn’t find any data ..."
         _data = str_pad_left(_data, int(max_col_size/2), int(length(_data)/2))
-        return send_update( th(TH_TABLE_UINFIND, _data) )
+        return send_update( th(TH_TABLE_UIFIND, _data) )
     }
 
     if (SELECT_HELP_STATE == true) _component_help = view_help()
@@ -54,7 +54,7 @@ function view_help(){
     return sprintf("%s\n\n", th_help_text( ctrl_help_get() ) )
 }
 function view_header(){
-    return sprintf("%s\n", th(TH_SELECT_HEADER_NORMAL, data_header) )
+    return sprintf("%s\n", th(TH_GRIDSELECT_HEADER_NORMAL, data_header) )
 }
 
 function view_body(             _selected_item_idx, _iter_item_idx, _data_item_idx, _item_index, _select_text, _data, _data_info, _data_idx){
@@ -86,7 +86,7 @@ function view_body(             _selected_item_idx, _iter_item_idx, _data_item_i
             if ( _iter_item_idx != _selected_item_idx ) {
                 _data = _data _item_index _item_text
             } else {
-                _data = _data _item_index th(TH_SELECT_ITEM_FOCUSED, _item_text)
+                _data = _data _item_index th(TH_GRIDSELECT_ITEM_FOCUSED, _item_text)
             }
             _iter_item_idx += max_data_row_num
         }
@@ -96,10 +96,10 @@ function view_body(             _selected_item_idx, _iter_item_idx, _data_item_i
     # ctrl_rstate_set( SELECTED_ITEM_IDX, model[ _selected_item_idx ] )
     _data_idx = model[ _selected_item_idx ]
     _data_info = data_info[ _data_idx ]
-    if ( _data_info != "" ) _data = _data "INFO: " th(TH_SELECT_ITEM_SELECTED, _data_info) "\n"
+    if ( _data_info != "" ) _data = _data "INFO: " th(TH_GRIDSELECT_ITEM_SELECTED, _data_info) "\n"
     if ( multiselect_len>0 ) {
         for (i=1; i<=multiselect_len; i ++) {
-            _select_text = _select_text th(TH_SELECT_ITEM_FOCUSED, data[ multiselect[i] ]) " "
+            _select_text = _select_text th(TH_GRIDSELECT_ITEM_FOCUSED, data[ multiselect[i] ]) " "
         }
         _data = _data sprintf("SELECT: %s\n",  _select_text ) UI_END
     } else {
@@ -292,9 +292,9 @@ END {
             _tmp_cur_iter_item = data[ _tmp_cur_iter_item_idx ]
         }
 
-        send_env( "___X_CMD_UI_SELECT_FINAL_COMMAND",           exit_get_cmd() )
-        send_env( "___X_CMD_UI_SELECT_CURRENT_ITEM_INDEX",      _tmp_cur_iter_item_idx )
-        send_env( "___X_CMD_UI_SELECT_CURRENT_ITEM",             _tmp_cur_iter_item )
+        send_env( "___X_CMD_UI_GRIDSELECT_FINAL_COMMAND",           exit_get_cmd() )
+        send_env( "___X_CMD_UI_GRIDSELECT_CURRENT_ITEM_INDEX",      _tmp_cur_iter_item_idx )
+        send_env( "___X_CMD_UI_GRIDSELECT_CURRENT_ITEM",             _tmp_cur_iter_item )
     }
 
 }

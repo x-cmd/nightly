@@ -51,17 +51,17 @@ BEGIN {
     TH_TABLE_SELECTED_COL               =       UI_FG_BLUE UI_TEXT_REV
     TH_TABLE_SELECTED_ROW               =       UI_FG_GREEN UI_TEXT_REV
     TH_TABLE_SELECTED_ROW_COL           =       UI_FG_CYAN UI_TEXT_REV
-    TH_TABLE_UINFIND                    =       UI_TEXT_DIM
+    TH_TABLE_UIFIND                     =       UI_TEXT_DIM
     # EndSection
 
     # Find item
     TH_TABLE_LINE_ITEM_HIGHLIGHT_0      =       ""
     TH_TABLE_LINE_ITEM_HIGHLIGHT_1      =       UI_END
 
-    # Section: select
-    TH_SELECT_HEADER_NORMAL           =       UI_TEXT_BOLD
-    TH_SELECT_ITEM_FOCUSED            =       UI_TEXT_REV UI_FG_GREEN
-    TH_SELECT_ITEM_SELECTED           =       UI_FG_GREEN
+    # Section: gridselect
+    TH_GRIDSELECT_HEADER_NORMAL           =       UI_TEXT_BOLD
+    TH_GRIDSELECT_ITEM_FOCUSED            =       UI_TEXT_REV UI_FG_GREEN
+    TH_GRIDSELECT_ITEM_SELECTED           =       UI_FG_GREEN
     # EndSection
 
     # Section: selectn
@@ -70,6 +70,16 @@ BEGIN {
     TH_SELECTN_ITEM_FOCUSED_UNSELECT    =       UI_TEXT_BOLD UI_TEXT_REV UI_FG_BLUE
     TH_SELECTN_ITEM_UNFOCUSED_SELECT    =       UI_TEXT_UNDERLINE UI_FG_GREEN
     TH_SELECTN_ITEM_UNFOCUSED_UNSELECT  =       ""
+    # EndSection
+
+    # Section: categoryselect
+    TH_CATEGORYSELECT_HEADER_NORMAL            =       UI_TEXT_UNDERLINE
+    TH_CATEGORYSELECT_UNDIRECTORY              =       UI_TEXT_DIM
+    TH_CATEGORYSELECT_ITEM_FOCUSED_SELECT      =       UI_TEXT_BOLD UI_FG_GREEN UI_TEXT_REV
+    TH_CATEGORYSELECT_ITEM_FOCUSED_UNSELECT    =       UI_TEXT_BOLD UI_TEXT_REV UI_FG_BLUE
+    TH_CATEGORYSELECT_ITEM_UNFOCUSED_SELECT    =       UI_FG_GREEN
+    TH_CATEGORYSELECT_ITEM_UNFOCUSED_UNSELECT  =       ""
+    TH_CATEGORYSELECT_ITEM_UNFOCUSED_UNGRIDSELECT_DIR  =   UI_TEXT_UNDERLINE
     # EndSection
 
     # help panel

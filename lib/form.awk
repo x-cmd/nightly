@@ -1,11 +1,11 @@
 # Section: NR==1    DATA SOURCE parsing
 BEGIN {
-    ATT_DESC    = "\003"
+    ATT_DESC    = "\007"
     ATT_VAR     = "\004"
 
     ATT_DEFAULT = "\005"
     ATT_OP      = "\006"
-    ATT_OP_L    = "\007"
+    # ATT_OP_L    = "\007"
 
     ATT_ANS     = "\010"
 
@@ -41,9 +41,9 @@ NR==1{
         i = i + 4
         for (j=i; j<=argl; ++j) {
             if (args[j] == "--") break
-            rule[ rulel ATT_OP (j-i+1) ] = args[j]
+            rule[ rulel L (j-i+1) ] = args[j]
         }
-        rule[ rulel ATT_OP_L ] = j-i
+        rule[ rulel L ] = j-i
         i=j
     }
 
@@ -53,11 +53,11 @@ NR==1{
             ctrl_lineedit_init( rule, i ATT_ANS  )
             ctrl_lineedit_put(  rule, rule[ i ATT_DEFAULT ], i ATT_ANS )
         } else {
-            ctrl_rstate_init( rule, 1, rule[ i ATT_OP_L ], i ATT_ANS )
+            ctrl_rstate_init( rule, 1, rule[ i L ], i ATT_ANS )
             tmp = rule[ i ATT_DEFAULT ]
             if ( tmp == "" ) continue
-            for (j=1; j<=rule[ i ATT_OP_L ]; ++j){
-                if ( tmp == rule[ i ATT_OP j ]) {
+            for (j=1; j<=rule[ i L ]; ++j){
+                if ( tmp == rule[ i L j ]) {
                     ctrl_rstate_set( rule, j, i ATT_ANS )
                     break
                 }
@@ -118,6 +118,7 @@ function view_help( _ctrl_current, data ){
     return th_help_text( data )
 }
 
+
 function view_body( _ctrl_current,                          data, _question, _line, _tmp, _is_focused, _is_selected,  i, j ){
     for (i=1; i<=rulel; ++i) {
         _question       =  sprintf( "%-" question_width + 2 "s",   rule[ i ATT_DESC ] )
@@ -136,14 +137,16 @@ function view_body( _ctrl_current,                          data, _question, _li
         op = rule[ i ATT_OP ]
         if (op != "=") {
             _answer     = ctrl_lineedit_get( rule, i ATT_ANS )
+            _answer_style=""
+            if (op ~ "=~") _answer_style = (judgment_of_regexp( rule, i )) ? UI_END : UI_FG_RED
             _answer     = (op !~ /\*/) ? _answer : ui_str_rep( "*", length(_answer) )
-            _line       = _line th( "", _answer)
+            _line       = _line th( _answer_style, _answer)
         } else {
             _answer     = ctrl_rstate_get( rule, i ATT_ANS )
-            for (j=1; j<=rule[ i ATT_OP_L ]; ++j) {
+            for (j=1; j<=rule[ i L ]; ++j) {
                 # TODO: if it is too long, use multiple line
                 _is_selected    = _answer == j
-                _line           = _line th( _is_selected ? STYLE_ANSWER_SELECTED: STYLE_ANSWER_UNSELECTED, rule[ i ATT_OP j ] ) " "
+                _line           = _line th( _is_selected ? STYLE_ANSWER_SELECTED: STYLE_ANSWER_UNSELECTED, rule[ i L j ] ) " "
             }
         }
         data = data "\n" _line
@@ -186,7 +189,7 @@ NR>1{
 END {
     for (i=1; i<=rulel; ++i) {
         var =       rule[ i ATT_VAR ]
-        if (rule[ i ATT_OP ] == "=")    _answer = rule[ i ATT_OP ctrl_rstate_get( rule, i ATT_ANS ) ]
+        if (rule[ i ATT_OP ] == "=")    _answer = rule[ i L ctrl_rstate_get( rule, i ATT_ANS ) ]
         else                            _answer = ctrl_lineedit_get( rule, i ATT_ANS )
         send_env( var, _answer )
     }

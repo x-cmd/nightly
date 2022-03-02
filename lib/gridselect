@@ -1,0 +1,118 @@
+# shellcheck shell=sh disable=SC3043
+
+# . ./lib/region
+xrc ui/lib/region
+xrc ui/lib/getchar
+xrc awk
+___X_CMD_UI_GRIDSELECT_DISPLAY_ITEM_INDEX=0
+___X_CMD_UI_GRIDSELECT_MULTIPLE_STATE=0
+___X_CMD_UI_GRIDSELECT_HELP_STATE=1
+# Section: main
+___x_cmd_ui_gridselect(){
+    local O="${O:-___X_CMD_UI_GRIDSELECT_DEFAULT}"
+    case "${1}" in
+        num)        ___X_CMD_UI_GRIDSELECT_DISPLAY_ITEM_INDEX=1
+                    shift && ___x_cmd_ui_gridselect_out "$@"
+                    ;;
+        multiple)   ___X_CMD_UI_GRIDSELECT_MULTIPLE_STATE=1
+                    shift && ___x_cmd_ui_gridselect_out "$@"
+                    ;;
+        nohelp)     ___X_CMD_UI_GRIDSELECT_HELP_STATE=0
+                    shift && ___x_cmd_ui_gridselect_out "$@"
+                    ;;
+        *)          ___X_CMD_UI_GRIDSELECT_DISPLAY_ITEM_INDEX=0
+                    ___x_cmd_ui_gridselect_out "$@"
+                    ;;
+    esac
+}
+
+
+if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
+# 881 hh
+___x_cmd_ui_gridselect_control_awk(){
+    LC_ALL=en_US.UTF-8 command awk \
+        -W interactive \
+        -v EXIT_OP="$EXIT_OP" -v ITEM_INDEX_STATE="$___X_CMD_UI_GRIDSELECT_DISPLAY_ITEM_INDEX" \
+        -f "$___X_CMD_ROOT/awk/lib/default.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/str.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/wcwidth.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/ui.awk" \
+        -f "$___X_CMD_ROOT/ui/lib/share.awk" \
+        -f "$___X_CMD_ROOT/ui/lib/theme.awk" \
+        -f "$___X_CMD_ROOT/ui/lib/gridselect.awk"
+}
+else
+___x_cmd_ui_gridselect_control_awk(){
+    LC_ALL=en_US.UTF-8 command awk \
+        -v EXIT_OP="$EXIT_OP" \
+        -v RS="$___X_CMD_UI_REGION_RS" -v ORS="$___X_CMD_UI_REGION_RS" \
+        -v ITEM_INDEX_STATE="$___X_CMD_UI_GRIDSELECT_DISPLAY_ITEM_INDEX" \
+        -v SELECT_MULTIPLE_STATE="$___X_CMD_UI_GRIDSELECT_MULTIPLE_STATE" \
+        -v SELECT_HELP_STATE="$___X_CMD_UI_GRIDSELECT_HELP_STATE" \
+        -f "$___X_CMD_ROOT/awk/lib/default.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/str.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/wcwidth.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/ui.awk" \
+        -f "$___X_CMD_ROOT/ui/lib/share.awk" \
+        -f "$___X_CMD_ROOT/ui/lib/theme.awk" \
+        -f "$___X_CMD_ROOT/ui/lib/gridselect.awk"
+        # -f "../ui/lib/gridselect.awk" \
+        # -f "./lib/theme.awk"
+}
+fi
+
+___x_cmd_ui_gridselect_control(){
+    {
+        printf "UPDATE %s %s${___X_CMD_UI_REGION_RS}" "${COLUMNS}" "${LINES}"
+        IFS="$(printf "$___X_CMD_UI_REGION_RS")"
+        printf "%s%s" "$*" "$___X_CMD_UI_REGION_RS"
+        cat
+    } | ___x_cmd_ui_gridselect_control_awk
+}
+
+___x_cmd_ui_gridselect_control_display(){
+    cat "./.x-cmd/dev/testcase/testlargedata" | awk -v REGION_RS="$___X_CMD_UI_REGION_RS" '{printf $0 REGION_RS}'
+    # cat "./.x-cmd/dev/testcase/testdata" | awk -v REGION_RS="$___X_CMD_UI_REGION_RS" '{printf $0 REGION_RS}'
+}
+___x_cmd_ui_gridselect_main(){
+    ___x_cmd_ui_region_autorefresh_with_keyboard ___x_cmd_ui_gridselect_control "$@"
+}
+# ___x_cmd_ui_gridselect_out(){
+#     ___x_cmd_ui_gridselect_main ___x_cmd_ui_gridselect_control_display
+# }
+___x_cmd_ui_gridselect_out(){
+    ___x_cmd_ui_gridselect_main "$@"
+}
+
+# ___ui_select_out
+# f(){
+#     ___x_cmd_ui_gridselect \
+#     "Please select the app you want to install:" \
+#     "Install docker" \
+#     "Install k8s" \
+#     "Install minikube" \
+#     "Install jvm" \
+#     "Install nvm" \
+#     "---" \
+#     "It's the 1 app descriptor." \
+#     "It's the 2 app descriptor." \
+#     "It's the 3 app descriptor." \
+#     "It's the 4 app descriptor." \
+#     "It's the 5 app descriptor." \
+#     "---"
+
+
+#     echo "___X_CMD_UI_GRIDSELECT_FINAL_COMMAND:" "$___X_CMD_UI_GRIDSELECT_FINAL_COMMAND"
+#     i=1
+#     while [ "$i" -le "$___X_CMD_UI_GRIDSELECT_MULTIPLE_LEN" ];do
+
+#         eval printf "\"___X_CMD_UI_GRIDSELECT_ITEM_INDEX$i:%s\n\"" "\"\$___X_CMD_UI_GRIDSELECT_ITEM_INDEX$i\""
+#         eval printf "\"___X_CMD_UI_GRIDSELECT_ITEM$i:%s\n\"" "\"\$___X_CMD_UI_GRIDSELECT_ITEM$i\""
+#         i=$((i+1))
+#     done
+
+#     echo "\n___X_CMD_UI_GRIDSELECT_CURRENT_ITEM_INDEX:" "$___X_CMD_UI_GRIDSELECT_CURRENT_ITEM_INDEX"
+#     echo "___X_CMD_UI_GRIDSELECT_CURENT_ITEM:" "$___X_CMD_UI_GRIDSELECT_CURENT_ITEM"
+#     echo "___X_CMD_UI_GRIDSELECT_MULTIPLE_LEN:" "$___X_CMD_UI_GRIDSELECT_MULTIPLE_LEN"
+# }
+# f

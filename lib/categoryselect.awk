@@ -9,29 +9,47 @@ BEGIN {
 function view_help(){
     return sprintf("%s", th_help_text( ctrl_help_get() ) )
 }
-function view_header(){
-    return sprintf("%s", th(TH_SELECTN_HEADER_NORMAL, data_header) )
+function view_info(         _selected_index_of_focus_column, _item_index, _file_type, _file_size, _last_access, _last_modification, _last_change, _access_rights, _uid, _gid, _data){
+    _selected_index_of_focus_column = ctrl_win_val( data, FOCUS_COL )
+    _item_index = FOCUS_COL L _selected_index_of_focus_column
+
+    _file_type          =   data_info_file_type[ _item_index ]
+    _file_size          =   data_info_size[ _item_index ]
+    _last_access        =   data_info_time_of_last_access[ _item_index ]
+    _last_modification  =   data_info_time_of_last_modification[ _item_index ]
+    _last_change        =   data_info_time_of_last_change[ _item_index ]
+    _access_rights      =   data_info_access_rights[ _item_index ]
+    _uid                =   data_info_uid[ _item_index ]
+    _gid                =   data_info_gid[ _item_index ]
+    _data = sprintf("Access: %s", _access_rights, _id)
+    _data = _data sprintf("  Uid: ( %s )  Gid: ( %s )\n", _uid, _gid)
+    _data = _data sprintf("Name: %s  Size: %s  Type: %s", data[ _item_index ], _file_size, _file_type)
+    return _data
 }
 
 function view_body(         i, j, _i_for_this_column, _offset_for_this_column, _selected_index_of_this_column, _max_column_size, _tmp, _data ){
     for (j=WIN_BEGIN; j<=WIN_END; ++j) {
         _offset_for_this_column = ctrl_win_begin( data, j )
-        _max_column_size = data[ j S ] + 3
+        _max_column_size = data[ j S ] + 2
         _selected_index_of_this_column = ctrl_win_val( data, j )
 
         for (i=1; i<=VIEW_BODY_ROW_SIZE; ++i) {
             _i_for_this_column = _offset_for_this_column + i - 1
-            if ( _i_for_this_column <= data[ j L ] ) _tmp = str_pad_right(data[ j L _i_for_this_column ], _max_column_size)
-            else _tmp = ui_str_rep(" ", _max_column_size)
-            if (j == FOCUS_COL) {
-                STYLE_SELECTN_SELECTED      =   TH_SELECTN_ITEM_FOCUSED_SELECT
-                STYLE_SELECTN_UNSELECTED    =   TH_SELECTN_ITEM_FOCUSED_UNSELECT
-            } else {
-                STYLE_SELECTN_SELECTED      =   TH_SELECTN_ITEM_UNFOCUSED_SELECT
-                STYLE_SELECTN_UNSELECTED    =   TH_SELECTN_ITEM_UNFOCUSED_UNSELECT
+            if ( _i_for_this_column > data[ j L ] ) {
+                _data[ i ] = _data[ i ] ui_str_rep(" ", _max_column_size + 1)
+                continue
             }
-            if ( _selected_index_of_this_column == _i_for_this_column ) _tmp = th(STYLE_SELECTN_SELECTED, _tmp)
-            else _tmp = th(STYLE_SELECTN_UNSELECTED, _tmp)
+            _tmp = " " str_pad_right( data[ j L _i_for_this_column ], _max_column_size)
+            if (j == FOCUS_COL) {
+                STYLE_CATEGORYSELECT_SELECTED      =   TH_CATEGORYSELECT_ITEM_FOCUSED_SELECT
+                STYLE_CATEGORYSELECT_UNSELECTED    =   TH_CATEGORYSELECT_ITEM_FOCUSED_UNSELECT
+            } else {
+                STYLE_CATEGORYSELECT_SELECTED      =   TH_CATEGORYSELECT_ITEM_UNFOCUSED_SELECT
+                STYLE_CATEGORYSELECT_UNSELECTED    =   TH_CATEGORYSELECT_ITEM_UNFOCUSED_UNSELECT
+            }
+            if ( _selected_index_of_this_column == _i_for_this_column ) _tmp = th(STYLE_CATEGORYSELECT_SELECTED, _tmp)
+            else _tmp = th(STYLE_CATEGORYSELECT_UNSELECTED, _tmp)
+            if ( data_info_file_type[ j L _i_for_this_column ] != "directory" ) _tmp = th(TH_CATEGORYSELECT_UNDIRECTORY, _tmp)
             _data[ i ] = _data[ i ] _tmp
         }
     }
@@ -54,9 +72,10 @@ function view(      _component_help, _component_header, _component_body){
     view_calcuate_geoinfo()
 
     _component_help         = view_help()
+    _component_info         = view_info()
     _component_body         = view_body()
 
-    send_update( _component_help "\n" _component_body  )
+    send_update( _component_help "\n" _component_info _component_body  )
 }
 
 # EndSection
@@ -110,7 +129,7 @@ BEGIN{
     FOCUS_COL=1
 }
 
-function reinit_selected_index( col ) {
+function reinit_selected_index( col     ,l) {
     # TODO: 10 reserve space
     VIEW_BODY_ROW_SIZE = max_row_size - 10
     if ( VIEW_BODY_ROW_SIZE > MAX_DATA_ROW_NUM )     VIEW_BODY_ROW_SIZE = MAX_DATA_ROW_NUM
@@ -124,6 +143,7 @@ function consume_ctrl(){
     if ($1 == "---") {
         input_level = $2
         data[ input_level L ] = ($3 == -1) ? -1 : 0
+
         ctrl_win_set(data, 1, input_level)
         _maxcollen[ input_level ] = 0
         input_state = INPUT_STATE_DATA
@@ -146,12 +166,25 @@ function consume_data(){
         reinit_selected_index( input_level )
         view()
         return
+    } else if ($1 == "---") {
+        split(substr($0, 5), data_info_arr, "\006")
+        data_info_file_type[ input_level L l ]                  = data_info_arr[1]
+        data_info_size[ input_level L l ]                       = data_info_arr[2]
+        data_info_time_of_last_access[ input_level L l ]        = data_info_arr[3]
+        data_info_time_of_last_modification[ input_level L l ]  = data_info_arr[4]
+        data_info_time_of_last_change[ input_level L l ]        = data_info_arr[5]
+        data_info_access_rights[ input_level L l ]              = data_info_arr[6]
+        data_info_uid[ input_level L l ]                        = data_info_arr[7]
+        data_info_gid[ input_level L l ]                        = data_info_arr[8]
+        return
     } else {
         l = data[ input_level L ] + 1
         data[ input_level L ] = l
         if (l > MAX_DATA_ROW_NUM)   MAX_DATA_ROW_NUM = l
-        if (_maxcollen[ input_level ] < $1)  _maxcollen[ input_level ] = $1
-        data[ input_level L l ] = substr($0, length($1)+1)
+        # elem = str_trim($0)
+        elem_len = wcswidth($0)
+        if (_maxcollen[ input_level ] < elem_len)  _maxcollen[ input_level ] = elem_len
+        data[ input_level L l ] = $0
     }
 }
 
@@ -166,11 +199,11 @@ input_state==INPUT_STATE_CTRL{
 
 END {
     if ( exit_is_with_cmd() == true ) {
-        for (i=1; i<input_level; i++) {
+        for (i=1; i<=FOCUS_COL; i++) {
             _key_path = _key_path L data[ i L ctrl_win_val( data, i ) ]
         }
-        send_env( "___X_CMD_UI_SELECTN_FINAL_COMMAND",    exit_get_cmd() )
-        send_env( "___X_CMD_UI_SELECTN_CURRENT_ITEM",         _key_path )
+        send_env( "___X_CMD_UI_CATEGORYSELECT_FINAL_COMMAND",    exit_get_cmd() )
+        send_env( "___X_CMD_UI_CATEGORYSELECT_CURRENT_ITEM",         _key_path )
     }
 }
 

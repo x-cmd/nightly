@@ -3,35 +3,40 @@
 xrc ui/lib/region
 xrc ui/lib/varctl
 
-___x_cmd_ui_selectnlazy(){
-    ___x_cmd_ui_selectnlazy_mainloop "$@"
+___x_cmd_ui_categoryselect(){
+    ___x_cmd_ui_categoryselect_mainloop "$@"
 }
 
-___x_cmd_ui_selectnlazy_test_func_ls(){
+
+___x_cmd_ui_categoryselect_test_func_ls(){
     if [ "$#" -eq 0 ]; then
-        ls .
+        ls -a -I . -I .. . | xargs stat -c "%n
+--- %F\\006%s\\006%x\\006%y\\006%z\\006%A\\006%u/%U\\006%g/%G" 2>/dev/null
         return
     fi
 
     local IFS="/"
     local p="$*"
     [ ! -d "$p" ] && return 1
-    ls "$p" 2>/dev/null
+    cd "$p"
+    ls -a -I . -I .. | xargs stat -c "%n
+--- %F\\006%s\\006%x\\006%y\\006%z\\006%A\\006%u/%U\\006%g/%G" 2>/dev/null
+    cd - >/dev/null
     return 0
 }
 
-___x_cmd_ui_selectnlazy_mainloop(){
+___x_cmd_ui_categoryselect_mainloop(){
     local func="$1"; shift
-    ___x_cmd_ui_region_run ___x_cmd_ui_selectnlazy_mainloop_recursive_first
+    ___x_cmd_ui_region_run ___x_cmd_ui_categoryselect_mainloop_recursive_first
 }
 
-___x_cmd_ui_selectnlazy_mainloop_recursive_first(){
+___x_cmd_ui_categoryselect_mainloop_recursive_first(){
     local nextlist
     local is_stopped=
     {
         ___x_cmd_pidofsubshell
-        ___x_cmd_ui_selectnlazy_mainloop_recursive_update_nextlist
-        ___x_cmd_ui_selectnlazy_mainloop_recursive 1
+        ___x_cmd_ui_categoryselect_mainloop_recursive_update_nextlist
+        ___x_cmd_ui_categoryselect_mainloop_recursive 1
     } | {
         local PID_OF_UPSUBSHELL
         read -r PID_OF_UPSUBSHELL
@@ -45,30 +50,31 @@ ___x_cmd_ui_selectnlazy_mainloop_recursive_first(){
         -f "$___X_CMD_ROOT/awk/lib/ui.awk" \
         -f "$___X_CMD_ROOT/ui/lib/share.awk" \
         -f "$___X_CMD_ROOT/ui/lib/theme.awk" \
-        -f "$___X_CMD_ROOT/ui/lib/selectnlazy.awk"
+        -f "$___X_CMD_ROOT/ui/lib/categoryselect.awk"
         # -f "/home/qiakai/ui/lib/share.awk" \
         # -f "/home/qiakai/ui/lib/theme.awk" \
-        # -f "/home/qiakai/ui/lib/selectnlazy.awk"
+        # -f "/home/qiakai/ui/lib/categoryselect.awk"
         kill -SIGPIPE "$PID_OF_UPSUBSHELL"
     }
 }
 
-___x_cmd_ui_selectnlazy_mainloop_recursive_curlist_curitem(){
-    printf "%s" "$curlist" | awk -v idx="$curidx" 'NR==idx{ print $0; exit(0) }'
+___x_cmd_ui_categoryselect_mainloop_recursive_curlist_curitem(){
+    printf "%s" "$curlist" | awk -v idx="$((curidx*2-1))" 'NR==idx{ print $0; exit(0) }'
 }
 
-___x_cmd_ui_selectnlazy_mainloop_recursive_curlist_len(){
-    printf "%s" "$curlist" | awk 'END{ print NR; }'
+___x_cmd_ui_categoryselect_mainloop_recursive_curlist_len(){
+    printf "%s" "$curlist" | awk 'END{ print int(NR/2); }'
 }
 
 ___x_cmd_ui_send_newlist(){
     printf "%s %d %d$___X_CMD_UI_REGION_RS" "---" "$1" "$2"
     shift 2
-    local IFS="$___X_CMD_UI_REGION_RS"
     local item
-    printf "%s\n" "$*" | while read -r item;do
-        printf "${#item} $item$___X_CMD_UI_REGION_RS"
-    done
+    if [ "$#" -gt 0 ] ;then
+        printf "%s\n" "$*" | while read -r item;do
+            printf "$item$___X_CMD_UI_REGION_RS"
+        done
+    fi
     printf "%s$___X_CMD_UI_REGION_RS" "---"
 }
 
@@ -76,15 +82,15 @@ ___x_cmd_ui_send_data(){
     printf "%s$___X_CMD_UI_REGION_RS" "$*"
 }
 
-___x_cmd_ui_selectnlazy_mainloop_recursive_sendview(){
+___x_cmd_ui_categoryselect_mainloop_recursive_sendview(){
     ticks="$((ticks+1))"
     printf "R:%s:%s:%s%s" "$ticks" "$COLUMNS" "$LINES" "$___X_CMD_UI_REGION_RS" # send view
 }
 
-___x_cmd_ui_selectnlazy_mainloop_recursive_update_nextlist(){
+___x_cmd_ui_categoryselect_mainloop_recursive_update_nextlist(){
     nextlist="$("$func" "$@")"
     expandable=$?
-    ___x_cmd_ui_selectnlazy_mainloop_recursive_sendview
+    ___x_cmd_ui_categoryselect_mainloop_recursive_sendview
 
     if [ "$expandable" = 0 ]; then
         ___x_cmd_ui_send_newlist "$((curlevel+1))" 0 "$nextlist"
@@ -94,17 +100,17 @@ ___x_cmd_ui_selectnlazy_mainloop_recursive_update_nextlist(){
 }
 
 # Using calling stack to simulate list to avoid lacking of efficient array support in Posix Sh. Proudly implemented by me
-___x_cmd_ui_selectnlazy_mainloop_recursive(){
+___x_cmd_ui_categoryselect_mainloop_recursive(){
     local curlevel="${1:?Provide level}";             shift 1
     local curlist="${nextlist}"
     local curlistl
-    curlistl="$(___x_cmd_ui_selectnlazy_mainloop_recursive_curlist_len)"
+    curlistl="$(___x_cmd_ui_categoryselect_mainloop_recursive_curlist_len)"
     local curidx=1
     local curitem
-    curitem="$(___x_cmd_ui_selectnlazy_mainloop_recursive_curlist_curitem)"
+    curitem="$(___x_cmd_ui_categoryselect_mainloop_recursive_curlist_curitem)"
     local newlist
     local expandable
-    ___x_cmd_ui_selectnlazy_mainloop_recursive_update_nextlist "$@" "$curitem"
+    ___x_cmd_ui_categoryselect_mainloop_recursive_update_nextlist "$@" "$curitem"
 
     while [ -z "$is_stopped" ]; do
         if ! ___x_cmd_ui_getchar; then
@@ -114,38 +120,38 @@ ___x_cmd_ui_selectnlazy_mainloop_recursive(){
         case "${___X_CMD_UI_GETCHAR_CHAR}" in
             UP)
                 ___x_cmd_ui_varctl_num curidx 1 "$curlistl" dec
-                curitem="$(___x_cmd_ui_selectnlazy_mainloop_recursive_curlist_curitem)"
+                curitem="$(___x_cmd_ui_categoryselect_mainloop_recursive_curlist_curitem)"
                 ___x_cmd_ui_send_data "C:$___X_CMD_UI_GETCHAR_TYPE:$___X_CMD_UI_GETCHAR_CHAR"
-                ___x_cmd_ui_selectnlazy_mainloop_recursive_update_nextlist "$@" "$curitem"
+                ___x_cmd_ui_categoryselect_mainloop_recursive_update_nextlist "$@" "$curitem"
                 ;;
             DN)
                 ___x_cmd_ui_varctl_num curidx 1 "$curlistl" inc
-                curitem="$(___x_cmd_ui_selectnlazy_mainloop_recursive_curlist_curitem)"
+                curitem="$(___x_cmd_ui_categoryselect_mainloop_recursive_curlist_curitem)"
                 ___x_cmd_ui_send_data "C:$___X_CMD_UI_GETCHAR_TYPE:$___X_CMD_UI_GETCHAR_CHAR"
-                ___x_cmd_ui_selectnlazy_mainloop_recursive_update_nextlist "$@" "$curitem"
+                ___x_cmd_ui_categoryselect_mainloop_recursive_update_nextlist "$@" "$curitem"
                 ;;
             LEFT)
                 if [ "$curlevel" != 1 ]; then
                     ___x_cmd_ui_send_data "C:$___X_CMD_UI_GETCHAR_TYPE:$___X_CMD_UI_GETCHAR_CHAR"
-                    ___x_cmd_ui_selectnlazy_mainloop_recursive_sendview
+                    ___x_cmd_ui_categoryselect_mainloop_recursive_sendview
                     nextlist="${curlist}"
                     break
                 fi
                 ;;
             RIGHT)
-                curlistl="$(___x_cmd_ui_selectnlazy_mainloop_recursive_curlist_len)"
+                curlistl="$(___x_cmd_ui_categoryselect_mainloop_recursive_curlist_len)"
                 if [ "$expandable" = 0  ] && [ "$curlistl" -gt 0 ]; then
                     ___x_cmd_ui_send_data "C:$___X_CMD_UI_GETCHAR_TYPE:$___X_CMD_UI_GETCHAR_CHAR"
-                    ___x_cmd_ui_selectnlazy_mainloop_recursive "$((curlevel+1))" "$@" "$curitem"
+                    ___x_cmd_ui_categoryselect_mainloop_recursive "$((curlevel+1))" "$@" "$curitem"
                 fi
                 ;;
             *)  ___x_cmd_ui_send_data "C:$___X_CMD_UI_GETCHAR_TYPE:$___X_CMD_UI_GETCHAR_CHAR"
-                ___x_cmd_ui_selectnlazy_mainloop_recursive_sendview ;;
+                ___x_cmd_ui_categoryselect_mainloop_recursive_sendview ;;
         esac
     done
 }
 
 
-# ___x_cmd_ui_selectnlazy ___x_cmd_ui_selectnlazy_test_func_ls
-# echo "___X_CMD_UI_SELECTN_FINAL_COMMAND:" "$___X_CMD_UI_SELECTN_FINAL_COMMAND"
-# echo "___X_CMD_UI_SELECTN_CURRENT_ITEM:" "$___X_CMD_UI_SELECTN_CURRENT_ITEM"
+# ___x_cmd_ui_categoryselect ___x_cmd_ui_categoryselect_test_func_ls
+# echo "___X_CMD_UI_CATEGORYSELECT_FINAL_COMMAND:" "$___X_CMD_UI_CATEGORYSELECT_FINAL_COMMAND"
+# echo "___X_CMD_UI_CATEGORYSELECT_CURRENT_ITEM:" "$___X_CMD_UI_CATEGORYSELECT_CURRENT_ITEM"

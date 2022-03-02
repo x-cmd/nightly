@@ -455,6 +455,13 @@ function th( style, text ){
     return style text UI_END
 }
 
+function judgment_of_regexp(obj, _key_prefix,      i){
+    for (i=1; i<=obj[ _key_prefix L]; ++i) {
+        if ( _answer ~ obj[ _key_prefix L i ] ) return true
+    }
+    return false
+}
+
 # Section: from awk
 
 BEGIN{

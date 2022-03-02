@@ -1,12 +1,30 @@
 # . ./lib/form
 xrc ui/lib/form
+
+___x_cmd_ui_form_control_awk(){
+    LC_ALL=en_US.UTF-8 command awk \
+        -v EXIT_OP="$EXIT_OP" \
+        -v RS="$___X_CMD_UI_REGION_RS" -v ORS="$___X_CMD_UI_REGION_RS" \
+        -v exit_strategy="$___X_CMD_UI_FORM_EXIT_STRATEGY" \
+        -f "$___X_CMD_ROOT/awk/lib/default.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/str.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/wcwidth.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/ui.awk" \
+        -f "./lib/share.awk" \
+        -f "./lib/theme.awk" \
+        -f "./lib/form.awk"
+        # -f "$___X_CMD_ROOT/ui/lib/share.awk" \
+        # -f "$___X_CMD_ROOT/ui/lib/theme.awk" \
+        # -f "$___X_CMD_ROOT/ui/lib/form.awk"
+}
+
 f(){
     # local ___X_CMD_UI_FORM_EXIT_STRATEGY="execute|save|exit"
     local ___X_CMD_UI_FORM_EXIT_STRATEGY="execute|exit"
 
     ___x_cmd_ui_form \
     "Text atype" atype 1                       "=" private public -- \
-    "Text repo" repo "ddd"                              "=~" "abc1[0-9]+"   -- \
+    "Text repo" repo "abc12"                              "=~" "abc1[0-9]+"   -- \
     "Text user" user ""                              "=~*" "12[0-9]+" -- \
     "Text mul_line_arg1" mul_line_arg1 "xxx"   "*" -- \
     "Text mul_line_arg2" mul_line_arg2  ""  -- \
@@ -25,3 +43,9 @@ f(){
     echo "___X_CMD_UI_FORM_EXIT:" "$___X_CMD_UI_FORM_EXIT"
 }
 f
+f1(){
+    local ___X_CMD_UI_FORM_EXIT_STRATEGY="execute|exit"
+    ___x_cmd_ui_form "Are you sure you want to delete repo" tf 1 = "yes" "no"
+    echo "tf: $tf"
+    echo "___X_CMD_UI_FORM_EXIT:" "$___X_CMD_UI_FORM_EXIT"
+}
