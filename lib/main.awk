@@ -1050,7 +1050,6 @@ function generate_rest_argument_help(        _option_help,_option_after) {
         _option_after = cut_line(_option_after,_max_len)
         _option_help = _option_help "    " FG_BLUE option_id _space "   " FG_LIGHT_RED _option_after "\n"
     }
-
     return _option_help
 }
 
@@ -1221,6 +1220,114 @@ function generate_advise_json(      indent, indent_str,
 # EndSection
 
 # Section: 4-Arguments and intercept for help and advise            5-DefaultValues
+function ls_option(         i, j, k,tmp_len,option_id,tmp,option_desc,option_argc,oparr_keyprefix,_op,option_default,_optarr_len,_regex,_candidate,_default){
+    for (i=1; i<=advise_arr[ LEN ]; ++i) {
+        # TODO: Can be optimalize.
+        tmp_len=split(advise_arr[ i ], tmp)
+        if ( option_alias_2_option_id[ tmp[1] ] != "" ){
+            option_id = option_alias_2_option_id[ tmp[1] ]
+        } else {
+            option_id = tmp[1]
+        }
+
+        for (j=2; j<=tmp_len; ++j) {
+            advise_map[ option_id ] = advise_map[ option_id ] " " tmp[j]
+        }
+        advise_map[ option_id ] = str_trim( advise_map[ option_id ] )
+    }
+
+    for (i=1; i<=option_id_list[ LEN ]; ++i) {
+        option_id = option_id_list[i]
+        print "printf \"%s\n\" " " " quote_string(option_id)
+        option_desc = option_arr[ option_id KSEP OPTION_DESC ]
+        print "printf \"%s\n\" " " " quote_string(option_desc)
+
+        option_argc   = option_arr[ option_id KSEP LEN ]
+        if( option_argc == 0 ){
+            print "printf \"\n\n\" "
+        }
+        for(j=1; j<=option_argc; ++j) {
+            oparr_keyprefix = option_id KSEP j KSEP OPTARG_OPARR
+            _op = option_arr[ oparr_keyprefix KSEP 1 ]
+            option_default = option_arr[ option_id KSEP j KSEP OPTARG_DEFAULT ]
+            if (option_default != "" && option_default != OPTARG_DEFAULT_REQUIRED_VALUE) {
+                print "printf \"\006%s\n\" " " " quote_string(option_default)
+            }
+
+            if ( _op == "=~" ) {
+                _optarr_len = option_arr[ oparr_keyprefix KSEP LEN ]
+                for ( k=1; k<=_optarr_len; ++k ) {
+                    _regex = "\"" option_arr[ oparr_keyprefix KSEP k ] "\""
+                    print "printf \"%s\006\" " _regex
+                }
+                print "printf \"\n\" " " "
+            }else if ( _op == "=" ) {
+                _optarr_len = option_arr[ oparr_keyprefix KSEP LEN ]
+                for ( k=1; k<=_optarr_len; ++k ) {
+                    _candidate = "\"" option_arr[ oparr_keyprefix KSEP k ] "\""
+                    print "printf \"%s\006\" " _candidate
+                }
+                print "printf \"\n\" " " "
+            }
+        }
+        if (advise_map[ option_id ] != "") {
+            print "printf \"%s\n\" " advise_map[option_id]
+            continue
+        }else{
+            print "printf \"\n\" "
+        }
+    }
+
+    for (i=1; i <= rest_option_id_list[ LEN ]; ++i) {
+        option_id       = rest_option_id_list[ i ]
+        print "printf \"%s\n\" " " " quote_string(option_id)
+        option_desc = option_arr[ option_id KSEP OPTION_DESC ]
+        print "printf \"%s\n\" " " " quote_string(option_desc)
+
+        _default = option_arr[ option_id KSEP 1 KSEP OPTARG_DEFAULT ]
+        if (_default != "" && _default != OPTARG_DEFAULT_REQUIRED_VALUE) {
+            print "printf \"\006%s\n\" " " " quote_string(_default)
+        }else{
+            print "printf \"\n\" "
+        }
+
+        oparr_keyprefix = option_id KSEP 1 KSEP OPTARG_OPARR
+        _op = option_arr[ oparr_keyprefix KSEP 1 ]
+        if ( _op == "=~" ) {
+            _optarr_len = option_arr[ oparr_keyprefix KSEP LEN ]
+            for ( k=1; k<=_optarr_len; ++k ) {
+                _regex = "\"" option_arr[ oparr_keyprefix KSEP k ] "\""
+                print "printf \"%s\006\" " _regex
+            }
+            print "printf \"\n\" " " "
+        }else if(_op == "=") {
+            _optarr_len = option_arr[ oparr_keyprefix KSEP LEN ]
+            for ( k=1; k<=_optarr_len; ++k ) {
+                _candidate = "\"" option_arr[ oparr_keyprefix KSEP k ] "\""
+                print "printf \"%s\006\" " _candidate
+            }
+            print "printf \"\n\" " " "
+        }else{
+            print "printf \"\n\" "
+        }
+
+        if (advise_map[ option_id ] != "") {
+            print "printf \"%s\n\" " advise_map[option_id]
+            continue
+        }else{
+            print "printf \"\n\" "
+        }
+    }
+}
+
+function ls_subcmd(         i,_cmd_name){
+    for (i=1; i <= subcmd_arr[ LEN ]; ++i) {
+        _cmd_name = subcmd_arr[ i ]
+        print "printf \"%s\n\" " quote_string(_cmd_name)
+        print "printf \"%s\n\" " subcmd_map[ subcmd_arr[ i ] ]
+    }
+}
+
 NR==4 {
 
     # handle arguments
@@ -1253,6 +1360,27 @@ NR==4 {
         }
         print "return 1"
         exit_now(1)
+    }
+
+    if( arg_arr[1] == "_ls_subcmd" ){
+        ls_subcmd()
+        exit_now(0)
+    }
+
+    if( arg_arr[1] == "_ls_option" ){
+        ls_option()
+        exit_now(0)
+    }
+
+    if( arg_arr[1] == "_ls_option_subcmd" ){
+        ls_option()
+        print "printf \"---------------------\n\" "
+        ls_subcmd()
+        print "printf \"---------------------\n\" "
+        for(i=1; i <= arg_arr[ LEN ]; ++i){
+            print "printf \"%s\n\" " arg_arr[i]
+        }
+        exit_now(0)
     }
 
     if( arg_arr[1] == "_dryrun" ){

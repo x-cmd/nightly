@@ -35,6 +35,7 @@ case "$1" in
         docker run -it-v "$(pwd)":/pd "xcmd/${1}-dev" sh -i -c "cd pd && x test local"
         ;;
     *)
+        xws install
         echo "Usage: x test {cross|local|bash:3|bash:4|bash:5|alpine|ubuntu|centos}"
         return 1
         ;;

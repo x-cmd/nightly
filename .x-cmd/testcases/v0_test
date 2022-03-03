@@ -268,7 +268,7 @@ start_test() {
 # Example:
 # #start_test ./testcase/v0_test_option
 
-for testcase in option namelist subcmd param_default quote has_subcmd dryrun license; do
+for testcase in option namelist subcmd param_default quote has_subcmd dryrun license ls_option ls_subcmd ls_option_subcmd; do
     . "$(x wsroot)/.x-cmd/testcases/v0_test_$testcase"
     start_test "$(x wsroot)/.x-cmd/testcases/v0_test_$testcase"
 done
