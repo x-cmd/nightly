@@ -14,7 +14,7 @@ ___x_cmd_gh_xrc(){
     done
 }
 
-___x_cmd_gh_xrc  utils config token repo/main current user/main org/main \
+___x_cmd_gh_xrc  utils config_awk config token repo/main current user/main org/main \
     repo/member/main repo/pr/main _type/main
 
 x log init gh
@@ -28,6 +28,7 @@ subcommand:
     user                                    "user"
     config                                  "save, load, which"
     token                                   "set token"
+    release                                 "manage release"
 '
     param:run
 
@@ -56,9 +57,11 @@ ____x_cmd_gh_make() {
     http "@$O" make  'https://api.github.com'
     http "@$O" header Accept "application/vnd.github.v3+json"
 
-    O=$O_ORIGINAL ___x_cmd_gh_config_load >/dev/null
+    local token
+    token="$(O="$O_ORIGINAL" ___x_cmd_gh_config_get "oauth_token")"
 
-    if [ $? -eq 0 ] && [ -n "$(O="$O_ORIGINAL" ___x_cmd_gh_token)" ]; then
+    if [ -n "$token" ]; then
+        http "@___x_cmd_gh_$O_ORIGINAL" header put Authorization "token $token"
         local user
         user="$(O="$O_ORIGINAL" ___x_cmd_gh_current_owner)" || return 1
         gh_log info "Hi $user! You've successfully authenticated."

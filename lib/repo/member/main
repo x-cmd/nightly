@@ -48,7 +48,7 @@ options:
 
     ___x_cmd_gh_param_init_owner_repo
     if [ -z "$1" ];then
-        echo "At least one user’s spatial address is needed"
+        printf "%s\n" "At least one user's spatial address is needed"
         return 1
     fi
     local username
@@ -73,7 +73,7 @@ options:
     #n              "Username list"
 '
     param:run
-    [ -z "$1" ] && gh_log error "At least one user’s spatial address is needed" && return 1
+    [ -z "$1" ] && gh_log error "At least one user's spatial address is needed" && return 1
 
     ___x_cmd_gh_param_init_owner_repo
     local username
