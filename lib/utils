@@ -26,10 +26,6 @@ ______x_cmd_gt_get_multi() {
     local total_page=100000
     while [ "$i" -le "$total_page" ]; do
         ______x_cmd_gt_get "$@" page="$i" per_page=100
-        local code="$?"
-        if [ "$code" -ne 0 ];then
-            return $code
-        fi
         total_page="$(______x_cmd_gt_resp_header "total_page")"
         [ -z "$total_page" ] && return
         # echo "total_page:$total_page" >&2
@@ -123,13 +119,6 @@ ______x_cmd_gt_parse_owner_repo() {
     fi
 }
 
-______x_cmd_gt_table() {
-    local tmp
-    tmp=$1
-    shift
-    printf "%s" "$tmp" 2>&1 | ui table jsonfmt "$@"
-}
-
 ___x_cmd_gt_json_query(){
     local awkfile
     awkfile="$(xrc cat awk/lib/default.awk awk/lib/json.awk awk/lib/jiter.awk )"
@@ -151,4 +140,8 @@ ___x_cmd_gt_json_query_rename(){
         eval "${1%%=*}"="$(___x_cmd_gt_json_query "$data" "${1##*=}")"
         shift
     done
+}
+
+___x_cmd_gt_default(){
+    param_default "$@" 2>/dev/null || return 1
 }

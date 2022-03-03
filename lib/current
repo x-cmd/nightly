@@ -39,17 +39,19 @@ ___x_cmd_gt_current_owner() {
     param:void
     local O="${O:-GITEE_DEFAULT}"
     if [ -n "$1" ]; then
-        param_default put "gitee_$O" owner "$1"
-        param_default remove "gitee_$O" "owner_type"
-        param_default dump "gitee_$O"
+        ___x_cmd_gt_default put     "gitee_$O" "owner" "$1"
+        ___x_cmd_gt_default remove  "gitee_$O" "owner_type"
         return 0
     fi
+
     local owner
-    owner="$(param_default get "gitee_$O" owner)"
+    owner="$(___x_cmd_gt_default get "gitee_$O" owner)"
     [ -n "$owner" ] && printf "%s" "$owner" && return
 
-    data=$(______x_cmd_gt_get "/v5/user")
-    [ -n "$data" ] && owner=$(___x_cmd_gt_json_query "$data" .login) && param_default put "gitee_$O" owner "$owner"
+    local data
+    data=$(______x_cmd_gt_get "/v5/user") || return 1
+    owner="$(___x_cmd_gt_json_query "$data" ".login")"
+    ___x_cmd_gt_default put "gitee_$O" owner "$owner"
     printf "%s" "$owner"
 }
 
@@ -59,12 +61,12 @@ ___x_cmd_gt_current_owner_type() {
     local O="${O:-GITEE_DEFAULT}"
     if [ -n "$1" ]; then
         # Set owner type
-        param_default put "gitee_$O" owner_type "$1"
+        ___x_cmd_gt_default put "gitee_$O" owner_type "$1"
         return
     fi
 
     local data
-    data="$(param_default get "gitee_$O" owner_type "$1")"
+    data="$(___x_cmd_gt_default get "gitee_$O" owner_type "$1")"
     if [ -z "$data" ]; then
         owner="$(___x_cmd_gt_current_owner)"
         if [ -z "$owner" ]; then
@@ -75,9 +77,9 @@ ___x_cmd_gt_current_owner_type() {
         data=$(______x_cmd_gt_owner_type_query "$owner")
         [ -z "$data" ] && return 1
 
-        param_default put "gitee_$O" owner_type "$data"
+        ___x_cmd_gt_default put "gitee_$O" owner_type "$data"
     fi
-    printf "%s" "$data" 
+    printf "%s" "$data"
 }
 
 ______x_cmd_gt_owner_type_query() {
