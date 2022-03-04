@@ -123,6 +123,23 @@ function str_trim_left(astr){
     return astr
 }
 
+function str_rep(char, number, _i, _s) {
+    for (   _i=1; _i<=number; ++_i  ) _s = _s char
+    return _s
+}
+
+function str_join(sep, obj, prefix, start, end,     i, _result) {
+    _result = (start <= end) ? obj[prefix start]: ""
+    for (i=start+1; i<=end; ++i) _result = _result sep obj[prefix i]
+    return _result
+}
+
+function str_joinwrap(left, right, obj, prefix, start, end,     i, _result) {
+    _result = ""
+    for (i=start; i<=end; ++i) _result = _result left obj[prefix i] right
+    return _result
+}
+
 # EndSection
 
 # Section: code facility

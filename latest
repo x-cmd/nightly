@@ -172,7 +172,8 @@ ___param_dsl_set(){
 }
 
 alias param:dsl="local ___X_CMD_PARAM_DSL; ___param_dsl_set"
-alias param:run='local IFS; ___x_cmd_param_int "$@" ; local _x_cmd_param_code="$?" ; [ $_x_cmd_param_code = 125 ] && eval "$(_param_main "$@" )" || return $_x_cmd_param_code'
+# TODO: there is a better design.
+alias param:run='local IFS; ___x_cmd_param_int "$@" ; local _x_cmd_param_code="$?" ; [ "$_x_cmd_param_code" = 125 ] && eval "$(_param_main "$@" )" || return $_x_cmd_param_code'
 
 ___x_cmd_param_int(){
     case "$1" in

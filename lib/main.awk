@@ -71,15 +71,10 @@ function handle_arguments_restargv_typecheck(is_interative, i, argval, is_dsl_de
 
     if (argval != "") {
         _ret = assert(_optarg_id, "$" i, argval)
-
-        if (_ret == true) {
-            return true
-        } else if (false == is_interative) {
-            if (is_dsl_default == true) {
-                panic_param_define_error(_ret)
-            } else {
-                panic_error( _ret )
-            }
+        if (_ret == true)                       return true
+        else if (false == is_interative) {
+            if (is_dsl_default == true)         panic_param_define_error(_ret)
+            else                                panic_error( _ret )
         } else {
             # TODO: XXX
             append_query_code(  "_X_CMD_PARAM_ARG_" i,
@@ -89,20 +84,13 @@ function handle_arguments_restargv_typecheck(is_interative, i, argval, is_dsl_de
         }
     }
 
-    nth_rule = option_arr[ "#n" ]
-    if (nth_rule == "") {
-       return true
-    }
+    if (option_arr[ "#n" ] == "")     return true               # nth_rule
 
     _ret = assert(_optarg_id, "$" i, argval)
-    if (_ret == true) {
-        return true
-    } else if (false == is_interative) {
-        if (is_dsl_default == true) {
-            panic_param_define_error(_ret)
-        } else {
-            panic_error( _ret )
-        }
+    if (_ret == true)                           return true
+    else if (false == is_interative) {
+        if (is_dsl_default == true)             panic_param_define_error(_ret)
+        else                                    panic_error( _ret )
     } else {
         # TODO: XXX
         append_query_code(  "_X_CMD_PARAM_ARG_" i,
@@ -112,7 +100,7 @@ function handle_arguments_restargv_typecheck(is_interative, i, argval, is_dsl_de
     }
 }
 
-function handle_arguments_restargv(         final_rest_argv_len, i, nth_rule, arg_val, option_id,
+function handle_arguments_restargv(         final_rest_argv_len, i, arg_val, option_id,
     named_value, _need_set_arg, set_arg_namelist, tmp, _index ){
 
     final_rest_argv_len = final_rest_argv[ LEN ]
