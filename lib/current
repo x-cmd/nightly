@@ -39,20 +39,19 @@ ___x_cmd_gh_current_owner() {
     param:void
     local O="${O:-GITHUB_DEFAULT}"
     if [ -n "$1" ]; then
-        ___x_cmd_gh_default put     "github_$O" "owner" "$1"
-        ___x_cmd_gh_default remove  "github_$O" "owner_type"
+        ___X_CMD_GITHUB_DEFAULT_OWNER="$1"
+        ___x_cmd_gh_config_set  "user" "$___X_CMD_GITHUB_DEFAULT_OWNER"
+        ___x_cmd_ui_tf "true" "Manually change the owner to $___X_CMD_GITHUB_DEFAULT_OWNER"
         return 0
     fi
 
-    local owner
-    owner="$(___x_cmd_gh_default get "github_$O" owner)"
-    [ -n "$owner" ] && printf "%s\n" "$owner" && return 0
+    [ -n "$___X_CMD_GITHUB_DEFAULT_OWNER" ] && printf "%s\n" "$___X_CMD_GITHUB_DEFAULT_OWNER" && return 0
 
     local data
     data=$(___x_cmd_gh_get "/user") || return 1
-    owner=$(___x_cmd_gh_json_query "$data" ".login")
-    ___x_cmd_gh_default put "github_$O" owner "$owner"
-    printf "%s\n" "$owner"
+    ___X_CMD_GITHUB_DEFAULT_OWNER=$(___x_cmd_gh_json_query "$data" ".login")
+    ___x_cmd_gh_config_set  "user" "$___X_CMD_GITHUB_DEFAULT_OWNER" 1>/dev/null 2>&1
+    printf "%s\n" "$___X_CMD_GITHUB_DEFAULT_OWNER"
 }
 
 # shellcheck disable=SC2120
@@ -60,7 +59,6 @@ ___x_cmd_gh_current_owner_type() {
     param:void
     local O="${O:-GITHUB_DEFAULT}"
     if [ -n "$1" ]; then
-        # Set owner type
         ___x_cmd_gh_default put "github_$O" owner_type "$1"
         return
     fi
