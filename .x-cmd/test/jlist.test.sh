@@ -29,7 +29,8 @@ END{
 
     print jlist_join(",", jobj, jpath("1.4.c"), "1:5:1")
     print jlist_join(",", jobj, jpath("1.4.c"))
-    arrgl = jlist_grep_to_arr(jobj, "1.4.c", "[5-7]", arrg)
+    # arrgl = jlist_grep_to_arr(jobj, "1.4.c", "[5-7]", arrg)
+    arrgl = jgrep_to_arr(jobj, "1.4.c", "[5-7]", arrg)
     for( i=1; i<=arrgl; ++i){
         print arrg[i]
     }
@@ -43,4 +44,23 @@ A
 }
 
 time (json_join)
+
+# f(){
+
+#     awk '
+# function f2(arr3, arr4){
+#     arr4[1]=arr3[1]
+# }
+# function f1(arr1, arr2){
+#     f2(arr1,arr2)
+# }
+# {
+#     a=$0
+#     split(a, obj1, "b")
+#     f1(obj1, obj2)
+#     print obj2[1]
+# }
+# '
+# }
+# echo "aabbccdd" | f
 

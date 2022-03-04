@@ -354,7 +354,7 @@ function jlist_grep_to_arr( obj, keypath, reg,  arr,        _arrl,    _k, _len, 
 
     _len = obj[ keypath T_LEN ]
     for(_i=1; _i<=_len; ++_i){
-        _tmp = jpath(_k "." _i key)
+        _tmp = keypath S "\"" _i "\""
         if( match(json_str_unquote2( obj[ _tmp ] ), reg)){
             arr[ ++_arrl ] = _tmp
         }
@@ -421,13 +421,13 @@ function jdict_value2arr(obj, keypath, arr,    _keyarr, i, l){
 function jdict_grep_to_arr( obj, keypath, reg,  arr,    _arrl,  _klist, _k, _tmp, _len, _ret, _i ){
     _k = keypath
     keypath = jpath(keypath)
-
+    print substr(obj[ keypath T_KEY ],2)
     _l = split(substr(obj[ keypath T_KEY ],2), _klist, S)
 
     _arrl = 0
     for(_i=1; _i<=_l; ++_i){
         _tmp = _klist[_i]
-        if( match( obj[ jpath(_k "." json_str_unquote2(_tmp)) ], reg)){
+        if( match( obj[ keypath S _tmp ], reg)){
             arr[ ++ _arrl ] = _tmp
         }
     }
@@ -661,17 +661,17 @@ function json_split2tokenarr_(text){
 # Section: still strange: should be global search
 
 # TODO: ...
-function jgrep_to_arr(obj, keypath, key, reg,      _type){
+function jgrep_to_arr(obj, keypath, reg, key,      _type){
     _k = keypath
     keypath = jpath(keypath)
 
     _type = obj[ keypath ]
     if (_type == T_LIST) {
-        return jlist_grep(obj, keypath, key, reg)
+        return jlist_grep_to_arr(obj, keypath, reg, key)
     }
 
     if (_type == T_DICT) {
-        return jdict_grep(obj, keypath, key, reg)
+        return jdict_grep_to_arr(obj, keypath, reg, key)
     }
 
     return ""

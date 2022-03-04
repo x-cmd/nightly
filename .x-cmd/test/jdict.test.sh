@@ -24,12 +24,13 @@ END{
     jdict_push(_, jpath("1.2"), q("d"), "122")
     jdict_rm(_, jpath("1.2"), q("a"))
 
-    arrlen = jdict_grep_to_arr(_, "1.2.c", "1", arr)
+    arrlen = jdict_grep_to_arr(_, "1.2.c", "{", arr)
+    # arrlen = jgrep_to_arr(_, "1.2.c", "c", arr)
     for(i=1; i<=arrlen; ++i){
         print arr[i]
     }
 
-    print jstr(_)
+    # print jstr(_)
 }
 
 ' <<A
