@@ -6,7 +6,9 @@ xrc dict/latest
 
 # Section 1: Global definitions
 ############################
-PARAM_AWK_PATH="$(xrc which param/lib/main.awk)"
+
+___X_CMD_PARAM_AWK_DSL_PATH="$(xrc which param/lib/dsl.awk)"
+___X_CMD_PARAM_AWK_PATH="$(xrc which param/lib/main.awk)"
 PARAM_DEFAULT_VAR_PREFIX=___X_CMD_X_BASH_PARAM_DEFAULT___
 PARAM_TYPE_VAR_PREFIX=___X_CMD_X_BASH_PARAM_TYPE___
 PARAM_SUBCMD_VAR_PREFIX=___X_CMD_X_BASH_PARAM_SUBCMD___
@@ -170,7 +172,35 @@ ___param_dsl_set(){
 }
 
 alias param:dsl="local ___X_CMD_PARAM_DSL; ___param_dsl_set"
-alias param:run='local IFS; eval "$(_param_main "$@"  )"'
+alias param:run='local IFS; ___x_cmd_param_int "$@" ; local _x_cmd_param_code="$?" ; [ $_x_cmd_param_code = 125 ] && eval "$(_param_main "$@" )" || return $_x_cmd_param_code'
+
+___x_cmd_param_int(){
+    case "$1" in
+        _x_cmd_help)
+            ___X_CMD_PARAM_AWK_PATH="$(xrc which param/lib/help.awk)" _param_main
+            ;;
+        _x_cmd_advise_json)
+            eval "$(___X_CMD_PARAM_AWK_PATH="$(xrc which param/lib/advise.awk)" _param_main "$@")"
+            ;;
+        _param_list_subcmd)
+            ___X_CMD_PARAM_AWK_PATH="$(xrc which param/lib/meta.awk)" _param_main "$@"
+            ;;
+        _param_has_subcmd)
+            ___X_CMD_PARAM_AWK_PATH="$(xrc which param/lib/meta.awk)" _param_main "$@"
+            ;;
+        _ls_subcmd)
+            ___X_CMD_PARAM_AWK_PATH="$(xrc which param/lib/meta.awk)" _param_main "$@"
+            ;;
+        _ls_option)
+            ___X_CMD_PARAM_AWK_PATH="$(xrc which param/lib/meta.awk)" _param_main "$@"
+            ;;
+        _ls_option_subcmd)
+            ___X_CMD_PARAM_AWK_PATH="$(xrc which param/lib/meta.awk)" _param_main "$@"
+            ;;
+        *)  return 125
+    esac
+    return
+}
 
 alias param:void="local ___X_CMD_PARAM_SCOPE;  local ___X_CMD_PARAM_DSL;  param:run"
 
@@ -239,9 +269,12 @@ _param_main() {
             -v COLUMNS="$COLUMNS" \
             -v IS_INTERACTIVE="$___X_CMD_PARAM_IS_INTERACTIVE" \
             -v IS_TTY="$___X_CMD_PARAM_STDERR_IS_TTY" \
-            -f "$PARAM_AWK_PATH"
+            -f "$___X_CMD_PARAM_AWK_DSL_PATH" \
+            -f "$___X_CMD_PARAM_AWK_PATH"
+    local code="$?"
     # Notice: Must clear this variable.
     ___X_CMD_PARAM_SCOPE=
+    return $code
 }
 
 # EndSections
