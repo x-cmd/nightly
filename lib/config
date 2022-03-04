@@ -5,8 +5,8 @@ ___x_cmd_gt_config(){
     param:dsl       '
 subcmd:
     which       "Show current config path"
-    save        "Save the config in memory into file"
-    load        "Load the config from config path"
+    get         "Print the value of a given configuration key"
+    set         "Update configuration with a value for the given key"
 '
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
@@ -24,25 +24,35 @@ ___x_cmd_gt_config_which() {
     printf "%s" "$HOME/.x-cmd/.config/x-bash/app.gitee.config/$O"
 }
 
-# TODO:config
-___x_cmd_gt_config_save() {
-    param:void
+___x_cmd_gt_config_get() {
+    param:scope     "gitee/$O"
+    param:dsl       '
+type:
+    ConfigName  =   oauth_token user git_protocol
+options:
+    --host        "host name"                               <>="gitee.com"
+    #1            "The name of the configuration to get"    <>:ConfigName
+'
+    param:run
     local O="${O:-GITEE_DEFAULT}"
-    local ___gitee_path="${1:-$HOME/.x-cmd/.config/x-bash/app.gitee.config/$O}"
-    [ ! -e "$___gitee_path" ] && mkdir -p "$___gitee_path##*/"
-    ___x_cmd_gt_default dump "gitee_$O">"$___gitee_path" && ___x_cmd_ui tf "true" \
-    "$(ui bold "Config $O saved in path:") $(ui yellow underline "$___gitee_path")" && return 0
-    gt_log error "gt config save Fail"
+    [ -e  "$HOME/.x-cmd/.config/x-bash/app.gitee.config/$O" ] || return 1
+    ___x_cmd_git_config_get "$HOME/.x-cmd/.config/x-bash/app.gitee.config/$O" "$host" "$1"
 }
 
-# shellcheck disable=SC2120
-___x_cmd_gt_config_load() {
-    param:void
+___x_cmd_gt_config_set() {
+    param:scope     "gitee/$O"
+    param:dsl       '
+type:
+    ConfigName  =   oauth_token user git_protocol
+options:
+    --host    "host name"                             <>="gitee.com"
+    #1        "Please provide configuration key"      <>:ConfigName
+    #2        "Please provide configuration val"      <>
+'
+    param:run
     local O="${O:-GITEE_DEFAULT}"
-    local ___gitee_path="${1:-$HOME/.x-cmd/.config/x-bash/app.gitee.config/$O}"
-    [ ! -f "$___gitee_path" ] && gt_log warn "There is no history config" && return
-    ___x_cmd_gt_default load "gitee_$O" "$___gitee_path"
-    local token
-    token="$(___x_cmd_gt_default get "gitee_$O" token)"
-    http "@___x_cmd_gt_${O:-GITEE_DEFAULT}" header put Authorization "token $token"
+    local ___gitee_path="$HOME/.x-cmd/.config/x-bash/app.gitee.config/$O"
+    [ -e  "$___gitee_path" ] || mkdir -p "$___gitee_path##*/"
+    ___x_cmd_git_config_set "$___gitee_path" "$host" "$1" "$2" && ___x_cmd_ui_tf "true" "set config successfully" && return 0
+    gh_log error "gh config set Fail"
 }

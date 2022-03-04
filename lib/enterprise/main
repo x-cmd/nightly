@@ -76,9 +76,9 @@ ___x_cmd_gt_enterprise_repo_ls() {
     param:scope     "gitee/$O"
     param:dsl       '
 type:
-    genre = all public internal private
+    Genre = all public internal private
 options:
-    --repo_type     "type"          <>:genre="all"
+    --repo_type     "type"          <>:Genre="all"
     --direct        "direct"        <>:bool="false"
 '
     param:run

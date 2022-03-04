@@ -26,14 +26,15 @@ subcmd:
 }
 
 
+# shellcheck disable=SC2154
 ___x_cmd_gt_issue_create() {
     param:scope     "gitee/$O"
     param:dsl      '
 options:
     --owner         "owner"                         <>
     --title         "title"                         <>
-    --body          "issue describe"                <>=""
     --repo          "repo path"                     <>
+    --body          "issue describe"                <>=""
     --type          "issue type"                    <>=""
     --assignee      "assignee space address"        <>=""
     --collaborators "collaborators space address"   <>=""
@@ -44,19 +45,27 @@ options:
 '
     security=${security:-false}
     param:run
-    ______x_cmd_gt_post_json "/v5/repos/${owner##*/}/issues" repo=$repo title issue_type=$type body assignee \
-        collaborators milestone labels program security_hole=$security
+    
+    local data
+    data="$(______x_cmd_gt_post_json "/v5/repos/${owner##*/}/issues" repo="$repo" title issue_type="$type" body assignee \
+        collaborators milestone labels program security_hole="$security" || return 1)"
+    ___x_cmd_gt_json_query_rename "$data" id=.number title=.title html_url=.html_url
+    [ -n "$id" ] && ___x_cmd_ui tf "true" "Success" "id: $id" "title: $title" "url: $html_url" && return 0
+                    gt_log        "error" "Create issue failure"                               && return 1
 }
 
+# shellcheck disable=SC2154
 ___x_cmd_gt_issue_update() {
     param:scope     "gitee/$O"
     param:dsl       '
+type:
+    State = open progressing closed
 options:
     --owner         "owner"                         <>
+    --repo          "repo path"                     <>
     --number        "issue number"                  <>
-    --repo          "repo path"                     <>=""
     --title         "title"                         <>=""
-    --state         "issue state"                   <>=""
+    --state         "issue state "                  <>:State
     --body          "issue describe"                <>=""
     --assignee      "assignee space address"        <>=""
     --collaborators "collaborators space address"   <>=""
@@ -67,8 +76,13 @@ options:
 '
     param:run
     security=${security:-false}
-    ______x_cmd_gt_patch_json "/v5/repos/${owner##*/}/issues/${number}" repo title state body assignee \
-        collaborators milestone labels program security_hole=$security
+    
+    local data
+    data="$(______x_cmd_gt_patch_json "/v5/repos/${owner##*/}/issues/${number}" repo title state body assignee \
+        collaborators milestone labels program security_hole="$security" || return 1)"
+    ___x_cmd_gt_json_query_rename "$data" id=.number state=.state html_url=.html_url
+    [ -n "$id" ] && ___x_cmd_ui tf "true" "Success" "id: $id" "state: $state" "url: $html_url" && return 0
+                    gt_log        "error" "Update issue failure"                               && return 1
 }
 
 ___x_cmd_gt_issue_logs(){
@@ -81,21 +95,21 @@ options:
     --sort          "sort(asc、desc)"       <>="desc"
 '
     param:run
-    ______x_cmd_gt_get "/v5/repos/${owner##*/}/issues/${number}/operate_logs" repo sort
+    ___ui_table_json "$(printf "%s" "O=$O ______x_cmd_gt_get \"/v5/repos/${owner##*/}/issues/${number}/operate_logs\" repo sort || return 1" )" \
+            time=.created_at user=.user.login type=.action_type content=.content  && return 0
 }
 
 # shellcheck shell=sh
 # shellcheck disable=SC2039,3043,SC2154
 
-# schedule、deadline、created_at、finished_at 用UI来处理
 ___x_cmd_gt_repo_issue() {
     param:scope     "gitee/$O"
     param:dsl       '
 type:
-    state = open progressing closed rejected all
+    State = open progressing closed rejected all
 options:
     --repo          "Repo name"                 <>
-    --state         "issue state"               <>:state=all
+    --state         "issue state"               <>:State=all
     --labels        "labels"                    <>=""
     --milestone     "milestone"                 <>=""
     --assignee      "assignee"                  <>=""
@@ -175,11 +189,12 @@ subcmd:
     ls              "list all comment"
     create          "create a comment"
     update          "update a comment"
-    delete          "delete a comment"
+    del             "delete a comment"
 '
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
         gt_log warn "subcmd not found. show help." >&2
+        ___x_cmd_gt_issue _param_help_doc
         return 1
     fi
     "___x_cmd_gt_issue_comment_$PARAM_SUBCMD" "$@"
@@ -199,9 +214,10 @@ options:
 '
     param:run
     ___ui_table_json "$(printf "%s" "______x_cmd_gt_get_multi \"/v5/repos/${owner##*/}/${repo##*/}/issues/$number/comments\" since page per_page order || return 1" )" \
-        IssueNumber=.target.issue.number Title=.target.issue.title User=.user.login body=.body && return 0
+        CommitId=.id IssueNumber=.target.issue.number Title=.target.issue.title User=.user.login body=.body && return 0
 }
 
+# shellcheck disable=SC2086,SC2154
 ___x_cmd_gt_issue_comment_create(){
     param:scope     "gitee/$O"
     param:dsl       '
@@ -209,35 +225,48 @@ options:
     --owner         "owner"                             <>
     --repo          "repo path"                         <>
     --number        "issue number"                      <>
-    --body          "The contents of the comment."      <>
+    --body          "The contents of the comment"       <>
 '
     param:run
-    ______x_cmd_gt_post_json "/v5/repos/${owner##*/}/${repo##*/}/issues/$number/comments"  body
+
+    local data
+    data="$(______x_cmd_gt_post_json "/v5/repos/${owner##*/}/${repo##*/}/issues/$number/comments" body || return 1)"
+    ___x_cmd_gt_json_query_rename "$data" id=.target.issue.number title=.target.issue.title body=.body
+    [ -n "$id" ] && ___x_cmd_ui tf "true" "Success" "id: $id" "title: $title" "comment_body: $body" && return 0
+                    gt_log        "error" "Create Comment failure"                                  && return 1
 }
 
 ___x_cmd_gt_issue_comment_update(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
-    --owner         "owner"                            <>
-    --repo          "repo path"                        <>
+    --owner         "owner"                             <>
+    --repo          "repo path"                         <>
     --id            "comments id"                       <>
-    --body          "The contents of the comment."      <>
+    --body          "The contents of the comment"       <>
 '
     param:run
-    ______x_cmd_gt_patch_json "/v5/repos/${owner##*/}/${repo##*/}/issues/comments/${id}"  body
+
+    local data
+    data="$(______x_cmd_gt_patch_json "/v5/repos/${owner##*/}/${repo##*/}/issues/comments/${id}" body || return 1)"
+    ___x_cmd_gt_json_query_rename "$data" id=.target.issue.number title=.target.issue.title body=.body
+    [ -n "$id" ] && ___x_cmd_ui tf "true" "Success" "id: $id" "title: $title" "comment_body: $body" && return 0
+                    gt_log        "error" "Update Comment failure"                                  && return 1
 }
 
-___x_cmd_gt_issue_comment_delete(){
+# shellcheck disable=SC2181
+___x_cmd_gt_issue_comment_del(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
-    --owner         "owner"                            <>
-    --repo          "repo path"                        <>
+    --owner         "owner"                             <>
+    --repo          "repo path"                         <>
     --id            "comments id"                       <>
 '
     param:run
-    ______x_cmd_gt_delete "/v5/repos/${owner##*/}/${repo##*/}/issues/comments/${id}"
+    ______x_cmd_gt_delete "/v5/repos/${owner##*/}/${repo##*/}/issues/comments/${id}" 1>/dev/null 2>&1
+    [ $? -eq 0 ] && ___x_cmd_ui tf "true" "Deleted comment successfully"                      && return 0
+                    gt_log error "Deleting comment failure by ${owner##*/} ${repo##*/} $id."  && return 1
 }
 
 # EndSection

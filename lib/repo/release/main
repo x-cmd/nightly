@@ -28,10 +28,10 @@ ___x_cmd_gt_repo_release_ls() {
     param:scope     "gitee/$O"
     param:dsl    '
 type:
-    direction = asc  desc
+    Direction = asc  desc
 options:
     --repo          "Repo name"             <>:repo
-    --direction     "direction(asc,desc)"   <>:direction="asc"
+    --direction     "direction(asc,desc)"   <>:Direction="asc"
 '
     param:run
 

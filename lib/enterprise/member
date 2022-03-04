@@ -31,10 +31,10 @@ ___x_cmd_gt_enterprise_member_ls() {
     param:scope     "gitee/$O"
     param:dsl       '
 type:
-    role = all member admin
+    Role = all member admin
 options:
     --enterprise    "enterprise space address"          <>:address
-    --role          "role type"                         <>:role="all"
+    --role          "role type"                         <>:Role="all"
 '
     param:run
 
@@ -72,12 +72,12 @@ ___x_cmd_gt_enterprise_member_add() {
     param:scope     "gitee/$O"
     param:dsl       '
 type:
-    role =  member  outsourced admin
-    mode =  username email
+    Role =  member  outsourced admin
+    Mode =  username email
 options:
     --enterprise|-e   "enterprise"              <>:address
-    --role            "role"                    <>:role
-    --mode            "username or email"       <>:mode="username"
+    --role            "role"                    <>:Role
+    --mode            "username or email"       <>:Mode="username"
     #n                "real name"
 '
     param:run

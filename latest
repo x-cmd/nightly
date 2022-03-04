@@ -8,7 +8,7 @@
 # TODO: wait ccmd fix
 # xrc http param json str ui ccmd
 xrc http param json str ui
-xrc ui/lib/table
+xrc ui/lib/table gh/lib/config_awk
 
 
 # TODO: Precompile it into one file.
@@ -82,9 +82,11 @@ ___x_cmd_gt_make() {
     http "@$O" make         'https://gitee.com/api'
     http "@$O" header  type "application/json;charset=utf-8"
 
-    O=$O_ORIGINAL ___x_cmd_gt_config_load >/dev/null
+    local token
+    token="$(O="$O_ORIGINAL" ___x_cmd_gt_config_get "oauth_token")"
 
-    if [ $? -eq 0 ] && [ -n "$(O="$O_ORIGINAL" ___x_cmd_gt_token)" ]; then
+    if [ -n "$token" ]; then
+        http "@___x_cmd_gt_$O_ORIGINAL" header put Authorization "token $token"
         local user
         user="$(O="$O_ORIGINAL" ___x_cmd_gt_current_owner)" || return 1
         gt_log info "Hi $user! You've successfully authenticated."

@@ -34,17 +34,17 @@ ___x_cmd_gt_repo_pr_ls() {
     param:scope     "gitee/$O"
     param:dsl       '
 type:
-    state = open merged closed all
-    sort  = created updated popularity long-running
-    direction = desc asc
+    State = open merged closed all
+    Sort  = created updated popularity long-running
+    Direction = desc asc
 options:
     --repo              "Repo name"                                         <>
-    --state             "state"                                             <>:state="open"
+    --state             "state"                                             <>:State="open"
     --head              "source branch. Format: [username:]<branch>"        <>=""
     --base              "target branch. Format: [username:]<branch>"        <>=""
     --since             "since"                                             <>=""
-    --sort              "sort"                                              <>:sort="created"
-    --direction         "direction"                                         <>:direction="desc"
+    --sort              "sort"                                              <>:Sort="created"
+    --direction         "direction"                                         <>:Direction="desc"
     --milestone_number  "milestone id"                                      <>:numbers=""
     --labels            "labels"                                            <>=""
 '
@@ -87,10 +87,10 @@ ___x_cmd_gt_repo_pr_log() {
     param:scope     "gitee/$O"
     param:dsl       '
 type:
-    state  = desc asc
+    State  = desc asc
 options:
     #1|--pr             "pr id"                 <>:number
-    --sort              "sort"                  <>:state="desc"
+    --sort              "sort"                  <>:State="desc"
 '
     param:run
 
@@ -132,7 +132,7 @@ ___x_cmd_gt_repo_pr_create() {
     param:scope     "gitee/$O"
     param:dsl       '
 type:
-    bool = true false
+    Bool = true false
 options:
     --repo                  "Repo name"                                                     <>:repo
     --title                 "pr title"                                                      <>
@@ -146,7 +146,7 @@ options:
     --testers               "tester username list. Format: <username>[,<username>]"         <>:name=""
     --assignees_number      "minimum number of reviewers"                                   <>:numbers=""
     --testers_number        "minimum test number"                                           <>:numbers=""
-    --prune_source_branch   "prune_source_branch"                                           <>:bool=false
+    --prune_source_branch   "prune_source_branch"                                           <>:Bool=false
 '
     param:run
 
@@ -162,7 +162,7 @@ ___x_cmd_gt_repo_pr_update() {
 ##TODO:state
     param:dsl       '
 type:
-    state = closed
+    State = closed
 options:
     #1|--pr                 "pr number"                                 <>:number
     --title                 "pr title"                                  <>
@@ -171,7 +171,7 @@ options:
     --labels                "labels"                                    <>=""
     --assignees_number      "minimum number of reviewers"               <>:numbers=""
     --testers_number        "minimum test number"                       <>:numbers=""
-    --state                 "state"                                     <>:state="closed"
+    --state                 "state"                                     <>:State="closed"
 '
     param:run
 
@@ -184,10 +184,10 @@ ___x_cmd_gt_repo_pr_merge() {
     param:scope     "gitee/$O"
     param:dsl       '
 type:
-    merge = squash  merge
+    Merge = squash  merge
 options:
     #1|--pr                 "pr id"                                     <>
-    --merge_method          "merge method(squash,merge)"                <>:merge="merge"
+    --merge_method          "merge method(squash,merge)"                <>:Merge="merge"
     --prune_source_branch   "prune source branch"                       <>:bool="false"
     --title                 "title"                                     <>=""
     --description           "description"                               <>=""

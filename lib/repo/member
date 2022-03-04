@@ -7,6 +7,7 @@
 # gt repo member add user-b
 
 # gt repo member +el:admin -user-a +user-b
+# shellcheck disable=SC2154,SC2086
 ___x_cmd_gt_repo_member(){
     param:dsl       '
 subcmd:
@@ -32,16 +33,18 @@ options:
 '
     param:run
     ___x_cmd_gt_param_init_owner_repo
+    ___x_cmd_gt_printf_command_log "gt repo ls -r $repo"
+
     ___ui_table_json "$(printf "%s" "______x_cmd_gt_get_multi "/v5/repos/${owner_repo}/collaborators" page per_page || return 1" )" \
         NameSpace=.login Name=.name Admin=.permissions.admin PushPermissions=.permissions.push && return 0
 }
 
-# shellcheck disable=SC2181
+# shellcheck disable=SC2181,SC2154
 ___x_cmd_gt_repo_member_add() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
-    --repo|-r           "Repo name"                              <>:repo
+    --repo|-r           "Repo name or Path(owner/repo)"          <>:repo
     --permission|-p     "permission"                             <>:permission="push"
     #n                  "Username list"                          <>
 '
@@ -50,16 +53,17 @@ options:
     # param Design permission:key
     ___x_cmd_gt_param_init_owner_repo
     if [ -z "$1" ];then
-        gt_log error "At least one user’s spatial address is needed"
+        gt_log error "At least one user’s spatial address is needed, gt member add <user>"
         return 1
     fi
+    ___x_cmd_gt_printf_command_log "gt member add -r $repo -p $permission " "$@"
+
     local username
     for username in "$@"; do
         {
             ______x_cmd_gt_put_json "/v5/repos/$owner_repo/collaborators/${username##*/}" permission 1>/dev/null 2>&1
-
-            [ $? -ne 0 ] && gt_log error "add user failure: $username"               && return 1
-                            gt_log info  "add $username to $owner_repo successfully" && return 0
+            [ $? -ne 0 ] && gt_log error "add user failure: $username to $owner_repo" && return 1
+                            gt_log info  "add $username to $owner_repo successfully"  && return 0
         }
     done
 }
@@ -70,13 +74,15 @@ ___x_cmd_gt_repo_member_del() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
-    --repo|-r       "Repo name"            <>:repo
+    --repo|-r       "Repo name or Path(owner/repo)"     <>:repo
     #n              "Username list"
 '
     param:run
     [ -z "$1" ] && gt_log error "At least one user’s spatial address is needed" && return 1
 
     ___x_cmd_gt_param_init_owner_repo
+    ___x_cmd_gt_printf_command_log "gt member del -r $repo " "$@"
+
     local username
     for username in "$@"; do
         ______x_cmd_gt_delete "/v5/repos/$owner_repo/collaborators/${username##*/}"

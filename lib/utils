@@ -145,3 +145,10 @@ ___x_cmd_gt_json_query_rename(){
 ___x_cmd_gt_default(){
     param_default "$@" 2>/dev/null || return 1
 }
+
+
+# ui printf untils tool
+___x_cmd_gt_printf_command_log() {
+    local ___X_CMD_LOG_COLORIZED_MSG="\\033[90m"
+    gt_log "info" "==> " "$@"
+}

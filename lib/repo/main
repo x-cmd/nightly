@@ -7,12 +7,12 @@ ___x_cmd_gt_repo(){
 subcmd:
     create          "create repo"
     ls              "list repo of owner"
-    info            "Show detailed information of repo"
-    del             "Remove repo"
+    info            "show detailed information of repo"
+    del             "remove repo"
     clear           "clear repo"
     issue           "get repo issue"
+    review          "setup review repo configure"
 '
-    # TODO: add release: release  review: "review repo"
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
         gt_log warn "Subcmd Not Found."
@@ -45,9 +45,9 @@ ___x_cmd_gt_repo_create() {
     param:scope     "gitee/$O"
     param:dsl       '
 type:
-    access  =   private public
+    Access  =   private public
 option:
-    --access                "private,public"                <>:access=private
+    --access                "private,public"                <>:Access=private
     --description           "description"                   <>=""
     --homepage              "homepage"                      <>=""
     --no_issues             "Provide issue"
@@ -76,6 +76,7 @@ option:
     [ -n "$no_wiki" ] && has_wiki=false
     [ -n "$no_comment" ] && can_comment=false
     [ -n "$no_auto_init" ] && auto_init=false
+    # TODO: ___x_cmd_gt_printf_command_log
 
     [ $# -eq 0 ] && gt_log info "repo create name is null" && return
     local name
@@ -106,11 +107,11 @@ ___x_cmd_gt_org_repo_create() {
     param:scope     "gitee/$O"
     param:dsl       '
 type:
-    access  =   private public innerSource
+    Access  =   private public innerSource
 option:
     --org                   "organization create repo"      <>:name
     --description           "description"                   <>=""
-    --access                "private,public,innerSource"    <>:access=private
+    --access                "private,public,innerSource"    <>:Access=private
     --homepage              "homepage"                      <>:url_type=""
     --no_issues             "Provide issue"
     --no_wiki               "Provide wiki"
@@ -164,10 +165,10 @@ ___x_cmd_gt_enterprise_repo_create() {
     param:scope     "gitee/$O"
     param:dsl       '
 type:
-    access  =   private public innerSource
+    Access  =   private public innerSource
 option:
     --enterprise            "enterprise space address"          <>
-    --access                "private,public,innerSource"        <>:access=private
+    --Access                "private,public,innerSource"        <>:Access=private
     --description           "description"                       <>=""
     --homepage              "homepage"                          <>:url_type=""
     --paths                 "repo path"                         <>:url_type=""
@@ -246,22 +247,23 @@ ___x_cmd_gt_repo_info() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
-    #1|--repo          "Repo name"         <>:repo
+    #1|--repo          "Repo or Path(owner/repo)"         <>:repo
 '
     param:run
 
-    # TODO: FIX form not data. wait param debug
     # get owner_repo by repo
     ___x_cmd_gt_param_init_owner_repo
+    ___x_cmd_gt_printf_command_log "gt repo info -r $repo"
+
     local data
     data=$(______x_cmd_gt_get "/v5/repos/${owner_repo}" || return 1)
         ___x_cmd_gt_json_query_rename "$data" id=.id name=.name html_url=.html_url
     [ -n "$name" ] && ___x_cmd_ui tf "true" "Success" "id: $id" "name: $name" "url: $html_url" && return 0
-                      gt_log "error" "Fail. Couldn't find any repo: $repo"                     && return 1
+                      gt_log         "error" "Fail. Couldn't find any repo: $repo"             && return 1
 }
 
 # https://gitee.com/api/v5/swagger#/deleteV5ReposOwnerRepo
-# shellcheck disable=SC2181
+# shellcheck disable=SC2181,SC2154
 ___x_cmd_gt_repo_del() {
     # TODO: -y force del
     param:scope     "gitee/$O"
@@ -270,21 +272,22 @@ options:
     #n      "Provide repo list"    <>
 '
     param:run
-    # TODO: wait fix | input all name then can do it
-    ___x_cmd_ui_select nohelp "Are you sure you want to $(ui bold red delete repo) $(ui bold "$*")" "yes" "no" "---" "---"
-    [ "$___X_CMD_UI_SELECT_CURRENT_ITEM" != "yes" ] && gt_log info "Delete repo has been canceled" &&  return 0
+    xrc ui/lib/form
+    ___x_cmd_gt_printf_command_log "gt repo del " "$@"
+
+    local ___X_CMD_UI_FORM_EXIT_STRATEGY="execute|exit"
+    ___x_cmd_ui_form "Are you sure you want to $(___x_cmd_ui bold red delete "repo:") $(___x_cmd_ui bold "$*")" tf 1 = "yes" "no"
+    [ "$tf" != "yes" ] && gt_log info "Delete repo has been canceled" &&  return 0
     local i
     for i in "$@"; do
         ______x_cmd_gt_param_normalize_repo "$i"
         ______x_cmd_gt_delete "/v5/repos/$owner_repo" 1>/dev/null 2>&1
-        if [ $? -eq 0 ]; then
-            ui tf "true" "Deleted repo $i successfully"
-        else
-            gt_log error "Deleting repo failure: $i. Probably because it desn't exists."
-        fi
+        [ $? -eq 0 ] && ui tf "true" "Deleted repo $i successfully"                                  && return 0
+                        gt_log error "Deleting repo failure: $i. Probably because it desn't exists." && return 1
     done
 }
 
+# shellcheck disable=SC2181
 ___x_cmd_gt_repo_clear() {
     param:scope     "gitee/$O"
     param:dsl       '
@@ -294,25 +297,34 @@ options:
     param:run
 
     ___x_cmd_gt_param_init_owner_repo
-    # TODO: wait fix | input all name then can do it
-    ___x_cmd_ui_select nohelp "Are you sure you want to $(ui bold red clear repo) $(ui bold "${owner_repo}")" "yes" "no" "---" "---"
-    [ "$___X_CMD_UI_SELECT_CURRENT_ITEM" != "yes" ] && gt_log info "Clear repo has been canceled" &&  return 0
+    ___x_cmd_gt_printf_command_log "gt repo clear -r " "$@"
 
-    ______x_cmd_gt_put_json "/v5/repos/${owner_repo}/clear" && ___x_cmd_ui tf "true" "Successfully clear ${owner_repo}" && return 0
-                                                               gt_log error "Clearing repo failure: $owner_repo"        && return 1
+    local ___X_CMD_UI_FORM_EXIT_STRATEGY="execute|exit"
+    ___x_cmd_ui_form "Are you sure you want to $(ui bold red clear repo) $(ui bold "${owner_repo}")" tf 1 = "yes" "no"
+    [ "$tf" != "yes" ] && gt_log info "Clear repo has been canceled" &&  return 0
+
+    ______x_cmd_gt_put_json "/v5/repos/${owner_repo}/clear" 1>/dev/null 2>&1
+    [ $? -eq 0 ] && ___x_cmd_ui tf "true" "Successfully clear ${owner_repo}" && return 0
+                    gt_log error "Clearing repo failure: $owner_repo"        && return 1
 }
 
+# shellcheck disable=SC2154,SC2181
 ___x_cmd_gt_repo_review(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
     #1|--repo             "Repo name"                   <>:repo
-    --assignees           "assignees username"          <>:name
-    --testers             "testers usrename"            <>:name
-    --assignees_number    "number of reviewers"         <>:number="1"
-    --testers_number      "number of people tested"     <>:number="1"
+    --assignees           "assignees username"          <>:assignees
+    --testers             "testers usrename"            <>:testers
+    --assignees_number    "number of reviewers"         <>:assignees_number="1"
+    --testers_number      "number of people tested"     <>:testers_number="1"
 '
     param:run
     ___x_cmd_gt_param_init_owner_repo
-    ______x_cmd_gt_put_json "/v5/repos/${owner_repo}/reviewer" assignees testers assignees_number testers_number
+    ___x_cmd_gt_printf_command_log "gt repo review " \
+    "--repo $repo --assignees $assignees --testers $testers --assignees_number $assignees_number --testers_number $testers_number"
+
+    ______x_cmd_gt_put_json "/v5/repos/${owner_repo}/reviewer" assignees testers assignees_number testers_number 1>/dev/null 2>&1
+    [ $? -eq 0 ] && ___x_cmd_ui tf "true" "Successfully setup ${owner_repo} review configure" && return 0
+                    gt_log error "Setup repo review configure failure: $owner_repo"           && return 1
 }
