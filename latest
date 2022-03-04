@@ -149,6 +149,7 @@ A
 \"---\"
 "
     eval "$text"
+    if [ "$___X_CMD_UI_GRIDSELECT_FINAL_COMMAND" = "q" ]; then return 0;fi
     ___x_cmd_cd_origin "$___X_CMD_UI_GRIDSELECT_CURRENT_ITEM"
 }
 # EndSection
