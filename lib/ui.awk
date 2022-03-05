@@ -7,6 +7,7 @@ BEGIN {
     UI_FG_MAGENTA = "\033[35m"
     UI_FG_CYAN = "\033[36m"
     UI_FG_WHITE = "\033[37m"
+    UI_FG_DARKGRAY = "\033[90m"
 
     UI_BG_BLACK = "\033[40m"
     UI_BG_RED = "\033[41m"
