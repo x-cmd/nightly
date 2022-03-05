@@ -9,23 +9,32 @@ BEGIN {
 function view_help(){
     return sprintf("%s", th_help_text( ctrl_help_get() ) )
 }
-function view_info(         _selected_index_of_focus_column, _item_index, _file_type, _file_size, _last_access, _last_modification, _last_change, _access_rights, _uid, _gid, _data){
+function view_ls_info(         _selected_index_of_focus_column, _item_index, _file_type, _file_size, _last_access, _last_modify, _last_change, _access_rights, _uid, _gid, _data){
     _selected_index_of_focus_column = ctrl_win_val( data, FOCUS_COL )
     _item_index = FOCUS_COL L _selected_index_of_focus_column
 
     _file_type          =   data_info_file_type[ _item_index ]
     _file_size          =   data_info_size[ _item_index ]
     _last_access        =   data_info_time_of_last_access[ _item_index ]
-    _last_modification  =   data_info_time_of_last_modification[ _item_index ]
+    _last_modify        =   data_info_time_of_last_modify[ _item_index ]
     _last_change        =   data_info_time_of_last_change[ _item_index ]
     _access_rights      =   data_info_access_rights[ _item_index ]
     _uid                =   data_info_uid[ _item_index ]
     _gid                =   data_info_gid[ _item_index ]
-    _data = sprintf("Access: %s", _access_rights, _id)
-    _data = _data sprintf("  Uid: ( %s )  Gid: ( %s )\n", _uid, _gid)
-    _data = _data sprintf("Name: %s  Size: %s  Type: %s", data[ _item_index ], _file_size, _file_type)
+    _data =       sprintf("  Name: %s  Size: %s  Type: %s\n", data[ _item_index ], _file_size, _file_type)
+    _data = _data sprintf("Access: %s  Uid: ( %s )  Gid: ( %s )\n", _access_rights, _uid, _gid)
+    _data = _data sprintf("Access: %s\n", _last_access)
+    _data = _data sprintf("Modify: %s\n", _last_modify, _id)
+    _data = _data sprintf("Change: %s\n", _last_change, _id)
     return _data
 }
+
+function view_env_info(){
+    _selected_index_of_focus_column = ctrl_win_val( data, FOCUS_COL )
+    _item_index = FOCUS_COL L _selected_index_of_focus_column
+    return sprintf("INFO: %s", data_info_env[ _item_index ])
+}
+
 
 function view_body(         i, j, _i_for_this_column, _offset_for_this_column, _selected_index_of_this_column, _max_column_size, _tmp, _data ){
     for (j=WIN_BEGIN; j<=WIN_END; ++j) {
@@ -49,7 +58,7 @@ function view_body(         i, j, _i_for_this_column, _offset_for_this_column, _
             }
             if ( _selected_index_of_this_column == _i_for_this_column ) _tmp = th(STYLE_CATEGORYSELECT_SELECTED, _tmp)
             else _tmp = th(STYLE_CATEGORYSELECT_UNSELECTED, _tmp)
-            if ( data_info_file_type[ j L _i_for_this_column ] != "directory" ) _tmp = th(TH_CATEGORYSELECT_UNDIRECTORY, _tmp)
+            if ( data_info_file_type[ j L _i_for_this_column ] == "regular file" ) _tmp = th(TH_CATEGORYSELECT_UNDIRECTORY, _tmp)
             _data[ i ] = _data[ i ] _tmp
         }
     }
@@ -72,7 +81,7 @@ function view(      _component_help, _component_header, _component_body){
     view_calcuate_geoinfo()
 
     _component_help         = view_help()
-    _component_info         = view_info()
+    _component_info         = (LS_INFO_VAR == true) ? view_ls_info() : view_env_info()
     _component_body         = view_body()
 
     send_update( _component_help "\n" _component_info _component_body  )
@@ -127,6 +136,8 @@ BEGIN{
     INPUT_STATE_CTRL = 1
     input_state = INPUT_STATE_CTRL
     FOCUS_COL=1
+    LS_INFO_VAR=0
+    ENV_INFO_VAR=0
 }
 
 function reinit_selected_index( col     ,l) {
@@ -167,17 +178,24 @@ function consume_data(){
         view()
         return
     } else if ($1 == "---") {
-        split(substr($0, 5), data_info_arr, "\006")
-        data_info_file_type[ input_level L l ]                  = data_info_arr[1]
-        data_info_size[ input_level L l ]                       = data_info_arr[2]
-        data_info_time_of_last_access[ input_level L l ]        = data_info_arr[3]
-        data_info_time_of_last_modification[ input_level L l ]  = data_info_arr[4]
-        data_info_time_of_last_change[ input_level L l ]        = data_info_arr[5]
-        data_info_access_rights[ input_level L l ]              = data_info_arr[6]
-        data_info_uid[ input_level L l ]                        = data_info_arr[7]
-        data_info_gid[ input_level L l ]                        = data_info_arr[8]
+        if ($2 == "env") {
+            ENV_INFO_VAR = 1
+            data_info_env[ input_level L l ] = substr($0, 9)
+        } else {
+            LS_INFO_VAR = 1
+            split(substr($0, 8), data_info_arr, "\006")
+            data_info_file_type[ input_level L l ]                  = data_info_arr[1]
+            data_info_size[ input_level L l ]                       = data_info_arr[2]
+            data_info_time_of_last_access[ input_level L l ]        = data_info_arr[3]
+            data_info_time_of_last_modify[ input_level L l ]        = data_info_arr[4]
+            data_info_time_of_last_change[ input_level L l ]        = data_info_arr[5]
+            data_info_access_rights[ input_level L l ]              = data_info_arr[6]
+            data_info_uid[ input_level L l ]                        = data_info_arr[7]
+            data_info_gid[ input_level L l ]                        = data_info_arr[8]
+        }
         return
     } else {
+        if ($0 == "") return
         l = data[ input_level L ] + 1
         data[ input_level L ] = l
         if (l > MAX_DATA_ROW_NUM)   MAX_DATA_ROW_NUM = l

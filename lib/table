@@ -61,7 +61,7 @@ ___ui_table_clear(){
 
 # Section: rearrange the data
 
-___ui_table_json(){
+___ui_table_json1(){
     local arg
     local args
     local title
@@ -101,17 +101,13 @@ xrc awk
 # 2. Input json, then tranfer as primitive data to awk
 # 3. Using instruction to control table
 
-# ___X_CMD_UI_TABLE_CONTROL_AWK_PATH="$(xrc cat ./lib/share.awk ./lib/theme.awk ./lib/table.control.awk)"
-___X_CMD_UI_TABLE_CONTROL_AWK_PATH="$(xrc cat ui/lib/share.awk ui/lib/theme.awk ui/lib/table.control.awk)"
-
 if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
 # 881 hh
 ___x_cmd_ui_table_control_awk(){
-    # LC_ALL=en_US.UTF-8 USE=str,wcwidth,ui ___x_cmd_awk code "$___X_CMD_UI_TABLE_CONTROL_AWK_PATH" \
-    #     -v EXIT_OP="$EXIT_OP" -W interactive
-    LC_ALL=en_US.UTF-8 command awk \
+    command awk \
         -W interactive \
         -v EXIT_OP="$EXIT_OP" \
+        -v ORS="$___X_CMD_UI_REGION_RS" \
         -f "$___X_CMD_ROOT/awk/lib/default.awk" \
         -f "$___X_CMD_ROOT/awk/lib/str.awk" \
         -f "$___X_CMD_ROOT/awk/lib/wcwidth.awk" \
@@ -119,11 +115,11 @@ ___x_cmd_ui_table_control_awk(){
         -f "$___X_CMD_ROOT/ui/lib/share.awk" \
         -f "$___X_CMD_ROOT/ui/lib/theme.awk" \
         -f "$___X_CMD_ROOT/ui/lib/table.control.awk"
+        # -f "./lib/table.control.awk"
+        # -f "./lib/share.awk" \
 }
 else
 ___x_cmd_ui_table_control_awk(){
-    # LC_ALL=en_US.UTF-8 USE=str,wcwidth,ui ___x_cmd_awk code "$___X_CMD_UI_TABLE_CONTROL_AWK_PATH" \
-    #     -v EXIT_OP="$EXIT_OP" -v RS="$___X_CMD_UI_REGION_RS" -v ORS="$___X_CMD_UI_REGION_RS"
     LC_ALL=en_US.UTF-8 command awk \
         -v EXIT_OP="$EXIT_OP" \
         -v RS="$___X_CMD_UI_REGION_RS" -v ORS="$___X_CMD_UI_REGION_RS" \
@@ -134,8 +130,8 @@ ___x_cmd_ui_table_control_awk(){
         -f "$___X_CMD_ROOT/ui/lib/share.awk" \
         -f "$___X_CMD_ROOT/ui/lib/theme.awk" \
         -f "$___X_CMD_ROOT/ui/lib/table.control.awk"
-        # -f "./lib/theme.awk" \
         # -f "./lib/table.control.awk"
+        # -f "./lib/theme.awk" \
 }
 fi
 
@@ -284,15 +280,25 @@ ___ui_table_out_func(){
 # Section: json to table
 CODE="$(xrc cat awk/lib/default.awk awk/lib/json.awk awk/lib/jiter.awk )"
 ___x_cmd_ui_json2table(){
-    local cmd="$1" ;shift
+    local args=""
+    local IFS
     IFS=$(printf "\003")
-    eval "$cmd" | awk "$CODE
+    while [ "$#" -gt 0 ]; do
+        if [ "$1" != -- ];then
+            args="$args${IFS}$1"
+        else
+            shift
+            break
+        fi
+        shift
+    done
+    "$@" | command awk "$CODE
     {
         printf(\"%s\", json_to_machine_friendly(\$0) )
-    }" | awk -v args="$*" -v UI_REGION_RS="${___X_CMD_UI_REGION_RS}" "$CODE"'
+    }" | awk -v args="$args" -v UI_REGION_RS="${___X_CMD_UI_REGION_RS}" "$CODE"'
     BEGIN{
         arrl=split(args, arr, "\003")
-        for(j=1; j<=arrl; j++) {
+        for(j=2; j<=arrl; j++) {
             idx = index(arr[j], "=")
             if (idx == 0) {
                 head_text = head_text "\003" arr[j]
@@ -311,7 +317,7 @@ ___x_cmd_ui_json2table(){
             if (jiter_regexarr_parse(_, $0,  parl, par) == true ){
                 ret=""
                 item_text=""
-                for (i=1; i<=arrl; i++) {
+                for (i=2; i<=arrl; i++) {
                     item_text = jget(_, arr[i])
                     gsub(/"/, "", item_text)
                     ret = ret "\003" item_text

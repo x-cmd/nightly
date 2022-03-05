@@ -26,21 +26,22 @@ BEGIN {
     TH_LIST_ITEM_HIGHLIGHT_1            =       UI_END
     # EndSection
 
-    # Section: question and answer
-    TH_QA_Q                         =       UI_FG_YELLOW
+    # Section: form
+    TH_FORM_Q_HELP                        =      UI_FG_DARKGRAY
+    TH_FORM_Q_ERROR                       =      UI_FG_RED
 
-    TH_QA_Q_FOCUSED   =  UI_FG_CYAN
-    TH_QA_Q_UNFOCUSED =  UI_END
+    TH_FORM_Q_FOCUSED   =  UI_FG_CYAN
+    TH_FORM_Q_UNFOCUSED =  UI_END
 
-    TH_QA_A_FOCUSED_SELECTED                   =       UI_TEXT_REV UI_FG_CYAN
-    TH_QA_A_FOCUSED_NOTSELECTED                =       UI_TEXT_DIM UI_FG_CYAN
-    TH_QA_A_UNFOCUSED_SELECTED                 =       UI_TEXT_UNDERLINE UI_FG_CYAN
-    TH_QA_A_UNFOCUSED_NOTSELECTED              =       UI_END
+    TH_FORM_A_FOCUSED_SELECTED                   =       UI_TEXT_REV UI_FG_CYAN
+    TH_FORM_A_FOCUSED_NOTSELECTED                =       UI_TEXT_DIM UI_FG_CYAN
+    TH_FORM_A_UNFOCUSED_SELECTED                 =       UI_TEXT_UNDERLINE UI_FG_CYAN
+    TH_FORM_A_UNFOCUSED_NOTSELECTED              =       UI_END
 
-    TH_QA_A_FOCUSED_VALID             = ""
-    TH_QA_A_FOCUSED_INVALID           = ""
-    TH_QA_A_UNFOCUSED_VALID          = ""
-    TH_QA_A_UNFOCUSED_INVALID        = ""
+    TH_FORM_A_FOCUSED_VALID             = ""
+    TH_FORM_A_FOCUSED_INVALID           = ""
+    TH_FORM_A_UNFOCUSED_VALID          = ""
+    TH_FORM_A_UNFOCUSED_INVALID        = ""
     # EndSection
 
     # Section: table
@@ -61,7 +62,8 @@ BEGIN {
     # Section: gridselect
     TH_GRIDSELECT_HEADER_NORMAL           =       UI_TEXT_BOLD
     TH_GRIDSELECT_ITEM_FOCUSED            =       UI_TEXT_REV UI_FG_GREEN
-    TH_GRIDSELECT_ITEM_SELECTED           =       UI_FG_GREEN
+    TH_GRIDSELECT_ITEM_SELECTED           =       UI_TEXT_REV UI_TEXT_DIM UI_FG_GREEN
+    TH_GRIDSELECT_ITEM_SELECTED_INFO      =       UI_FG_GREEN
     # EndSection
 
     # Section: selectn

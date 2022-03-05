@@ -35,7 +35,8 @@ ___x_cmd_ui_region_send_update(){
         cat
     else
         printf "%s" "$*"
-    fi | tr '\n' '\001'
+    fi
+    # fi | tr '\n' '\001'
     printf "%s" "${___X_CMD_UI_REGION_RS}"
 }
 
@@ -122,7 +123,7 @@ ___x_cmd_ui_region_update_awk(){
 if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
 ___x_cmd_ui_region_update_awk_(){
     # LC_ALL=en_US.UTF-8 USE=str,ui ___x_cmd_awk file "$___X_CMD_UI_REGION_AWK" -W interactive
-    LC_ALL=en_US.UTF-8 command awk \
+    command awk \
         -W interactive \
         -f "$___X_CMD_ROOT/awk/lib/default.awk" \
         -f "$___X_CMD_ROOT/awk/lib/str.awk" \
@@ -388,4 +389,3 @@ ___ui_region_demo0(){
 
 
 # EndSection
-

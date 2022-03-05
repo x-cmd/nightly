@@ -103,11 +103,11 @@ function ctrl( char_type, char_value,                   _ctrl_current ) {
 function view(            _ctrl_current, _component_help, _component_body, _component_exit  ){
     _ctrl_current = ctrl_rstate_get( CURRENT )
 
-    _component_help = view_help( _ctrl_current )
     _component_body = view_body( _ctrl_current )
     _component_exit = view_exit( _ctrl_current )
+    _component_help = view_help( _ctrl_current )
 
-    send_update(  _component_help "\n" _component_body "\n\n" _component_exit "\n"  )
+    send_update( _component_body "\n" _component_exit "\n\n" _component_help  )
 }
 
 function view_help( _ctrl_current, data ){
@@ -115,7 +115,7 @@ function view_help( _ctrl_current, data ){
     if (rule[ _ctrl_current ATT_OP ] == "=") {
         data = data "Press <Arrow-Left> and <Arrow-Right> to alternative choice, or input digit."
     }
-    return th_help_text( data )
+    return th( TH_FORM_Q_HELP, data )
 }
 
 
@@ -125,20 +125,20 @@ function view_body( _ctrl_current,                          data, _question, _li
         _is_focused     =  _ctrl_current == i
 
         if ( _is_focused ) {
-            STYLE_ANSWER_SELECTED       = TH_QA_A_FOCUSED_SELECTED
-            STYLE_ANSWER_UNSELECTED     = TH_QA_A_FOCUSED_NOTSELECTED
-            _line                       = th( TH_QA_Q_FOCUSED,   "> "_question ) th(UI_TEXT_DIM, ":") " "
+            STYLE_ANSWER_SELECTED       = TH_FORM_A_FOCUSED_SELECTED
+            STYLE_ANSWER_UNSELECTED     = TH_FORM_A_FOCUSED_NOTSELECTED
+            _line                       = th( TH_FORM_Q_FOCUSED,   "> "_question ) th(UI_TEXT_DIM, ":") " "
         } else {
-            STYLE_ANSWER_SELECTED       = TH_QA_A_UNFOCUSED_SELECTED
-            STYLE_ANSWER_UNSELECTED     = TH_QA_A_UNFOCUSED_NOTSELECTED
-            _line                       = th( TH_QA_Q_UNFOCUSED,  "  " _question ) ": "
+            STYLE_ANSWER_SELECTED       = TH_FORM_A_UNFOCUSED_SELECTED
+            STYLE_ANSWER_UNSELECTED     = TH_FORM_A_UNFOCUSED_NOTSELECTED
+            _line                       = th( TH_FORM_Q_UNFOCUSED,  "  " _question ) ": "
         }
 
         op = rule[ i ATT_OP ]
         if (op != "=") {
             _answer     = ctrl_lineedit_get( rule, i ATT_ANS )
             _answer_style=""
-            if (op ~ "=~") _answer_style = (judgment_of_regexp( rule, i )) ? UI_END : UI_FG_RED
+            if (op ~ "=~") _answer_style = (judgment_of_regexp( rule, i )) ? UI_END : TH_FORM_Q_ERROR
             _answer     = (op !~ /\*/) ? _answer : ui_str_rep( "*", length(_answer) )
             _line       = _line th( _answer_style, _answer)
         } else {
@@ -149,7 +149,7 @@ function view_body( _ctrl_current,                          data, _question, _li
                 _line           = _line th( _is_selected ? STYLE_ANSWER_SELECTED: STYLE_ANSWER_UNSELECTED, rule[ i L j ] ) " "
             }
         }
-        data = data "\n" _line
+        data = data _line "\n"
     }
     return data
 }
@@ -158,11 +158,11 @@ function view_body( _ctrl_current,                          data, _question, _li
 function view_exit( _ctrl_current,  data,           _is_focused, _is_selected ){
     _is_focused = _ctrl_current == rulel+1
     if ( _is_focused ) {
-        STYLE_EXIT      = TH_QA_A_FOCUSED_SELECTED
-        STYLE_EXIT_NOT  = TH_QA_A_FOCUSED_NOTSELECTED
+        STYLE_EXIT      = TH_FORM_A_FOCUSED_SELECTED
+        STYLE_EXIT_NOT  = TH_FORM_A_FOCUSED_NOTSELECTED
     } else {
-        STYLE_EXIT      = TH_QA_A_UNFOCUSED_SELECTED
-        STYLE_EXIT_NOT  = TH_QA_A_UNFOCUSED_NOTSELECTED
+        STYLE_EXIT      = TH_FORM_A_UNFOCUSED_SELECTED
+        STYLE_EXIT_NOT  = TH_FORM_A_UNFOCUSED_NOTSELECTED
     }
     _ctrl_exit_strategy = ctrl_rstate_get( EXIT )
     for (i=1; i<=exit_strategy_arrl; ++i) {

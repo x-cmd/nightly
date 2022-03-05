@@ -12,21 +12,21 @@ ___x_cmd_ui_gridselect_control_awk(){
         -f "$___X_CMD_ROOT/awk/lib/wcwidth.awk" \
         -f "$___X_CMD_ROOT/awk/lib/ui.awk" \
         -f "$___X_CMD_ROOT/ui/lib/share.awk" \
-        -f "../ui/lib/gridselect.awk" \
+        -f "./lib/gridselect.awk" \
         -f "./lib/theme.awk"
 }
 
-f(){
+f1(){
 
-    cmd=f2
+    cmd=fff
     eval "$($cmd)"
 
     echo "___X_CMD_UI_GRIDSELECT_FINAL_COMMAND:" "$___X_CMD_UI_GRIDSELECT_FINAL_COMMAND"
     echo "___X_CMD_UI_GRIDSELECT_CURRENT_ITEM_INDEX:" "$___X_CMD_UI_GRIDSELECT_CURRENT_ITEM_INDEX"
-    echo "___X_CMD_UI_GRIDSELECT_CURENT_ITEM:" "$___X_CMD_UI_GRIDSELECT_CURRENT_ITEM"
+    echo "___X_CMD_UI_GRIDSELECT_CURRENT_ITEM:" "$___X_CMD_UI_GRIDSELECT_CURRENT_ITEM"
 }
 
-f1(){
+f2(){
      ___x_cmd_ui_gridselect num \
     "Please select the app you want to install:" \
     "Install docker" \
@@ -43,7 +43,7 @@ f1(){
     "---"
 }
 
-f2(){
+fff(){
     cat "./.x-cmd/dev/testcase/testlargedata" | awk 'BEGIN{
         print "___x_cmd_ui_gridselect" " multiple" " \\"
     }
@@ -61,4 +61,4 @@ f3(){
     echo "___X_CMD_UI_GRIDSELECT_CURRENT_ITEM_INDEX:" "$___X_CMD_UI_GRIDSELECT_CURRENT_ITEM_INDEX"
     echo "___X_CMD_UI_GRIDSELECT_CURRENT_ITEM:" "$___X_CMD_UI_GRIDSELECT_CURRENT_ITEM"
 }
-f
+f1

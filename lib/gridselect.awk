@@ -76,18 +76,14 @@ function view_body(             _selected_item_idx, _iter_item_idx, _data_item_i
         if (i > model_len) break
         for (j=0; j<view_body_col_num; j++ ) {
             _iter_item_idx = page_begin + i + ( j * view_body_row_num )
-
             if (_iter_item_idx > model_len) break
-
             _data_item_idx = model[ _iter_item_idx ]
             _item_text = str_pad_right( data[ _data_item_idx ], view_item_len, data_wlen[ _data_item_idx ] )
             if ( ITEM_INDEX_STATE == true ) _item_index = _data_item_idx ": "
             # if ( ITEM_INDEX_STATE == true ) _item_index = th(UI_FG_GREEN, _data_item_idx ": ")
-            if ( _iter_item_idx != _selected_item_idx ) {
-                _data = _data _item_index _item_text
-            } else {
-                _data = _data _item_index th(TH_GRIDSELECT_ITEM_FOCUSED, _item_text)
-            }
+            if ( _iter_item_idx == _selected_item_idx )              _data = _data _item_index th(TH_GRIDSELECT_ITEM_FOCUSED, _item_text)
+            else if ( IS_SELECTED_ITEM[ _iter_item_idx ] == true )   _data = _data _item_index th(TH_GRIDSELECT_ITEM_SELECTED, _item_text)
+            else _data = _data _item_index _item_text
             _iter_item_idx += max_data_row_num
         }
         if (i != model_len) _data = _data "\n  "
@@ -96,15 +92,7 @@ function view_body(             _selected_item_idx, _iter_item_idx, _data_item_i
     # ctrl_rstate_set( SELECTED_ITEM_IDX, model[ _selected_item_idx ] )
     _data_idx = model[ _selected_item_idx ]
     _data_info = data_info[ _data_idx ]
-    if ( _data_info != "" ) _data = _data "INFO: " th(TH_GRIDSELECT_ITEM_SELECTED, _data_info) "\n"
-    if ( multiselect_len>0 ) {
-        for (i=1; i<=multiselect_len; i ++) {
-            _select_text = _select_text th(TH_GRIDSELECT_ITEM_FOCUSED, data[ multiselect[i] ]) " "
-        }
-        _data = _data sprintf("SELECT: %s\n",  _select_text ) UI_END
-    } else {
-        _data = _data sprintf("SELECT: %s\n", data[ _data_idx ] ) UI_END
-    }
+    if ( _data_info != "" ) _data = _data "INFO: " th(TH_GRIDSELECT_ITEM_SELECTED_INFO, _data_info) "\n"
     return "  " _data
 }
 
@@ -171,23 +159,14 @@ function handle_ctrl_to_move_focus(char_type, char_value){
     if (char_value == "RIGHT")                      return ctrl_rstate_add( SELECTED_ITEM_IDX, + view_body_row_num )
 }
 
-function handle_ctrl_to_select_item(char_value) {
+function handle_ctrl_to_select_item(char_value,         item) {
     if (char_value != "ENTER")  return
     if (ctrl_sw_get( MULTIPLE_EDIT ) == false) {
         return exit_with_elegant( char_value )
     } else {
-        for (i=1; i<=multiselect_len; ++i) {
-            if ( multiselect[ i ] == ctrl_rstate_get( SELECTED_ITEM_IDX )) {
-                # delete multiselect[ i ]
-                -- multiselect_len
-                for (j=i; j<=multiselect_len; j++) {
-                    multiselect[ j ] = multiselect[ j + 1 ]
-                }
-                return
-            }
-        }
-        multiselect[ ++ multiselect_len ] = model[ ctrl_rstate_get( SELECTED_ITEM_IDX ) ]
-        return
+        item = ctrl_rstate_get( SELECTED_ITEM_IDX )
+        if ( IS_SELECTED_ITEM[ item ] == true ) return IS_SELECTED_ITEM[ item ] = false
+        return IS_SELECTED_ITEM[ item ] = true
     }
 }
 
@@ -196,6 +175,7 @@ function handle_ctrl_in_normal_state(char_type, char_value) {
 
     if (char_type == "ascii-space" && SELECT_MULTIPLE_STATE == true) {
         (ctrl_sw_get( MULTIPLE_EDIT ) == false) ? ctrl_sw_toggle( MULTIPLE_EDIT ) : exit_with_elegant( char_value )
+        IS_MULTIPLE_SELECT = true
         return
     }
     if (char_value == "/")                                  return ctrl_sw_toggle( FIND_EDIT )    # find
@@ -280,11 +260,13 @@ NR>2 {
 
 END {
     if ( exit_is_with_cmd() == true ) {
-        if (multiselect_len > 0 ) {
-            for (i=1; i<=multiselect_len; ++ i) {
-                _item_idx = multiselect[ i ]
-                _tmp_cur_iter_item_idx = _tmp_cur_iter_item_idx "\003" _item_idx
-                _tmp_cur_iter_item = _tmp_cur_iter_item "\003" data[ _item_idx ]
+        if (IS_MULTIPLE_SELECT == true) {
+            for (i=1; i<=data_len; ++ i) {
+                if ( IS_SELECTED_ITEM[i] == true ) {
+                    _item_idx = model[i]
+                    _tmp_cur_iter_item_idx = _tmp_cur_iter_item_idx "\003" _item_idx
+                    _tmp_cur_iter_item = _tmp_cur_iter_item "\003" data[ _item_idx ]
+                }
             }
         } else {
             _tmp_cur_iter_item_idx = ctrl_rstate_get( SELECTED_ITEM_IDX )

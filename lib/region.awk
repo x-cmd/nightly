@@ -72,7 +72,6 @@ function update(text){
 
     printf(UI_CURSOR_RESTORE) > "/dev/stderr"
     # printf(UI_CURSOR_SAVE)
-
     if (LAST_OUTPUT_LINE_COUNT < OUTPUT_LINE_COUNT) {
         # printf( "%s",
         #     last_output_test cal_empty_line(OUTPUT_LINE_COUNT - LAST_OUTPUT_LINE_COUNT, width) )
