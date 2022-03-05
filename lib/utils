@@ -125,7 +125,7 @@ ___x_cmd_gh_json_query(){
     local data="$1"
     shift
     while [ $# -gt 0 ];do
-    print "$data"| awk "$awkfile""
+        awk "$awkfile""
 {
     jiter_print_eqarr_after_tokenize(\$0,\"$1\", \"\n\")
 }"
@@ -135,10 +135,11 @@ ___x_cmd_gh_json_query(){
 
 #TODO:awk!!!
 ___x_cmd_gh_json_query_rename(){
-    local data="$1"
+    local data
+    data="$(cat)"
     shift
     while [ $# -gt 0 ];do
-        eval "${1%%=*}"="$(___x_cmd_gh_json_query "$data" "${1##*=}")"
+        eval "${1%%=*}"="$(printf "%s" "$data" | ___x_cmd_gh_json_query "${1##*=}")"
         shift
     done
 }

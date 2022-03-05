@@ -113,14 +113,16 @@ option:
     for name in "$@"; do
         {
             local data
-            data="$(___x_cmd_gh_post_json "/orgs/$org/repos" name description homepage has_issues \
-                has_wiki has_projects auto_init  visibility="$access" gitignore_template license_template)"
-            [ $? -ne 0 ] && ___x_cmd_ui_tf "false" "Creating repo failure: $name." && return 1
+            if ! data="$(___x_cmd_gh_post_json "/orgs/$org/repos" name description homepage has_issues \
+                has_wiki has_projects auto_init  visibility="$access" gitignore_template license_template)"; then
+
+                ___x_cmd_ui_tf false "Creating repo failure: $name." && return 1
+            fi
             local repo_id
             local url
             local repo_owner
             ___x_cmd_gh_json_query_rename "$data" repo_id=.id url=.html_url repo_owner=.owner.login
-            ___x_cmd_ui_tf  "true" "Creating repo $name success" "repo_id: $repo_id" "repo_owner: $repo_owner" "url: $url"
+            ___x_cmd_ui_tf true "Creating repo $name success" "repo_id: $repo_id" "repo_owner: $repo_owner" "url: $url"
         }
     done
 }
@@ -140,8 +142,13 @@ ___x_cmd_gh_repo_ls() {
         owner_type="$(___x_cmd_gh_owner_type_query "$owner")"
     fi
 
-    ___ui_table_json "$(printf "%s" "___x_cmd_gh_${owner_type}_repo ls $@ || return 1" )" \
-        Id=.id Name=.name Owner=.owner.login Url=.html_url && return 0
+    # ___ui_table_json ___x_cmd_gh_repo_ls_func \
+    #     Id=.id Name=.name Owner=.owner.login Url=.html_url && return 0
+
+    if ___ui_table_json Id=.id Name=.name Owner=.owner.login Url=.html_url \
+        -- "___x_cmd_gh_${owner_type}_repo" ls "$@"; then
+        return 0
+    fi
 
     ___x_cmd_ui_tf "false" "Please provide owner and owner_type"
     return 1
@@ -159,15 +166,15 @@ options:
     param:run
 
     ___x_cmd_gh_param_init_owner_repo
-    local data
-    data="$(___x_cmd_gh_get "/repos/${owner_repo}")"
 
-    [ $? -ne 0 ] && ___x_cmd_ui_tf "false" "Fail. Couldn't find any repo: ${owner_repo}" && return 1
-    local id
-    local name
-    local html_url
-    ___x_cmd_gh_json_query_rename "$data" id=.id html_url=.html_url name=.full_name
-    ___x_cmd_ui_tf  "true" "Creating repo $name success" "repo_id: $id" "name: $name" "url: $html_url"
+    ___x_cmd_gh_get "/repos/${owner_repo}" | (
+        if ___x_cmd_gh_json_query_rename id=.id html_url=.html_url name=.full_name; then
+            ___x_cmd_ui_tf true     "Creating repo $name success" "repo_id: $id" "name: $name" "url: $html_url"
+        else
+            ___x_cmd_ui_tf false    "Fail. Couldn't find any repo: ${owner_repo}"
+            return 1
+        fi
+    )
 }
 
 ___x_cmd_gh_repo_del() {
@@ -184,11 +191,10 @@ options:
     local i
     for i in "$@"; do
         ___x_cmd_gh_param_normalize_repo "$i"
-        ___x_cmd_gh_delete "/repos/$owner_repo" >/dev/null
-
-        if [ $? -eq 0 ]; then
-                ___x_cmd_ui_tf "true"  "deleted repo $owner_repo"
-        else    ___x_cmd_ui_tf "false" "Deleting repo failure: $owner_repo. Probably because it desn't exists."
+        if ___x_cmd_gh_delete "/repos/$owner_repo" >/dev/null; then
+            ___x_cmd_ui_tf true  "deleted repo $owner_repo"
+        else
+            ___x_cmd_ui_tf false "Deleting repo failure: $owner_repo. Probably because it desn't exists."
         fi
     done
 }
