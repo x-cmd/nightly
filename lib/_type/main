@@ -16,11 +16,12 @@ param_type      gitee     RepoName          "=~"      "[-A-Za-z0-9_]+"
 param_type      gitee     RepoPerm          =       pull    push     admin
 param_type      gitee     RepoVisibility    =       private public
 param_type      gitee     RepoVisibilityOrg =       private public   innerSource
+param_type      gitee     UserRole          =       all member admin
 
 # param_type      gitee     numbers           "=~"      "[0-9]+|(\\s&&[^\\f\\n\\r\\t\\v])*"
 param_type      gitee     Address           "=~"      "[-A-Za-z0-9_]+|https?://.+"
 
-
+# TODO:user name
 
 # param_type      gitee     Ignore            =   <<A
 # $(xrc cat gt/lib/_type/ignore)

@@ -12,10 +12,10 @@
 ___x_cmd_gt_org_member(){
     param:dsl       '
 subcmd:
-    ls            "list member"
+    ls              "list member"
     user            "get org member user info"
     add             "add member"
-    del|remove      "Remove member"
+    del             "Remove member"
 '
     param:run
 
@@ -32,45 +32,36 @@ ___x_cmd_gt_org_member_ls() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
-    #1|--org        "org space address"    <>:address
-    --role          "role"                 <>="all"         = admin member all
+    --role          "role"                 <>:UserRole="all"
+    #1|--org        "org space address"    <>:Address
 '
     param:run
-    # param form bug
-    [ -z "$org" ] && gt_log error "org space address is empty" && return 1
-
     ___ui_table_json "$(printf "%s" "______x_cmd_gt_get_multi \"/v5/orgs/${org##*/}/members\" role page per_page || return 1" )" \
             NameSpace=.login Name=.name Role=.member_role Url=.html_url && return 0
-        [ $? -eq 1 ] && return 1
+    return 1
 }
 
 ___x_cmd_gt_org_member_user() {
     param:scope     "gitee/$O"
     param:dsl      '
 options:
-    #1|--org            "org space address"              <>:address
     --username          "username: user space address"   <>:name
+    #1|--org            "org space address"              <>:address
 '
     param:run
-    [ -z "$org" ] && [ -z "$username" ] && gt_log error "Get member user have empty options" && return 1
 
     local data
     data=$(______x_cmd_gt_get "/v5/orgs/${org##*/}/memberships/${username##*/}")
-    # TODO: wait json_awk
+    [ -z "$data" ] && gt_log error "Getting organization info failure by $org $username" && return 1
+
     local organization
     local name
     local name_space
     local role
     local html_url
-    organization="$(___x_cmd_gt_json_query "$data" .organization.name)"
-    name="$(___x_cmd_gt_json_query "$data" .user.name)"
-    name_space="$(___x_cmd_gt_json_query "$data" .user.login)"
-    role="$(___x_cmd_gt_json_query "$data" .role)"
-    html_url="$(___x_cmd_gt_json_query "$data" .user.html_url)"
-    [ -n "$organization" ] && \
-        ___x_cmd_ui tf  "true" "Success" "Organization: $organization" "Name: $name" "NameSpace: $name_space" "Role: $role" "UserUrl: $html_url" && \
-        return 0
-    gt_log "error" "Getting organization info failure by $org $username" && return 1
+    ___x_cmd_gt_json_query_rename "$data" organization=".organization.name" name=".user.name" name_space=".user.login" role=".role" html_url=".user.html_url"
+
+    ___x_cmd_ui tf  "true" "Success" "Organization: $organization" "Name: $name" "NameSpace: $name_space" "Role: $role" "UserUrl: $html_url"
 }
 
 # shellcheck disable=SC2181
@@ -86,19 +77,17 @@ options:
 '
     param:run
 
-    if [ -z "$1" ];then
-        gt_log error "At least one user’s spatial address is needed"
+    if [ $# -eq 0 ];then
+        gt_log error "At least one user's spatial address is needed"
         return 1
     fi
-    # param form bug
-    [ -z "$org" ] && gt_log error "org space address is empty" && return 1
 
-        for username in "$@"; do
+    for username in "$@"; do
         {
             ______x_cmd_gt_put_json "/v5/orgs/${org##*/}/memberships/${username##*/}" role 1>/dev/null 2>&1
 
             [ $? -ne 0 ] && gt_log error "Add $username failure"      &&   return 1
-                            gt_log info  "Add $username successfully" &&   return 0
+                            gt_log info  "Add $username successfully"
         }
     done
 }
@@ -113,19 +102,17 @@ options:
 '
     param:run
 
-    if [ -z "$1" ];then
-        gt_log error "At least one user’s spatial address is needed"
+    if [ $# -eq 0 ];then
+        gt_log error "At least one user's spatial address is needed"
         return 1
     fi
-    # param form bug
-    [ -z "$org" ] && gt_log error "org space address is empty" && return 1
 
     local username
     for username in "$@"; do
         {
-            ______x_cmd_gt_delete "/v5/orgs/${org##*/}/memberships/${username##*/}" role 1>/dev/null 2>&1
+            ______x_cmd_gt_delete "/v5/orgs/${org##*/}/memberships/${username##*/}" 1>/dev/null 2>&1
             [ $? -ne 0 ] && gt_log error "Remove $username failure"     &&  return 1
-                            gt_log info  "Remove $username successfully.";  return 0
+                            gt_log info  "Remove $username successfully."
         }
     done
 }

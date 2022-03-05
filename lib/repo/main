@@ -76,23 +76,22 @@ option:
     [ -n "$no_wiki" ] && has_wiki=false
     [ -n "$no_comment" ] && can_comment=false
     [ -n "$no_auto_init" ] && auto_init=false
-    # TODO: ___x_cmd_gt_printf_command_log
 
-    [ $# -eq 0 ] && gt_log info "repo create name is null" && return
+    [ $# -eq 0 ] && gt_log info "repo create name is null" && return 1
     local name
+    local data
+    local repo_id
+    local url
+    local repo_owner
     for name in "$@"; do
         {
-            local data
+
             data=$(______x_cmd_gt_post_json "/v5/user/repos" name="${name##*/}" description homepage has_issues has_wiki can_comment \
-            auto_init gitignore_template license_template path="$paths" private 2>/dev/null)
+                auto_init gitignore_template license_template path="$paths" private 2>/dev/null)
+            [ -z "$data" ] && gt_log error "Creating repo failure: $name." && return 1
+
             ___x_cmd_gt_json_query_rename "$data" repo_id=.id url=.html_url repo_owner=.owner.login
-            if [ -n "$repo_id" ];then
-                ___x_cmd_ui tf "true" "Creating repo $name success" "repo_id: $repo_id" "repo_owner: $repo_owner" "url: $url"
-                return 0
-            else
-                gt_log error "Creating repo failure: $name. Code is $code. "
-                return 1
-            fi
+            ___x_cmd_ui tf "true" "Creating repo $name success" "repo_id: $repo_id" "repo_owner: $repo_owner" "url: $url"
         }
     done
 }
@@ -119,7 +118,7 @@ option:
     --no_auto_init          "auto init README"
     --gitignore_template    "Git Ignore"                    <>:Ignore=""
     --license_template      "license"                       <>:license=""
-    --paths                  "repo path"                    <>:url_type=""
+    --paths                 "repo path"                     <>:url_type=""
     #n                      "repo names"
 '
     param:run
@@ -145,15 +144,16 @@ option:
     for name in "$@"; do
         local resp
         {
-            ______x_cmd_gt_post_json "/v5/orgs/$org/repos" name description homepage has_issues has_wiki can_comment auto_init \
-             gitignore_template license_template path="$paths" public 1>/dev/null
+            ______x_cmd_gt_post_json "/v5/orgs/$org/repos" name description homepage \
+                has_issues has_wiki can_comment auto_init \
+                gitignore_template license_template \
+                path="$paths" public 1>/dev/null
             code=$?
             if [ $code -ne 0 ]; then
                 gt_log error "Creating repo failure: $name. Code is $code. "
                 return $code
             else
                 gt_log info "Creating $name repo successfully."
-                return 0
             fi
         }
     done
@@ -247,19 +247,24 @@ ___x_cmd_gt_repo_info() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
-    #1|--repo          "Repo or Path(owner/repo)"         <>:repo
+    #1|--repo          "Repo or Path(owner/repo)"         <>:RepoName
 '
     param:run
 
     # get owner_repo by repo
     ___x_cmd_gt_param_init_owner_repo
-    ___x_cmd_gt_printf_command_log "gt repo info -r $repo"
 
     local data
+    local id
+    local name
+    local html_url
     data=$(______x_cmd_gt_get "/v5/repos/${owner_repo}" || return 1)
-        ___x_cmd_gt_json_query_rename "$data" id=.id name=.name html_url=.html_url
+    ___x_cmd_gt_json_query_rename "$data" id=.id name=.name html_url=.html_url
+
     [ -n "$name" ] && ___x_cmd_ui tf "true" "Success" "id: $id" "name: $name" "url: $html_url" && return 0
-                      gt_log         "error" "Fail. Couldn't find any repo: $repo"             && return 1
+
+    gt_log  "error" "Fail. Couldn't find any repo: $owner_repo"
+    return 1
 }
 
 # https://gitee.com/api/v5/swagger#/deleteV5ReposOwnerRepo
@@ -272,8 +277,6 @@ options:
     #n      "Provide repo list"    <>
 '
     param:run
-    xrc ui/lib/form
-    ___x_cmd_gt_printf_command_log "gt repo del " "$@"
 
     local ___X_CMD_UI_FORM_EXIT_STRATEGY="execute|exit"
     ___x_cmd_ui_form "Are you sure you want to $(___x_cmd_ui bold red delete "repo:") $(___x_cmd_ui bold "$*")" tf 1 = "yes" "no"
@@ -282,8 +285,9 @@ options:
     for i in "$@"; do
         ______x_cmd_gt_param_normalize_repo "$i"
         ______x_cmd_gt_delete "/v5/repos/$owner_repo" 1>/dev/null 2>&1
-        [ $? -eq 0 ] && ui tf "true" "Deleted repo $i successfully"                                  && return 0
-                        gt_log error "Deleting repo failure: $i. Probably because it desn't exists." && return 1
+        [  $? -ne 0 ] && gt_log error "Deleting repo failure: $i. Probably because it desn't exists." && return 1
+
+        ui tf "true" "Deleted repo $i successfully"
     done
 }
 
@@ -292,12 +296,11 @@ ___x_cmd_gt_repo_clear() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
-    #1|--repo          "Repo name"             <>:repo
+    #1|--repo          "Repo name"             <>:RepoName
 '
     param:run
 
     ___x_cmd_gt_param_init_owner_repo
-    ___x_cmd_gt_printf_command_log "gt repo clear -r " "$@"
 
     local ___X_CMD_UI_FORM_EXIT_STRATEGY="execute|exit"
     ___x_cmd_ui_form "Are you sure you want to $(ui bold red clear repo) $(ui bold "${owner_repo}")" tf 1 = "yes" "no"
@@ -305,7 +308,9 @@ options:
 
     ______x_cmd_gt_put_json "/v5/repos/${owner_repo}/clear" 1>/dev/null 2>&1
     [ $? -eq 0 ] && ___x_cmd_ui tf "true" "Successfully clear ${owner_repo}" && return 0
-                    gt_log error "Clearing repo failure: $owner_repo"        && return 1
+
+    gt_log error "Clearing repo failure: $owner_repo"
+    return 1
 }
 
 # shellcheck disable=SC2154,SC2181
@@ -313,7 +318,7 @@ ___x_cmd_gt_repo_review(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
-    #1|--repo             "Repo name"                   <>:repo
+    #1|--repo             "Repo name"                   <>:RepoName
     --assignees           "assignees username"          <>:assignees
     --testers             "testers usrename"            <>:testers
     --assignees_number    "number of reviewers"         <>:assignees_number="1"
@@ -321,10 +326,10 @@ options:
 '
     param:run
     ___x_cmd_gt_param_init_owner_repo
-    ___x_cmd_gt_printf_command_log "gt repo review " \
-    "--repo $repo --assignees $assignees --testers $testers --assignees_number $assignees_number --testers_number $testers_number"
 
     ______x_cmd_gt_put_json "/v5/repos/${owner_repo}/reviewer" assignees testers assignees_number testers_number 1>/dev/null 2>&1
     [ $? -eq 0 ] && ___x_cmd_ui tf "true" "Successfully setup ${owner_repo} review configure" && return 0
-                    gt_log error "Setup repo review configure failure: $owner_repo"           && return 1
+
+    gt_log error "Setup repo review configure failure: $owner_repo"
+    return 1
 }

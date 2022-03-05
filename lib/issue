@@ -45,8 +45,11 @@ options:
 '
     security=${security:-false}
     param:run
-    
+
     local data
+    local id
+    local title
+    local html_url
     data="$(______x_cmd_gt_post_json "/v5/repos/${owner##*/}/issues" repo="$repo" title issue_type="$type" body assignee \
         collaborators milestone labels program security_hole="$security" || return 1)"
     ___x_cmd_gt_json_query_rename "$data" id=.number title=.title html_url=.html_url
@@ -76,8 +79,11 @@ options:
 '
     param:run
     security=${security:-false}
-    
+
     local data
+    local id
+    local state
+    local html_url
     data="$(______x_cmd_gt_patch_json "/v5/repos/${owner##*/}/issues/${number}" repo title state body assignee \
         collaborators milestone labels program security_hole="$security" || return 1)"
     ___x_cmd_gt_json_query_rename "$data" id=.number state=.state html_url=.html_url
@@ -126,6 +132,10 @@ options:
             IssueNumber=.number Title=.title State=.issue_state Assigner=.assignee.name body=.body && return 0
     else
         local data
+        local id
+        local title
+        local state
+        local assignee
         data="$(______x_cmd_gt_get "/v5/repos/${owner_repo}/issues/${number}")"
         ___x_cmd_gt_json_query_rename "$data" id=.number title=.title state=.state assignee=.assignee.name
         if [ -n "$id" ];then

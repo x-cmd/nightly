@@ -8,7 +8,7 @@ ___x_cmd_gt_org(){
     param:scope     "gitee/$O"
     param:dsl       '
 subcmd:
-    info                    "Show information"
+    ls                      "Show org information or List all org"
     create                  "create org"
     repo                    "List all repos"
     quit                    "quit org"
@@ -25,34 +25,32 @@ subcmd:
     "___x_cmd_gt_org_${PARAM_SUBCMD}" "$@"
 }
 
-# TODO: rename "ls"?
 # shellcheck disable=SC2154
-___x_cmd_gt_org_info() {
+___x_cmd_gt_org_ls() {
     param:scope     "gitee/$O"
     param:dsl       '
-type:
 options:
-    --admin      "admin"       <>:bool=false
+    --admin      "admin"       <>:Bool=false
 '
     param:run
 
     if [ $# -eq 0 ]; then
         ___ui_table_json "$(printf "%s" "______x_cmd_gt_get_multi \"/v5/user/orgs\" admin page per_page || return 1" )" \
             Id=.id Name=.name FollowCount=.follow_count Url=.repos_url && return 0
-        [ $? -eq 1 ] && return 1
-    else
-        local data
-        data="$(______x_cmd_gt_get "/v5/orgs/${1:?Provide organization}")"
-        ___x_cmd_gt_json_query_rename "$data" id=.id name=.name public=.public follow_count=.follow_count owner=.owner.name
-        if [ -n "$id" ];then
-            ___x_cmd_ui tf "true" "Success" "id: $id" "name: $name" "public: $public" "follow_count: $follow_count" "owner: $owner"
-            return 0
-        else
-            gt_log "err" "Getting organization info failure by $1"
-            return 1
-        fi
+        return 1
     fi
-    return 0
+
+    local data
+    local id
+    local name
+    local public
+    local follow_count
+    local owner
+    data="$(______x_cmd_gt_get "/v5/orgs/${1:?Provide organization}")"
+    [ -z "$data" ] && gt_log "err" "Getting organization info failure by $1" && return 1
+
+    ___x_cmd_gt_json_query_rename "$data" id=.id name=.name public=.public follow_count=.follow_count owner=.owner.name
+    ___x_cmd_ui tf "true" "Success" "id: $id" "name: $name" "public: $public" "follow_count: $follow_count" "owner: $owner"
 }
 
 # It is very rare TODO: batch?
@@ -61,9 +59,9 @@ ___x_cmd_gt_org_create() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
-    #1              "organization name"     <>:name
     --org           "organization path"     <>=""
     --description   "description"           <>=""
+    #1              "organization name"     <>
 '
     param:run
     org=${org:-$1}
@@ -94,17 +92,15 @@ ___x_cmd_gt_org_repo_ls() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
-    --type     "type"     <>="all"    = all private public
+    --type      "type"                          <>="all"    = all private public
+    #1|--org    "Please provide organization"   <>:Address
 '
     param:run
-    if [ -z "$1" ]; then
-        gt_log error "Please provide organization"
-        return 1
-    fi
-     ___ui_table_json "$(printf "%s" "O=$O ______x_cmd_gt_get_multi \"/v5/orgs/${1:?Provide organization}/repos\" type || return 1" )" \
+     ___ui_table_json "$(printf "%s" "O=$O ______x_cmd_gt_get_multi \"/v5/orgs/$1/repos\" type || return 1" )" \
             Id=.id Name=.name public=.public OwnerName=.owner.name DefaultBranch=".default_branch" OpenIssuesCount=.open_issues_count license=.license Url=.html_url && return 0
 }
 
+# shellcheck disable=SC2181
 ___x_cmd_gt_org_quit() {
     param:scope     "gitee/$O"
     param:dsl       '
@@ -112,17 +108,15 @@ options:
     #n      "orgs"
 '
     param:run
-    if [ -z "$1" ];then
-        gt_log error "At least one org spatial address is needed."
-        return 1
-    fi
+
+    [ $# -eq 0 ] && gt_log error "At least one org spatial address is needed." && return 1
 
     for org in "$@"; do
     {
         ______x_cmd_gt_delete "/v5/user/memberships/orgs/${org##*/}"
 
         [ $? -ne 0 ] && gt_log error "Quit $org organization failure"     &&   return 1
-                        gt_log info  "Quit $org organization successfully.";   return 0
+                        gt_log info  "Quit $org organization successfully."
     }
     done
 }

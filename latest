@@ -74,13 +74,11 @@ subcmd:
 ___x_cmd_gt_make() {
     param:void
 
-
-
-    local O_ORIGINAL="${1:?Provide client name by O environment}"
+    local O_ORIGINAL="${1:-GITEE_DEFAULT}"
     local O="___x_cmd_gt_$O_ORIGINAL"
 
     http "@$O" make         'https://gitee.com/api'
-    http "@$O" header  type "application/json;charset=utf-8"
+    http "@$O" header type  "application/json;charset=utf-8"
 
     local token
     token="$(O="$O_ORIGINAL" ___x_cmd_gt_config_get "oauth_token")"

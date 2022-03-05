@@ -147,8 +147,3 @@ ___x_cmd_gt_default(){
 }
 
 
-# ui printf untils tool
-___x_cmd_gt_printf_command_log() {
-    local ___X_CMD_LOG_COLORIZED_MSG="\\033[90m"
-    gt_log "info" "==> " "$@"
-}
