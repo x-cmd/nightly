@@ -134,9 +134,15 @@ function str_join(sep, obj, prefix, start, end,     i, _result) {
     return _result
 }
 
-function str_joinwrap(left, right, obj, prefix, start, end,     i, _result) {
-    _result = ""
-    for (i=start; i<=end; ++i) _result = _result left obj[prefix i] right
+# function str_joinwrap(left, right, obj, prefix, start, end,     i, _result) {
+#     _result = ""
+#     for (i=start; i<=end; ++i) _result = _result left obj[prefix i] right
+#     return _result
+# }
+
+function str_joinwrap(sep, left, right, obj, prefix, start, end,     i, _result) {
+    _result = (start <= end) ? left obj[prefix start] right : ""
+    for (i=start+1; i<=end; ++i) _result = _result sep left obj[prefix i] right
     return _result
 }
 
@@ -245,19 +251,9 @@ function tokenize_argument_into_TOKEN_ARRAY(astr,
 
 # Section: Assert
 
-### Type check
-function join_optarg_oparr(optarg_id,
-    _len, _idx, _result, _oparr_keyprefix){
-
+function join_optarg_oparr(optarg_id,            _oparr_keyprefix){
     _oparr_keyprefix = optarg_id KSEP OPTARG_OPARR
-
-    _result = ""
-    _len = option_arr[ _oparr_keyprefix KSEP LEN ]
-    for (_idx=1; _idx<=_len; ++_idx) {
-        _result = _result " " option_arr[ _oparr_keyprefix KSEP _idx ]
-    }
-
-    return _result
+    return " " str_join( " ", option_arr, _oparr_keyprefix KSEP, 1, option_arr[ _oparr_keyprefix KSEP LEN ] )
 }
 
 function assert_arr_eq(optarg_id, arg_name, value, sep,
@@ -682,10 +678,7 @@ function parse_param_dsl(line,
                 # HANDLE:   option #1 #2 #3 ...
                 if ( match( line, /^#[0-9]+[\s]*/ ) )
                 {
-                    if (HAS_SUBCMD != true) {
-                        HAS_SUBCMD = false
-                    }
-
+                    if (HAS_SUBCMD != true)     HAS_SUBCMD = false
                     parse_param_dsl_for_positional_argument( line )
                     continue
                 }

@@ -1,49 +1,22 @@
 
-
-# function print_helpdoc_getitem(oparr_keyprefix,
-#     op, oparr_string, op_arr_len,
-#     k){
-
-#     op = option_arr[ oparr_keyprefix KSEP 1 ]
-#     if ( op == "" ) return ""
-
-#     oparr_string    = "<"
-#     op_arr_len = option_arr[ oparr_keyprefix KSEP LEN ]
-#     for ( k=2; k<=op_arr_len; ++k ) {
-#         oparr_string = oparr_string option_arr[ oparr_keyprefix KSEP k ] "|"
-#     }
-
-#     oparr_string = substr(oparr_string, 1, length(oparr_string)-1) ">"
-#     if (oparr_string == ">") oparr_string = ""
-
-#     return op "\t" oparr_string
-# }
-
 # Section: utils
-function cut_line(_line,_space_len,_option_line,_len_line,_max_len_line,_option_after_len,_option_after_arr_len){
-    if( COLUMNS == "" ){
-        return _line
-    }
-    _option_line = ""
-    _option_after_arr_len = 0
-    _len_line = length(_line)
-    _max_len_line = COLUMNS-_space_len-3-4
-    _option_after_len = split(_line,_option_after_arr," ")
-    if (_len_line >= _max_len_line) {
-        # for(key in _option_after_arr){
-        for(key=1; key<=_option_after_len; ++key){
-            _option_after_arr_len=_option_after_arr_len+length(_option_after_arr[key])+1
-            if(_option_after_arr_len >= _max_len_line) {
-                _option_after_arr_len = _option_after_arr_len-length(_option_after_arr[key])-1
-                break
-            }
+function cut_line( _line, _space_len,               _max_len_line, _option_after_arrl, _part_len){
+    if( COLUMNS == "" )     return _line
+
+    _max_len_line = COLUMNS - _space_len - 3 - 4
+    if ( length(_line) < _max_len_line )  return _line
+
+    _option_after_arrl = split( _line, _option_after_arr, " " )
+    _part_len = 0
+    for(key=1; key<=_option_after_arrl; ++key){
+        _part_len += length(_option_after_arr[key]) + 1
+        if (_part_len >= _max_len_line) {
+            _part_len -= ( length(_option_after_arr[key]) + 1 )
+            break
         }
-        # debug("_option_after_arr_len:"_option_after_arr_len";\t\tspace:"_space_len+7)
-        _option_line = _option_line substr(_line, 1, _option_after_arr_len) "\n" str_rep(" ", _space_len+7)  cut_line(substr(_line,_option_after_arr_len+1),_space_len)
-    } else {
-        _option_line = _option_line _line
     }
-    return _option_line
+    # debug("_part_len:"_part_len";\t\tspace:"_space_len+7)
+    return substr(_line, 1, _part_len) "\n" str_rep(" ", _space_len+7)  cut_line( substr(_line, _part_len + 1 ), _space_len )
 }
 
 # General default/candidate/regex rule string.
@@ -54,24 +27,12 @@ function generate_optarg_rule_string(option_id, optarg_idx,     _op, _regex, _ca
     _op = option_arr[ oparr_keyprefix KSEP 1 ]
     gsub("\005", " ", _default)
 
-    if (_default != "" && _default != OPTARG_DEFAULT_REQUIRED_VALUE) {
-        _default = " [default: " _default "]"
-    }
+    if (_default != "" && _default != OPTARG_DEFAULT_REQUIRED_VALUE)    _default = " [default: " _default "]"
 
-    if ( _op == "=~" ) {
-        _optarr_len = option_arr[ oparr_keyprefix KSEP LEN ]
-        _regex = str_joinwrap( "\"", "\"|", option_arr, oparr_keyprefix KSEP, 2, _optarr_len )
-        # for ( k=2; k<=_optarr_len; ++k ) _regex = _regex "\"" option_arr[ oparr_keyprefix KSEP k ] "\"" "|"
-        _regex = " [regex: " substr(_regex, 1, length(_regex)-1) "]"
+    if ( _op == "=~" )  return _default " [regex: "     str_joinwrap( "|",  "\"", "\"", option_arr, oparr_keyprefix KSEP, 2, option_arr[ oparr_keyprefix KSEP LEN ] ) "]"
+    if ( _op == "="  )  return _default " [candidate: " str_joinwrap( ", ", "\"", "\"", option_arr, oparr_keyprefix KSEP, 2, option_arr[ oparr_keyprefix KSEP LEN ] ) "]"
 
-    } else if ( _op == "=" ) {
-        _optarr_len = option_arr[ oparr_keyprefix KSEP LEN ]
-        _candidate = str_joinwrap( "\"", "\",", option_arr, oparr_keyprefix KSEP, 2, _optarr_len )
-        # for ( k=2; k<=_optarr_len; ++k ) _candidate = _candidate "\"" option_arr[ oparr_keyprefix KSEP k ] "\"" ", "
-        _candidate = " [candidate: " substr(_candidate, 1, length(_candidate)-2) " ]"
-    }
-
-    return _default _candidate _regex
+    return _default
 }
 # EndSection
 

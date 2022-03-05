@@ -28,17 +28,17 @@ test_ls_option(){
 -y|--fsdfsd|-o
 Test regex arg1
 ${arg_sep}888
-=~${arg_sep}[0-9]+${arg_sep}[a-z]+${arg_sep}
+=~${arg_sep}[0-9]+${arg_sep}[a-z]+
 list_repo_1
 -u|--usdasd|-p
 Test regex arg2
 ${arg_sep}123
-=~${arg_sep}[0-9]+${arg_sep}
+=~${arg_sep}[0-9]+
 
 --license
 Test regex arg3
 ${arg_sep}0BSD
-=${arg_sep}MulanPSL-2.0${arg_sep}0BSD${arg_sep}AFL-3.0${arg_sep}AGPL-3.0${arg_sep}${arg_sep}XXXX License${arg_sep}
+=${arg_sep}MulanPSL-2.0${arg_sep}0BSD${arg_sep}AFL-3.0${arg_sep}AGPL-3.0${arg_sep}${arg_sep}XXXX License
 
 -z
 Test regex arg4
@@ -48,7 +48,7 @@ Test regex arg4
 -k
 Test regex arg5
 ${arg_sep}abc
-=${arg_sep}abc${arg_sep}cde${arg_sep}def${arg_sep}
+=${arg_sep}abc${arg_sep}cde${arg_sep}def
 ${arg_sep}666
 
 
@@ -60,12 +60,12 @@ Repo name 1
 #2
 Repo name 2
 ${arg_sep}456
-=~${arg_sep}[0-9]+${arg_sep}
+=~${arg_sep}[0-9]+
 
 #3
 Repo name 3
 ${arg_sep}gplv3
-=${arg_sep}gplv3${arg_sep}apachev2${arg_sep}mplv2${arg_sep}
+=${arg_sep}gplv3${arg_sep}apachev2${arg_sep}mplv2
 
 #4
 Test rest argument #4 when exist option and flag
