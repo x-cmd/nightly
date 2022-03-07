@@ -58,7 +58,7 @@ subcommand:
     "____x_cmd_gh_auth_${PARAM_SUBCMD}" "$@"
 }
 
-____x_cmd_gh_auth_log(){
+____x_cmd_gh_auth_login(){
     param:void
     local client_id=3d0f25caedcc0e18c985
     local scope
@@ -67,23 +67,17 @@ ____x_cmd_gh_auth_log(){
     [ "$scope" = "all" ] && scope="repo workflow write:packages delete:packages admin:org admin:public_key admin:repo_hook admin:org_hook gist notifications user delete_repo write:discussion admin:enterprise admin:gpg_key"
 
     http "@____x_cmd_log_GITHUB" header put "Accept" "application/json"
-    local codeData
-    local device_code
-    local user_code
-    local verification_uri
-    export all_proxy=socks5://192.168.31.117:1086
-    codeData="$(http "@____x_cmd_log_GITHUB" post json "https://github.com/login/device/code" client_id="$client_id" scope="$scope")"
-    ___x_cmd_gh_json_query_rename "$codeData" device_code=.device_code user_code=.user_code verification_uri=.verification_uri
 
-    gh_log info "$user_code"
-    http browse "$verification_uri"
-    local gh_status="authorization_pending"
-    local data
-    while [ "$gh_status" = "authorization_pending" ];do
-        data="$(http "@____x_cmd_log_GITHUB" post json https://github.com/login/oauth/access_token client_id="$client_id" grant_type="$grant_type" device_code="$device_code")"
-        echo "$data">>a.json
-        ___x_cmd_gh_json_query_rename "$data" gh_status=.error
-        sleep 10
-    done
-    # ___x_cmd_gh_token "$(___x_cmd_gh_json_query "$data" .access_token || return 1)"
+    http "@____x_cmd_log_GITHUB" post json "https://github.com/login/device/code" client_id="$client_id" scope="$scope" | (
+        ___x_cmd_git_json_query_rename  device_code=.device_code user_code=.user_code verification_uri=.verification_uri
+        gh_log info "Copy your one-time code:$user_code"
+        http browse "$verification_uri"
+        local gh_status="authorization_pending"
+        local data
+        while [ "$gh_status" = "authorization_pending" ];do
+            data="$(http "@____x_cmd_log_GITHUB" post json https://github.com/login/oauth/access_token client_id="$client_id" grant_type="$grant_type" device_code="$device_code")"
+            ___x_cmd_git_json_query_rename "$data" gh_status=.error
+            sleep 10
+        done
+    )
 }

@@ -119,31 +119,6 @@ ___x_cmd_gh_parse_owner_repo() {
     fi
 }
 
-___x_cmd_gh_json_query(){
-    local awkfile
-    awkfile="$(xrc cat awk/lib/default.awk awk/lib/json.awk awk/lib/jiter.awk )"
-    local data="$1"
-    shift
-    while [ $# -gt 0 ];do
-        awk "$awkfile""
-{
-    jiter_print_eqarr_after_tokenize(\$0,\"$1\", \"\n\")
-}"
-    shift
-    done
-}
-
-#TODO:awk!!!
-___x_cmd_gh_json_query_rename(){
-    local data
-    data="$(cat)"
-    shift
-    while [ $# -gt 0 ];do
-        eval "${1%%=*}"="$(printf "%s" "$data" | ___x_cmd_gh_json_query "${1##*=}")"
-        shift
-    done
-}
-
 ___x_cmd_gh_default(){
     param_default "$@" 2>/dev/null || return 1
 }

@@ -64,3 +64,26 @@ A
 )"
     printf "%s\n" "$data">"$url"
 }
+
+___x_cmd_git_json_query(){
+    local awkfile
+    awkfile="$(xrc cat awk/lib/default.awk awk/lib/json.awk awk/lib/jiter.awk )"
+    while [ $# -gt 0 ];do
+    awk "$awkfile""
+{
+    jiter_print_eqarr_after_tokenize(\$0,\"$1\", \"\n\")
+}"
+    shift
+    done
+}
+
+#TODO:awk!!!
+___x_cmd_git_json_query_rename(){
+    local data
+    data="$(cat)"
+    shift
+    while [ $# -gt 0 ];do
+        eval "${1%%=*}"="$(printf "%s" "$data" | ___x_cmd_git_json_query "${1##*=}")"
+        shift
+    done
+}

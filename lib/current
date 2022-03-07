@@ -47,11 +47,14 @@ ___x_cmd_gh_current_owner() {
 
     [ -n "$___X_CMD_GITHUB_DEFAULT_OWNER" ] && printf "%s\n" "$___X_CMD_GITHUB_DEFAULT_OWNER" && return 0
 
-    local data
-    data=$(___x_cmd_gh_get "/user") || return 1
-    ___X_CMD_GITHUB_DEFAULT_OWNER=$(___x_cmd_gh_json_query "$data" ".login")
-    ___x_cmd_gh_config_set  "user" "$___X_CMD_GITHUB_DEFAULT_OWNER" 1>/dev/null 2>&1
-    printf "%s\n" "$___X_CMD_GITHUB_DEFAULT_OWNER"
+    ___X_CMD_GITHUB_DEFAULT_OWNER="$(___x_cmd_gh_get "/user" | ___x_cmd_git_json_query ".login")"
+    if [ -n "$___X_CMD_GITHUB_DEFAULT_OWNER" ];then
+        ___x_cmd_gh_config_set  "user" "$___X_CMD_GITHUB_DEFAULT_OWNER" 1>/dev/null 2>&1
+        printf "%s\n" "$___X_CMD_GITHUB_DEFAULT_OWNER"
+    else
+        gh_log error "get current owner fail"
+        return 1
+    fi
 }
 
 # shellcheck disable=SC2120

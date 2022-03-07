@@ -32,8 +32,11 @@ options:
 '
     param:run
     ___x_cmd_gh_param_init_owner_repo
-    ___ui_table_json "$(printf "%s" "___x_cmd_gh_get_multi "/repos/${owner_repo}/collaborators" || return 1" )" \
-        Id=.id Name=.login role=.role_name Push=.permissions.push && return 0
+
+    if ___ui_table_json Id=.id Owner=.login Url=.html_url \
+        -- "___x_cmd_gh_get_multi" "/repos/${owner_repo}/collaborators"; then
+        return 0
+    fi
 }
 
 ___x_cmd_gh_repo_member_add() {

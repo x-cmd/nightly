@@ -27,13 +27,17 @@ ___x_cmd_gh_org_ls() {
 
     local url
     if [ $# -gt 0 ]; then
-         url="/users/$1/orgs"
-    else url="/user/orgs"
+        url="/users/$1/orgs"
+    else
+        url="/user/orgs"
     fi
 
-    ___ui_table_json "$(printf "%s" "___x_cmd_gh_get_multi $url || return 1" )" Id=.id Name=.login && return 0
-
+    if ___ui_table_json Id=.id Name=.login \
+        -- "___x_cmd_gh_get_multi" "$url"; then
+        return 0
+    fi
     ___x_cmd_ui_tf "false" "get $1 organizations ls fail"
+    return 1
 }
 
 ___x_cmd_gh_org_info() {
@@ -44,16 +48,15 @@ options:
 '
     param:run
 
-    local data
-    data="$(___x_cmd_gh_get "/orgs/$org")"
-
-    [ $? -ne 0 ] &&  ___x_cmd_ui_tf "false" "get $org organizations info fail" && return 1
-
-    local id
-    local name
-    local html_url
-    ___x_cmd_gh_json_query_rename "$data" id=.id html_url=.html_url name=.login
-    ___x_cmd_ui_tf  "true" "get $org organizations info success" "Id: $id" "Name: $name" "Url: $html_url"
+    ___x_cmd_gh_get "/orgs/$org" | (
+        ___x_cmd_git_json_query_rename id=.id url=.html_url name=.login
+        if [ -n "$id" ]; then
+            ___x_cmd_ui_tf  "true" "get $org organizations info success" "Id: $id" "Name: $name" "Url: $url"
+            else
+            ___x_cmd_ui_tf "false" "get $org organizations info fail"
+            return 1
+        fi
+    )
 }
 
 ___x_cmd_gh_org_repo(){
@@ -78,9 +81,10 @@ options:
     #1|--org   "org space address"      <>:address
 '
     param:run
-     ___ui_table_json "$(printf "%s" "___x_cmd_gh_get_multi "/orgs/$org/repos" type || return 1" )" \
-      Id=.id Name=.name OwnerName=.owner.login IsPrivate=.private && return 0
-
+    if ___ui_table_json Id=.id Name=.name OwnerName=.owner.login IsPrivate=.private \
+        -- "___x_cmd_gh_get_multi" "/orgs/$org/repos" type ; then
+        return 0
+    fi
     ___x_cmd_ui_tf "false" "Please provide owner and owner_type"
     return 1
 }
@@ -114,8 +118,12 @@ options:
     #1|--org        "org space address"    <>:address
 '
     param:run
-    ___ui_table_json "$(printf "%s" "___x_cmd_gh_get_multi "/orgs/${org##*/}/members" role filter || return 1" )" \
-        Id=.id UserName=.login Url=.html_url  && return 0
+    if ___ui_table_json Id=.id UserName=.login Url=.html_url \
+        --  "___x_cmd_gh_get_multi" "/orgs/${org##*/}/members" role filter; then
+        return 0
+    fi
+    ___x_cmd_ui_tf "false" "get member list fail"
+    return 1
 }
 
 ___x_cmd_gh_org_member_user() {
@@ -126,17 +134,16 @@ options:
     #1|--org            "org space address"         <>:address
 '
     param:run
-    local data
-    data="$(___x_cmd_gh_get "/orgs/${org##*/}/memberships/${username##*/}")"
 
-    [ $? -ne 0 ] &&  ___x_cmd_ui_tf "false" "get $username in organizations info fail" && return 1
-
-    local role
-    local url
-    local name
-    local state
-    ___x_cmd_gh_json_query_rename "$data" role=.role url=.organization_url name=.user.login state=.state
-    ___x_cmd_ui_tf  "true" "get $username in organizations info  success" "Name: $name" "Role: $role" "state: $state" "Url: $url"
+    ___x_cmd_gh_get "/orgs/${org##*/}/memberships/${username##*/}" | (
+        ___x_cmd_git_json_query_rename role=.role url=.organization_url name=.user.login state=.state
+        if [ -n "$role" ];then
+            ___x_cmd_ui_tf  "true" "get $username in organizations info  success" "Name: $name" "Role: $role" "state: $state" "Url: $url"
+            else
+            ___x_cmd_ui_tf "false" "get $username in organizations info fail"
+            return 1
+        fi
+    )
 }
 
 ___x_cmd_gh_org_member_add() {
