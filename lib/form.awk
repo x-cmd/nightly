@@ -9,7 +9,7 @@ BEGIN {
 
     ATT_ANS     = "\010"
 
-    FS="\001"
+    # FS="\001"/
 }
 
 NR==1{
@@ -22,8 +22,9 @@ NR==1{
     rulel = 0
     for (i=1; i<=argl; ++i) {
         rulel = rulel + 1
-        rule[ rulel ATT_DESC ]              = args[i]
-        l = wcswidth(args[i])
+        desc = str_trim(args[i])
+        rule[ rulel ATT_DESC ]              = desc
+        l = wcswidth(desc)
         if (question_width < l) question_width = l
         rule[ rulel ATT_VAR ]               = args[i+1]
         rule[ rulel ATT_DEFAULT ]           = args[i+2]

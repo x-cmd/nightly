@@ -32,7 +32,9 @@ if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
 ___x_cmd_ui_gridselect_control_awk(){
     command awk \
         -W interactive \
-        -v EXIT_OP="$EXIT_OP" -v ITEM_INDEX_STATE="$___X_CMD_UI_GRIDSELECT_DISPLAY_ITEM_INDEX" \
+        -v ORS="$___X_CMD_UI_REGION_RS" \
+        -v EXIT_OP="$EXIT_OP" \
+        -v ITEM_INDEX_STATE="$___X_CMD_UI_GRIDSELECT_DISPLAY_ITEM_INDEX" \
         -v SELECT_MULTIPLE_STATE="$___X_CMD_UI_GRIDSELECT_MULTIPLE_STATE" \
         -v SELECT_HELP_STATE="$___X_CMD_UI_GRIDSELECT_HELP_STATE" \
         -f "$___X_CMD_ROOT/awk/lib/default.awk" \
@@ -59,16 +61,14 @@ ___x_cmd_ui_gridselect_control_awk(){
         -f "$___X_CMD_ROOT/ui/lib/share.awk" \
         -f "$___X_CMD_ROOT/ui/lib/theme.awk" \
         -f "$___X_CMD_ROOT/ui/lib/gridselect.awk"
-        # -f "/home/qiakai/ui/lib/theme.awk" \
         # -f "/home/qiakai/ui/lib/gridselect.awk"
+        # -f "/home/qiakai/ui/lib/theme.awk" \
 }
 fi
 
 ___x_cmd_ui_gridselect_control(){
     {
-        printf "UPDATE %s %s${___X_CMD_UI_REGION_RS}" "${COLUMNS}" "${LINES}"
-        IFS="$(printf "$___X_CMD_UI_REGION_RS")"
-        printf "%s%s" "$*" "$___X_CMD_UI_REGION_RS"
+        ___x_cmd_ui_region_send_update "$@"
         cat
     } | ___x_cmd_ui_gridselect_control_awk
 }
@@ -87,9 +87,8 @@ ___x_cmd_ui_gridselect_out(){
     ___x_cmd_ui_gridselect_main "$@"
 }
 
-# ___ui_select_out
 # f(){
-#     ___x_cmd_ui_gridselect \
+#      ___x_cmd_ui_gridselect num \
 #     "Please select the app you want to install:" \
 #     "Install docker" \
 #     "Install k8s" \
@@ -99,24 +98,13 @@ ___x_cmd_ui_gridselect_out(){
 #     "---" \
 #     "It's the 1 app descriptor." \
 #     "It's the 2 app descriptor." \
-#     "It's the 3 app descriptor." \
-#     "It's the 4 app descriptor." \
+#     "" \
+#     "" \
 #     "It's the 5 app descriptor." \
 #     "---"
-# }
-
-
 #     echo "___X_CMD_UI_GRIDSELECT_FINAL_COMMAND:" "$___X_CMD_UI_GRIDSELECT_FINAL_COMMAND"
-#     i=1
-#     while [ "$i" -le "$___X_CMD_UI_GRIDSELECT_MULTIPLE_LEN" ];do
+#     echo "___X_CMD_UI_GRIDSELECT_CURRENT_ITEM_INDEX:" "$___X_CMD_UI_GRIDSELECT_CURRENT_ITEM_INDEX"
+#     echo "___X_CMD_UI_GRIDSELECT_CURRENT_ITEM:" "$___X_CMD_UI_GRIDSELECT_CURRENT_ITEM"
 
-#         eval printf "\"___X_CMD_UI_GRIDSELECT_ITEM_INDEX$i:%s\n\"" "\"\$___X_CMD_UI_GRIDSELECT_ITEM_INDEX$i\""
-#         eval printf "\"___X_CMD_UI_GRIDSELECT_ITEM$i:%s\n\"" "\"\$___X_CMD_UI_GRIDSELECT_ITEM$i\""
-#         i=$((i+1))
-#     done
-
-#     echo "\n___X_CMD_UI_GRIDSELECT_CURRENT_ITEM_INDEX:" "$___X_CMD_UI_GRIDSELECT_CURRENT_ITEM_INDEX"
-#     echo "___X_CMD_UI_GRIDSELECT_CURENT_ITEM:" "$___X_CMD_UI_GRIDSELECT_CURENT_ITEM"
-#     echo "___X_CMD_UI_GRIDSELECT_MULTIPLE_LEN:" "$___X_CMD_UI_GRIDSELECT_MULTIPLE_LEN"
 # }
 # f

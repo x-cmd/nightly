@@ -5,9 +5,10 @@ xrc ui/lib/region
 
 if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
 ___x_cmd_ui_form_control_awk(){
-    LC_ALL=en_US.UTF-8 command awk \
+    command awk \
         -W interactive \
         -v EXIT_OP="$EXIT_OP" \
+        -v ORS="$___X_CMD_UI_REGION_RS" \
         -f "$___X_CMD_ROOT/awk/lib/default.awk" \
         -f "$___X_CMD_ROOT/awk/lib/str.awk" \
         -f "$___X_CMD_ROOT/awk/lib/wcwidth.awk" \
@@ -15,6 +16,7 @@ ___x_cmd_ui_form_control_awk(){
         -f "$___X_CMD_ROOT/ui/lib/share.awk" \
         -f "$___X_CMD_ROOT/ui/lib/theme.awk" \
         -f "$___X_CMD_ROOT/ui/lib/form.awk"
+        # -f "./lib/form.awk"
 }
 
 ___x_cmd_ui_form_control(){

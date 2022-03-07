@@ -204,7 +204,6 @@ function consume_ctrl(      _cmd) {
     }
 
     DATA_HAS_CHANGED = true
-
     _cmd=$0
     gsub(/^C:/, "", _cmd)
     idx = index(_cmd, ":")
