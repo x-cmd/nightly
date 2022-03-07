@@ -119,29 +119,6 @@ ______x_cmd_gt_parse_owner_repo() {
     fi
 }
 
-___x_cmd_gt_json_query(){
-    local awkfile
-    awkfile="$(xrc cat awk/lib/default.awk awk/lib/json.awk awk/lib/jiter.awk )"
-    local data="$1"
-    shift
-    while [ $# -gt 0 ];do
-    printf "%s" "$data"| awk "$awkfile""
-{
-    jiter_print_eqarr_after_tokenize(\$0,\"$1\", \"\n\")
-}"
-    shift
-    done
-}
-
-___x_cmd_gt_json_query_rename(){
-    local data="$1"
-    shift
-    while [ $# -gt 0 ];do
-        eval "${1%%=*}"="$(___x_cmd_gt_json_query "$data" "${1##*=}")"
-        shift
-    done
-}
-
 ___x_cmd_gt_default(){
     param_default "$@" 2>/dev/null || return 1
 }

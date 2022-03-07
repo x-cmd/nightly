@@ -8,7 +8,7 @@
 # TODO: wait ccmd fix
 # xrc http param json str ui ccmd
 xrc http param json str ui
-xrc ui/lib/table gh/lib/config_awk
+xrc ui/lib/table gh/lib/resource
 
 
 # TODO: Precompile it into one file.
