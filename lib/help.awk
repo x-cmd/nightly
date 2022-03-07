@@ -22,15 +22,15 @@ function cut_line( _line, _space_len,               _max_len_line, _option_after
 # General default/candidate/regex rule string.
 # Example: [default: fzf] [candidate: fzf, skim] [regex: ^(fzf|skim)$ ] ...
 function generate_optarg_rule_string(option_id, optarg_idx,     _op, _regex, _candidate) {
-    oparr_keyprefix = option_id KSEP optarg_idx KSEP OPTARG_OPARR
-    _default = option_arr[ option_id KSEP optarg_idx KSEP OPTARG_DEFAULT ]
-    _op = option_arr[ oparr_keyprefix KSEP 1 ]
+    oparr_keyprefix = option_id S optarg_idx S OPTARG_OPARR
+    _default = option_arr[ option_id S optarg_idx S OPTARG_DEFAULT ]
+    _op = option_arr[ oparr_keyprefix S 1 ]
     gsub("\005", " ", _default)
 
     if (_default != "" && _default != OPTARG_DEFAULT_REQUIRED_VALUE)    _default = " [default: " _default "]"
 
-    if ( _op == "=~" )  return _default " [regex: "     str_joinwrap( "|",  "\"", "\"", option_arr, oparr_keyprefix KSEP, 2, option_arr[ oparr_keyprefix KSEP LEN ] ) "]"
-    if ( _op == "="  )  return _default " [candidate: " str_joinwrap( ", ", "\"", "\"", option_arr, oparr_keyprefix KSEP, 2, option_arr[ oparr_keyprefix KSEP LEN ] ) "]"
+    if ( _op == "=~" )  return _default " [regex: "     str_joinwrap( "|",  "\"", "\"", option_arr, oparr_keyprefix S, 2, option_arr[ oparr_keyprefix L ] ) "]"
+    if ( _op == "="  )  return _default " [candidate: " str_joinwrap( ", ", "\"", "\"", option_arr, oparr_keyprefix S, 2, option_arr[ oparr_keyprefix L ] ) "]"
 
     return _default
 }
@@ -40,7 +40,7 @@ function generate_optarg_rule_string(option_id, optarg_idx,     _op, _regex, _ca
 
 # Get max length of _opt_help_doc, and generate _opt_help_doc_arr.
 function ___generate_help_cal_l_maxlen_helpdoc_helpdocarr(   obj,           i ){
-    l = obj[ LEN ]
+    l = obj[ L ]
     _max_len = 0
     for (i=1; i<=l; ++i) {
         _opt_help_doc = get_option_string( obj[ i ] )       # obj[ i ] is option_ids
@@ -56,7 +56,7 @@ function generate_help_for_option_without_arg(   _return, i, _option_after,     
     for (i=1; i<=l; ++i) {
         option_id = flag_list[ i ]
         _space = str_rep(" ", _max_len-length(_opt_help_doc_arr[ i ]))
-        _option_after = option_arr[option_id KSEP OPTION_DESC ] UI_END
+        _option_after = option_arr[option_id S OPTION_DESC ] UI_END
         _option_after = cut_line(_option_after,_max_len)
         _return = _return "    " FG_BLUE _opt_help_doc_arr[ i ] _space "   " FG_LIGHT_RED _option_after "\n"
     }
@@ -71,11 +71,11 @@ function generate_help_for_option_with_arg(     _return, i, _option_after,      
         option_id = option_list[ i ]
 
         oparr_string  = ""
-        option_argc   = option_arr[ option_id KSEP LEN ]
+        option_argc   = option_arr[ option_id L ]
         for(j=1; j<=option_argc; ++j) oparr_string = oparr_string generate_optarg_rule_string(option_id, j)
 
         _multiple = match(option_id, /\\|m/) ? " [multiple]" : ""
-        _option_after = option_arr[ option_list[ i ] KSEP OPTION_DESC ] UI_END oparr_string _multiple
+        _option_after = option_arr[ option_list[ i ] S OPTION_DESC ] UI_END oparr_string _multiple
         _option_after = cut_line(_option_after,_max_len)
 
         _space = str_rep(" ", _max_len-length(_opt_help_doc_arr[ i ]))
@@ -92,22 +92,22 @@ function generate_help_for_option_with_arg(     _return, i, _option_after,      
 function generate_option_help(         _return, i, option_list, flag_list) {
     # If option has no argument, push it to flag_list.
     # Otherwise, push it to option_list.
-    for (i=1; i<=option_id_list[ LEN ]; ++i) {
+    for (i=1; i<=option_id_list[ L ]; ++i) {
         option_id     = option_id_list[ i ]
-        option_argc   = option_arr[ option_id KSEP LEN ]
+        option_argc   = option_arr[ option_id L ]
 
         if (option_argc == 0) {
-            flag_list[ LEN ] = flag_list[ LEN ] + 1
-            flag_list[ flag_list[ LEN ] ] = option_id
+            flag_list[ L ] = flag_list[ L ] + 1
+            flag_list[ flag_list[ L ] ] = option_id
         } else {
-            option_list[ LEN ] = option_list[ LEN ] + 1
-            option_list[ option_list[ LEN ] ] = option_id
+            option_list[ L ] = option_list[ L ] + 1
+            option_list[ option_list[ L ] ] = option_id
         }
     }
 
     _return = ""
-    if (0 != flag_list[ LEN ])      _return = _return "\n" generate_help_for_option_without_arg()
-    if (0 != option_list[ LEN ])    _return = _return "\n" generate_help_for_option_with_arg()
+    if (0 != flag_list[ L ])      _return = _return "\n" generate_help_for_option_without_arg()
+    if (0 != option_list[ L ])    _return = _return "\n" generate_help_for_option_with_arg()
     return _return
 }
 # EndSection
@@ -117,18 +117,18 @@ function generate_rest_argument_help(        _option_help,_option_after) {
     # Get max length of rest argument name.
     _max_len = 0
     _option_after = ""
-    for (i=1; i<=rest_option_id_list[ LEN ]; ++i) {
+    for (i=1; i<=rest_option_id_list[ L ]; ++i) {
         if (length(rest_option_id_list[ i ]) > _max_len) _max_len = length(rest_option_id_list[ i ])
     }
 
     # Generate help doc.
     _option_help = _option_help "\nARGS:\n"
-    for (i=1; i <= rest_option_id_list[ LEN ]; ++i) {
+    for (i=1; i <= rest_option_id_list[ L ]; ++i) {
         option_id       = rest_option_id_list[ i ]
 
         oparr_string = generate_optarg_rule_string(option_id, 1)
 
-        _option_after = option_arr[option_id KSEP OPTION_DESC ] UI_END oparr_string
+        _option_after = option_arr[option_id S OPTION_DESC ] UI_END oparr_string
         _option_after = cut_line(_option_after,_max_len)
 
         _space = str_rep(" ", _max_len-length(option_id))
@@ -142,13 +142,13 @@ function generate_rest_argument_help(        _option_help,_option_after) {
 function generate_subcommand_help(        _option_help, _cmd_name) {
     # Get max length of subcommand name.
     _max_len = 0
-    for (i=1; i<=subcmd_arr[ LEN ]; ++i) {
+    for (i=1; i<=subcmd_arr[ L ]; ++i) {
         if (length(subcmd_arr[ i ]) > _max_len) _max_len = length(subcmd_arr[ i ])
     }
 
     # Generate help doc.
     _option_help = _option_help "\nSUBCOMMANDS:\n"
-    for (i=1; i <= subcmd_arr[ LEN ]; ++i) {
+    for (i=1; i <= subcmd_arr[ L ]; ++i) {
         _cmd_name = subcmd_arr[ i ]
         gsub("\\|", ",", _cmd_name)
         _space = str_rep(" ", _max_len-length(_cmd_name))
@@ -161,9 +161,9 @@ function generate_subcommand_help(        _option_help, _cmd_name) {
 # EndSection
 
 function print_helpdoc(){
-    if (0 != option_id_list[ LEN ])         printf("%s", generate_option_help())
-    if (0 != rest_option_id_list[ LEN ])    printf("%s", generate_rest_argument_help())
-    if (0 != subcmd_arr[ LEN ])             printf("%s", generate_subcommand_help())
+    if (0 != option_id_list[ L ])         printf("%s", generate_option_help())
+    if (0 != rest_option_id_list[ L ])    printf("%s", generate_rest_argument_help())
+    if (0 != subcmd_arr[ L ])             printf("%s", generate_subcommand_help())
     printf("\n")
 }
 

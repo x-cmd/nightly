@@ -1,7 +1,12 @@
 BEGIN {
     false = 0;  true = 1
-    LEN   ="len"
-    KSEP  = "\034"
+    # L-EN   ="len"
+    # K-SEP  = "\034"
+
+    S = "\001"
+    T = "\002"
+    L = "\003"
+
     EXIT_CODE = 0
 }
 
@@ -183,9 +188,9 @@ function get_option_string(option_id,
     gsub("\\|m", "", _option_string)
     gsub("\\|", ",", _option_string)
 
-    option_argc      = option_arr[ option_id KSEP LEN ]
+    option_argc      = option_arr[ option_id L ]
     for ( _j=1; _j<=option_argc; ++_j ) {
-        _option_string = _option_string " <" option_arr[ option_id KSEP _j KSEP OPTARG_NAME ] ">"
+        _option_string = _option_string " <" option_arr[ option_id S _j S OPTARG_NAME ] ">"
     }
 
     return _option_string
@@ -202,30 +207,30 @@ function tokenize_argument_into_TOKEN_ARRAY(astr,
     gsub(/\\ /,    "\004", astr)
 
     astr = str_trim(astr)
-    TOKEN_ARRAY[LEN] = 0
+    TOKEN_ARRAY[ L ] = 0
     while (length(astr) > 0){
 
         if (match(astr, /^\003[^\003]*\003/)) {
-            _len = TOKEN_ARRAY[LEN] + 1
+            _len = TOKEN_ARRAY[ L ] + 1
             _tmp = substr(astr, 1, RLENGTH)
             gsub("\004", " ",   _tmp)      # Unwrap
             gsub("\003", "",    _tmp)      # Unwrap
             gsub("\002", "\"",  _tmp)
             gsub("\001", "\\",  _tmp)      # Unwrap
             TOKEN_ARRAY[_len] = _tmp
-            TOKEN_ARRAY[LEN] = _len
+            TOKEN_ARRAY[ L ] = _len
             astr = substr(astr, RLENGTH+1)
 
         } else if ( match(astr, /^[^ \n\t\v\003]+/) ){ #"
 
-            _len = TOKEN_ARRAY[LEN] + 1
+            _len = TOKEN_ARRAY[ L ] + 1
             _tmp = substr(astr, 1, RLENGTH)
             gsub("\004", " ",       _tmp)
             gsub("\003", "",        _tmp)
             gsub("\002", "\"",      _tmp)
             gsub("\001", "\\\\",    _tmp)   # Notice different
             TOKEN_ARRAY[_len] = _tmp
-            TOKEN_ARRAY[LEN] = _len
+            TOKEN_ARRAY[ L ] = _len
             astr = substr(astr, RLENGTH+1)
 
             if ( match(astr, /^\003[^\003]*\003/) ) {
@@ -252,22 +257,22 @@ function tokenize_argument_into_TOKEN_ARRAY(astr,
 # Section: Assert
 
 function join_optarg_oparr(optarg_id,            _oparr_keyprefix){
-    _oparr_keyprefix = optarg_id KSEP OPTARG_OPARR
-    return " " str_join( " ", option_arr, _oparr_keyprefix KSEP, 1, option_arr[ _oparr_keyprefix KSEP LEN ] )
+    _oparr_keyprefix = optarg_id S OPTARG_OPARR
+    return " " str_join( " ", option_arr, _oparr_keyprefix S, 1, option_arr[ _oparr_keyprefix L ] )
 }
 
 function assert_arr_eq(optarg_id, arg_name, value, sep,
     op_arr_len, i, idx, value_arr_len, value_arr, candidate, sw,
     oparr_keyprefix){
 
-    oparr_keyprefix = optarg_id KSEP OPTARG_OPARR
-    op_arr_len = option_arr[ oparr_keyprefix KSEP LEN ]
+    oparr_keyprefix = optarg_id S OPTARG_OPARR
+    op_arr_len = option_arr[ oparr_keyprefix L ]
 
     value_arr_len = split(value, value_arr, sep)
     for (i=1; i<=value_arr_len; ++i) {
         sw = false
         for (idx=2; idx<=op_arr_len; ++idx) {
-            candidate = option_arr[ oparr_keyprefix KSEP idx ]
+            candidate = option_arr[ oparr_keyprefix S idx ]
             candidate = str_unquote_if_quoted( candidate )
             if ( value_arr[i] == candidate ) {
                 sw = true
@@ -285,15 +290,15 @@ function assert_arr_eq(optarg_id, arg_name, value, sep,
 function assert_arr_regex(optarg_id, arg_name, value, sep,
     i, value_arr_len, value_arr, sw, oparr_keyprefix){
 
-    oparr_keyprefix = optarg_id KSEP OPTARG_OPARR
+    oparr_keyprefix = optarg_id S OPTARG_OPARR
 
-    len = option_arr[ oparr_keyprefix KSEP LEN ]
+    len = option_arr[ oparr_keyprefix L ]
 
     value_arr_len = split(value, value_arr, sep)
     for (i=1; i<=value_arr_len; ++i) {
         sw = false
         for (idx=2; idx<=len; ++idx) {
-            val = option_arr[ oparr_keyprefix KSEP idx ]
+            val = option_arr[ oparr_keyprefix S idx ]
             val = str_unquote_if_quoted( val )
             if (match( value_arr[i], val )) {
                 sw = true
@@ -313,8 +318,8 @@ function assert(optarg_id, arg_name, arg_val,
     op, sw, idx, len, val,
     oparr_keyprefix){
 
-    oparr_keyprefix = optarg_id KSEP OPTARG_OPARR
-    op = option_arr[ oparr_keyprefix KSEP 1 ]
+    oparr_keyprefix = optarg_id S OPTARG_OPARR
+    op = option_arr[ oparr_keyprefix S 1 ]
     # debug("assert: optarg_id: " optarg_id " arg_name: " arg_name " arg_val: " arg_val " op: " op " oparr_keyprefix: " oparr_keyprefix)
 
     if (op == "=int") {
@@ -323,9 +328,9 @@ function assert(optarg_id, arg_name, arg_val,
         }
     } else if (op == "=") {
         sw = false
-        len = option_arr[ oparr_keyprefix KSEP LEN ]
+        len = option_arr[ oparr_keyprefix L ]
         for (idx=2; idx<=len; ++idx) {
-            val = option_arr[ oparr_keyprefix KSEP idx ]
+            val = option_arr[ oparr_keyprefix S idx ]
             val = str_unquote_if_quoted( val )
             if (arg_val == val) {
                 sw = true
@@ -339,9 +344,9 @@ function assert(optarg_id, arg_name, arg_val,
         }
     } else if (op == "=~") {
         sw = false
-        len = option_arr[ oparr_keyprefix KSEP LEN ]
+        len = option_arr[ oparr_keyprefix L ]
         for (idx=2; idx<=len; ++idx) {
-            val = option_arr[ oparr_keyprefix KSEP idx ]
+            val = option_arr[ oparr_keyprefix S idx ]
             val = str_unquote_if_quoted( val )
             if (match(arg_val, "^"val"$")) {
                 sw = true
@@ -375,7 +380,7 @@ function assert(optarg_id, arg_name, arg_val,
 # Section: Step 1 Utils: Global types
 
 BEGIN {
-    type_arr[LEN]=0
+    type_arr[ L ]=0
 }
 
 function type_arr_add(line_trimed,                 _name, _rest){
@@ -409,23 +414,23 @@ function subcmd_arr_add(idx, line_trimed,                 _id, _name_arr, _name_
 
 # Section: Step 2 Utils: Parse param DSL
 BEGIN {
-    advise_arr[ LEN ]=0
-    arg_arr[ LEN ]=0
-    subcmd_arr[ LEN ]=0
+    advise_arr[ L ]=0
+    arg_arr[ L ]=0
+    subcmd_arr[ L ]=0
     # subcmd_map
 
     # RS="\001"
 
-    rest_option_id_list[ LEN ] = 0
+    rest_option_id_list[ L ] = 0
 }
 
 BEGIN {
-    final_rest_argv[ LEN ] = 0
+    final_rest_argv[ L ] = 0
 
-    option_arr[ LEN ]=0
-    option_id_list[ LEN ] = 0
+    option_arr[ L ]=0
+    option_id_list[ L ] = 0
 
-    # OPTION_ARGC = "num" # Equal LEN
+    # OPTION_ARGC = "num" # Equal  L
     OPTION_SHORT = "shoft"
     OPTION_TYPE = "type"
     OPTION_DESC = "desc"
@@ -447,11 +452,11 @@ BEGIN {
 function handle_option_id(option_id,            _arr, _arr_len, _arg_name, _index){
 
     # Add option_id to option_id_list
-    _index = option_id_list[ LEN ] + 1
-    option_id_list[ LEN ] = _index
+    _index = option_id_list[ L ] + 1
+    option_id_list[ L ] = _index
     option_id_list[ _index ] = option_id
 
-    option_arr[ option_id KSEP OPTION_M ] = false
+    option_arr[ option_id S OPTION_M ] = false
 
     _arr_len = split( option_id, _arr, /\|/ )
 
@@ -464,7 +469,7 @@ function handle_option_id(option_id,            _arr, _arr_len, _arg_name, _inde
         }
 
         if (_arg_name == "m") {
-            option_arr[ option_id KSEP OPTION_M ] = true
+            option_arr[ option_id S OPTION_M ] = true
             continue
         }
 
@@ -473,7 +478,7 @@ function handle_option_id(option_id,            _arr, _arr_len, _arg_name, _inde
         }
 
         if ( _index == 1 ) {
-            option_arr[ option_id KSEP OPTION_NAME ] = _arg_name
+            option_arr[ option_id S OPTION_NAME ] = _arg_name
         }
         option_alias_2_option_id[ _arg_name ] = option_id
         # debug( "option_alias_2_option_id\t" _arg_name "!\t!" option_id "|" )
@@ -500,7 +505,7 @@ function handle_optarg_declaration(optarg_definition, optarg_id,
     }
 
     optarg_name = substr( optarg_definition_token1, 2, RLENGTH-2 )
-        option_arr[ optarg_id KSEP OPTARG_NAME ] = optarg_name
+        option_arr[ optarg_id S OPTARG_NAME ] = optarg_name
 
     optarg_definition_token1 = substr( optarg_definition_token1, RLENGTH+1 )
 
@@ -511,18 +516,18 @@ function handle_optarg_declaration(optarg_definition, optarg_id,
 
     if (match( optarg_definition_token1 , /^=/) ) {
         default_value = substr( optarg_definition_token1, 2 )
-        option_arr[ optarg_id KSEP OPTARG_DEFAULT ] = str_unquote_if_quoted( default_value )
+        option_arr[ optarg_id S OPTARG_DEFAULT ] = str_unquote_if_quoted( default_value )
     } else {
         # It means, it is required.
-        option_arr[ optarg_id KSEP OPTARG_DEFAULT ] = OPTARG_DEFAULT_REQUIRED_VALUE
+        option_arr[ optarg_id S OPTARG_DEFAULT ] = OPTARG_DEFAULT_REQUIRED_VALUE
         EXISTS_REQUIRED_OPTION = true
     }
 
-    if (TOKEN_ARRAY[ LEN ] >= 2) {
-        for ( i=2; i<=TOKEN_ARRAY[ LEN ]; ++i ) {
-            option_arr[ optarg_id KSEP OPTARG_OPARR KSEP i-1 ] = TOKEN_ARRAY[i]
+    if (TOKEN_ARRAY[ L ] >= 2) {
+        for ( i=2; i<=TOKEN_ARRAY[ L ]; ++i ) {
+            option_arr[ optarg_id S OPTARG_OPARR S i-1 ] = TOKEN_ARRAY[i]
         }
-        option_arr[ optarg_id KSEP OPTARG_OPARR KSEP LEN ] = TOKEN_ARRAY[ LEN ] - 1
+        option_arr[ optarg_id S OPTARG_OPARR L ] = TOKEN_ARRAY[ L ] - 1
     } else {
         type_rule = type_arr[ optarg_type ]
         if (type_rule == "") {
@@ -531,10 +536,10 @@ function handle_optarg_declaration(optarg_definition, optarg_id,
 
         tokenize_argument_into_TOKEN_ARRAY( type_rule )
 
-        for ( i=1; i<=TOKEN_ARRAY[ LEN ]; ++i ) {
-            option_arr[ optarg_id KSEP OPTARG_OPARR KSEP i ] = TOKEN_ARRAY[i]
+        for ( i=1; i<=TOKEN_ARRAY[ L ]; ++i ) {
+            option_arr[ optarg_id S OPTARG_OPARR S i ] = TOKEN_ARRAY[i]
         }
-        option_arr[ optarg_id KSEP OPTARG_OPARR KSEP LEN ] = TOKEN_ARRAY[ LEN ]
+        option_arr[ optarg_id S OPTARG_OPARR L ] = TOKEN_ARRAY[ L ]
     }
 
 }
@@ -547,11 +552,11 @@ function parse_param_dsl_for_positional_argument(line,
 
     option_id = TOKEN_ARRAY[1]
 
-    tmp = rest_option_id_list[ LEN ] + 1
-    rest_option_id_list[ LEN ] = tmp
+    tmp = rest_option_id_list[ L ] + 1
+    rest_option_id_list[ L ] = tmp
     rest_option_id_list[ tmp ] = option_id
-    option_arr[ option_id KSEP LEN ] = 1
-    option_arr[ option_id KSEP OPTION_M ] = 0
+    option_arr[ option_id L ] = 1
+    option_arr[ option_id S OPTION_M ] = 0
 
     _arr_len = split( option_id, _arr, /\|/ )
     for ( _index=1; _index <= _arr_len; ++_index ) {
@@ -564,28 +569,28 @@ function parse_param_dsl_for_positional_argument(line,
         if ( _index == 1 ) {
             _arg_no = substr( _arg_name, 2)
         } else if ( _index == 2 ) {
-            option_arr[ option_id KSEP OPTION_NAME ] = _arg_name
+            option_arr[ option_id S OPTION_NAME ] = _arg_name
         }
         option_alias_2_option_id[ _arg_name ] = option_id
     }
 
     option_desc = TOKEN_ARRAY[2]
-    option_arr[ option_id KSEP OPTION_DESC ] = option_desc
+    option_arr[ option_id S OPTION_DESC ] = option_desc
 
-    if ( TOKEN_ARRAY[ LEN ] >= 3) {
+    if ( TOKEN_ARRAY[ L ] >= 3) {
         tmp = ""
-        for ( _index=3; _index<=TOKEN_ARRAY[LEN]; ++_index ) {
+        for ( _index=3; _index<=TOKEN_ARRAY[ L ]; ++_index ) {
             tmp = tmp " " quote_string(TOKEN_ARRAY[ _index ])
         }
 
         option_arr[ option_id ] = tmp
 
-        _optarg_id = option_id KSEP 1
+        _optarg_id = option_id S 1
         handle_optarg_declaration( tmp, _optarg_id )
 
         # NOTICE: this is correct. Only if has default value, or it is required !
-        if (final_rest_argv[ LEN ] < _arg_no)   final_rest_argv[ LEN ] = _arg_no
-        final_rest_argv[ _arg_no ] = option_arr[ _optarg_id KSEP OPTARG_DEFAULT ]
+        if (final_rest_argv[ L ] < _arg_no)   final_rest_argv[ L ] = _arg_no
+        final_rest_argv[ _arg_no ] = option_arr[ _optarg_id S OPTARG_DEFAULT ]
         # debug( "final_rest_argv[ " _arg_no " ] = " final_rest_argv[ _arg_no ] )
     }
 
@@ -599,16 +604,16 @@ function parse_param_dsl_for_all_positional_argument(line,
 
     option_id = TOKEN_ARRAY[1]  # Should be #n
 
-    tmp = rest_option_id_list[ LEN ] + 1
-    rest_option_id_list[ LEN ] = tmp
+    tmp = rest_option_id_list[ L ] + 1
+    rest_option_id_list[ L ] = tmp
     rest_option_id_list[ tmp ] = option_id
 
     option_desc = TOKEN_ARRAY[2]
-    option_arr[ option_id KSEP OPTION_DESC ] = option_desc
+    option_arr[ option_id S OPTION_DESC ] = option_desc
 
-    if ( TOKEN_ARRAY[ LEN ] >= 3) {
+    if ( TOKEN_ARRAY[ L ] >= 3) {
         tmp = ""
-        for (i=3; i<=TOKEN_ARRAY[LEN]; ++i) {
+        for (i=3; i<=TOKEN_ARRAY[ L ]; ++i) {
             tmp = tmp " " quote_string(TOKEN_ARRAY[i])
         }
 
@@ -651,8 +656,8 @@ function parse_param_dsl(line,
         } else {
 
             if (state == STATE_ADVISE) {
-                tmp = advise_arr[ LEN ] + 1
-                advise_arr[ LEN ] = tmp
+                tmp = advise_arr[ L ] + 1
+                advise_arr[ L ] = tmp
                 advise_arr[ tmp ] = line
 
             } else if ( state == STATE_TYPE ) {
@@ -661,8 +666,8 @@ function parse_param_dsl(line,
             } else if ( state == STATE_SUBCOMMAND ) {
                 HAS_SUBCMD = true
 
-                tmp = subcmd_arr[ LEN ] + 1
-                subcmd_arr[ LEN ] = tmp
+                tmp = subcmd_arr[ L ] + 1
+                subcmd_arr[ L ] = tmp
 
                 subcmd_arr_add(tmp, line)
             } else if (state == STATE_OPTION) {
@@ -688,8 +693,8 @@ function parse_param_dsl(line,
                     panic_param_define_error("Expect option starting with - or -- :\n" line)
                 }
 
-                len = option_arr[ LEN ] + 1
-                option_arr[ LEN ] = len
+                len = option_arr[ L ] + 1
+                option_arr[ L ] = len
                 option_arr[ len ] = line
 
                 tokenize_argument_into_TOKEN_ARRAY( line )
@@ -697,19 +702,19 @@ function parse_param_dsl(line,
                 handle_option_id( option_id )
 
                 option_desc = TOKEN_ARRAY[2]
-                option_arr[ option_id KSEP OPTION_DESC ] = option_desc
+                option_arr[ option_id S OPTION_DESC ] = option_desc
 
                 j = 0
-                if ( TOKEN_ARRAY[ LEN ] >= 3) {
+                if ( TOKEN_ARRAY[ L ] >= 3) {
 
                     tmp = ""
-                    for (k=3; k<=TOKEN_ARRAY[LEN]; ++k) {
+                    for (k=3; k<=TOKEN_ARRAY[ L ]; ++k) {
                         tmp = tmp " " quote_string(TOKEN_ARRAY[k])
                     }
 
                     j = j + 1
-                    option_arr[ option_id KSEP j ] = tmp
-                    handle_optarg_declaration( tmp, option_id KSEP j )
+                    option_arr[ option_id S j ] = tmp
+                    handle_optarg_declaration( tmp, option_id S j )
                 }
 
                 while (true) {
@@ -721,11 +726,11 @@ function parse_param_dsl(line,
                         break
                     }
                     j = j + 1
-                    option_arr[ option_id KSEP j ] = nextline
-                    handle_optarg_declaration( nextline, option_id KSEP j )
+                    option_arr[ option_id S j ] = nextline
+                    handle_optarg_declaration( nextline, option_id S j )
                 }
 
-                option_arr[ option_id KSEP LEN ] = j
+                option_arr[ option_id L ] = j
             }
         }
     }
@@ -737,19 +742,19 @@ function parse_param_dsl(line,
 
 function oparr_join(oparr_keyprefix,              _index, _len, _ret ){
     _ret = ""
-    _len = option_arr[ oparr_keyprefix KSEP LEN ]
+    _len = option_arr[ oparr_keyprefix L ]
     for ( _index=1; _index<=_len; ++_index ) {
-        _ret = _ret " " str_quote_if_unquoted( option_arr[ oparr_keyprefix KSEP _index ] )
+        _ret = _ret " " str_quote_if_unquoted( option_arr[ oparr_keyprefix S _index ] )
     }
     return _ret
 }
 
 function check_required_option_ready(       i, j, option, option_argc, option_id, option_m, option_name, _ret, _varname ) {
 
-    for ( i=1; i<=option_id_list[ LEN ]; ++i ) {
+    for ( i=1; i<=option_id_list[ L ]; ++i ) {
         option_id       = option_id_list[ i ]
-        option_m        = option_arr[ option_id KSEP OPTION_M ]
-        option_name     = option_arr[ option_id KSEP OPTION_NAME ]
+        option_m        = option_arr[ option_id S OPTION_M ]
+        option_name     = option_arr[ option_id S OPTION_NAME ]
         gsub(/^--?/, "", option_name)
 
         # if assign, continue
@@ -761,7 +766,7 @@ function check_required_option_ready(       i, j, option, option_argc, option_id
             continue
         }
 
-        option_argc      = option_arr[ option_id KSEP LEN ]
+        option_argc      = option_arr[ option_id L ]
 
         if ( 0 == option_argc ) {
             continue
@@ -777,12 +782,12 @@ function check_required_option_ready(       i, j, option, option_argc, option_id
                 # if argc == 1
                 val = option_default_map[ option_name ]
                 if (length(val) == 0) {
-                    val = option_arr[ option_id KSEP 1 KSEP OPTARG_DEFAULT ]
+                    val = option_arr[ option_id S 1 S OPTARG_DEFAULT ]
                 }
                 _varname = option_name
             } else {
                 # if argc >= 2
-                val = option_arr[ option_id KSEP j KSEP OPTARG_DEFAULT ]
+                val = option_arr[ option_id S j S OPTARG_DEFAULT ]
                 _varname = option_name "_" j
             }
 
@@ -790,22 +795,22 @@ function check_required_option_ready(       i, j, option, option_argc, option_id
 
                 if ( true == IS_INTERACTIVE ) {
                     append_query_code( _varname,
-                        option_arr[ option_id KSEP OPTION_DESC ],
-                        oparr_join( option_id KSEP j KSEP OPTARG_OPARR )    )
+                        option_arr[ option_id S OPTION_DESC ],
+                        oparr_join( option_id S j S OPTARG_OPARR )    )
                     continue
                 }
                 return panic_required_value_error( option_id )
             }
 
-            _ret = assert(option_id KSEP j, _varname, val)
+            _ret = assert(option_id S j, _varname, val)
             if ( _ret == true ) {
                 append_code_assignment( _varname, val )
             } else if ( false == IS_INTERACTIVE ) {
                 panic_error( _ret )
             } else {
                 append_query_code(  _varname,
-                    option_arr[option_id KSEP OPTION_DESC ],
-                    oparr_join( option_id KSEP j KSEP OPTARG_OPARR )        )
+                    option_arr[option_id S OPTION_DESC ],
+                    oparr_join( option_id S j S OPTARG_OPARR )        )
             }
         }
     }
@@ -831,7 +836,7 @@ NR==2 {
     code=substr(code, 2)
 
     subcmd_arr_len = split(code, subcmd_arr, ARG_SEP)
-    subcmd_arr[ LEN ] = subcmd_arr_len
+    subcmd_arr[ L ] = subcmd_arr_len
     for (i=1; i<=subcmd_arr_len; ++i) {
         _subcmd_elem = str_trim( subcmd_arr[i] )
         if (0 != length( _subcmd_elem ) ) {
@@ -852,8 +857,8 @@ NR==4 {
     arguments = $0
     gsub("\n", "\004", arguments)
     arg_arr_len = split(arguments, arg_arr, ARG_SEP)
-    arg_arr[ LEN ] = arg_arr_len
-    for (i=1; i<=arg_arr[ LEN ]; ++i) {
+    arg_arr[ L ] = arg_arr_len
+    for (i=1; i<=arg_arr[ L ]; ++i) {
         gsub("\004", "\n", arg_arr[ i ])
     }
 

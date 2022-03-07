@@ -3,17 +3,17 @@
 function generate_advise_json_value_candidates(oparr_keyprefix,
     oparr_string, optarg_name, k, op ){
 
-    op = option_arr[ oparr_keyprefix KSEP 1 ]
+    op = option_arr[ oparr_keyprefix S 1 ]
 
     oparr_string = ""
     if (op == "=") {
-        op_arr_len = option_arr[ oparr_keyprefix KSEP LEN ]
+        op_arr_len = option_arr[ oparr_keyprefix L ]
         for ( k=2; k<=op_arr_len; ++k ) {
-            oparr_string = oparr_string "\"" option_arr[ oparr_keyprefix KSEP k ] "\"" ", "
+            oparr_string = oparr_string "\"" option_arr[ oparr_keyprefix S k ] "\"" ", "
         }
         oparr_string = "[ " substr(oparr_string, 1, length(oparr_string)-2) " ],"
     } else if (op == "=~") {
-        optarg_name = option_arr[ option_id KSEP OPTARG_NAME ]
+        optarg_name = option_arr[ option_id S OPTARG_NAME ]
         oparr_string = "[  ],"
         if ( advise_map[ optarg_name ] != "" ) {
             oparr_string = "\"" advise_map[ optarg_name ] "\","
@@ -39,7 +39,7 @@ function generate_advise_json(      indent, indent_str,
     }
 
     ADVISE_JSON = "{"
-    for (i=1; i<=advise_arr[ LEN ]; ++i) {
+    for (i=1; i<=advise_arr[ L ]; ++i) {
         # TODO: Can be optimalize.
         tmp_len=split(advise_arr[ i ], tmp)
         if ( option_alias_2_option_id[ tmp[1] ] != "" ){
@@ -55,19 +55,19 @@ function generate_advise_json(      indent, indent_str,
     }
 
     # Rule for option
-    for (i=1; i<=option_id_list[ LEN ]; ++i) {
+    for (i=1; i<=option_id_list[ L ]; ++i) {
 
         option_id       = option_id_list[ i ]
-        option_argc     = option_arr[ option_id KSEP LEN ]
+        option_argc     = option_arr[ option_id L ]
 
         if (option_argc == 0) {
-            ADVISE_JSON = ADVISE_JSON "\n" indent_str "  \"" option_id "\": \"--- " option_arr[ option_id KSEP OPTION_DESC ] " \","
+            ADVISE_JSON = ADVISE_JSON "\n" indent_str "  \"" option_id "\": \"--- " option_arr[ option_id S OPTION_DESC ] " \","
         } else {
             ADVISE_JSON = ADVISE_JSON "\n" indent_str "  \"" option_id "\": " "{\n  "
         }
 
         for ( j=1; j<=option_argc; ++j ) {
-            oparr_keyprefix = option_id KSEP j KSEP OPTARG_OPARR
+            oparr_keyprefix = option_id S j S OPTARG_OPARR
             oparr_string    = generate_advise_json_value_candidates(oparr_keyprefix)
             oparr_string    = indent_str "  \"#" j "\": " oparr_string "\n  "
 
@@ -75,12 +75,12 @@ function generate_advise_json(      indent, indent_str,
         }
 
         if (option_argc > 0) {
-            ADVISE_JSON = ADVISE_JSON indent_str "  \"#desc\": \"" option_arr[ option_id KSEP OPTION_DESC ] "\"\n  " indent_str "},"
+            ADVISE_JSON = ADVISE_JSON indent_str "  \"#desc\": \"" option_arr[ option_id S OPTION_DESC ] "\"\n  " indent_str "},"
         }
     }
 
     # Rules for rest options
-    for (i=1; i <= rest_option_id_list[ LEN ]; ++i) {
+    for (i=1; i <= rest_option_id_list[ L ]; ++i) {
         option_id       = rest_option_id_list[ i ]
 
         # Rules in DSL's advise section
@@ -88,12 +88,12 @@ function generate_advise_json(      indent, indent_str,
             ADVISE_JSON = ADVISE_JSON "\n" indent_str "  \"" option_id "\": \"" advise_map[option_id] "\","
             continue
         }
-        oparr_keyprefix = option_id KSEP "1" KSEP OPTARG_OPARR
+        oparr_keyprefix = option_id S "1" S OPTARG_OPARR
         oparr_string    = generate_advise_json_value_candidates(oparr_keyprefix)
         ADVISE_JSON     = ADVISE_JSON "\n" indent_str "  \"" option_id "\": " oparr_string
     }
 
-    for (i=1; i <= subcmd_arr[ LEN ]; ++i) {
+    for (i=1; i <= subcmd_arr[ L ]; ++i) {
         split(subcmd_arr[ i ], _name_arr, "|") # get the subcmd name list
         subcmd_funcname = "${X_CMD_ADVISE_FUNC_NAME}_" _name_arr[ 1 ]
 
