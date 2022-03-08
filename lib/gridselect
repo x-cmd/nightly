@@ -26,14 +26,9 @@ ___x_cmd_ui_gridselect(){
     esac
 }
 
-
-if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
-# 881 hh
-___x_cmd_ui_gridselect_control_awk(){
+___x_cmd_ui_gridselect_control_awk_(){
     command awk \
-        -W interactive \
-        -v ORS="$___X_CMD_UI_REGION_RS" \
-        -v EXIT_OP="$EXIT_OP" \
+        "$@" \
         -v ITEM_INDEX_STATE="$___X_CMD_UI_GRIDSELECT_DISPLAY_ITEM_INDEX" \
         -v SELECT_MULTIPLE_STATE="$___X_CMD_UI_GRIDSELECT_MULTIPLE_STATE" \
         -v SELECT_HELP_STATE="$___X_CMD_UI_GRIDSELECT_HELP_STATE" \
@@ -46,43 +41,33 @@ ___x_cmd_ui_gridselect_control_awk(){
         -f "$___X_CMD_ROOT/ui/lib/gridselect.awk"
         # -f "./lib/gridselect.awk"
 }
-else
+
 ___x_cmd_ui_gridselect_control_awk(){
-    LC_ALL=en_US.UTF-8 command awk \
-        -v EXIT_OP="$EXIT_OP" \
-        -v RS="$___X_CMD_UI_REGION_RS" -v ORS="$___X_CMD_UI_REGION_RS" \
-        -v ITEM_INDEX_STATE="$___X_CMD_UI_GRIDSELECT_DISPLAY_ITEM_INDEX" \
-        -v SELECT_MULTIPLE_STATE="$___X_CMD_UI_GRIDSELECT_MULTIPLE_STATE" \
-        -v SELECT_HELP_STATE="$___X_CMD_UI_GRIDSELECT_HELP_STATE" \
-        -f "$___X_CMD_ROOT/awk/lib/default.awk" \
-        -f "$___X_CMD_ROOT/awk/lib/str.awk" \
-        -f "$___X_CMD_ROOT/awk/lib/wcwidth.awk" \
-        -f "$___X_CMD_ROOT/awk/lib/ui.awk" \
-        -f "$___X_CMD_ROOT/ui/lib/share.awk" \
-        -f "$___X_CMD_ROOT/ui/lib/theme.awk" \
-        -f "$___X_CMD_ROOT/ui/lib/gridselect.awk"
-        # -f "/home/qiakai/ui/lib/gridselect.awk"
-        # -f "/home/qiakai/ui/lib/theme.awk" \
+    if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
+        ___x_cmd_ui_gridselect_control_awk_ -W interactive "$@"
+    else
+        ___x_cmd_ui_gridselect_control_awk_ "$@"
+    fi
 }
-fi
+
 
 ___x_cmd_ui_gridselect_control(){
     {
-        ___x_cmd_ui_region_send_update "$@"
+        printf "UPDATE %s %s\n" "${COLUMNS}" "${LINES}"
+        if [ "$#" -eq 0 ]; then
+            cat
+        else
+            local IFS="
+"
+            printf "%s\n" "$*"
+        fi
         cat
     } | ___x_cmd_ui_gridselect_control_awk
 }
 
-___x_cmd_ui_gridselect_control_display(){
-    cat "./.x-cmd/dev/testcase/testlargedata" | awk -v REGION_RS="$___X_CMD_UI_REGION_RS" '{printf $0 REGION_RS}'
-    # cat "./.x-cmd/dev/testcase/testdata" | awk -v REGION_RS="$___X_CMD_UI_REGION_RS" '{printf $0 REGION_RS}'
-}
 ___x_cmd_ui_gridselect_main(){
     ___x_cmd_ui_region_autorefresh_with_keyboard ___x_cmd_ui_gridselect_control "$@"
 }
-# ___x_cmd_ui_gridselect_out(){
-#     ___x_cmd_ui_gridselect_main ___x_cmd_ui_gridselect_control_display
-# }
 ___x_cmd_ui_gridselect_out(){
     ___x_cmd_ui_gridselect_main "$@"
 }

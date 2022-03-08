@@ -42,7 +42,6 @@ fff(){
     END{
         print substr(ret, 4)
     }'
-    # cat "./.x-cmd/dev/testcase/testdata" | awk -v REGION_RS="$___X_CMD_UI_REGION_RS" '{printf $0 REGION_RS}'
 }
 f3(){
     ___x_cmd_ui_gridselect nohelp "Are you sure you want to delete repo $*" "yes" "no" "---" "---"

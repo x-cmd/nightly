@@ -1,4 +1,7 @@
 # shellcheck shell=sh disable=SC3043,SC2120
+# shellcheck disable=SC2120
+xrc ui/lib/getchar
+xrc awk
 
 ___x_cmd_ui_region(){
     local subcmd="$1";  [ "$#" -gt 0 ] && shift
@@ -13,87 +16,6 @@ ___x_cmd_ui_region(){
             ;;
     esac
 }
-
-# Section: send
-# shellcheck disable=SC2120
-xrc ui/lib/getchar
-xrc awk
-
-# ___X_CMD_UI_REGION_AWK="./lib/region.awk"
-___X_CMD_UI_REGION_AWK="$(xrc which ui/lib/region.awk)"
-
-___x_cmd_ui_region_send(){
-    ___x_cmd_ui_region_send_update "$@"
-}
-
-if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
-___X_CMD_UI_REGION_RS="
-"
-# ___x_cmd_ui_region_send_update(){
-#     printf "UPDATE %s %s${___X_CMD_UI_REGION_RS}" "${COLUMNS}" "${LINES}"
-#     if [ "$#" -eq 0 ]; then
-#         cat
-#     else
-#         printf "%s" "$*"
-#     fi
-#     # fi | tr '\n' '\001'
-#     printf "%s" "${___X_CMD_UI_REGION_RS}"
-# }
-
-___x_cmd_ui_region_send_env(){
-    local tmp
-    tmp="$(printf "\002")"
-    while [ $# -gt 0 ]; do
-        printf "ENV %s${tmp}" "$1"
-        printf "%s" "$(eval printf \"\$"$1"\")"
-        printf "%s" "${tmp}"
-        shift
-    done | tr '\n\002' '\001\n'
-}
-
-___x_cmd_ui_region_send_env_kv(){
-    printf "ENV %s${___X_CMD_UI_REGION_RS}" "$1"
-    printf "%s" "$2" | tr '\n' '\001'
-    printf "%s" "${___X_CMD_UI_REGION_RS}"
-    shift
-}
-else
-___X_CMD_UI_REGION_RS="$(printf "\001")"
-
-___x_cmd_ui_region_send_env(){
-    while [ $# -gt 0 ]; do
-        printf "ENV %s${___X_CMD_UI_REGION_RS}" "$1"
-        printf "%s${___X_CMD_UI_REGION_RS}" "$(eval printf \"\$"$1"\")"
-        shift
-    done
-}
-
-___x_cmd_ui_region_send_env_kv(){
-    printf "ENV %s${___X_CMD_UI_REGION_RS}" "$1"
-    printf "%s${___X_CMD_UI_REGION_RS}" "$2"
-    shift
-}
-
-fi
-
-___x_cmd_ui_region_send_update(){
-    printf "UPDATE %s %s${___X_CMD_UI_REGION_RS}" "${COLUMNS}" "${LINES}"
-    if [ "$#" -eq 0 ]; then
-        cat
-    else
-        local IFS="${___X_CMD_UI_REGION_RS}"
-        printf "%s" "$*"
-    fi
-    printf "%s" "${___X_CMD_UI_REGION_RS}"
-}
-
-___x_cmd_ui_region_send_screeninfo(){
-    printf "SIZE %s %s${___X_CMD_UI_REGION_RS}" "${COLUMNS}" "${LINES}"
-}
-
-# TODO: sendenv
-
-# EndSection
 
 # Section: region update
 
@@ -124,7 +46,6 @@ ___x_cmd_ui_region_update_awk(){
 
 if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
 ___x_cmd_ui_region_update_awk_(){
-    # LC_ALL=en_US.UTF-8 USE=str,ui ___x_cmd_awk file "$___X_CMD_UI_REGION_AWK" -W interactive
     command awk \
         -W interactive \
         -f "$___X_CMD_ROOT/awk/lib/default.awk" \
@@ -134,15 +55,55 @@ ___x_cmd_ui_region_update_awk_(){
 }
 else
 ___x_cmd_ui_region_update_awk_(){
-    # LC_ALL=en_US.UTF-8 USE=str,ui ___x_cmd_awk file "$___X_CMD_UI_REGION_AWK" -v RS="$___X_CMD_UI_REGION_RS"
     LC_ALL=en_US.UTF-8 command awk \
-        -v RS="$___X_CMD_UI_REGION_RS" \
         -f "$___X_CMD_ROOT/awk/lib/default.awk" \
         -f "$___X_CMD_ROOT/awk/lib/str.awk" \
         -f "$___X_CMD_ROOT/awk/lib/ui.awk" \
         -f "$___X_CMD_UI_REGION_AWK"
 }
 fi
+
+# EndSection
+
+# Section: send
+
+# ___X_CMD_UI_REGION_AWK="./lib/region.awk"
+___X_CMD_UI_REGION_AWK="$(xrc which ui/lib/region.awk)"
+
+___x_cmd_ui_region_send(){
+    ___x_cmd_ui_region_send_update "$@"
+}
+
+___X_CMD_UI_REGION_END_LINE="$(printf "\003\002\005")"
+
+___x_cmd_ui_region_send_env(){
+    while [ $# -gt 0 ]; do
+        ___x_cmd_ui_region_send_env_kv "$1" "$(eval printf \"\$"$1"\")"
+        shift
+    done
+}
+
+___x_cmd_ui_region_send_env_kv(){
+    printf "ENV %s\n" "$1"
+    printf "%s\n%s\n" "$2" "$___X_CMD_UI_REGION_END_LINE"
+    shift
+}
+
+___x_cmd_ui_region_send_update(){
+    printf "UPDATE %s %s\n" "${COLUMNS}" "${LINES}"
+    if [ "$#" -eq 0 ]; then
+        cat
+    else
+        printf "%s" "$*"
+    fi
+    printf "\n%s\n" "$___X_CMD_UI_REGION_END_LINE"
+}
+
+___x_cmd_ui_region_send_screeninfo(){
+    printf "SIZE %s %s\n" "${COLUMNS}" "${LINES}"
+}
+
+# TODO: sendenv
 
 # EndSection
 
@@ -275,13 +236,13 @@ ___x_cmd_ui_region___autorefresh_with_keyboard_mainloop(){
             local ticks=1
             while true; do
                 ticks="$((ticks+1))"
-                printf "R:%s:%s:%s%s" "$ticks" "$COLUMNS" "$LINES" "$___X_CMD_UI_REGION_RS"
+                printf "R:%s:%s:%s\n" "$ticks" "$COLUMNS" "$LINES"
                 sleep "${___X_CMD_UI_REFRESH_INTERVAL:-0.1}"
             done
         ) &
 
         while ___x_cmd_ui_getchar; do
-            printf "C:%s:%s%s" "${___X_CMD_UI_GETCHAR_TYPE}" "${___X_CMD_UI_GETCHAR_CHAR}" "$___X_CMD_UI_REGION_RS" || break
+            printf "C:%s:%s\n" "${___X_CMD_UI_GETCHAR_TYPE}" "${___X_CMD_UI_GETCHAR_CHAR}" || break
         done
     } | {
         local PID_OF_UPSUBSHELL

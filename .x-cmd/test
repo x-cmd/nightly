@@ -1,5 +1,5 @@
 # shellcheck shell=sh disable=SC1072 #source
-
+x log init ui
 test_table(){
     . ./.x-cmd/dev/testcase/ui_table_testcase
 }

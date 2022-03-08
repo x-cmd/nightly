@@ -63,9 +63,26 @@ ___x_cmd_ui_categoryselect_mainloop(){
     local func="$1"; shift
     ___x_cmd_ui_region_run ___x_cmd_ui_categoryselect_mainloop_recursive_first
 }
+___x_cmd_ui_category_control_awk_(){
+    command awk \
+        "$@" \
+        -f "$___X_CMD_ROOT/awk/lib/default.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/str.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/wcwidth.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/ui.awk" \
+        -f "$___X_CMD_ROOT/ui/lib/share.awk" \
+        -f "$___X_CMD_ROOT/ui/lib/theme.awk" \
+        -f "$___X_CMD_ROOT/ui/lib/categoryselect.awk"
+        # -f "./lib/categoryselect.awk"
+}
 
-
-if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
+___x_cmd_ui_category_control_awk(){
+    if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
+        ___x_cmd_ui_category_control_awk_ -W interactive "$@"
+    else
+        ___x_cmd_ui_category_control_awk_ "$@"
+    fi
+}
 
 ___x_cmd_ui_categoryselect_mainloop_recursive_first(){
     local nextlist
@@ -77,55 +94,10 @@ ___x_cmd_ui_categoryselect_mainloop_recursive_first(){
     } | {
         local PID_OF_UPSUBSHELL
         read -r PID_OF_UPSUBSHELL
-
-        command awk \
-        -W interactive \
-        -v ORS="$___X_CMD_UI_REGION_RS" \
-        -f "$___X_CMD_ROOT/awk/lib/default.awk" \
-        -f "$___X_CMD_ROOT/awk/lib/str.awk" \
-        -f "$___X_CMD_ROOT/awk/lib/wcwidth.awk" \
-        -f "$___X_CMD_ROOT/awk/lib/ui.awk" \
-        -f "$___X_CMD_ROOT/ui/lib/share.awk" \
-        -f "$___X_CMD_ROOT/ui/lib/theme.awk" \
-        -f "$___X_CMD_ROOT/ui/lib/categoryselect.awk"
-        # -f "./lib/categoryselect.awk"
-        # -f "/home/qiakai/ui/lib/share.awk" \
-        # -f "/home/qiakai/ui/lib/theme.awk" \
-        # -f "/home/qiakai/ui/lib/categoryselect.awk"
+        ___x_cmd_ui_category_control_awk
         kill -SIGPIPE "$PID_OF_UPSUBSHELL"
     }
 }
-else
-
-___x_cmd_ui_categoryselect_mainloop_recursive_first(){
-    local nextlist
-    local is_stopped=
-    {
-        ___x_cmd_pidofsubshell
-        ___x_cmd_ui_categoryselect_mainloop_recursive_update_nextlist
-        ___x_cmd_ui_categoryselect_mainloop_recursive 1
-    } | {
-        local PID_OF_UPSUBSHELL
-        read -r PID_OF_UPSUBSHELL
-
-        LC_ALL=en_US.UTF-8 command awk \
-        -v RS="$___X_CMD_UI_REGION_RS" \
-        -v ORS="$___X_CMD_UI_REGION_RS" \
-        -f "$___X_CMD_ROOT/awk/lib/default.awk" \
-        -f "$___X_CMD_ROOT/awk/lib/str.awk" \
-        -f "$___X_CMD_ROOT/awk/lib/wcwidth.awk" \
-        -f "$___X_CMD_ROOT/awk/lib/ui.awk" \
-        -f "$___X_CMD_ROOT/ui/lib/share.awk" \
-        -f "$___X_CMD_ROOT/ui/lib/theme.awk" \
-        -f "$___X_CMD_ROOT/ui/lib/categoryselect.awk"
-        # -f "./lib/categoryselect.awk"
-        # -f "/home/qiakai/ui/lib/share.awk" \
-        # -f "/home/qiakai/ui/lib/theme.awk" \
-        # -f "/home/qiakai/ui/lib/categoryselect.awk"
-        kill -SIGPIPE "$PID_OF_UPSUBSHELL"
-    }
-}
-fi
 
 ___x_cmd_ui_categoryselect_mainloop_recursive_curlist_curitem(){
     printf "%s" "$curlist" | awk -v idx="$((curidx*2-1))" 'NR==idx{ print $0; exit(0) }'
@@ -136,24 +108,21 @@ ___x_cmd_ui_categoryselect_mainloop_recursive_curlist_len(){
 }
 
 ___x_cmd_ui_send_newlist(){
-    printf "%s %d %d$___X_CMD_UI_REGION_RS" "---" "$1" "$2"
+    printf "%s %d %d\n" "---" "$1" "$2"
     shift 2
-    local item
     if [ "$#" -gt 0 ] ;then
-        printf "%s\n" "$*" | while read -r item;do
-            printf "%s%s" "$item" "$___X_CMD_UI_REGION_RS"
-        done
+        printf "%s\n" "$*"
     fi
-    printf "%s$___X_CMD_UI_REGION_RS" "---"
+    printf "%s\n" "---"
 }
 
 ___x_cmd_ui_send_data(){
-    printf "%s$___X_CMD_UI_REGION_RS" "$*"
+    printf "%s\n" "$*"
 }
 
 ___x_cmd_ui_categoryselect_mainloop_recursive_sendview(){
     ticks="$((ticks+1))"
-    printf "R:%s:%s:%s%s" "$ticks" "$COLUMNS" "$LINES" "$___X_CMD_UI_REGION_RS" # send view
+    printf "R:%s:%s:%s\n" "$ticks" "$COLUMNS" "$LINES" # send view
 }
 
 ___x_cmd_ui_categoryselect_mainloop_recursive_update_nextlist(){

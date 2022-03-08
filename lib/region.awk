@@ -127,33 +127,35 @@ function update_width_height(w, h) {
 }
 
 {
-    if ($1 == "UPDATE") {
-        op = $1
-        update_width_height($2, $3)
-    } else if ($1 == "ENV") {
-        op = "ENV"
-        op1 = $2
-    } else if (op == "UPDATE") {
-        op = ""
-        if (last_update != $0) {
-            last_update = $0
-            if (RS == "\n") {
-                gsub("\001", "\n", $0)
+    if (op == "UPDATE") {
+        if ($0 != "\003\002\005") {
+            op_stream = (op_stream == "") ? $0 : op_stream "\n" $0
+        } else {
+            if (last_update != op_stream) {
+                last_update = op_stream
+                update( op_stream )
             }
-            update($0)
+            op = ""
+            op_stream = ""
         }
-    } else if (op == "ENV") {
-        env_code(op1, $0)
-        op=""
-    } else if (op == "STDOUT") {
-        print $0
-    } else if (op == "RESULT") {
-        print $0
-    } else if ($1 == "SIZE") {
-        update_width_height($2, $3)
+    } else if (op == "ENV") {       # Using Quote
+        if ($0 != "\003\002\005") {
+            op_stream = (op_stream == "") ? $0 : op_stream "\n" $0
+        } else {
+            env_code( op_arg1, op_stream )
+            op = ""
+            op_stream = ""
+        }
     } else {
-        op = $1
-        op2 = $2
+        if ($1 == "SIZE") {
+            update_width_height($2, $3)
+        } else if ($1 == "UPDATE") {
+            op = $1
+            update_width_height($2, $3)
+        } else {
+            op = $1
+            op_arg1 = $2
+        }
     }
 }
 

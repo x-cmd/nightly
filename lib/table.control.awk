@@ -183,38 +183,54 @@ function ctrl(char_type, char_value) {
 # EndSection
 
 # Section: consumer_item and consume_header
+
+BEGIN{
+    CONSUMER_ITEM_STREAM = "\001"
+    CONSUMER_ITEM_COL = 0
+}
+
+function consume_item_push(                 l ){
+    CONSUMER_ITEM_COL += 1
+    l = wcswidth( CONSUMER_ITEM_STREAM )
+    data_line[ data_len ] = ( data_line[ data_len ] == "" ) ? CONSUMER_ITEM_STREAM :data_line[ data_len ] "\003" CONSUMER_ITEM_STREAM
+
+    data[ data_len KSEP CONSUMER_ITEM_COL ] = CONSUMER_ITEM_STREAM
+    data_wlen [ data_len KSEP CONSUMER_ITEM_COL ] = l
+
+    if (col_max[ CONSUMER_ITEM_COL ] < l) col_max[ CONSUMER_ITEM_COL ] = l
+
+    CONSUMER_ITEM_STREAM = "\001"
+}
+
 function consumer_item() {
-    if ($0 == "---") {
+    if ($0 == "\003\002\005") {
         ctrl_rstate_init( CURRENT_COLUMN, 1, data_col_num )
+        data_len -= 1
         model_generate()
 
         DATA_MODE = DATA_MODE_CTRL
         return
-    }
+    } else if ($0 == "\002") {
+        # consume_item_push()
 
-    data_line[ ++ data_len ] = $0
-    item_arr_len = split($0, item_arr, "\003")
-    for (i=1; i<=item_arr_len; i++) {
-        elem = item_arr[i]
-        elem = str_trim(elem)
-        elem_wlen = wcswidth( elem )
-
-        data[ data_len KSEP i ] = elem
-        data_wlen [ data_len KSEP i ] = elem_wlen
-
-        if (col_max[ i ] < elem_wlen) col_max[ i ] = elem_wlen
-    }
-
-    # Show the first screen to improve use experience
-    if ( data_len == max_row_size ) {
-        ctrl_rstate_init( CURRENT_COLUMN, 1, data_col_num )
-        model_generate()
-        view()
+        CONSUMER_ITEM_COL = 0
+        data_len += 1
+        # Show the first screen to improve use experience
+        if ( data_len == max_row_size ) {
+            ctrl_rstate_init( CURRENT_COLUMN, 1, data_col_num )
+            model_generate()
+            view()
+        }
+    } else if ($0 == "\003") {
+        consume_item_push()
+    } else {
+        CONSUMER_ITEM_STREAM = ( CONSUMER_ITEM_STREAM == "\001" ) ? $0 : CONSUMER_ITEM_STREAM "\n" $0
     }
 }
 
+# Using \t to seperate
 function consume_header(){
-    data_col_num = split($0, data_header_arr, "\003")
+    data_col_num = split($0, data_header_arr, "\t")
 
     for (i=1; i<=data_col_num; i++) {
         elem = str_trim(data_header_arr[i])
@@ -222,6 +238,7 @@ function consume_header(){
 
         data_header_arr_wlen [ i ] = elem_wlen
     }
+    data_len = 1
 }
 # EndSection
 
@@ -233,9 +250,9 @@ BEGIN {
     DATA_MODE = DATA_MODE_ITEM
 }
 
-NR==3 {  consume_header(); }
+NR==2 {  consume_header(); }
 
-NR>3 {
+NR>2 {
     if ( DATA_MODE == DATA_MODE_CTRL ) {
         if (try_update_width_height( $0 ) == true) {
             # view()

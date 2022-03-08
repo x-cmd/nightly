@@ -6,6 +6,7 @@ BEGIN{
     S = "\001"
     T = "\002"
     L = "\003"
+    A = "\004"
 }
 
 BEGIN{
@@ -71,29 +72,44 @@ function buffer_get(          buf){
 
 # Section: utilities
 
-function send_update(msg){
-    # mawk
-    if (ORS == "\n") {
-        # gsub("\n", "\001", msg)
-        gsub(/\n/, "\001", msg)
-    }
+# function send_update(msg){
+#     # mawk
+#     if (ORS == "\n") {
+#         # gsub("\n", "\001", msg)
+#         gsub(/\n/, "\001", msg)
+#     }
 
-    printf("%s %s %s" ORS, "UPDATE", max_col_size, max_row_size)
-    printf("%s" ORS, msg)
+#     printf("%s %s %s" ORS, "UPDATE", max_col_size, max_row_size)
+#     printf("%s" ORS, msg)
+
+#     fflush()
+# }
+
+function send_update(msg){
+    printf("%s %s %s\n", "UPDATE", max_col_size, max_row_size)
+    printf("%s" "\n" "\003\002\005" "\n", msg)
 
     fflush()
 }
+
+# function send_env(var, value){
+#     # mawk
+#     if (ORS == "\n") {
+#         gsub(/\n/, "\001", value)
+#     }
+
+#     printf("%s %s" ORS, "ENV", var)
+#     printf("%s" ORS, value)
+#     fflush()
+# }
 
 function send_env(var, value){
-    # mawk
-    if (ORS == "\n") {
-        gsub(/\n/, "\001", value)
-    }
+    printf("%s %s\n", "ENV", var)
+    printf("%s" "\n" "\003\002\005" "\n", value)
 
-    printf("%s %s" ORS, "ENV", var)
-    printf("%s" ORS, value)
     fflush()
 }
+
 # EndSection
 
 # Section: ctrl_help
@@ -496,6 +512,31 @@ function input_consume_multi( _tmp ){
         return state_idx
     }
     return _tmp
+}
+
+# EndSection
+
+# Section: stack
+function stack_length( obj,     l ){
+    return obj[ L ] + 0
+}
+
+function stack_push( obj, elem,     l ){
+    l = obj[ L ] + 1
+    obj[ L ] = l
+    obj[ l ] = elem
+    return l
+}
+
+function stack_pop( obj,            l ){
+    l = obj[ L ]
+    if (l == 0) return
+    obj[ L ] = l - 1
+    return obj[ l ]
+}
+
+function stack_top( obj,     l ){
+    return obj[ obj[ L ] + 0 ]
 }
 
 # EndSection
