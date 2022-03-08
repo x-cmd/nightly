@@ -15,7 +15,6 @@ function cut_line( _line, _space_len,               _max_len_line, _option_after
             break
         }
     }
-    # debug("_part_len:"_part_len";\t\tspace:"_space_len+7)
     return substr(_line, 1, _part_len) "\n" str_rep(" ", _space_len+7)  cut_line( substr(_line, _part_len + 1 ), _space_len )
 }
 
@@ -38,48 +37,53 @@ function generate_optarg_rule_string(option_id, optarg_idx,     _op, _regex, _ca
 
 # Section: option_help
 
-# Get max length of _opt_help_doc, and generate _opt_help_doc_arr.
-function ___generate_help_cal_l_maxlen_helpdoc_helpdocarr(   obj,           i ){
-    l = obj[ L ]
+# Get max length of _opt_help_doc, and generate opt_text_arr.
+function generate_help_cal_maxlen_helpdoc_helpdocarr( obj, opt_text_arr,            l, i, _len, _max_len, _opt_help_doc ){
     _max_len = 0
-    for (i=1; i<=l; ++i) {
+    l = obj[ L ]
+    for ( i=1; i<=l; ++i ) {
         _opt_help_doc = get_option_string( obj[ i ] )       # obj[ i ] is option_ids
-        if (length(_opt_help_doc) > _max_len)           _max_len = length(_opt_help_doc)
-        _opt_help_doc_arr[ i ] = _opt_help_doc
+        _len = length( _opt_help_doc )        # TODO: Might using wcswidth
+        opt_text_arr[ i L ] = _len
+        if ( _len > _max_len )    _max_len = _len
+        opt_text_arr[ i ] = _opt_help_doc
     }
+    return _max_len
 }
 
-function generate_help_for_option_without_arg(   _return, i, _option_after,     l, _max_len, _opt_help_doc, _opt_help_doc_arr){
-    ___generate_help_cal_l_maxlen_helpdoc_helpdocarr( flag_list )
+function generate_help_for_flag( flag_list,         l, i, opt_text_arr, _return, _option_after, _max_len, _space, _option_id ){
+    _max_len = generate_help_cal_maxlen_helpdoc_helpdocarr( flag_list, opt_text_arr )
 
     _return = "FLAGS:\n"
-    for (i=1; i<=l; ++i) {
-        option_id = flag_list[ i ]
-        _space = str_rep(" ", _max_len-length(_opt_help_doc_arr[ i ]))
-        _option_after = option_arr[option_id S OPTION_DESC ] UI_END
-        _option_after = cut_line(_option_after,_max_len)
-        _return = _return "    " FG_BLUE _opt_help_doc_arr[ i ] _space "   " FG_LIGHT_RED _option_after "\n"
+    l = flag_list[ L ]
+    for ( i=1; i<=l; ++i ) {
+        _option_id = flag_list[ i ]
+        _space = str_rep( " ", _max_len - opt_text_arr[ i L ] )
+        _option_after = option_arr[ _option_id S OPTION_DESC ] UI_END
+        _option_after = cut_line( _option_after, _max_len )
+        _return = _return "    " FG_BLUE opt_text_arr[ i ] _space "   " FG_LIGHT_RED _option_after "\n"
     }
     return _return
 }
 
-function generate_help_for_option_with_arg(     _return, i, _option_after,      l, _max_len, _opt_help_doc, _opt_help_doc_arr ){
-    ___generate_help_cal_l_maxlen_helpdoc_helpdocarr( option_list )
+function generate_help_for_option( option_list,         l, i, opt_text_arr, _return, _option_after, _max_len ){
+    _max_len = generate_help_cal_maxlen_helpdoc_helpdocarr( option_list, opt_text_arr )
 
     _return = "OPTIONS:\n"
-    for (i=1; i<=l; ++i) {
+    l = option_list[ L ]
+    for ( i=1; i<=l; ++i ) {
         option_id = option_list[ i ]
 
         oparr_string  = ""
         option_argc   = option_arr[ option_id L ]
-        for(j=1; j<=option_argc; ++j) oparr_string = oparr_string generate_optarg_rule_string(option_id, j)
+        for( j=1; j<=option_argc; ++j ) oparr_string = oparr_string generate_optarg_rule_string(option_id, j)
 
-        _multiple = match(option_id, /\\|m/) ? " [multiple]" : ""
+        _multiple = match( option_id, /\\|m/ ) ? " [multiple]" : ""
         _option_after = option_arr[ option_list[ i ] S OPTION_DESC ] UI_END oparr_string _multiple
-        _option_after = cut_line(_option_after,_max_len)
+        _option_after = cut_line( _option_after, _max_len )
 
-        _space = str_rep(" ", _max_len-length(_opt_help_doc_arr[ i ]))
-        _return = _return "    " FG_BLUE _opt_help_doc_arr[ i ] _space "   " FG_LIGHT_RED _option_after "\n"
+        _space  = str_rep(" ", _max_len - opt_text_arr[ i L ] )
+        _return = _return "    " FG_BLUE opt_text_arr[ i ] _space "   " FG_LIGHT_RED _option_after "\n"
     }
     return _return
 }
@@ -92,11 +96,11 @@ function generate_help_for_option_with_arg(     _return, i, _option_after,      
 function generate_option_help(         _return, i, option_list, flag_list) {
     # If option has no argument, push it to flag_list.
     # Otherwise, push it to option_list.
-    for (i=1; i<=option_id_list[ L ]; ++i) {
+    for ( i=1; i<=option_id_list[ L ]; ++i ) {
         option_id     = option_id_list[ i ]
         option_argc   = option_arr[ option_id L ]
 
-        if (option_argc == 0) {
+        if ( option_argc == 0 ) {
             flag_list[ L ] = flag_list[ L ] + 1
             flag_list[ flag_list[ L ] ] = option_id
         } else {
@@ -106,8 +110,8 @@ function generate_option_help(         _return, i, option_list, flag_list) {
     }
 
     _return = ""
-    if (0 != flag_list[ L ])      _return = _return "\n" generate_help_for_option_without_arg()
-    if (0 != option_list[ L ])    _return = _return "\n" generate_help_for_option_with_arg()
+    if ( 0 != flag_list[ L ] )      _return = _return "\n" generate_help_for_flag( flag_list )
+    if ( 0 != option_list[ L ] )    _return = _return "\n" generate_help_for_option( option_list )
     return _return
 }
 # EndSection

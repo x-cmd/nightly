@@ -128,8 +128,8 @@ function str_trim_left(astr){
     return astr
 }
 
-function str_rep(char, number, _i, _s) {
-    for (   _i=1; _i<=number; ++_i  ) _s = _s char
+function str_rep(char, number, i, _s) {
+    for (   i=1; i<=number; ++i  ) _s = _s char
     return _s
 }
 
@@ -183,14 +183,14 @@ function append_query_code(varname, description, typestr){
 #   1. --option1,-o1
 #   2. --option1,-o1 <arg1> <arg2> ...
 function get_option_string(option_id,
-    _option_string, _j){
+    _option_string, j){
     _option_string = option_id
     gsub("\\|m", "", _option_string)
     gsub("\\|", ",", _option_string)
 
     option_argc      = option_arr[ option_id L ]
-    for ( _j=1; _j<=option_argc; ++_j ) {
-        _option_string = _option_string " <" option_arr[ option_id S _j S OPTARG_NAME ] ">"
+    for ( j=1; j<=option_argc; ++j ) {
+        _option_string = _option_string " <" option_arr[ option_id S j S OPTARG_NAME ] ">"
     }
 
     return _option_string
@@ -395,7 +395,7 @@ function type_arr_add(line_trimed,                 _name, _rest){
     type_arr[ _name ] = str_trim( _rest )
 }
 
-function subcmd_arr_add(idx, line_trimed,                 _id, _name_arr, _name_arr_len, _i){
+function subcmd_arr_add(idx, line_trimed,                 _id, _name_arr, _name_arr_len, i){
     if (! match(line_trimed, /^[A-Za-z0-9_\|-]+/)) {
         panic_param_define_error( "Expect subcommand in the first token, but get:\n" line )
     }
@@ -405,8 +405,8 @@ function subcmd_arr_add(idx, line_trimed,                 _id, _name_arr, _name_
     subcmd_map[ _id ] = str_trim( substr( line_trimed, RLENGTH+1 ) )
 
     _name_arr_len = split(_id, _name_arr, "|")
-    for (_i=1; _i<=_name_arr_len; _i++) {
-        subcmd_id_lookup[ _name_arr[ _i ] ] = _id
+    for (i=1; i<=_name_arr_len; i++) {
+        subcmd_id_lookup[ _name_arr[ i ] ] = _id
     }
 }
 
