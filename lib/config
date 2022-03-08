@@ -54,5 +54,5 @@ options:
     local ___gitee_path="$HOME/.x-cmd/.config/x-bash/app.gitee.config/$O"
     [ -e  "$___gitee_path" ] || mkdir -p "$___gitee_path##*/"
     ___x_cmd_git_config_set "$___gitee_path" "$host" "$1" "$2" && return 0
-    gt_log error "gitee config set Fail"
+    gt_log error "gitee config set fail"
 }

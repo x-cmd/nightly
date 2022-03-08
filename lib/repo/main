@@ -8,7 +8,7 @@ subcmd:
     create          "create repo"
     ls              "list repo of owner"
     info            "show detailed information of repo"
-    del             "remove repo"
+    rm              "remove repo"
     clear           "clear repo"
     issue           "get repo issue"
     review          "setup review repo configure"
@@ -23,21 +23,7 @@ subcmd:
     "___x_cmd_gt_repo_${PARAM_SUBCMD}" "$@"
 }
 
-____x_cmd_gt_repo()(
-    ___x_cmd_gt_current_repo "${1:-repo}"
-    shift
-    ___x_cmd_gt_repo ${1:+"$@"}
-)
-
-___x_cmd_gt_repo_new() {
-    param:void
-    local reponame="${1:?Provide object name}"
-    local aliasname="${2:-$reponame}"
-    # shellcheck disable=SC2139
-    alias "$aliasname=\"O=$O ____x_cmd_gt_repo $reponame\""
-}
-
-# arguments NAME
+# Section: create
 # shellcheck disable=SC2154
 ___x_cmd_gt_repo_create() {
     local O="${O:-GITEE_DEFAULT}"
@@ -47,6 +33,8 @@ ___x_cmd_gt_repo_create() {
 type:
     Access  =   private public
 option:
+    #n                      "repo names"
+
     --access                "private,public"                <>:Access=private
     --description           "description"                   <>=""
     --homepage              "homepage"                      <>=""
@@ -57,7 +45,6 @@ option:
     --gitignore_template    "Git Ignore"                    <>:Ignore=" "
     --license_template      "license"                       <>:license=" "
     -p|--path               "repo path"                     <>:url_type=""
-    #n                      "repo names"
 '
 
     param:run
@@ -73,21 +60,20 @@ option:
     local can_comment="${no_comment:+false}";    can_comment="${can_domment:-true}"
     local auto_init="${no_auto_init:+false}";    auto_init="${auto_init:-true}"
 
-    [ $# -eq 0 ] && gt_log error "repo name is empty" && return 1
+    [ $# -eq 0 ] && gt_log error "Repo name is empty" && return 1
     local name
     for name in "$@"; do
-        {
-            ______x_cmd_gt_post_json "/v5/user/repos" name="${name##*/}" description homepage has_issues \
-                has_wiki can_comment auto_init gitignore_template license_template path private | (
-                    ___x_cmd_git_json_query_rename repo_id=.id url=.html_url repo_owner=.owner.login
-                    if [ -n "$repo_id" ];then
-                        ___x_cmd_ui_tf true  "Creating repo $name successfully" "repo_id: $repo_id" "repo_owner: $repo_owner" "url: $url"
-                    else
-                        ___x_cmd_ui_tf false "Creating repo failure: $name."
-                        return 1
-                    fi
-                )
-        }
+        ______x_cmd_gt_post_json "/v5/user/repos" name="${name##*/}" description homepage has_issues \
+            has_wiki can_comment auto_init gitignore_template license_template path private \
+        | (
+            ___x_cmd_git_json_query_rename repo_id=.id url=.html_url repo_owner=.owner.login
+            if [ -n "$repo_id" ]; then
+                ___x_cmd_ui_tf true  "Creating repo $name successfully" "repo_id: $repo_id" "repo_owner: $repo_owner" "url: $url"
+            else
+                ___x_cmd_ui_tf false "Creating repo failure: $name."
+                return 1
+            fi
+        )
     done
 }
 
@@ -103,7 +89,9 @@ ___x_cmd_gt_org_repo_create() {
 type:
     Access  =   private public innerSource
 option:
-    --org                   "organization create repo"      <>:name
+    #n                      "repo names"
+    --org                   "organization space path"       <>:name
+
     --description           "description"                   <>=""
     --access                "private,public,innerSource"    <>:Access=private
     --homepage              "homepage"                      <>:url_type=""
@@ -114,7 +102,6 @@ option:
     --gitignore_template    "Git Ignore"                    <>:Ignore=""
     --license_template      "license"                       <>:license=""
     -p|--path               "repo path"                     <>:url_type=""
-    #n                      "repo names"
 '
     param:run
 
@@ -133,19 +120,18 @@ option:
     # TODO: owner may be personal
     local name
     for name in "$@"; do
-        local resp
-        {
-            ______x_cmd_gt_post_json "/v5/orgs/$org/repos" name description homepage \
-                has_issues has_wiki can_comment auto_init gitignore_template license_template \
-                path public | (
-                    if ___x_cmd_git_json_query_rename url=.html_url;then
-                        ___x_cmd_ui_tf true     "Creating repo $name successfully" "url: $url"
-                    else
-                        ___x_cmd_ui_tf false    "Creating repo failure: $name."
-                        return 1
-                    fi
-                )
-        }
+        ______x_cmd_gt_post_json "/v5/orgs/$org/repos" name description homepage \
+            has_issues has_wiki can_comment auto_init gitignore_template license_template \
+            path public \
+        | (
+            ___x_cmd_git_json_query_rename url=.html_url
+            if [ -n "$url" ]; then
+                ___x_cmd_ui_tf true     "Creating repo $name successfully" "url: $url"
+            else
+                ___x_cmd_ui_tf false    "Creating repo failure: $name."
+                return 1
+            fi
+        )
     done
 }
 
@@ -157,7 +143,9 @@ ___x_cmd_gt_enterprise_repo_create() {
 type:
     Access  =   private public innerSource
 option:
+    #n                      "repo names"
     --enterprise            "enterprise space address"          <>
+
     --Access                "private,public,innerSource"        <>:Access=private
     --description           "description"                       <>=""
     --homepage              "homepage"                          <>:url_type=""
@@ -186,29 +174,27 @@ option:
 
     outsourced=${outsourced:-false}
 
-    # TODO:
     local name
     for name in "$@"; do
-    {
         ______x_cmd_gt_post_json "/v5/enterprises/${enterprise##*/}/repos" \
             name description homepage has_issues can_comment auto_init \
             gitignore_template license_template path private enterprise \
-            outsourced project_creator members | (
-                if ___x_cmd_git_json_query_rename url=.html_url;then
-                    ___x_cmd_ui_tf true     "Creating repo $name successfully" "url: $url"
-                else
-                    ___x_cmd_ui_tf false    "Creating repo failure: $name."
-                    return 1
-                fi
-            )
-    }
+            outsourced project_creator members \
+        | (
+            ___x_cmd_git_json_query_rename url=.html_url
+            if [ -n "$url" ]; then
+                ___x_cmd_ui_tf true     "Creating repo $name successfully" "url: $url"
+            else
+                ___x_cmd_ui_tf false    "Creating repo failure: $name."
+                return 1
+            fi
+        )
     done
     return 0
 }
+# EndSection
 
-############################
-# Section 5: List Repos
-############################
+# Section: list
 # shellcheck disable=SC2154,SC2145
 ___x_cmd_gt_repo_ls() {
     param:void
@@ -221,17 +207,16 @@ ___x_cmd_gt_repo_ls() {
     fi
 
     if ___ui_table_json Id=.id Name=.name Owner=.owner.login Url=.html_url \
-        -- "___x_cmd_gt_${owner_type}_repo" ls "$@";then
+        -- "___x_cmd_gt_${owner_type}_repo" ls "$@"; then
         return 0
     fi
 
     gt_log error "Please provide owner and owner_type"
     return 1
 }
+# EndSection
 
-############################
-# Section 7: Repo - Deletion & Info & Creation
-############################
+# Section: del & info & clear
 # shellcheck disable=SC2154
 ___x_cmd_gt_repo_info() {
     param:scope     "gitee/$O"
@@ -243,9 +228,9 @@ options:
 
     # get owner_repo by repo
     ___x_cmd_gt_param_init_owner_repo
-
     ______x_cmd_gt_get "/v5/repos/${owner_repo}" | (
-        if ___x_cmd_git_json_query_rename id=.id name=.name html_url=.html_url;then
+        ___x_cmd_git_json_query_rename id=.id name=.name html_url=.html_url
+        if [ -n "$id" ]; then
              ___x_cmd_ui_tf true    "Success" "id: $id" "name: $name" "url: $html_url"
              return 0
         else
@@ -257,7 +242,7 @@ options:
 
 # https://gitee.com/api/v5/swagger#/deleteV5ReposOwnerRepo
 # shellcheck disable=SC2181,SC2154
-___x_cmd_gt_repo_del() {
+___x_cmd_gt_repo_rm() {
     # TODO: -y force del
     param:scope     "gitee/$O"
     param:dsl       '
@@ -266,12 +251,12 @@ options:
 '
     param:run
 
-    local ___X_CMD_UI_FORM_EXIT_STRATEGY="execute|exit"
-    ___x_cmd_ui_form "Are you sure you want to $(___x_cmd_ui bold red delete "repo:") $(___x_cmd_ui bold "$*")" tf 1 = "yes" "no"
+    ___X_CMD_UI_FORM_EXIT_STRATEGY="execute|exit" ___x_cmd_ui_form "Are you sure you want to $(___x_cmd_ui bold red delete "repo:") $(___x_cmd_ui bold "$*")" tf 1 = "yes" "no"
     [ "$tf" != "yes" ] && gt_log info "Delete repo has been canceled" &&  return 0
     local i
     for i in "$@"; do
         ______x_cmd_gt_param_normalize_repo "$i"
+        # TODO:http handle，delete repo return data is null.Status: 204 No Content
         if ______x_cmd_gt_delete "/v5/repos/$owner_repo" >/dev/null; then
             ___x_cmd_ui_tf true  "Deleting repo $i successfully"
         else
@@ -296,6 +281,7 @@ options:
     ___x_cmd_ui_form "Are you sure you want to $(ui bold red clear repo) $(ui bold "${owner_repo}")" tf 1 = "yes" "no"
     [ "$tf" != "yes" ] && gt_log info "Clear repo has been canceled" &&  return 0
 
+    # TODO:http handle，delete repo return data is null.Status: 204 No Content
     if ______x_cmd_gt_put_json "/v5/repos/${owner_repo}/clear" >/dev/null; then
         ___x_cmd_ui_tf true   "Clearing repo ${owner_repo} successfully"
     else
@@ -303,6 +289,9 @@ options:
         return 1
     fi
 }
+# EndSection
+
+# Section: pr review config
 
 # shellcheck disable=SC2154,SC2181
 ___x_cmd_gt_repo_review(){
@@ -317,12 +306,15 @@ options:
 '
     param:run
     ___x_cmd_gt_param_init_owner_repo
-
-    if ______x_cmd_gt_put_json "/v5/repos/${owner_repo}/reviewer" assignees testers \
-        assignees_number testers_number >/dev/null; then
-        ___x_cmd_ui_tf true   "Setuping ${owner_repo} review configure successfully"
-    else
-        ___x_cmd_ui_tf false  "Setuping repo review configure failure: ${owner_repo}"
-        return 1
-    fi
+    ______x_cmd_gt_put_json "/v5/repos/${owner_repo}/reviewer" assignees testers \
+    | (
+        ___x_cmd_git_json_query_rename name=.name
+        if [ -n "$name" ]; then
+            ___x_cmd_ui_tf true   "Setuping ${owner_repo} review configure successfully"
+        else
+            ___x_cmd_ui_tf false  "Setuping repo review configure failure: ${owner_repo}"
+            return 1
+        fi
+    )
 }
+# EndSection

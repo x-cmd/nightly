@@ -7,7 +7,7 @@ ___x_cmd_gt_enterprise(){
     param:scope     "gitee/$O"
     param:dsl       '
 subcmd:
-    ls            "Show information"
+    ls              "Show information"
     repo            "List all repos"
     issue           "List all issues"
     member          "enterprise member management"
@@ -50,21 +50,23 @@ options:
 '
     param:run
     if [ "$#" -eq 0 ]; then
-        ___ui_table_json "$(printf "%s" "______x_cmd_gt_get_multi \"/v5/user/enterprises\" admin || return 1" )" \
-            Id=.id Name=.name Path=.path || return 1
-        return 0
+        if ___ui_table_json Id=.id Name=.name Path=.path \
+            -- "______x_cmd_gt_get_multi" "/v5/user/enterprises" admin; then
+            return 0
+        fi
+        gt_log error "Couldn't find any data"
+        return 1
     fi
-
-    local data
-    data="$(______x_cmd_gt_get "/v5/repos/${owner_repo}/issues/${number}")"
-
-    local id
-    local name
-    local path
-    ___x_cmd_gt_json_query_rename "$data" id=.id name=.name path=.path
-    [ -z "$id" ] && gt_log "err" "Getting organization info failure by $1" && return 1
-
-    ___x_cmd_ui tf "true" "Success" "id: $id" "name: $name" "path: $path"
+    ______x_cmd_gt_get "/v5/enterprises/${1:?Provide enterprise}" \
+    | (
+        ___x_cmd_git_json_query_rename id=.id name=.name path=.path
+        if [ -n "$id" ]; then
+            ___x_cmd_ui_tf true   "Success" "id: $id" "name: $name" "path: $path"
+        else
+            ___x_cmd_ui_tf false  "Couldn't find any enterprise info data by $1"
+            return 1
+        fi
+    )
 }
 
 # https://gitee.com/api/v5/swagger#/getV5EnterprisesEnterpriseRepos
@@ -74,12 +76,18 @@ ___x_cmd_gt_enterprise_repo_ls() {
 type:
     Genre = all public internal private
 options:
+    #1              "Please provide enterprise path"    <>
     --repo_type     "type"                              <>:Genre="all"
     --direct        "direct"                            <>:bool="false"
-    #1              "Please provide enterprise path"    <>
 '
     param:run
-    ___ui_table_json "$(printf "%s" "O=$O ______x_cmd_gt_get_multi \"/v5/enterprises/$1/repos\" repo_type direct page per_page" )" \
-        Id=".id" Name=".name" public=".public" OwnerName=".owner.name" DefaultBranch=".default_branch" \
-        OpenIssuesCount=".open_issues_count" license=".license" Url=".html_url" && return 0
+
+    if ___ui_table_json Id=".id" Name=".name" public=".public" OwnerName=".owner.name" DefaultBranch=".default_branch" \
+        OpenIssuesCount=".open_issues_count" license=".license" Url=".html_url" \
+        -- "______x_cmd_gt_get_multi" "/v5/enterprises/$1/repos" repo_type direct page per_page; then
+        return 0
+    fi
+
+    gt_log error "Couldn't find any data by $1"   && return 1
+    return 1
 }

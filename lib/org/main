@@ -35,22 +35,24 @@ options:
     param:run
 
     if [ $# -eq 0 ]; then
-        ___ui_table_json "$(printf "%s" "______x_cmd_gt_get_multi \"/v5/user/orgs\" admin page per_page || return 1" )" \
-            Id=.id Name=.name FollowCount=.follow_count Url=.repos_url && return 0
+        if ___ui_table_json Id=.id Name=.name FollowCount=.follow_count Url=.repos_url \
+            -- "______x_cmd_gt_get_multi" "/v5/user/orgs" admin admin page per_page; then
+            return 0
+        fi
+        gt_log error "Couldn't find any data"
         return 1
     fi
 
-    local data
-    local id
-    local name
-    local public
-    local follow_count
-    local owner
-    data="$(______x_cmd_gt_get "/v5/orgs/${1:?Provide organization}")"
-    [ -z "$data" ] && gt_log "err" "Getting organization info failure by $1" && return 1
-
-    ___x_cmd_gt_json_query_rename "$data" id=.id name=.name public=.public follow_count=.follow_count owner=.owner.name
-    ___x_cmd_ui tf "true" "Success" "id: $id" "name: $name" "public: $public" "follow_count: $follow_count" "owner: $owner"
+    ______x_cmd_gt_get "/v5/orgs/${1:?Provide organization}" \
+    | (
+        ___x_cmd_git_json_query_rename id=.id name=.name public=.public follow_count=.follow_count owner=.owner.name
+        if [ -n "$id" ]; then
+            ___x_cmd_ui_tf true   "Success" "id: $id" "name: $name" "public: $public" "follow_count: $follow_count" "owner: $owner"
+        else
+            ___x_cmd_ui_tf false  "Couldn't find any organization info data by $1"
+            return 1
+        fi
+    )
 }
 
 # It is very rare TODO: batch?
@@ -65,9 +67,17 @@ options:
 '
     param:run
     org=${org:-$1}
-    ______x_cmd_gt_post_json "/v5/users/organization" name="$1" org description  1>/dev/null
-    [ $? -ne 0 ] && gt_log error "Creating organization failure: $1." && return 1
-                    gt_log info  "Creating organization Successfully" && return 0
+
+    ______x_cmd_gt_post_json "/v5/users/organization" name="$1" org description \
+    | (
+        ___x_cmd_git_json_query_rename id=.id
+        if [ -n "$id" ]; then
+            ___x_cmd_ui_tf true   "Creating Organization Successfully"
+        else
+            ___x_cmd_ui_tf false  "Creating organization failure by $1."
+            return 1
+        fi
+    )
 }
 
 ___x_cmd_gt_org_repo(){
@@ -96,8 +106,13 @@ options:
     #1|--org    "Please provide organization"   <>:Address
 '
     param:run
-     ___ui_table_json "$(printf "%s" "O=$O ______x_cmd_gt_get_multi \"/v5/orgs/$1/repos\" type || return 1" )" \
-            Id=.id Name=.name public=.public OwnerName=.owner.name DefaultBranch=".default_branch" OpenIssuesCount=.open_issues_count license=.license Url=.html_url && return 0
+    if ___ui_table_json Id=.id Name=.name public=.public OwnerName=.owner.name DefaultBranch=.default_branch \
+        OpenIssuesCount=.open_issues_count license=.license Url=.html_url \
+        -- "______x_cmd_gt_get_multi" "/v5/orgs/$1/repos" type; then
+        return 0
+    fi
+    gt_log error "Couldn't find any data. By $1"
+    return 1
 }
 
 # shellcheck disable=SC2181
@@ -112,11 +127,12 @@ options:
     [ $# -eq 0 ] && gt_log error "At least one org spatial address is needed." && return 1
 
     for org in "$@"; do
-    {
-        ______x_cmd_gt_delete "/v5/user/memberships/orgs/${org##*/}"
-
-        [ $? -ne 0 ] && gt_log error "Quit $org organization failure"     &&   return 1
-                        gt_log info  "Quit $org organization successfully."
-    }
+        # TODO:http handle，delete repo return data is null.Status: 204 No Content
+        if ______x_cmd_gt_delete "/v5/user/memberships/orgs/${org##*/}" >/dev/null; then
+            gt_log info  "Quit $org organization successfully."
+        else
+            gt_log error "Quit $org organization failure"
+            return 1
+        fi
     done
 }

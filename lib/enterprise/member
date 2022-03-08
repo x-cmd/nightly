@@ -13,7 +13,7 @@ subcmd:
     ls              "list member"
     user            "get member user info"
     add             "add member"
-    del             "remove member"
+    rm              "remove member"
     access          "Change the member access"
 '
     param:run
@@ -36,10 +36,11 @@ options:
 '
     param:run
 
-    ___ui_table_json "$(printf "%s" "______x_cmd_gt_get_multi \"/v5/enterprises/${enterprise##*/}/members\" role page per_page" )" \
-            NameSpace=.user.login Name=.user.name MarkName=.remark IsOutSourced=.outsourced Role=.role && return 0
-
-    gt_log error "get enterprise list fail"
+    if ___ui_table_json NameSpace=.user.login Name=.user.name MarkName=.remark IsOutSourced=.outsourced Role=.role \
+        -- "______x_cmd_gt_get_multi" "/v5/enterprises/${enterprise##*/}/members" role page per_page; then
+        return 0
+    fi
+    gt_log error "Couldn't find any data by $enterprise"   && return 1
     return 1
 }
 
@@ -53,18 +54,16 @@ options:
 '
     param:run
 
-    local data
-    local name_space
-    local mark_name
-    local role
-    local is_active
-    local is_out_sourced
-    data="$(______x_cmd_gt_get_multi "/v5/enterprises/${enterprise}/members/${username}")"
-    [ -z "$data" ] && gt_log "err" "Getting organization info failure by ${enterprise} ${username}" && return 1
-
-    ___x_cmd_gt_json_query_rename "$data" name_space=.user.login mark_name=.remark role=.role is_active=.active is_out_sourced=.outsourced
-
-    ___x_cmd_ui tf "true" "Success" "NameSpace: $name_space" "MarkName: $mark_name" "Role: $role" "IsActive: $is_active" "IsOutSourced: $is_out_sourced"
+    ______x_cmd_gt_get_multi "/v5/enterprises/${enterprise}/members/${username}" | (
+        ___x_cmd_git_json_query_rename name_space=.user.login mark_name=.remark role=.role is_active=.active is_out_sourced=.outsourced
+        if [ -n "$name_space" ]; then
+             ___x_cmd_ui_tf true  "NameSpace: $name_space" "MarkName: $mark_name" "Role: $role" "IsActive: $is_active" "IsOutSourced: $is_out_sourced"
+             return 0
+        else
+             ___x_cmd_ui_tf false "Couldn't find any data by: ${enterprise} ${username}"
+            return 1
+        fi
+    )
 }
 
 # shellcheck disable=SC2181,SC2086,SC2154
@@ -85,18 +84,19 @@ options:
     [ $# -eq 0 ] && gt_log error "At least one user's spatial address or email is needed" && return 1
     local username
     for username in "$@"; do
-    {
-        ______x_cmd_gt_post_json "/v5/enterprises/${enterprise}/members" \
-            role $mode="$username" 1>/dev/null 2>&1
-
-        [ $? -ne 0 ] && gt_log error "Add $username failure"      &&   return 1
-                        gt_log info  "Add $username successfully"
-    }
+        # TODO:http handle，delete repo return data is null.Status: 204 No Content
+        if ______x_cmd_gt_post_json "/v5/enterprises/${enterprise}/members" \
+            role $mode="$username" >/dev/null; then
+            gt_log info  "Add $username successfully"
+        else
+            gt_log error "Add $username failure"
+            return 1
+        fi
     done
 }
 
 # shellcheck disable=SC2181
-___x_cmd_gt_enterprise_member_del() {
+___x_cmd_gt_enterprise_member_rm() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -108,11 +108,13 @@ options:
 
     local username
     for username in "$@"; do
-        {
-            ______x_cmd_gt_delete "/v5/enterprises/${enterprise##*/}/members/${username##*/}" 1>/dev/null 2>&1
-            [ $? -ne 0 ] && gt_log error "Remove user failure by $username $enterprise" &&   return 1
-                            gt_log info  "Remove user successfully: $username"
-        }
+        # TODO:http handle，delete repo return data is null.Status: 204 No Content
+        if ______x_cmd_gt_delete "/v5/enterprises/${enterprise##*/}/members/${username##*/}" >/dev/null; then
+            gt_log info  "Remove user successfully: $username"
+        else
+            gt_log error "Remove user failure by $username $enterprise"
+            return 1
+        fi
     done
 }
 
@@ -130,7 +132,14 @@ options:
     param:run
     active=${active:-false}
 
-    ______x_cmd_gt_put_json "/v5/enterprises/${enterprise##*/}/members/${username##*/}" name role active 1>/dev/null 2>&1
-    [ $? -ne 0 ] && gt_log error "Modify access failure by $username $enterprise" &&   return 1
-                    gt_log info  "Modify access successfully: $username"          &&   return 0
+    ______x_cmd_gt_put_json "/v5/enterprises/${enterprise##*/}/members/${username##*/}" name role active | (
+        ___x_cmd_git_json_query_rename user=.user
+        if [ -n "$user" ]; then
+            gt_log info  "Modify access successfully: $username"
+            return 0
+        else
+            gt_log error "Modify access failure by $username $enterprise"
+            return 1
+        fi
+    )
 }
