@@ -1,0 +1,88 @@
+# shellcheck shell=sh
+# shellcheck disable=SC2039,3043
+___x_cmd_gh_org_repo(){
+    param:dsl       '
+subcmd:
+    ls          "list repo"
+    create      "org repo create"
+'
+    param:run
+    if [ -z "$PARAM_SUBCMD" ]; then
+        gh_log error "Command Not Found. Show help."
+        return 0
+    fi
+    "___x_cmd_gh_org_repo_${PARAM_SUBCMD}" "$@"
+}
+
+___x_cmd_gh_org_repo_ls() {
+    param:scope     "github/$O"
+    param:dsl       '
+options:
+    --type     "type"                   <>="all"    = all private public
+    #1|--org   "org space address"      <>:address
+'
+    param:run
+    if ___ui_table_json Id=.id Name=.name OwnerName=.owner.login IsPrivate=.private \
+        -- "___x_cmd_gh_get_multi" "/orgs/$org/repos" type ; then
+        return 0
+    fi
+    ___x_cmd_ui_tf false "Please provide owner and owner_type"
+    return 1
+}
+
+___x_cmd_gh_org_repo_create() {
+    param:scope     "github/$O"
+    param:dsl       '
+type:
+    access  =   private public internal
+option:
+    --org                       "organization create repo"                                             <>:name
+    --description               "A short description of the repository."                               <>=""
+    --homepage                  "A URL with more information about the repository."                    <>:URL=""
+    --team_id                   "the id of the team that will be granted access to this repository"    <>=""
+    --gitignore_template        "Desired language or platform"                                         <>:Ignore=""
+    --license_template          "The license keyword of the open source license for this repository."  <>:License=""
+    --access                    "Can be public or private."                                            <>:access=private
+    --no_issues                 "Whether to disable issue"
+    --no_projects               "Whether to disable has_projects"
+    --no_wiki                   "Whether to disable wiki"
+    --no_auto_init              "Disable auto init README"
+    --is_template               "make this repo available as a template,Default:false"
+    --no_squash_merge        "Whether to allow squash merges for pull requests."
+    --no_merge_commit        "Whether to allow merge commits for pull requests."
+    --no_rebase_merge        "Whether to allow rebase merges for pull requests."
+    --allow_auto_merge          "Whether to allow Auto-merge to be used on pull requests,Default:false"
+    --delete_branch_on_merge    "Either to allow automatically deleting head branches when pull requests are merged,Default:false"
+    #n                      "repo names"
+'
+    param:run
+
+    local private=true
+    [ "$access" = "public" ] && private=false
+
+    local has_issues="${no_issues:+false}";                 has_issues="${has_issue:-true}"
+    local has_wiki="${no_wiki:+false}";                     has_wiki="${has_wiki:-true}"
+    local has_projects="${no_projects:+false}";             has_projects="${has_projects:-true}"
+    local auto_init="${no_auto_init:+false}";               auto_init="${auto_init:-true}"
+    local allow_squash_merge="${no_squash_merge:+false}";   allow_squash_merge="${allow_squash_merge:-true}"
+    local allow_merge_commit="${no_merge_commit:+false}";   allow_merge_commit="${allow_merge_commit:-true}"
+    local allow_rebase_merge="${no_rebase_merge:+false}";   allow_rebase_merge="${allow_rebase_merge:-true}"
+
+    # TODO:owner may be personal
+    local name
+    for name in "$@"; do
+        ___x_cmd_gh_post_json "/orgs/$org/repos" name description homepage team_id \
+                gitignore_template license_template visibility="$access" has_issues \
+                has_projects auto_init is_template allow_squash_merge allow_merge_commit \
+                allow_rebase_merge  allow_auto_merge delete_branch_on_merge \
+        | (
+            ___x_cmd_git_json_query_rename repo_id=.id url=.html_url repo_owner=.owner.login
+            if [ -n "$repo_id" ]; then
+                ___x_cmd_ui_tf true "Creating repo $name success" "repo_id: $repo_id" "repo_owner: $repo_owner" "url: $url"
+            else
+                ___x_cmd_ui_tf false "Creating repo failure: $name."
+                return 1
+            fi
+        )
+    done
+}

@@ -1,12 +1,12 @@
-
-
+# shellcheck shell=sh
+# shellcheck disable=SC2039,3043
 
 ___x_cmd_gh_repo_pr_tester(){
     param:scope     "github/$O"
     param:dsl       '
 subcommand:
     add             "Add assignee"
-    del             "Del assignee"
+    rm              "Remove assignee"
     reset           "Reset all assignee"
     test            "test pass"
 '

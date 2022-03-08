@@ -33,7 +33,7 @@ ___x_cmd_gh_token(){
         ___X_CMD_GITHUB_DEFAULT_OWNER=$user
         ___x_cmd_gh_config_set "oauth_token" "$1"
         ___x_cmd_gh_config_set "user" "$___X_CMD_GITHUB_DEFAULT_OWNER"
-        ___x_cmd_ui_tf "true" "set default token successfully,The default user is $user"
+        ___x_cmd_ui_tf true "set default token successfully,The default user is $user"
         return 0
     fi
 

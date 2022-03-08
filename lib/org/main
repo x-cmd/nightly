@@ -9,6 +9,7 @@ subcmd:
     info                    "Show information"
     repo                    "List all repos"
     member                  "member management"
+    app                     "Install github app list"
 '
     param:run
 
@@ -21,14 +22,16 @@ subcmd:
     "___x_cmd_gh_org_${PARAM_SUBCMD}" "$@"
 }
 
-
+# Section: List & Info
 ___x_cmd_gh_org_ls() {
     param:void
 
     local url
     if [ $# -gt 0 ]; then
-        url="/users/$1/orgs"
+        gt_log info "Get organization for username ${1}"
+        url="/users/${1}/orgs"
     else
+        gt_log info "Get current user's organization"
         url="/user/orgs"
     fi
 
@@ -36,7 +39,7 @@ ___x_cmd_gh_org_ls() {
         -- "___x_cmd_gh_get_multi" "$url"; then
         return 0
     fi
-    ___x_cmd_ui_tf "false" "get $1 organizations ls fail"
+    ___x_cmd_ui_tf false "get $1 organizations ls fail"
     return 1
 }
 
@@ -44,7 +47,7 @@ ___x_cmd_gh_org_info() {
     param:scope     "github/$O"
     param:dsl       '
 options:
-    #1|--org        "org space address"    <>:address
+    #1|--org        "org space address"    <>:Address
 '
     param:run
 
@@ -52,144 +55,30 @@ options:
         ___x_cmd_git_json_query_rename id=.id url=.html_url name=.login
         if [ -n "$id" ]; then
             ___x_cmd_ui_tf  "true" "get $org organizations info success" "Id: $id" "Name: $name" "Url: $url"
-            else
-            ___x_cmd_ui_tf "false" "get $org organizations info fail"
+        else
+            ___x_cmd_ui_tf false "get $org organizations info fail"
             return 1
         fi
     )
 }
-
-___x_cmd_gh_org_repo(){
-    param:dsl       '
-subcmd:
-    ls          "list repo"
-    create      "org repo create"
-'
-    param:run
-    if [ -z "$PARAM_SUBCMD" ]; then
-        gh_log error "Command Not Found. Show help."
-        return 0
-    fi
-    "___x_cmd_gh_org_repo_${PARAM_SUBCMD}" "$@"
-}
-
-___x_cmd_gh_org_repo_ls() {
-    param:scope     "github/$O"
-    param:dsl       '
-options:
-    --type     "type"                   <>="all"    = all private public
-    #1|--org   "org space address"      <>:address
-'
-    param:run
-    if ___ui_table_json Id=.id Name=.name OwnerName=.owner.login IsPrivate=.private \
-        -- "___x_cmd_gh_get_multi" "/orgs/$org/repos" type ; then
-        return 0
-    fi
-    ___x_cmd_ui_tf "false" "Please provide owner and owner_type"
-    return 1
-}
-
-    # Section: Member
-
-___x_cmd_gh_org_member(){
-    param:dsl       '
-subcmd:
-    ls              "list member"
-    user            "get org member user info"
-    add             "add member"
-    del|remove      "Remove member"
-'
-    param:run
-
-    if [ -z "$PARAM_SUBCMD" ]; then
-        echo "subcommand not found. show help." >&2
-        return 0
-    fi
-
-    "___x_cmd_gh_org_member_$PARAM_SUBCMD" "$@"
-}
-
-___x_cmd_gh_org_member_ls() {
-    param:scope     "github/$O"
-    param:dsl       '
-options:
-    --filter        "Filter members returned in the list."  <>="all"
-    --role          "Repo name"            <>="all"         = admin member all
-    #1|--org        "org space address"    <>:address
-'
-    param:run
-    if ___ui_table_json Id=.id UserName=.login Url=.html_url \
-        --  "___x_cmd_gh_get_multi" "/orgs/${org##*/}/members" role filter; then
-        return 0
-    fi
-    ___x_cmd_ui_tf "false" "get member list fail"
-    return 1
-}
-
-___x_cmd_gh_org_member_user() {
-    param:scope     "github/$O"
-    param:dsl      '
-options:
-    --username          "username:space address"    <>:name
-    #1|--org            "org space address"         <>:address
-'
-    param:run
-
-    ___x_cmd_gh_get "/orgs/${org##*/}/memberships/${username##*/}" | (
-        ___x_cmd_git_json_query_rename role=.role url=.organization_url name=.user.login state=.state
-        if [ -n "$role" ];then
-            ___x_cmd_ui_tf  "true" "get $username in organizations info  success" "Name: $name" "Role: $role" "state: $state" "Url: $url"
-            else
-            ___x_cmd_ui_tf "false" "get $username in organizations info fail"
-            return 1
-        fi
-    )
-}
-
-___x_cmd_gh_org_member_add() {
-    param:scope     "github/$O"
-    param:dsl       '
-type:
-    role = admin member
-options:
-    --org           "org"       <>:address
-    --role          "role"      <>:role="member"
-    #n              "username"
-'
-    param:run
-    [ $# -eq 0 ] && gt_log error "provide at least one username" && return 1
-    for username in "$@"; do
-        {
-            ___x_cmd_gh_put_json "/orgs/${org##*/}/memberships/${username##*/}" role 1>/dev/null 2>&1
-            [ $? -ne 0 ] && ___x_cmd_ui_tf "false" "add $username to organizations fail" && return 1
-            ___x_cmd_ui_tf  "true" "add $username to organizations  success"
-        }
-    done
-}
-
-___x_cmd_gh_org_member_del() {
-    param:scope     "github/$O"
-    param:dsl       '
-options:
-    --org       "org space address"         <>:address
-    #n          "username"
-'
-    param:run
-
-    [ $# -eq 0 ] && gt_log error "provide at least one username" && return 1
-
-    local username
-    for username in "$@"; do
-        {
-            ___x_cmd_gh_delete "/orgs/${org##*/}/memberships/${username##*/}" 1>/dev/null 2>&1
-
-            [ $? -ne 0 ] && ___x_cmd_ui_tf "false" "del $username to organizations fail" && return 1
-
-            ___x_cmd_ui_tf  "true" "del $username to organizations  success"
-        }
-    done
-}
-
 
 # EndSection
 
+# Section: Install github app list
+___x_cmd_gh_org_app(){
+    param:scope     "github/$O"
+    param:dsl       '
+options:
+    #1|--org        "org space address"                         <>:Address
+    --per_page      "Results per page"                          <>=30
+    --page          "Page number of the results to fetch."      <>=1
+'
+    if ___ui_table_json Id=.id Name=.login \
+        -- "___x_cmd_gh_get_multi" "/orgs/$1/installations" per_page page ; then
+        return 0
+    fi
+
+    ___x_cmd_ui_tf false "get $1 organizations github app fail"
+    return 1
+}
+# EndSection

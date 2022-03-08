@@ -12,7 +12,7 @@ ___x_cmd_gh_repo_member(){
 subcmd:
     ls              "list member"
     add             "add member"
-    del|remove      "Remove member"
+    rm              "Remove member"
 '
     param:run
 
@@ -27,14 +27,19 @@ subcmd:
 ___x_cmd_gh_repo_member_ls() {
     param:scope     "github/$O"
     param:dsl       '
+type:
+    Affiliation =   outside direct all
 options:
-    #1|--repo          "Repo name"         <>:repo
+    --affiliation       "Filter collaborators returned by their affiliation."   <>:Affiliation="all"
+    --per_page          "Results per page"                                      <>=30
+    --page              "Page number of the results to fetch."                  <>=1
+    #1|--repo           "Repo name"                                             <>:repo
 '
     param:run
     ___x_cmd_gh_param_init_owner_repo
 
     if ___ui_table_json Id=.id Owner=.login Url=.html_url \
-        -- "___x_cmd_gh_get_multi" "/repos/${owner_repo}/collaborators"; then
+        -- "___x_cmd_gh_get_multi" "/repos/${owner_repo}/collaborators" per_page page; then
         return 0
     fi
 }
@@ -43,32 +48,35 @@ ___x_cmd_gh_repo_member_add() {
     param:scope     "github/$O"
     param:dsl       '
 options:
-    --repo           "Repo name"             <>:repo
-    --permission     "permission"            <>:permission=push
-    #n               "Username list"         <>
+    --repo          "Repo name"                                     <>:repo
+    --permission    "The permission to grant the collaborator."     <>:permission=push
+    --permissions   "permissions"                                   <>=""
+    #n              "Username list"                                 <>
 '
     param:run
 
     ___x_cmd_gh_param_init_owner_repo
-    if [ -z "$1" ];then
+    if [ $# -eq 0 ];then
         printf "%s\n" "At least one user's spatial address is needed"
         return 1
     fi
     local username
     for username in "$@"; do
         {
-            ___x_cmd_gh_put_json "/repos/$owner_repo/collaborators/${username##*/}" permission 1>/dev/null
-            local code=$?
-            if [ $code -ne 0 ]; then
-                gh_log error "add user failure: $username. Code is $code. "
-            else
+            ___x_cmd_gh_put_json "/repos/$owner_repo/collaborators/${username##*/}" permission | (
+            data=___x_cmd_git_json_query .full_name
+            if [ -n "$data" ];then
                 ui tf "true" "add $username to $owner_repo successfully"
+            else
+                gh_log error "add user failure: $username."
+                return 1
             fi
+            )
         }
     done
 }
 
-___x_cmd_gh_repo_member_del() {
+___x_cmd_gh_repo_member_rm() {
     param:scope     "github/$O"
     param:dsl       '
 options:
@@ -76,16 +84,20 @@ options:
     #n              "Username list"
 '
     param:run
-    [ -z "$1" ] && gh_log error "At least one user's spatial address is needed" && return 1
+    if [ $# -eq 0 ];then
+        gh_log error "At least one user's spatial address is needed"
+        return 1
+    fi
 
     ___x_cmd_gh_param_init_owner_repo
     local username
     for username in "$@"; do
-        ___x_cmd_gh_delete "/repos/$owner_repo/collaborators/${username##*/}"
-        if [ $? -ne 0 ];then
-            ___x_cmd_ui_tf "false" "delete user failure: $username."
+        # TODO:http handle，delete repo return data is null.Status: 204 No Content
+        if ___x_cmd_gh_delete "/repos/$owner_repo/collaborators/${username##*/}";then
+            ___x_cmd_ui_tf true  "successfully deleted $username in $owner_repo"
         else
-            ___x_cmd_ui_tf "true"  "successfully deleted $username in $owner_repo"
+            ___x_cmd_ui_tf false "delete user failure: $username."
+            return 1
         fi
     done
 }

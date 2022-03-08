@@ -68,7 +68,7 @@ options:
     --body              "Release Description"       <>
     --draft             ”create a draft release“    <>:Bool="false"
     --prerelease        "Is release version"        <>:Bool="false"
-    
+
 '
     param:run
 
@@ -112,7 +112,7 @@ options:
         tag_name="$tag" name body prerelease
 }
 
-___x_cmd_gh_repo_release_delete() {
+___x_cmd_gh_repo_release_rm() {
     local O="${O:-GITHUB_DEFAULT}"
     param:scope  "github/$O"
     param:dsl    '
@@ -199,7 +199,7 @@ options:
 }
 
 # Delete the file in attachment list
-___x_cmd_gh_repo_release_attachment_del() {
+___x_cmd_gh_repo_release_attachment_rm() {
 
     local O="${O:-GITHUB_DEFAULT}"
 

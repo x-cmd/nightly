@@ -6,7 +6,7 @@ ___x_cmd_gh_repo_pr_assign(){
     param:dsl       '
 subcommand:
     add             "Add assignee"
-    del             "Del assignee"
+    rm              "Remove assignee"
     reset           "Reset all assignee"
     review          "review pass"
 '
@@ -34,7 +34,7 @@ options:
     ___x_cmd_gh_post_json "/repos/${owner_repo}/pulls/$pr/assignees" assignees
 }
 
-___x_cmd_gh_repo_pr_assign_del() {
+___x_cmd_gh_repo_pr_assign_rm() {
     param:scope     "github/$O"
     param:dsl       '
 options:

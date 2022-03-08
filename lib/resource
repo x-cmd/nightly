@@ -77,11 +77,11 @@ ___x_cmd_git_json_query(){
     done
 }
 
+
 #TODO:awk!!!
 ___x_cmd_git_json_query_rename(){
     local data
     data="$(cat)"
-    shift
     while [ $# -gt 0 ];do
         eval "${1%%=*}"="$(printf "%s" "$data" | ___x_cmd_git_json_query "${1##*=}")"
         shift
