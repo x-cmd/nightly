@@ -60,7 +60,7 @@ param_marg_seq() {
 # param_type    gitee     repo
 # param_type    gitee     user      =~  [A-Za-z0-9_]+
 # param_type    gitee     access    =   private         public          inner-public
-# param_type    gitee     License   =-  <"$(xrc cat gh/lib/_type/license)"
+# param_type    gitee     License   -  <"$(xrc cat gh/lib/_type/license)"
 
 # TODO: check
 param_type(){
@@ -71,7 +71,7 @@ param_type(){
     if [ "$2" != - ]; then
         result="$*"
     else
-        result="$1 = $(cat | awk '{ print "\"" gsub($0, "\"", "\\\"")  "\"" }')"
+        result="$1 = $(cat | awk '{ str=$0 ; gsub("\"", "\\\"", str) ; printf(" \"%s\"", str) }')"
     fi
 
     local varname="${PARAM_TYPE_VAR_PREFIX}${app_name}"

@@ -42,7 +42,7 @@ function panic_error(msg){
 }
 
 function panic_param_define_error( msg ){
-    print FG_LIGHT_RED "param define error: " UI_END msg "\nFor more information try to read the demo in " FG_BLUE "https://gitee.com/x-bash/param/blob/main/testcase/v0_test" UI_END > "/dev/stderr"
+    print FG_LIGHT_RED "param define error: " UI_END msg "\nFor more information try to read the demo in " FG_BLUE "https://gitee.com/x-bash/param/blob/main/.x-cmd/testcases/v0_test" UI_END > "/dev/stderr"
     print "return 1 2>/dev/null || exit 1 2>/dev/null"
     exit_now(1);
 }

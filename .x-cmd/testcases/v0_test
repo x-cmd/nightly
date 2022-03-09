@@ -232,7 +232,7 @@ start_test() {
 # Example:
 # #start_test ./testcase/v0_test_option  ls_option ls_subcmd ls_option_subcmd
 
-for testcase in option namelist subcmd param_default quote dryrun ls_subcmd ls_option ls_option_subcmd help; do
+for testcase in option namelist subcmd param_default quote dryrun ls_subcmd ls_option ls_option_subcmd  help license; do
     . "$(x wsroot)/.x-cmd/testcases/v0_test_$testcase"
     start_test "$(x wsroot)/.x-cmd/testcases/v0_test_$testcase"
 done
