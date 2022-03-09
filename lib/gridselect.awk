@@ -7,7 +7,7 @@ BEGIN {
         ctrl_help_item_put("ENTER", "for enter")
         ctrl_help_item_put("%", "for filter")
         ctrl_help_item_put("/", "for find")
-        if ( SELECT_MULTIPLE_STATE == true ) ctrl_help_item_put("SPACE", "for multiple select")
+        ctrl_help_item_put("SPACE", "for multiple select")
     }
 }
 # EndSection
@@ -123,8 +123,13 @@ function model_generate(    _filter,    i, l){
 # Section: ctrl
 BEGIN {
     ctrl_sw_init( FILTER_EDIT, false )
-    ctrl_sw_init( MULTIPLE_EDIT, false )
     ctrl_sw_init( FIND_EDIT, false )
+    if ( SELECT_MULTIPLE_STATE == true ) {
+        ctrl_sw_init( MULTIPLE_EDIT, true )
+        IS_MULTIPLE_SELECT = true
+    } else {
+        ctrl_sw_init( MULTIPLE_EDIT, false )
+    }
 }
 
 function handle_ctrl_in_filter_state(char_type, char_value){
@@ -172,19 +177,18 @@ function handle_ctrl_to_select_item(char_value,         item) {
 
 function handle_ctrl_in_normal_state(char_type, char_value) {
     exit_if_detected( char_value, ",q," )
-
-    if (char_type == "ascii-space" && SELECT_MULTIPLE_STATE == true) {
+    if (char_type == "ascii-space") {
         (ctrl_sw_get( MULTIPLE_EDIT ) == false) ? ctrl_sw_toggle( MULTIPLE_EDIT ) : exit_with_elegant( char_value )
         IS_MULTIPLE_SELECT = true
         return
     }
     if (char_value == "/")                                  return ctrl_sw_toggle( FIND_EDIT )    # find
-    if (char_value == "%")                                  return ctrl_sw_toggle( FILTER_EDIT )    # filter
+    if (char_value == "%")                                  return ctrl_sw_toggle( FILTER_EDIT )  # filter
 
     if (char_value == "h" && SELECT_HELP_STATE == true)     return ctrl_help_toggle()
 
     handle_ctrl_to_move_focus(char_type, char_value)    # ARROW UP/DOWN/LEFT/ROW/n/p
-    handle_ctrl_to_select_item(char_value)      # select item
+    handle_ctrl_to_select_item(char_value)              # select item
     ctrl_rstate_handle_char( SELECTED_ITEM_IDX, char_type, char_value )
 }
 
@@ -251,7 +255,6 @@ BEGIN {
 NR==1 {  update_width_height( $2, $3 );  }
 NR==2 {  data_header = str_trim($0) }
 NR>2 {
-
     if (DATA_MODE == DATA_MODE_CTRL) { consume_ctrl() }
     else if (DATA_MODE == DATA_MODE_ITEM) { consume_item() }
     else { consume_info() }
