@@ -53,7 +53,7 @@ options:
     ___x_cmd_gh_get "/orgs/${org##*/}/memberships/${username##*/}" | (
         ___x_cmd_git_json_query_rename role=.role url=.organization_url name=.user.login state=.state
         if [ -n "$state" ];then
-            ___x_cmd_ui_tf  "true" "get $username in organizations info  success" "Name: $name" "Role: $role" "state: $state" "Url: $url"
+            ___x_cmd_ui_tf true "get $username in organizations info  success" "Name: $name" "Role: $role" "state: $state" "Url: $url"
         else
             ___x_cmd_ui_tf false "get $username in organizations info fail"
             return 1
@@ -82,7 +82,7 @@ options:
             ___x_cmd_gh_put_json "/orgs/${org##*/}/memberships/${username##*/}" role | (
             ___x_cmd_git_json_query_rename state=.state
             if [ -n "$state" ];then
-                ___x_cmd_ui_tf  "true" "add $username to organizations  success"
+                ___x_cmd_ui_tf true "add $username to organizations  success"
             else
                 ___x_cmd_ui_tf false "add $username to organizations fail"
                 return 1

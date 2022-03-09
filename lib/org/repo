@@ -34,7 +34,7 @@ ___x_cmd_gh_org_repo_create() {
     param:scope     "github/$O"
     param:dsl       '
 type:
-    access  =   private public internal
+    Access  =   private public internal
 option:
     --org                       "organization create repo"                                             <>:name
     --description               "A short description of the repository."                               <>=""
@@ -42,18 +42,18 @@ option:
     --team_id                   "the id of the team that will be granted access to this repository"    <>=""
     --gitignore_template        "Desired language or platform"                                         <>:Ignore=""
     --license_template          "The license keyword of the open source license for this repository."  <>:License=""
-    --access                    "Can be public or private."                                            <>:access=private
+    --access                    "Can be public or private."                                            <>:Access=private
     --no_issues                 "Whether to disable issue"
     --no_projects               "Whether to disable has_projects"
     --no_wiki                   "Whether to disable wiki"
     --no_auto_init              "Disable auto init README"
     --is_template               "make this repo available as a template,Default:false"
-    --no_squash_merge        "Whether to allow squash merges for pull requests."
-    --no_merge_commit        "Whether to allow merge commits for pull requests."
-    --no_rebase_merge        "Whether to allow rebase merges for pull requests."
+    --no_squash_merge           "Whether to allow squash merges for pull requests."
+    --no_merge_commit           "Whether to allow merge commits for pull requests."
+    --no_rebase_merge           "Whether to allow rebase merges for pull requests."
     --allow_auto_merge          "Whether to allow Auto-merge to be used on pull requests,Default:false"
     --delete_branch_on_merge    "Either to allow automatically deleting head branches when pull requests are merged,Default:false"
-    #n                      "repo names"
+    #n                          "repo names"
 '
     param:run
 

@@ -49,7 +49,8 @@ ___x_cmd_gh_repo_info() {
     param:scope     "github/$O"
     param:dsl       '
 options:
-    #1|--repo          "Repo name"         <>:repo
+    --owner         "The owner of the repo needs to be updated"     <>=""
+    #1|--repo       "Repo name"                                     <>:repo
 '
     param:run
 
@@ -106,7 +107,11 @@ option:
     local allow_merge_commit="${no_merge_commit:+false}";   allow_merge_commit="${allow_merge_commit:-true}"
     local allow_rebase_merge="${no_rebase_merge:+false}";   allow_rebase_merge="${allow_rebase_merge:-true}"
 
-    [ $# -eq 0 ] && gh_log info "repo create name is null" && return
+    if [ $# -eq 0  ];then
+        gh_log error "repo create name is null"
+        return 1
+    fi
+
     local name
     for name in "$@"; do
         {
@@ -118,7 +123,7 @@ option:
             | (
             ___x_cmd_git_json_query_rename id=.id url=.html_url owner=.owner.login
             if [ -n "$id" ];then
-                ___x_cmd_ui_tf  "true" "Creating repo $name success" "repo_id: $id" "repo_owner: $owner" "url: $url"
+                ___x_cmd_ui_tf true "Creating repo $name success" "repo_id: $id" "repo_owner: $owner" "url: $url"
             else
                 ___x_cmd_ui_tf false "Creating repo failure: $name."
                 return 1
@@ -152,3 +157,82 @@ options:
 }
 # EndSection
 
+# Section: Update
+___x_cmd_gh_repo_update() {
+    local O="${O:-GITHUB_DEFAULT}"
+
+    param:scope     "github/$O"
+    param:dsl       '
+type:
+    Access  =   private public
+option:
+    --access                    "private,public"                                                        <>:Access=private
+    --repo                      "Need to update repo name"                                              <>:RepoName
+    --owner                     "The owner of the repo needs to be updated"                             <>=""
+    --description               "description"                                                           <>=""
+    --homepage                  "homepage"                                                              <>=""
+    --team_id                   "the id of the team that will be granted access to this repository"     <>=""
+    --default_branch            "Updates the default branch for this repository."                       <>=""
+    --advanced_security         "enable or disable GitHub Advanced Security for this repository."       <>:Status=""
+    --scanning                  "enable or disable secret scanning for this repository"                 <>:Status=""
+    --scanning_push_protection  "enable or disable secret scanning push protection for this repository" <>:Status=""
+    --no_issues                 "Whether to disable issue"
+    --no_projects               "Whether to disable has_projects"
+    --no_wiki                   "Whether to disable wiki"
+    --no_squash_merge           "Whether to allow squash merges for pull requests."
+    --no_merge_commit           "Whether to allow merge commits for pull requests."
+    --no_rebase_merge           "Whether to allow rebase merges for pull requests."
+    --allow_auto_merge          "Whether to allow Auto-merge to be used on pull requests,Default:false"
+    --delete_branch_on_merge    "Whether to delete head branches when pull requests are merged"
+    --allow_forking             "allow private forks."
+    --archived                  "Mark this repository as archived and read-only."
+    --is_template               "can be used to generate new repositories"
+    #n                          "repo names"
+'
+    param:run
+
+    local private=true
+    [ "$access" = "public" ] && private=false
+
+    local has_issues="${no_issues:+false}";      has_issues="${has_issue:-true}"
+    local has_wiki="${no_wiki:+false}";          has_wiki="${has_wiki:-true}"
+    local has_projects="${no_projects:+false}";  has_projects="${has_projects:-true}"
+    local auto_init="${no_auto_init:+false}";    auto_init="${auto_init:-true}"
+    local allow_squash_merge="${no_squash_merge:+false}";   allow_squash_merge="${allow_squash_merge:-true}"
+    local allow_merge_commit="${no_merge_commit:+false}";   allow_merge_commit="${allow_merge_commit:-true}"
+    local allow_rebase_merge="${no_rebase_merge:+false}";   allow_rebase_merge="${allow_rebase_merge:-true}"
+
+    if [ $# -eq 0 ];then
+        gh_log error "repo name is null"
+        return 1
+    fi
+
+    local tmp="{security_and_analysis:{}}"
+    xrc json
+    [ -n "$scanning" ] && ___x_cmd_json_put tmp.security_and_analysis.secret_scanning "{\"status\": \"$scanning\"}"
+    [ -n "$advanced_security" ] && ___x_cmd_json_put tmp.security_and_analysis.advanced_security "{\"status\": \"$advanced_security\"}"
+    [ -n "$secret_scanning_push_protection" ] && ___x_cmd_json_put tmp.security_and_analysis.secret_scanning_push_protection "{\"status\": \"$secret_scanning_push_protection\"}"
+    [ "$tmp" = "{security_and_analysis:{}}" ] && tmp=""
+
+    ___x_cmd_gh_param_init_owner_repo
+    local name
+    for name in "$@"; do
+        {
+            ___x_cmd_gh_patch_json "/repos/${owner_repo}" private \
+                visibility="$access" description homepage team_id default_branch \
+                security_and_analysis="$tmp" has_issues has_wiki has_projects \
+                allow_squash_merge allow_merge_commit allow_rebase_merge archived \
+                allow_auto_merge delete_branch_on_merge is_template allow_forking \
+            | (
+            ___x_cmd_git_json_query_rename id=.id url=.html_url owner=.owner.login
+            if [ -n "$id" ];then
+                ___x_cmd_ui_tf true "Creating repo $name success" "repo_id: $id" "repo_owner: $owner" "url: $url"
+            else
+                ___x_cmd_ui_tf false "Creating repo failure: $name."
+                return 1
+            fi
+            )
+        }
+    done
+}
+# EndSection

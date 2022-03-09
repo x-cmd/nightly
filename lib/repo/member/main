@@ -23,7 +23,7 @@ subcmd:
 
     "___x_cmd_gh_repo_member_$PARAM_SUBCMD" "$@"
 }
-
+# Section: List
 ___x_cmd_gh_repo_member_ls() {
     param:scope     "github/$O"
     param:dsl       '
@@ -31,6 +31,7 @@ type:
     Affiliation =   outside direct all
 options:
     --affiliation       "Filter collaborators returned by their affiliation."   <>:Affiliation="all"
+    --owner             "The owner of the repo needs to be updated"             <>=""
     --per_page          "Results per page"                                      <>=30
     --page              "Page number of the results to fetch."                  <>=1
     #1|--repo           "Repo name"                                             <>:repo
@@ -43,13 +44,16 @@ options:
         return 0
     fi
 }
+# EndSection
 
+# Section: Add & Rm
 ___x_cmd_gh_repo_member_add() {
     param:scope     "github/$O"
     param:dsl       '
 options:
     --repo          "Repo name"                                     <>:repo
     --permission    "The permission to grant the collaborator."     <>:permission=push
+    --owner         "The owner of the repo needs to be updated"     <>=""
     --permissions   "permissions"                                   <>=""
     #n              "Username list"                                 <>
 '
@@ -80,7 +84,8 @@ ___x_cmd_gh_repo_member_rm() {
     param:scope     "github/$O"
     param:dsl       '
 options:
-    --repo|-r       "Repo name"            <>:repo
+    --repo          "Repo name"                                     <>:repo
+    --owner         "The owner of the repo needs to be updated"     <>=""
     #n              "Username list"
 '
     param:run
@@ -101,3 +106,4 @@ options:
         fi
     done
 }
+# EndSection

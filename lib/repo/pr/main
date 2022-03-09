@@ -35,9 +35,10 @@ type:
     direction = desc asc
 options:
     --repo              "Repo name"                                         <>
-    --state             "state"                                             <>:state="open"
+    --owner             "The owner of the repo needs to be updated"         <>=""
     --head              "source branch. Format: [username:]<branch>"        <>=""
     --base              "target branch. Format: [username:]<branch>"        <>=""
+    --state             "state"                                             <>:state="open"
     --sort              "sort"                                              <>:sort="created"
     --direction         "direction"                                         <>:direction="desc"
 '
@@ -125,6 +126,7 @@ type:
     bool = true false
 options:
     --repo                  "Repo name"                                                     <>:repo
+    --owner                 "The owner of the repo needs to be updated"                     <>=""
     --title                 "pr title"                                                      <>
     --head                  "source branch. Format: [username:]<branch>"                    <>:name
     --base                  "target branch. Format: [username:]<branch>"                    <>:name

@@ -29,6 +29,7 @@ subcommand:
     config                                  "save, load, which"
     token                                   "set token"
     release                                 "manage release"
+    auth                                    "Authorize gh"
 '
     param:run
 
