@@ -39,6 +39,7 @@ type:
     Direction = desc asc
 options:
     --repo              "Repo name"                                         <>
+    --owner             "repo owner"                                        <>=""
     --state             "state"                                             <>:State="open"
     --head              "source branch. Format: [username:]<branch>"        <>=""
     --base              "target branch. Format: [username:]<branch>"        <>=""
@@ -137,6 +138,7 @@ type:
     Bool = true false
 options:
     --repo                  "Repo name"                                                     <>:RepoName
+    --owner                 "repo owner"                                                    <>=""
     --title                 "pr title"                                                      <>
     --head                  "source branch. Format: [username:]<branch>"                    <>:name
     --base                  "target branch. Format: [username:]<branch>"                    <>:name

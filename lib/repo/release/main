@@ -30,6 +30,7 @@ type:
     Direction = asc  desc
 options:
     --repo          "Repo name"             <>:RepoName
+    --owner         "repo owner"            <>=""
     --direction     "direction(asc,desc)"   <>:Direction="asc"
 '
     param:run
@@ -47,6 +48,7 @@ ___x_cmd_gt_repo_get_release_by_tag() {
 options:
     #1|--repo          "Repo name"             <>:RepoName
     #2|--tag           "tag name"              <>
+    --owner            "repo owner"            <>=""
 '
     param:run
     ___x_cmd_gt_param_init_owner_repo
@@ -62,6 +64,7 @@ ___x_cmd_gt_repo_release_create() {
     param:dsl    '
 options:
     #1|--repo           "Repo name"                 <>:RepoName
+    --owner             "repo owner"                <>=""
     --tag               "Please provide tag name"   <>
     --name              "Release name"              <>
     --body              "Release Description"       <>
@@ -136,6 +139,7 @@ ___x_cmd_gt_repo_release_latest() {
     param:dsl    '
 options:
     #1|--repo              "Repo name"               <>:RepoName
+    --owner                "repo owner"              <>=""
 '
     param:run
 

@@ -75,6 +75,8 @@ options:
     --affiliation   "affiliation"       <>:Group="owner"
     --sort          "sort"              <>:Sort="created"
     --direction     "direction"         <>:Direction="desc"
+    --page          "page"              <>:number=1
+    --per_page      "per_page"          <>:number=20
 '
     param:run
     if [ "$#" -gt 0 ]; then
@@ -85,7 +87,13 @@ options:
 
 # https://gitee.com/api/v5/swagger#/getV5Emails
 ___x_cmd_gt_user_email(){
-    param:void
+    param:scope     "github/$O"
+    param:dsl       '
+options:
+    --page          "page"             <>:number=1
+    --per_page      "per_page"         <>:number=20
+'
+    param:run
     if [ -t 1 ] && ___ui_table_json Id=.id Name=.name Owner=.owner.login Url=.html_url \
         -- "______x_cmd_gt_get_multi" "/v5/emails" ls "$@";then
         return 0
@@ -106,6 +114,8 @@ options:
     --page          "page"                                         <>:numbers=""
     --per_page      "per_page"                                     <>:numbers=""
 
+    --page          "page"                                         <>:number=1
+    --per_page      "per_page"                                     <>:number=20
     --labels        "labels"                                       <>=""
     --since         "since"                                        <>=""
     --schedule      "schedule"                                     <>=""

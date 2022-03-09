@@ -47,6 +47,8 @@ ___x_cmd_gt_enterprise_ls() {
 
 options:
     --admin      "list only managed enterprise"     <>:bool=false
+    --page       "page"                             <>:number=1
+    --per_page   "per_page"                         <>:number=20
 '
     param:run
     if [ "$#" -eq 0 ]; then
@@ -79,6 +81,8 @@ options:
     #1              "Please provide enterprise path"    <>
     --repo_type     "type"                              <>:Genre="all"
     --direct        "direct"                            <>:bool="false"
+    --page          "page"                              <>:number=1
+    --per_page      "per_page"                          <>:number=20
 '
     param:run
 

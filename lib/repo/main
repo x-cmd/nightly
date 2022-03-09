@@ -223,6 +223,8 @@ ___x_cmd_gt_repo_info() {
     param:dsl       '
 options:
     #1|--repo          "Repo or Path(owner/repo)"         <>:RepoName
+    --owner            "repo owner"                       <>=""
+
 '
     param:run
 
@@ -272,6 +274,8 @@ ___x_cmd_gt_repo_clear() {
     param:dsl       '
 options:
     #1|--repo          "Repo name"             <>:RepoName
+    --owner            "repo owner"            <>=""
+
 '
     param:run
 
@@ -299,6 +303,7 @@ ___x_cmd_gt_repo_review(){
     param:dsl       '
 options:
     #1|--repo             "Repo name"                   <>:RepoName
+    --owner               "repo owner"                  <>=""
     --assignees           "assignees username"          <>:assignees
     --testers             "testers usrename"            <>:testers
     --assignees_number    "number of reviewers"         <>:assignees_number="1"

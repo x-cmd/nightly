@@ -23,6 +23,7 @@ ___x_cmd_gt_repo_tag_ls() {
     param:dsl    '
 options:
     #1|--repo          "Repo name"                 <>:RepoName
+    --owner            "repo owner"                <>=""
 '
     param:run
 
@@ -43,6 +44,7 @@ ___x_cmd_gt_repo_tag_add() {
 options:
     --name          "tag name"                  <>
     --repo          "Repo name"                 <>:RepoName
+    --owner         "repo owner"                <>=""
     --refs          "starting point name"       <>="master"
     --msg           "tag message"               <>=""
 '

@@ -30,7 +30,9 @@ ___x_cmd_gt_org_ls() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
-    --admin      "admin"       <>:Bool=false
+    --admin         "admin"             <>:Bool=false
+    --page          "page"              <>:number=1
+    --per_page      "per_page"          <>:number=20
 '
     param:run
 
@@ -102,8 +104,10 @@ ___x_cmd_gt_org_repo_ls() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
-    --type      "type"                          <>="all"    = all private public
-    #1|--org    "Please provide organization"   <>:Address
+    --type          "type"                              <>="all"    = all private public
+    #1|--org        "Please provide organization"       <>:Address
+    --page          "page"                              <>:number=1
+    --per_page      "per_page"                          <>:number=20
 '
     param:run
     if ___ui_table_json Id=.id Name=.name public=.public OwnerName=.owner.name DefaultBranch=.default_branch \

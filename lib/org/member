@@ -32,8 +32,10 @@ ___x_cmd_gt_org_member_ls() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
-    --role          "role"                 <>:UserRole="all"
-    #1|--org        "org space address"    <>:Address
+    --role          "role"                  <>:UserRole="all"
+    #1|--org        "org space address"     <>:Address
+    --page          "page"                  <>:number=1
+    --per_page      "per_page"              <>:number=20
 '
     param:run
 

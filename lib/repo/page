@@ -27,6 +27,7 @@ ___x_cmd_gt_repo_page_info() {
     param:dsl       '
 options:
     --repo              "Repo name"                 <>:RepoNameName
+    --owner             "repo owner"                <>=""
 '
     param:run
 
@@ -43,6 +44,7 @@ ___x_cmd_gt_repo_page_build() {
     param:dsl       '
 options:
     --repo              "Repo name"                 <>:RepoNameName
+    --owner             "repo owner"                <>=""
 '
     param:run
 

@@ -117,10 +117,14 @@ options:
     --repo          "Repo name"                 <>
     --state         "issue state"               <>:State=all
     --labels        "labels"                    <>=""
+    --owner         "repo owner"                <>=""
+    --labels        "labels"                    <>=""
     --milestone     "milestone"                 <>=""
     --assignee      "assignee"                  <>=""
     --creator       "creator"                   <>=""
     --program       "program"                   <>=""
+    --page        "page"                        <>:number=1
+    --per_page    "per_page"                    <>:number=20
     --sort          "sort"                      <>="created"
     --direction     "direction"                 <>="desc"
     --number        "repo issue number"         <>=""
@@ -160,6 +164,8 @@ options:
     --sort          "sort(created,updated)"                        <>="created"
     --direction     "direction(asc、desc)"                         <>="desc"
     --org           "organization path"                            <>
+    --page          "page"                                         <>:number=1
+    --per_page      "per_page"                                     <>:number=20
 '
     param:run
 

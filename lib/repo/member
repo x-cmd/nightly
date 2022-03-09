@@ -29,7 +29,10 @@ ___x_cmd_gt_repo_member_ls() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
-    #1|--repo          "Repo name"         <>:RepoName
+    #1|--repo           "Repo name"         <>:RepoName
+    --owner             "repo owner"        <>=""
+    --page              "page"              <>:number=1
+    --per_page          "per_page"          <>:number=20
 '
     param:run
     ___x_cmd_gt_param_init_owner_repo
@@ -49,6 +52,7 @@ ___x_cmd_gt_repo_member_add() {
 options:
     --repo|-r           "Repo name or Path(owner/repo)"          <>:RepoNameName
     --permission|-p     "permission"                             <>:RepoNamePerm="push"
+    --owner             "repo owner"                             <>=""
     #n                  "Username list"                          <>
 '
     param:run
@@ -83,6 +87,7 @@ ___x_cmd_gt_repo_member_rm() {
     param:dsl       '
 options:
     --repo|-r       "Repo name or Path(owner/repo)"     <>:RepoName
+    --owner         "repo owner"                        <>=""
     #n              "Username list"
 '
     param:run
