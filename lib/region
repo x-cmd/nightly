@@ -1,5 +1,4 @@
 # shellcheck shell=sh disable=SC3043,SC2120
-# shellcheck disable=SC2120
 xrc ui/lib/getchar
 xrc awk
 

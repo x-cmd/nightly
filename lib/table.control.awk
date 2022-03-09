@@ -282,6 +282,7 @@ END {
         send_env( "___X_CMD_UI_TABLE_FINAL_COMMAND",    exit_get_cmd() )
         send_env( "___X_CMD_UI_TABLE_CURRENT_ROW",      _tmp_currow )
         send_env( "___X_CMD_UI_TABLE_CURRENT_COLUMN",   _tmp_curcol )
+        send_env( "___X_CMD_UI_TABLE_CUR_ITEM",         data[ _tmp_currow KSEP _tmp_curcol ] )
         send_env( "___X_CMD_UI_TABLE_CUR_LINE",         data_line[ _tmp_currow ] )
     }
 }

@@ -21,18 +21,18 @@ f1(){
     printf "%s\n" "___X_CMD_UI_TABLE_CUR_LINE: $___X_CMD_UI_TABLE_CUR_LINE"
 }
 data(){
-    # x json data
-    cat "./.x-cmd/dev/testcase/aaa.json"
+    x json data 10
+    # cat "./.x-cmd/dev/testcase/aaa.json"
 
 }
 
 f2(){
-    ___ui_table_json ID=.id NAME=.name Fullname=.full_name Login=.owner.login URL=.owner.html_url ProjectCreator=.project_creator -- data
-    # ___ui_table_json data NameSpace=.user.login Name=.user.name MarkName=.remark IsOutSourced=.outsourced Role=.role
+    ___ui_table_json ID=.id NAME=.name Fullname=.full_name Login=.owner.login URL=.owner.html_url ProjectCreator=.project_creator -- x json data
 
     printf "%s\n" "___X_CMD_UI_TABLE_FINAL_COMMAND: $___X_CMD_UI_TABLE_FINAL_COMMAND"
     printf "%s\n" "___X_CMD_UI_TABLE_CURRENT_ROW: $___X_CMD_UI_TABLE_CURRENT_ROW"
     printf "%s\n" "___X_CMD_UI_TABLE_CURRENT_COLUMN: $___X_CMD_UI_TABLE_CURRENT_COLUMN"
+    printf "%s\n" "___X_CMD_UI_TABLE_CUR_ITEM: $___X_CMD_UI_TABLE_CUR_ITEM"
     printf "%s\n" "___X_CMD_UI_TABLE_CUR_LINE: $___X_CMD_UI_TABLE_CUR_LINE"
 }
 f2
