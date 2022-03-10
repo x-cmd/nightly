@@ -34,13 +34,7 @@ ___x_cmd_gh_repo_ls() {
         owner_type="$(___x_cmd_gh_owner_type_query "$owner")"
     fi
 
-    if ___ui_table_json Id=.id Name=.name Owner=.owner.login Url=.html_url \
-        -- "___x_cmd_gh_${owner_type}_repo" ls "$@"; then
-        return 0
-    fi
-
-    ___x_cmd_ui_tf false "Please provide owner and owner_type"
-    return 1
+    ___x_cmd_gh_"${owner_type}"_repo ls "$@"
 }
 # EndSection
 
@@ -79,8 +73,8 @@ option:
     --description               "description"                                                           <>=""
     --homepage                  "homepage"                                                              <>=""
     --team_id                   "the id of the team that will be granted access to this repository"     <>=""
-    --gitignore_template        "The desired language or platform to apply to the .gitignore."          <>:Ignore=" "
-    --license_template          "The license keyword of the open source license for this repository."   <>:License=" "
+    --gitignore_template        "The desired language or platform to apply to the .gitignore."          <>:Ignore=""
+    --license_template          "The license keyword of the open source license for this repository."   <>:License=""
     --no_issues                 "Whether to disable issue"
     --no_projects               "Whether to disable has_projects"
     --no_wiki                   "Whether to disable wiki"
@@ -207,12 +201,12 @@ option:
         return 1
     fi
 
-    local tmp="{security_and_analysis:{}}"
-    xrc json
-    [ -n "$scanning" ] && ___x_cmd_json_put tmp.security_and_analysis.secret_scanning "{\"status\": \"$scanning\"}"
-    [ -n "$advanced_security" ] && ___x_cmd_json_put tmp.security_and_analysis.advanced_security "{\"status\": \"$advanced_security\"}"
-    [ -n "$secret_scanning_push_protection" ] && ___x_cmd_json_put tmp.security_and_analysis.secret_scanning_push_protection "{\"status\": \"$secret_scanning_push_protection\"}"
-    [ "$tmp" = "{security_and_analysis:{}}" ] && tmp=""
+    # local tmp="{security_and_analysis:{}}"
+    # xrc json
+    # [ -n "$scanning" ] && ___x_cmd_json_put tmp.security_and_analysis.secret_scanning "{\"status\": \"$scanning\"}"
+    # [ -n "$advanced_security" ] && ___x_cmd_json_put tmp.security_and_analysis.advanced_security "{\"status\": \"$advanced_security\"}"
+    # [ -n "$secret_scanning_push_protection" ] && ___x_cmd_json_put tmp.security_and_analysis.secret_scanning_push_protection "{\"status\": \"$secret_scanning_push_protection\"}"
+    # [ "$tmp" = "{security_and_analysis:{}}" ] && tmp=""
 
     ___x_cmd_gh_param_init_owner_repo
     local name
@@ -220,7 +214,7 @@ option:
         {
             ___x_cmd_gh_patch_json "/repos/${owner_repo}" private \
                 visibility="$access" description homepage team_id default_branch \
-                security_and_analysis="$tmp" has_issues has_wiki has_projects \
+                has_issues has_wiki has_projects \
                 allow_squash_merge allow_merge_commit allow_rebase_merge archived \
                 allow_auto_merge delete_branch_on_merge is_template allow_forking \
             | (

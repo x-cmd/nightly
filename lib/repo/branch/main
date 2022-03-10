@@ -1,0 +1,179 @@
+# shellcheck shell=sh
+# shellcheck disable=SC2039,3043
+___x_cmd_gh_repo_branch(){
+    param:dsl       '
+subcommand:
+    ls              "list member"
+    info            ""
+    rename          ""
+    add             "add member"
+    rm              "Remove member"
+    default         ""
+    protection      ""
+'
+    param:run
+
+    if [ -z "$PARAM_SUBCMD" ]; then
+        gh_log error "subcommand not found. show help."
+        return 0
+    fi
+
+    "___x_cmd_gh_repo_branch_$PARAM_SUBCMD" "$@"
+}
+
+# Section:list & info
+___x_cmd_gh_repo_branch_ls(){
+    param:scope     "github/$O"
+    param:dsl       '
+options:
+    #1|--repo       "repo name"                                 <>:RepoName
+    --owner         "repo owner name"                           <>=""
+    --per_page      "Results per page"                          <>=30
+    --page          "Page number of the results to fetch."      <>=1
+    --protected     "returns only protected branches."
+'
+    param:run
+
+    ___x_cmd_gh_param_init_owner_repo
+    if ___ui_table_json BranchName=.name Protected=.protected \
+        EnforcementLevel=.protection.required_status_checks.enforcement_level \
+        --  "___x_cmd_gh_get_multi" "/repos/${owner_repo}/branches" protected per_page page
+    then
+        return 0
+    fi
+    ___x_cmd_ui_tf false "get reppo ${owner_repo} branch list fail"
+    return 1
+}
+
+___x_cmd_gh_repo_branch_info(){
+    param:scope     "github/$O"
+    param:dsl       '
+options:
+    --repo          "repo name"                                 <>:RepoName
+    #1|--branch       "branch name"                               <>
+    --owner         "repo owner name"                           <>=""
+'
+    param:run
+
+    ___x_cmd_gh_param_init_owner_repo
+    ___x_cmd_gh_get_multi "/repos/${owner_repo}/branches/$branch" | (
+        ___x_cmd_git_json_query_rename Protected=.protected
+        if [ -n "$Protected" ]; then
+            ___x_cmd_ui_tf true "get reppo ${owner_repo} $branch branch info success" "Protected:$Protected"
+        else
+            ___x_cmd_ui_tf false "get reppo ${owner_repo} branch list fail"
+            return 1
+        fi
+    )
+}
+
+# EndSection
+
+# Section: rename & default
+___x_cmd_gh_repo_branch_rename(){
+    param:scope     "github/$O"
+    param:dsl       '
+options:
+    --repo          "repo name"                                 <>:RepoName
+    --branch        "branch name"                               <>
+    --owner         "repo owner name"                           <>=""
+    #1|--new_name   "branch new name"                           <>
+'
+    param:run
+
+    ___x_cmd_gh_param_init_owner_repo
+    ___x_cmd_gh_post_json "/repos/${owner_repo}/branches/$branch/rename" new_name | (
+        ___x_cmd_git_json_query_rename name=.name
+        if [ "$name" = "$new_name" ]; then
+            ___x_cmd_ui_tf true "branch renamed from $branch to $new_name successfully"
+        else
+            ___x_cmd_ui_tf false "${owner_repo} branch rename from $branch to $new_name failed"
+            return 1
+        fi
+    )
+}
+
+___x_cmd_gh_repo_branch_default(){
+    param:dsl       '
+options:
+    --repo                      "Need to update repo name"                                              <>:RepoName
+    --owner                     "The owner of the repo needs to be updated"                             <>=""
+    #1|--branch     "branch name"                               <>
+'
+    param:run
+    # TODO:source data
+    ___x_cmd_gh_repo_update --repo "$repo" --owner "$owner" --default_branch "$branch"
+}
+# EndSection
+
+___x_cmd_gh_repo_branch_protection(){
+    param:dsl       '
+subcommand:
+    info            ""
+    ls              ""
+    set             ""
+    rm              ""
+'
+    param:run
+    if [ -z "$PARAM_SUBCMD" ]; then
+        gh_log warn "Command Not Found. Show help."
+        ___x_cmd_gh_repo _param_help_doc
+        return 1
+    fi
+
+    "___x_cmd_gh_repo_${PARAM_SUBCMD}" "$@"
+}
+
+# Section:protection
+___x_cmd_gh_repo_branch_protection_ls(){
+    ___x_cmd_gh_repo_branch_ls "$@" --protected
+}
+
+___x_cmd_gh_repo_branch_protection_info(){
+    param:dsl       '
+options:
+    --repo          "repo name"                                 <>:RepoName
+    #1|--branch     "branch name"                               <>
+    --owner         "repo owner name"                           <>=""
+'
+    param:run
+
+    ___x_cmd_gh_param_init_owner_repo
+    ___x_cmd_gh_get "/repos/${owner_repo}/branches/${branch}/protection" | (
+    ___x_cmd_git_json_query_rename admins=.enforce_admins.enabled \
+        deletions=.allow_deletions.enabled linear=.required_linear_history.enabled \
+        pushes=.allow_force_pushes.enabled signatures=.required_signatures.enabled
+        if [ -n "$admins" ]; then
+            ___x_cmd_ui_tf true "protection branch $branch info" "enforce_admins:$admins" \
+                "allow_deletions:$deletions" "required_linear_history:$linear" "allow_force_pushes:$pushes" \
+                 "required_signatures:$signatures"
+        else
+            ___x_cmd_ui_tf false "protection branch $branch info failed"
+            return 1
+        fi
+    )
+}
+
+___x_cmd_gh_repo_branch_protection_set(){
+    #TODO: wait json，Data contains Obj
+    :
+}
+
+___x_cmd_gh_repo_branch_protection_rm(){
+    param:dsl       '
+options:
+    --repo          "repo name"                                 <>:RepoName
+    #1|--branch     "branch name"                               <>
+    --owner         "repo owner name"                           <>=""
+'
+    param:run
+
+    ___x_cmd_gh_param_init_owner_repo
+    if ___x_cmd_gh_delete "/repos/${owner_repo}/branches/${branch}/protection"; then
+        ___x_cmd_ui_tf  true "del ${branch} branch protection success"
+    else
+        ___x_cmd_ui_tf false "del ${branch} branch protection fail"
+        return 1
+    fi
+}
+# EndSection

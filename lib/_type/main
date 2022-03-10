@@ -15,10 +15,10 @@ param_type      github     RepoPath             "=~"    "[-A-Za-z0-9_/]+"      #
 param_type      github     RepoName             "=~"    "[-A-Za-z0-9_]+"
 param_type      github     NatureNumber         "=~"    "[0-9]+"
 param_type      github     Address              "=~"    "[-A-Za-z0-9_]+|https?://.+"
-param_type      github     Ignore            =   <<A
+param_type      github     Ignore               -   <<A
 $(xrc cat gh/lib/_type/ignore.txt)
 A
-param_type      github     License           =   <<A
+param_type      github     License              -   <<A
 $(xrc cat gh/lib/_type/license.txt)
 A
 
