@@ -207,7 +207,7 @@ function consumer_item() {
         ctrl_rstate_init( CURRENT_COLUMN, 1, data_col_num )
         data_len -= 1
         model_generate()
-
+        view()
         DATA_MODE = DATA_MODE_CTRL
         return
     } else if ($0 == "\002") {

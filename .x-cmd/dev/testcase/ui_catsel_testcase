@@ -1,0 +1,10 @@
+#!/bin/sh
+
+. ./lib/app/catsel
+f1(){
+    ___x_cmd_ui_catsel
+    echo "___X_CMD_UI_CATSEL_FINAL_COMMAND:" "$___X_CMD_UI_CATSEL_FINAL_COMMAND"
+    echo "___X_CMD_UI_CATSEL_CURRENT_ITEM:" "$___X_CMD_UI_CATSEL_CURRENT_ITEM"
+}
+
+f1

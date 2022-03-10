@@ -124,12 +124,8 @@ function model_generate(    _filter,    i, l){
 BEGIN {
     ctrl_sw_init( FILTER_EDIT, false )
     ctrl_sw_init( FIND_EDIT, false )
-    if ( SELECT_MULTIPLE_STATE == true ) {
-        ctrl_sw_init( MULTIPLE_EDIT, true )
-        IS_MULTIPLE_SELECT = true
-    } else {
-        ctrl_sw_init( MULTIPLE_EDIT, false )
-    }
+    if ( SELECT_MULTIPLE_STATE == true ) ctrl_sw_init( MULTIPLE_EDIT, true )
+    else ctrl_sw_init( MULTIPLE_EDIT, false )
 }
 
 function handle_ctrl_in_filter_state(char_type, char_value){
@@ -179,7 +175,7 @@ function handle_ctrl_in_normal_state(char_type, char_value) {
     exit_if_detected( char_value, ",q," )
     if (char_type == "ascii-space") {
         (ctrl_sw_get( MULTIPLE_EDIT ) == false) ? ctrl_sw_toggle( MULTIPLE_EDIT ) : exit_with_elegant( char_value )
-        IS_MULTIPLE_SELECT = true
+        SELECT_MULTIPLE_STATE = true
         return
     }
     if (char_value == "/")                                  return ctrl_sw_toggle( FIND_EDIT )    # find
@@ -262,7 +258,7 @@ NR>2 {
 
 END {
     if ( exit_is_with_cmd() == true ) {
-        if (IS_MULTIPLE_SELECT == true) {
+        if (SELECT_MULTIPLE_STATE == true) {
             for (i=1; i<=data_len; ++ i) {
                 if ( IS_SELECTED_ITEM[i] == true ) {
                     _item_idx = model[i]

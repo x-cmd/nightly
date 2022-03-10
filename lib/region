@@ -184,9 +184,21 @@ ___x_cmd_ui_region_run(){
 ___x_cmd_ui_region___update_with_keyboard_mainloop(){
     local fun="${1:?Provide handler}"; shift
 
-    while ___x_cmd_ui_getchar; do
-        "$fun" "$@" || break
-    done
+    {
+        ___x_cmd_pidofsubshell
+
+        printf "R:%s:%s:%s\n" "1" "$COLUMNS" "$LINES"
+        while ___x_cmd_ui_getchar; do
+            printf "C:%s:%s\n" "${___X_CMD_UI_GETCHAR_TYPE}" "${___X_CMD_UI_GETCHAR_CHAR}" || break
+        done
+    } | {
+        local PID_OF_UPSUBSHELL
+        read -r PID_OF_UPSUBSHELL
+
+        "$fun" "$@"
+
+        kill -SIGPIPE "$PID_OF_UPSUBSHELL"
+    }
 }
 ___x_cmd_ui_region_update_with_keyboard(){
     ___x_cmd_ui_region_run ___x_cmd_ui_region___update_with_keyboard_mainloop "$@"
