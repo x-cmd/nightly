@@ -8,6 +8,7 @@ subcmd:
     create          "create repo"
     ls              "list repo of owner"
     info            "show detailed information of repo"
+    update          "setup repo configure"
     rm              "remove repo"
     clear           "clear repo"
     issue           "get repo issue"
@@ -57,7 +58,7 @@ option:
 
     local has_issues="${no_issues:+false}";      has_issues="${has_issues:-true}"
     local has_wiki="${no_wiki:+false}";          has_wiki="${has_wiki:-true}"
-    local can_comment="${no_comment:+false}";    can_comment="${can_domment:-true}"
+    local can_comment="${no_comment:+false}";    can_comment="${can_comment:-true}"
     local auto_init="${no_auto_init:+false}";    auto_init="${auto_init:-true}"
 
     [ $# -eq 0 ] && gt_log error "Repo name is empty" && return 1
@@ -114,7 +115,7 @@ option:
 
     local has_issues="${no_issues:+false}";      has_issues="${has_issues:-true}"
     local has_wiki="${no_wiki:+false}";          has_wiki="${has_wiki:-true}"
-    local can_comment="${no_comment:+false}";    can_comment="${can_domment:-true}"
+    local can_comment="${no_comment:+false}";    can_comment="${can_comment:-true}"
     local auto_init="${no_auto_init:+false}";    auto_init="${auto_init:-true}"
 
     # TODO: owner may be personal
@@ -169,7 +170,7 @@ option:
     esac
     local has_issues="${no_issues:+false}";      has_issues="${has_issues:-true}"
     local has_wiki="${no_wiki:+false}";          has_wiki="${has_wiki:-true}"
-    local can_comment="${no_comment:+false}";    can_comment="${can_domment:-true}"
+    local can_comment="${no_comment:+false}";    can_comment="${can_comment:-true}"
     local auto_init="${no_auto_init:+false}";    auto_init="${auto_init:-true}"
 
     outsourced=${outsourced:-false}
@@ -206,13 +207,68 @@ ___x_cmd_gt_repo_ls() {
         owner_type="$(______x_cmd_gt_owner_type_query "$owner")"
     fi
 
-    if ___ui_table_json Id=.id Name=.name Owner=.owner.login Url=.html_url \
-        -- "___x_cmd_gt_${owner_type}_repo" ls "$@"; then
-        return 0
-    fi
+    ___x_cmd_gt_"${owner_type}"_repo ls "$@"
+}
+# EndSection
 
-    gt_log error "Please provide owner and owner_type"
-    return 1
+# Section: update
+# shellcheck disable=SC2154,SC2034
+___x_cmd_gt_repo_update() {
+    param:scope     "gitee/$O"
+    param:dsl       '
+type:
+    Access  =   private public
+options:
+    #1|--repo               "Repo or Path(owner/repo)"         <>:RepoName
+    --owner                 "repo owner"                       <>=""
+    --name                  "repo name"                        <>=
+
+    --access                "private,public"                   <>:Access
+    --description           "repo description"                 <>=""
+    --homepage              "homepage"                         <>=""
+    -p|--path               "repo path"                        <>:url_type=""
+    --default_branch        "repo default branch"              <>=""
+    --no_issues             "Provide issue"
+    --no_wiki               "Provide wiki"
+    --no_comment            "Provide can comment"
+    --no_security_hole      "Provide issue security"
+    --no_pull_requests      "Provide pull request"
+    --no_online_edit        "Provide online edit"
+    --no_lightweight_pr     "Provide lightweight pr"
+'
+    param:run
+
+    local private
+    case "$access" in
+        public)     private=false ;;
+        private)    private=true ;;
+    esac
+
+    local has_issues="${no_issues:+false}";                      has_issues="${has_issues:-true}"
+    local has_wiki="${no_wiki:+false}";                          has_wiki="${has_wiki:-true}"
+    local can_comment="${no_comment:+false}";                    can_comment="${can_comment:-true}"
+    local security_hole_enabled="${no_security_hole:+false}";    security_hole_enabled="${security_hole_enabled:-true}"
+    local pull_requests_enabled="${no_pull_requests:+false}";    pull_requests_enabled="${pull_requests_enabled:-true}"
+    local online_edit_enabled="${no_online_edit:+false}";        online_edit_enabled="${online_edit_enabled:-true}"
+    local lightweight_pr_enabled="${no_lightweight_pr:+false}";  lightweight_pr_enabled="${lightweight_pr_enabled:-true}"
+
+    [ $# -eq 0 ] && gt_log error "Repo name is empty" && return 1
+    local name
+    for name in "$@"; do
+        ______x_cmd_gt_param_normalize_repo "$i"
+        ______x_cmd_gt_patch_json "/v5/repos/${owner_repo}" name private description \
+            homepage path default_branch has_issues has_wiki can_comment security_hole_enabled \
+            pull_requests_enabled online_edit_enabled lightweight_pr_enabled \
+        | (
+            ___x_cmd_git_json_query_rename url=.html_url
+            if [ -n "$url" ]; then
+                ___x_cmd_ui_tf true     "Update repo $name successfully" "url: $url"
+            else
+                ___x_cmd_ui_tf false    "Update repo failure: $name."
+                return 1
+            fi
+        )
+    done
 }
 # EndSection
 

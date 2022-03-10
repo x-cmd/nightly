@@ -1,5 +1,6 @@
-Actionscript   
-Ada 
+Actionscript
+Ada
+
 Agda
 Android
 Anjuta
