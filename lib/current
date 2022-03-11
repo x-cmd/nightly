@@ -5,8 +5,8 @@ ___x_cmd_gt_current(){
     param:dsl       '
 subcmd:
     repo        "Save the config in memory into file"
-    owner       "get current owner"
-    type        "get current owner type"
+    owner       "Get current owner"
+    type        "Get current owner type"
 '
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then

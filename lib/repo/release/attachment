@@ -1,12 +1,13 @@
-
+# shellcheck shell=sh
+# shellcheck disable=SC2039,3043
 # Section : attachment
 
 ___x_cmd_gt_repo_release_attachment(){
     param:dsl    <<A
 subcmd:
-    ls              "list release's attachment"
-    add             "upload attachment"
-    rm              "delete attachment"
+    ls              "List release's attachment"
+    add             "Upload attachment"
+    rm              "Remove attachment"
 A
 
     if [ -z "$PARAM_SUBCMD" ]; then
@@ -48,7 +49,7 @@ options:
 }
 
 # Delete the file in attachment list
-___x_cmd_gt_repo_release_attachment_del() {
+___x_cmd_gt_repo_release_attachment_rm() {
 
     local O="${O:-GITEE_DEFAULT}"
 

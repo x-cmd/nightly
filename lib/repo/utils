@@ -61,8 +61,8 @@ ___x_cmd_gt_repo_fork() {
     param:scope    "gitee/$O"
     param:dsl       '
 options:
-    --repo              "Repo name"                 <>:RepoName
-    --organization=""   "Provide organization"      <>:org
+    --repo              "Provide owner name and repo name.(default:the current user repo)"   <>:RepoName
+    --organization=""   "Provide organization"                                               <>:org
 '
     param:run
 

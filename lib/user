@@ -10,9 +10,9 @@ ___x_cmd_gt_user(){
 subcmd:
     info        "Show information"
     repo        "List all repos"
-    email       "get user email"
+    email       "Show user email"
     issue       "List all issues"
-    key         "key management"
+    key         "user key management"
 '
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then

@@ -1,0 +1,4 @@
+# shellcheck shell=sh
+# shellcheck disable=SC2039,3043
+# @see: https://gitee.com/api/v8/swagger#/postEnterpriseIdGroups
+

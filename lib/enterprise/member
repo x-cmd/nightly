@@ -11,10 +11,10 @@ ___x_cmd_gt_enterprise_member(){
     param:dsl       '
 subcmd:
     ls              "list member"
-    user            "get member user info"
-    add             "add member"
-    rm              "remove member"
-    access          "Change the member access"
+    user            "Show member user info"
+    add             "Add member"
+    rm              "Remove member"
+    access          "Setup the member access"
 '
     param:run
 

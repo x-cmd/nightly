@@ -4,8 +4,8 @@
 ___x_cmd_gt_repo_tag(){
     param:dsl    '
 subcmd:
-    ls              "list tag"
-    add             "add tag"
+    ls              "List repo tag"
+    add             "Add repo tag"
 '
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
@@ -22,8 +22,7 @@ ___x_cmd_gt_repo_tag_ls() {
     param:scope     "gitee/$O"
     param:dsl    '
 options:
-    #1|--repo          "Repo name"                 <>:RepoName
-    --owner            "repo owner"                <>=""
+    #1|--repo          "Provide owner name and repo name.(default:the current user repo)"   <>:RepoName
 '
     param:run
 
@@ -42,11 +41,10 @@ ___x_cmd_gt_repo_tag_add() {
     param:scope     "gitee/$O"
     param:dsl    '
 options:
-    --name          "tag name"                  <>
-    --repo          "Repo name"                 <>:RepoName
-    --owner         "repo owner"                <>=""
-    --refs          "starting point name"       <>="master"
-    --msg           "tag message"               <>=""
+    --name          "tag name"                                                           <>
+    --repo          "Provide owner name and repo name.(default:the current user repo)"   <>:RepoName
+    --refs          "starting point name"                                                <>="master"
+    --msg           "tag message"                                                        <>=""
 '
     param:run
     ___x_cmd_gt_param_init_owner_repo

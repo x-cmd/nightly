@@ -5,14 +5,15 @@ ___x_cmd_gt_repo(){
     param:scope     "gitee/$O"
     param:dsl       '
 subcmd:
-    create          "create repo"
-    ls              "list repo of owner"
-    info            "show detailed information of repo"
-    update          "setup repo configure"
-    rm              "remove repo"
-    clear           "clear repo"
-    issue           "get repo issue"
-    review          "setup review repo configure"
+    create          "Create repo"
+    ls              "List repo of owner"
+    info            "Show detailed information of repo"
+    update          "Setup repo configure"
+    rm              "Remove repo"
+    clear           "Clear repo"
+    review          "Setup review repo configure"
+    issue           "List repo issue or Show the repo issue info"
+    branch          "repo branch management"
 '
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
@@ -207,7 +208,12 @@ ___x_cmd_gt_repo_ls() {
         owner_type="$(______x_cmd_gt_owner_type_query "$owner")"
     fi
 
-    ___x_cmd_gt_"${owner_type}"_repo ls "$@"
+    if ___ui_table_json Id=.id Name=.name Owner=.owner.login Url=.html_url \
+        -- "___x_cmd_gt_${owner_type}_repo" ls "$@"; then
+        return 0
+    fi
+    gt_log error "Couldn't find any data"
+    return 1
 }
 # EndSection
 
@@ -219,15 +225,14 @@ ___x_cmd_gt_repo_update() {
 type:
     Access  =   private public
 options:
-    #1|--repo               "Repo or Path(owner/repo)"         <>:RepoName
-    --owner                 "repo owner"                       <>=""
-    --name                  "repo name"                        <>=
+    #1|--repo               "Provide owner name and repo name.(default:the current user repo)"      <>:RepoName
+    --name                  "repo name"                                                             <>=""
 
-    --access                "private,public"                   <>:Access
-    --description           "repo description"                 <>=""
-    --homepage              "homepage"                         <>=""
-    -p|--path               "repo path"                        <>:url_type=""
-    --default_branch        "repo default branch"              <>=""
+    --access                "private,public"                                                        <>:Access=private
+    --description           "repo description"                                                      <>=""
+    --homepage              "homepage"                                                              <>=""
+    -p|--path               "repo path"                                                             <>:url_type=""
+    --default_branch        "repo default branch"                                                   <>=""
     --no_issues             "Provide issue"
     --no_wiki               "Provide wiki"
     --no_comment            "Provide can comment"
@@ -243,6 +248,7 @@ options:
         public)     private=false ;;
         private)    private=true ;;
     esac
+    [ -z "$name" ] && name=${repo##*/}
 
     local has_issues="${no_issues:+false}";                      has_issues="${has_issues:-true}"
     local has_wiki="${no_wiki:+false}";                          has_wiki="${has_wiki:-true}"
@@ -253,22 +259,19 @@ options:
     local lightweight_pr_enabled="${no_lightweight_pr:+false}";  lightweight_pr_enabled="${lightweight_pr_enabled:-true}"
 
     [ $# -eq 0 ] && gt_log error "Repo name is empty" && return 1
-    local name
-    for name in "$@"; do
-        ______x_cmd_gt_param_normalize_repo "$i"
-        ______x_cmd_gt_patch_json "/v5/repos/${owner_repo}" name private description \
-            homepage path default_branch has_issues has_wiki can_comment security_hole_enabled \
-            pull_requests_enabled online_edit_enabled lightweight_pr_enabled \
-        | (
-            ___x_cmd_git_json_query_rename url=.html_url
-            if [ -n "$url" ]; then
-                ___x_cmd_ui_tf true     "Update repo $name successfully" "url: $url"
-            else
-                ___x_cmd_ui_tf false    "Update repo failure: $name."
-                return 1
-            fi
-        )
-    done
+    ___x_cmd_gt_param_init_owner_repo
+    ______x_cmd_gt_patch_json "/v5/repos/${owner_repo}" name private description \
+        homepage path default_branch has_issues has_wiki can_comment security_hole_enabled \
+        pull_requests_enabled online_edit_enabled lightweight_pr_enabled \
+    | (
+        ___x_cmd_git_json_query_rename url=.html_url
+        if [ -n "$url" ]; then
+            ___x_cmd_ui_tf true     "Update $name successfully" "url: $url"
+        else
+            ___x_cmd_ui_tf false    "Update failure: $name."
+            return 1
+        fi
+    )
 }
 # EndSection
 
@@ -278,9 +281,7 @@ ___x_cmd_gt_repo_info() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
-    #1|--repo          "Repo or Path(owner/repo)"         <>:RepoName
-    --owner            "repo owner"                       <>=""
-
+    #1|--repo          "Provide owner name and repo name.(default:the current user repo)"   <>:RepoName
 '
     param:run
 
@@ -329,9 +330,7 @@ ___x_cmd_gt_repo_clear() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:
-    #1|--repo          "Repo name"             <>:RepoName
-    --owner            "repo owner"            <>=""
-
+    #1|--repo          "Provide owner name and repo name.(default:the current user repo)"   <>:RepoName
 '
     param:run
 
@@ -358,12 +357,11 @@ ___x_cmd_gt_repo_review(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
-    #1|--repo             "Repo name"                   <>:RepoName
-    --owner               "repo owner"                  <>=""
-    --assignees           "assignees username"          <>:assignees
-    --testers             "testers usrename"            <>:testers
-    --assignees_number    "number of reviewers"         <>:assignees_number="1"
-    --testers_number      "number of people tested"     <>:testers_number="1"
+    #1|--repo             "Provide owner name and repo name.(default:the current user repo)"   <>:RepoName
+    --assignees           "assignees username"                                                 <>:assignees
+    --testers             "testers usrename"                                                   <>:testers
+    --assignees_number    "number of reviewers"                                                <>:assignees_number="1"
+    --testers_number      "number of people tested"                                            <>:testers_number="1"
 '
     param:run
     ___x_cmd_gt_param_init_owner_repo

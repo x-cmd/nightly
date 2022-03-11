@@ -9,11 +9,11 @@ ___x_cmd_gt_org(){
     param:dsl       '
 subcmd:
     ls                      "Show org information or List all org"
-    create                  "create org"
+    create                  "Create org"
     repo                    "List all repos"
-    quit                    "quit org"
+    quit                    "Quit org"
     issue                   "List all issues"
-    member                  "member management"
+    member                  "org member management"
 '
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then

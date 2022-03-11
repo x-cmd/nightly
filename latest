@@ -20,7 +20,7 @@ ____x_cmd_gt_xrc(){
 }
 
 ____x_cmd_gt_xrc utils config token user current issue enterprise/main enterprise/member org/main org/member \
-    repo/utils repo/main repo/pr/main repo/release/main repo/member repo/tag repo/page
+    repo/utils repo/main repo/pr/main repo/release/main repo/member repo/tag repo/page repo/branch
 
 
 # define lazy loader TODO: advise fix it
@@ -62,8 +62,8 @@ subcmd:
     fi
 
     case "${PARAM_SUBCMD}" in
-        pr|release|member|tag)                                  "___x_cmd_gt_repo_${PARAM_SUBCMD}"   "$@"        ;;
-        *)                                                      "___x_cmd_gt_${PARAM_SUBCMD}"  "$@"              ;;
+        pr|release|member|tag)               "___x_cmd_gt_repo_${PARAM_SUBCMD}"   "$@"        ;;
+        *)                                   "___x_cmd_gt_${PARAM_SUBCMD}"  "$@"              ;;
     esac
 }
 

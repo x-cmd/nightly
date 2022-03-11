@@ -12,9 +12,9 @@
 ___x_cmd_gt_org_member(){
     param:dsl       '
 subcmd:
-    ls              "list member"
-    user            "get org member user info"
-    add             "add member"
+    ls              "List member"
+    user            "Show org member user info"
+    add             "Add member"
     del             "Remove member"
 '
     param:run

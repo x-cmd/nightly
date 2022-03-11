@@ -4,12 +4,12 @@
 ___x_cmd_gt_repo_release(){
     param:dsl    <<A
 subcmd:
-    ls              "list repo's release"
-    create          "create repo release"
-    update          "update release information"
-    delete          "remove repo release"
-    latest          "get latest release"
-    info            "show detailed information of repo"
+    ls              "List repo's release"
+    create          "Create repo release"
+    update          "Update release information"
+    rm              "Remove repo release"
+    latest          "Show latest release"
+    info            "Show detailed information of repo"
     attachment      "attachment management"
 A
     param:run
@@ -29,9 +29,8 @@ ___x_cmd_gt_repo_release_ls() {
 type:
     Direction = asc  desc
 options:
-    --repo          "Repo name"             <>:RepoName
-    --owner         "repo owner"            <>=""
-    --direction     "direction(asc,desc)"   <>:Direction="asc"
+    --repo          "Provide owner name and repo name.(default:the current user repo)"   <>:RepoName
+    --direction     "direction(asc,desc)"                                                <>:Direction="asc"
 '
     param:run
 
@@ -46,9 +45,8 @@ ___x_cmd_gt_repo_get_release_by_tag() {
     param:scope     "gitee/$O"
     param:dsl    '
 options:
-    #1|--repo          "Repo name"             <>:RepoName
-    #2|--tag           "tag name"              <>
-    --owner            "repo owner"            <>=""
+    #1|--repo          "Provide owner name and repo name.(default:the current user repo)"   <>:RepoName
+    #2|--tag           "tag name"                                                           <>
 '
     param:run
     ___x_cmd_gt_param_init_owner_repo
@@ -63,13 +61,12 @@ ___x_cmd_gt_repo_release_create() {
     param:scope  "gitee/$O"
     param:dsl    '
 options:
-    #1|--repo           "Repo name"                 <>:RepoName
-    --owner             "repo owner"                <>=""
-    --tag               "Please provide tag name"   <>
-    --name              "Release name"              <>
-    --body              "Release Description"       <>
-    --prerelease        "Is pre-release version"    <>:bool="false"
-    --target_commitish  "Default is master"         <>:name="master"
+    #1|--repo           "Provide owner name and repo name.(default:the current user repo)"   <>:RepoName
+    --tag               "Please provide tag name"                                            <>
+    --name              "Release name"                                                       <>
+    --body              "Release Description"                                                <>
+    --prerelease        "Is pre-release version"                                             <>:bool="false"
+    --target_commitish  "Default is master"                                                  <>:name="master"
 '
     param:run
 
@@ -119,7 +116,7 @@ options:
 }
 
 # TODO:https://gitee.com/api/v5/swagger#/deleteV5ReposOwnerRepoReleasesId
-___x_cmd_gt_repo_release_delete() {
+___x_cmd_gt_repo_release_rm() {
     local O="${O:-GITEE_DEFAULT}"
     param:scope  "gitee/$O"
     param:dsl    '
@@ -138,8 +135,7 @@ ___x_cmd_gt_repo_release_latest() {
     param:scope     "gitee/$O"
     param:dsl    '
 options:
-    #1|--repo              "Repo name"               <>:RepoName
-    --owner                "repo owner"              <>=""
+    #1|--repo   "Provide owner name and repo name.(default:the current user repo)"   <>:RepoName
 '
     param:run
 

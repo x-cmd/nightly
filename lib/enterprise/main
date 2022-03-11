@@ -27,8 +27,8 @@ subcmd:
 ___x_cmd_gt_enterprise_repo(){
     param:dsl       '
 subcmd:
-    ls          "list repo"
-    create      "enterprise repo create"
+    ls          "List enterprise repo"
+    create      "Create enterprise repo"
 '
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then

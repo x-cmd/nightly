@@ -5,15 +5,15 @@
 ___x_cmd_gt_repo_pr(){
     param:dsl       '
 subcmd:
-    ls              "list pull requests"
-    info            "pull request info"
-    log             "pull requests log"
-    commit          "get pull requests commit"
+    ls              "List pull requests"
+    log             "List pull requests log"
+    commit          "List pull requests commit"
+    info            "Show pull request info"
     view            "open pull request in browser"
-    create          "create pull request"
-    update          "update pull requests"
-    merge           "merge pull requests"
-    assign          "assign request to somebody"
+    create          "Create pull request"
+    update          "Update pull requests"
+    merge           "Merge pull requests"
+    assign          "Assign request to somebody"
     testers         "Designation pull requests testers"
 '
     param:run
@@ -38,16 +38,15 @@ type:
     Sort  = created updated popularity long-running
     Direction = desc asc
 options:
-    --repo              "Repo name"                                         <>
-    --owner             "repo owner"                                        <>=""
-    --state             "state"                                             <>:State="open"
-    --head              "source branch. Format: [username:]<branch>"        <>=""
-    --base              "target branch. Format: [username:]<branch>"        <>=""
-    --since             "since"                                             <>=""
-    --sort              "sort"                                              <>:Sort="created"
-    --direction         "direction"                                         <>:Direction="desc"
-    --milestone_number  "milestone id"                                      <>:numbers=""
-    --labels            "labels"                                            <>=""
+    --repo              "Provide owner name and repo name.(default:the current user repo)"   <>:RepoName
+    --state             "state"                                                              <>:State="open"
+    --head              "source branch. Format: [username:]<branch>"                         <>=""
+    --base              "target branch. Format: [username:]<branch>"                         <>=""
+    --since             "since"                                                              <>=""
+    --sort              "sort"                                                               <>:Sort="created"
+    --direction         "direction"                                                          <>:Direction="desc"
+    --milestone_number  "milestone id"                                                       <>:numbers=""
+    --labels            "labels"                                                             <>=""
 '
     param:run
 
@@ -137,20 +136,19 @@ ___x_cmd_gt_repo_pr_create() {
 type:
     Bool = true false
 options:
-    --repo                  "Repo name"                                                     <>:RepoName
-    --owner                 "repo owner"                                                    <>=""
-    --title                 "pr title"                                                      <>
-    --head                  "source branch. Format: [username:]<branch>"                    <>:name
-    --base                  "target branch. Format: [username:]<branch>"                    <>:name
-    --body                  "pull request content"                                          <>=""
-    --milestone_number      "milestone id"                                                  <>:numbers=""
-    --labels                "labels"                                                        <>=""
-    --issue                 "issue id"                                                      <>:numbers=""
-    --assignees             "reviewer username list. Format: <username>[,<username>]"       <>:name=""
-    --testers               "tester username list. Format: <username>[,<username>]"         <>:name=""
-    --assignees_number      "minimum number of reviewers"                                   <>:numbers=""
-    --testers_number        "minimum test number"                                           <>:numbers=""
-    --prune_source_branch   "prune_source_branch"                                           <>:Bool=false
+    --repo                  "Provide owner name and repo name.(default:the current user repo)"   <>:RepoName
+    --title                 "pr title"                                                           <>
+    --head                  "source branch. Format: [username:]<branch>"                         <>:name
+    --base                  "target branch. Format: [username:]<branch>"                         <>:name
+    --body                  "pull request content"                                               <>=""
+    --milestone_number      "milestone id"                                                       <>:numbers=""
+    --labels                "labels"                                                             <>=""
+    --issue                 "issue id"                                                           <>:numbers=""
+    --assignees             "reviewer username list. Format: <username>[,<username>]"            <>:name=""
+    --testers               "tester username list. Format: <username>[,<username>]"              <>:name=""
+    --assignees_number      "minimum number of reviewers"                                        <>:numbers=""
+    --testers_number        "minimum test number"                                                <>:numbers=""
+    --prune_source_branch   "prune_source_branch"                                                <>:Bool=false
 '
     param:run
 
