@@ -43,8 +43,7 @@ ___x_cmd_gh_repo_info() {
     param:scope     "github/$O"
     param:dsl       '
 options:
-    --owner         "The owner of the repo needs to be updated"     <>=""
-    #1|--repo       "Repo name"                                     <>:repo
+    #1|--repo    "Provide owner name and repo name.(default:the current user repo)"      <>:repo
 '
     param:run
 
@@ -161,8 +160,7 @@ type:
     Access  =   private public
 option:
     --access                    "private,public"                                                        <>:Access=private
-    --repo                      "Need to update repo name"                                              <>:RepoName
-    --owner                     "The owner of the repo needs to be updated"                             <>=""
+    --repo                      "Provide owner name and repo name.(default:the current user repo)"      <>:repo
     --description               "description"                                                           <>=""
     --homepage                  "homepage"                                                              <>=""
     --team_id                   "the id of the team that will be granted access to this repository"     <>=""

@@ -32,9 +32,8 @@ ___x_cmd_gh_repo_release_ls() {
 type:
     direction = asc  desc
 options:
-    --repo          "Repo name"                                     <>:repo
-    --owner         "The owner of the repo needs to be updated"     <>=""
-    --direction     "direction(asc,desc)"                           <>:direction="asc"
+    --repo          "Provide owner name and repo name.(default:the current user repo)"  <>:repo
+    --direction     "direction(asc,desc)"                                               <>:direction="asc"
 '
     param:run
 
@@ -47,9 +46,8 @@ ___x_cmd_gh_repo_get_release_by_tag() {
     param:scope     "github/$O"
     param:dsl    '
 options:
-    --owner         "The owner of the repo needs to be updated"     <>=""
-    #1|--repo       "Repo name"                                     <>:repo
-    #2|--tag        "tag name"                                      <>
+    #1|--repo   "Provide owner name and repo name.(default:the current user repo)"  <>:repo
+    #2|--tag    "tag name"                                                          <>
 '
     param:run
     ___x_cmd_gh_param_init_owner_repo
@@ -63,14 +61,13 @@ ___x_cmd_gh_repo_release_create() {
     param:scope  "github/$O"
     param:dsl    '
 options:
-    --tag               "Please provide tag name"                       <>
-    --name              "Release name"                                  <>
-    --body              "Release Description"                           <>
-    --owner             "The owner of the repo needs to be updated"     <>=""
-    --target_commitish  "Default is master"                             <>:name="master"
-    --draft             ”create a draft release“                        <>:Bool="false"
-    --prerelease        "Is release version"                            <>:Bool="false"
-    #1|--repo           "Repo name"                                     <>:repo
+    --tag               "Please provide tag name"                                           <>
+    --name              "Release name"                                                      <>
+    --body              "Release Description"                                               <>
+    --target_commitish  "Default is master"                                                 <>:name="master"
+    --draft             ”create a draft release“                                            <>:Bool="false"
+    --prerelease        "Is release version"                                                <>:Bool="false"
+    #1|--repo           "Provide owner name and repo name.(default:the current user repo)"  <>:repo
 
 '
     param:run
@@ -133,8 +130,7 @@ ___x_cmd_gh_repo_release_latest() {
     param:scope     "github/$O"
     param:dsl    '
 options:
-    --owner     "The owner of the repo needs to be updated"     <>=""
-    #1|--repo   "Repo name"                                     <>:repo
+    #1|--repo   "Provide owner name and repo name.(default:the current user repo)"  <>:repo
 '
     param:run
 

@@ -34,13 +34,12 @@ type:
     sort  = created updated popularity long-running
     direction = desc asc
 options:
-    --repo              "Repo name"                                         <>
-    --owner             "The owner of the repo needs to be updated"         <>=""
-    --head              "source branch. Format: [username:]<branch>"        <>=""
-    --base              "target branch. Format: [username:]<branch>"        <>=""
-    --state             "state"                                             <>:state="open"
-    --sort              "sort"                                              <>:sort="created"
-    --direction         "direction"                                         <>:direction="desc"
+    --repo          "Provide owner name and repo name.(default:the current user repo)"  <>
+    --head          "source branch. Format: [username:]<branch>"                        <>=""
+    --base          "target branch. Format: [username:]<branch>"                        <>=""
+    --state         "state"                                                             <>:state="open"
+    --sort          "sort"                                                              <>:sort="created"
+    --direction     "direction"                                                         <>:direction="desc"
 '
     param:run
 
@@ -125,15 +124,14 @@ ___x_cmd_gh_repo_pr_create() {
 type:
     bool = true false
 options:
-    --repo                  "Repo name"                                                     <>:repo
-    --owner                 "The owner of the repo needs to be updated"                     <>=""
-    --title                 "pr title"                                                      <>
-    --head                  "source branch. Format: [username:]<branch>"                    <>:name
-    --base                  "target branch. Format: [username:]<branch>"                    <>:name
-    --body                  "pull request content"                                          <>=""
-    --maintainer_can_modify "Indicates whether maintainers can modify the pull request."    <>:Bool=true
-    --draft                 "Indicates whether the pull request is a draft"                 <>=""
-    --issue                 "association issue"                                             <>=""
+    --repo                  "Provide owner name and repo name.(default:the current user repo)"  <>:repo
+    --title                 "pr title"                                                          <>
+    --head                  "source branch. Format: [username:]<branch>"                        <>:name
+    --base                  "target branch. Format: [username:]<branch>"                        <>:name
+    --body                  "pull request content"                                              <>=""
+    --maintainer_can_modify "Indicates whether maintainers can modify the pull request."        <>:Bool=true
+    --draft                 "Indicates whether the pull request is a draft"                     <>=""
+    --issue                 "association issue"                                                 <>=""
 '
     param:run
 

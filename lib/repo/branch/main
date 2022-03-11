@@ -26,10 +26,9 @@ ___x_cmd_gh_repo_branch_ls(){
     param:scope     "github/$O"
     param:dsl       '
 options:
-    #1|--repo       "repo name"                                 <>:RepoName
-    --owner         "repo owner name"                           <>=""
-    --per_page      "Results per page"                          <>=30
-    --page          "Page number of the results to fetch."      <>=1
+    #1|--repo       "Provide owner name and repo name.(default:the current user repo)"  <>:RepoName
+    --per_page      "Results per page"                                                  <>=30
+    --page          "Page number of the results to fetch."                              <>=1
     --protected     "returns only protected branches."
 '
     param:run
@@ -49,9 +48,8 @@ ___x_cmd_gh_repo_branch_info(){
     param:scope     "github/$O"
     param:dsl       '
 options:
-    --repo          "repo name"                                 <>:RepoName
-    #1|--branch       "branch name"                               <>
-    --owner         "repo owner name"                           <>=""
+    --repo          "Provide owner name and repo name.(default:the current user repo)"  <>:RepoName
+    #1|--branch     "branch name"                                                       <>
 '
     param:run
 
@@ -74,10 +72,9 @@ ___x_cmd_gh_repo_branch_rename(){
     param:scope     "github/$O"
     param:dsl       '
 options:
-    --repo          "repo name"                                 <>:RepoName
-    --branch        "branch name"                               <>
-    --owner         "repo owner name"                           <>=""
-    #1|--new_name   "branch new name"                           <>
+    --repo          "Provide owner name and repo name.(default:the current user repo)"  <>:RepoName
+    --branch        "branch name"                                                       <>
+    #1|--new_name   "branch new name"                                                   <>
 '
     param:run
 
@@ -96,9 +93,8 @@ options:
 ___x_cmd_gh_repo_branch_default(){
     param:dsl       '
 options:
-    --repo                      "Need to update repo name"                                              <>:RepoName
-    --owner                     "The owner of the repo needs to be updated"                             <>=""
-    #1|--branch     "branch name"                               <>
+    --repo          "Provide owner name and repo name.(default:the current user repo)"  <>:RepoName
+    #1|--branch     "branch name"                                                       <>
 '
     param:run
     # TODO:source data
@@ -132,9 +128,8 @@ ___x_cmd_gh_repo_branch_protection_ls(){
 ___x_cmd_gh_repo_branch_protection_info(){
     param:dsl       '
 options:
-    --repo          "repo name"                                 <>:RepoName
-    #1|--branch     "branch name"                               <>
-    --owner         "repo owner name"                           <>=""
+    --repo          "repo name"                                                         <>:RepoName
+    #1|--branch     "Provide owner name and repo name.(default:the current user repo)"  <>
 '
     param:run
 
@@ -162,9 +157,8 @@ ___x_cmd_gh_repo_branch_protection_set(){
 ___x_cmd_gh_repo_branch_protection_rm(){
     param:dsl       '
 options:
-    --repo          "repo name"                                 <>:RepoName
-    #1|--branch     "branch name"                               <>
-    --owner         "repo owner name"                           <>=""
+    --repo          "Provide owner name and repo name.(default:the current user repo)"  <>:RepoName
+    #1|--branch     "branch name"                                                       <>
 '
     param:run
 
