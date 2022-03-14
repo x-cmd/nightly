@@ -43,7 +43,7 @@ ___x_cmd_gh_repo_info() {
     param:scope     "github/$O"
     param:dsl       '
 options:
-    #1|--repo    "Provide owner name and repo name.(default:the current user repo)"      <>:repo
+    #1|--repo    "Provide owner name and repo name.(default:the current user repo)"      <>:RepName
 '
     param:run
 
@@ -160,7 +160,7 @@ type:
     Access  =   private public
 option:
     --access                    "private,public"                                                        <>:Access=private
-    --repo                      "Provide owner name and repo name.(default:the current user repo)"      <>:repo
+    --repo                      "Provide owner name and repo name.(default:the current user repo)"      <>:RepoName
     --description               "description"                                                           <>=""
     --homepage                  "homepage"                                                              <>=""
     --team_id                   "the id of the team that will be granted access to this repository"     <>=""

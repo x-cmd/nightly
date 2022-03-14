@@ -12,7 +12,7 @@ param_type      github     Status               =       enable  disable ""
 param_type      github     RepoVisibility       =       private public
 param_type      github     RepoPerm             =       pull    push     admin
 param_type      github     RepoPath             "=~"    "[-A-Za-z0-9_/]+"      # TODO: make it fit it github definition
-param_type      github     RepoName             "=~"    "[-A-Za-z0-9_]+"
+param_type      github     RepoName             "=~"    "[-A-Za-z0-9_/]+"
 param_type      github     NatureNumber         "=~"    "[0-9]+"
 param_type      github     Address              "=~"    "[-A-Za-z0-9_]+|https?://.+"
 param_type      github     Ignore               -   <<A

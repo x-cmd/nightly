@@ -32,7 +32,7 @@ ___x_cmd_gh_repo_release_ls() {
 type:
     direction = asc  desc
 options:
-    --repo          "Provide owner name and repo name.(default:the current user repo)"  <>:repo
+    --repo          "Provide owner name and repo name.(default:the current user repo)"  <>:RepName
     --direction     "direction(asc,desc)"                                               <>:direction="asc"
 '
     param:run
@@ -46,7 +46,7 @@ ___x_cmd_gh_repo_get_release_by_tag() {
     param:scope     "github/$O"
     param:dsl    '
 options:
-    #1|--repo   "Provide owner name and repo name.(default:the current user repo)"  <>:repo
+    #1|--repo   "Provide owner name and repo name.(default:the current user repo)"  <>:RepName
     #2|--tag    "tag name"                                                          <>
 '
     param:run
@@ -67,7 +67,7 @@ options:
     --target_commitish  "Default is master"                                                 <>:name="master"
     --draft             ”create a draft release“                                            <>:Bool="false"
     --prerelease        "Is release version"                                                <>:Bool="false"
-    #1|--repo           "Provide owner name and repo name.(default:the current user repo)"  <>:repo
+    #1|--repo           "Provide owner name and repo name.(default:the current user repo)"  <>:RepName
 
 '
     param:run
@@ -130,7 +130,7 @@ ___x_cmd_gh_repo_release_latest() {
     param:scope     "github/$O"
     param:dsl    '
 options:
-    #1|--repo   "Provide owner name and repo name.(default:the current user repo)"  <>:repo
+    #1|--repo   "Provide owner name and repo name.(default:the current user repo)"  <>:RepName
 '
     param:run
 

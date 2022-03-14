@@ -36,6 +36,7 @@ subcommand:
     if [ -z "${PARAM_SUBCMD}" ]; then
         gh_log warn "Subcmd Not Found."
         ___x_cmd_gh _param_help_doc
+        
         return 1
     fi
 

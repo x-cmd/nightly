@@ -124,7 +124,7 @@ ___x_cmd_gh_repo_pr_create() {
 type:
     bool = true false
 options:
-    --repo                  "Provide owner name and repo name.(default:the current user repo)"  <>:repo
+    --repo                  "Provide owner name and repo name.(default:the current user repo)"  <>:RepName
     --title                 "pr title"                                                          <>
     --head                  "source branch. Format: [username:]<branch>"                        <>:name
     --base                  "target branch. Format: [username:]<branch>"                        <>:name
