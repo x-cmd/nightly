@@ -19,7 +19,7 @@ ____x_cmd_gt_xrc(){
     done
 }
 
-____x_cmd_gt_xrc utils config token user current issue enterprise/main enterprise/member org/main org/member \
+____x_cmd_gt_xrc utils config token user current issue enterprise/main enterprise/member enterprise/team org/main org/member \
     repo/utils repo/main repo/pr/main repo/release/main repo/member repo/tag repo/page repo/branch
 
 

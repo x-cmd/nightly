@@ -11,6 +11,7 @@ subcmd:
     repo            "List all repos"
     issue           "List all issues"
     member          "enterprise member management"
+    team            "enterprise team management"
 '
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then

@@ -10,7 +10,7 @@
 ___x_cmd_gt_enterprise_member(){
     param:dsl       '
 subcmd:
-    ls              "list member"
+    ls              "List member"
     user            "Show member user info"
     add             "Add member"
     rm              "Remove member"
