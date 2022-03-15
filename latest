@@ -7,6 +7,7 @@ xrc dict/latest
 # Section 1: Global definitions
 ############################
 
+___X_CMD_PARAM_AWK_RE_PATH="$(xrc which awk/lib/re.awk)"
 ___X_CMD_PARAM_AWK_DSL_PATH="$(xrc which param/lib/dsl.awk)"
 ___X_CMD_PARAM_AWK_PATH="$(xrc which param/lib/main.awk)"
 PARAM_DEFAULT_VAR_PREFIX=___X_CMD_X_BASH_PARAM_DEFAULT___
@@ -270,6 +271,7 @@ _param_main() {
             -v COLUMNS="$COLUMNS" \
             -v IS_INTERACTIVE="$___X_CMD_PARAM_IS_INTERACTIVE" \
             -v IS_TTY="$___X_CMD_PARAM_STDERR_IS_TTY" \
+            -f "$___X_CMD_PARAM_AWK_RE_PATH" \
             -f "$___X_CMD_PARAM_AWK_DSL_PATH" \
             -f "$___X_CMD_PARAM_AWK_PATH"
     local code="$?"

@@ -1,0 +1,20 @@
+a(){
+    param:scope     "github/$O"
+    param:dsl       '
+options:
+    --repo          "Provide owner name and repo name.(default:the current user repo)"  <>
+    --number        "pr number"                                                         <>
+    --body          "The text of the review comment."                                   <>
+    --commit_id     "The SHA of the commit needing a comment"                           <>=""
+    --path          "The relative path to the file"                                     <>=""
+    --position      "The position in the diff where you want to add a review comment"   <>=""
+    --side          ""                                                                  <>=""
+    --line          ""                                                                  <>=""
+    --start_line    ""                                                                  <>=""
+    --start_side    ""                                                                  <>=""
+    --in_reply_to   ""                                                                  <>=""
+'
+    param:run
+}
+
+a

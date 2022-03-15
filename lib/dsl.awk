@@ -153,6 +153,62 @@ function str_joinwrap(sep, left, right, obj, prefix, start, end,     i, _result)
 
 # EndSection
 
+# Section: token argument
+BEGIN{
+
+
+    PARAM_RE_1 = "<[A-Za-z0-9_ ]*>" "(:[A-Za-z\\-]+)*"
+    PARAM_RE_1_2 = "=" re( re( RE_STR2 ) RE_OR re( RE_STR0 ) )
+    PARAM_RE_1 = PARAM_RE_1 re( PARAM_RE_1_2, "?" )
+
+    PARAM_RE_ARG = re( PARAM_RE_1 ) RE_OR re( RE_STR2 ) RE_OR re( RE_STR0 ) # re( "[^ \\t\\v\\n]+" "((\\\\[ ])[^ \\t\\v\\n]*)*" )# re(RE_STR0) # re( "[A-Za-z0-9\\-_=\\#|]+" )
+}
+
+BEGIN{
+    PARAM_RE_NEWLINE_TRIM_SPACE = "[ \t\v]+"
+    PARAM_RE_NEWLINE_TRIM = re("\n" PARAM_RE_NEWLINE_TRIM_SPACE) RE_OR re(PARAM_RE_NEWLINE_TRIM_SPACE "\n" )
+}
+
+function param_tokenized(s, arr,       l){
+    gsub( PARAM_RE_ARG, "\n&", s )
+    gsub( PARAM_RE_NEWLINE_TRIM, "\n", s )
+    gsub( "^[\n]+" RE_OR "[\n]+$", "", s)
+    l = split(s, arr, "\n")
+    return l
+}
+
+# function param_token_parse(s, arr, prefix, optarr, prefi      l){
+#     _option_id = arr[1]
+
+#     #
+#     arr[ _option_id , "desc" ] = arr[2]
+#     arr[ _option_id , 1, "arg_name" ] = handle()
+#     arr[ _option_id , 2, "arg_name" ] = handle()
+#     return l
+# }
+
+function param_print_tokenized(s, arr){
+    print "---------"
+    l = param_tokenized(s, arr)
+    for (i=1; i<=l; ++i) {
+        print arr[ i ]
+    }
+    print "---------"
+}
+
+# BEGIN{
+#     s0 = "--license               \"Test regex arg3\"  <regex_arg3>   =   \"MulanPSL-2.0\" \"0BSD\" \"AFL-3.0\" \"AGPL-3.0\" \"\" \"XXXX License\""
+#     s1 = "--license               \"Test regex arg3\"  <regex_arg3>=abcb   =   \"MulanPSL-2.0\" \"0BSD\" \"AFL-3.0\" \"AGPL-3.0\" \"\" \"XXXX License\""
+#     s2 = "#3|#n|#a|--regex_arg3|-s      \"Repo name 3\"        <>:repo"
+
+#     param_print_tokenized( s0 )
+#     param_print_tokenized( s1 )
+#     param_print_tokenized( s2 )
+#     exit 0
+# }
+
+# EndSection
+
 # Section: code facility
 function print_code(){
     print CODE
@@ -197,61 +253,11 @@ function get_option_string(option_id,
 }
 
 # TOKEN_ARRAY
-function tokenize_argument_into_TOKEN_ARRAY(astr,
-    _len, _tmp ){
-
-    original_astr = astr
-    gsub(/\\\\/,    "\001", astr)
-    gsub(/\\"/,     "\002", astr) # "
-    gsub("\"",      "\003", astr) # "
-    gsub(/\\ /,    "\004", astr)
-
-    astr = str_trim(astr)
-    TOKEN_ARRAY[ L ] = 0
-    while (length(astr) > 0){
-
-        if (match(astr, /^\003[^\003]*\003/)) {
-            _len = TOKEN_ARRAY[ L ] + 1
-            _tmp = substr(astr, 1, RLENGTH)
-            gsub("\004", " ",   _tmp)      # Unwrap
-            gsub("\003", "",    _tmp)      # Unwrap
-            gsub("\002", "\"",  _tmp)
-            gsub("\001", "\\",  _tmp)      # Unwrap
-            TOKEN_ARRAY[_len] = _tmp
-            TOKEN_ARRAY[ L ] = _len
-            astr = substr(astr, RLENGTH+1)
-
-        } else if ( match(astr, /^[^ \n\t\v\003]+/) ){ #"
-
-            _len = TOKEN_ARRAY[ L ] + 1
-            _tmp = substr(astr, 1, RLENGTH)
-            gsub("\004", " ",       _tmp)
-            gsub("\003", "",        _tmp)
-            gsub("\002", "\"",      _tmp)
-            gsub("\001", "\\\\",    _tmp)   # Notice different
-            TOKEN_ARRAY[_len] = _tmp
-            TOKEN_ARRAY[ L ] = _len
-            astr = substr(astr, RLENGTH+1)
-
-            if ( match(astr, /^\003[^\003]*\003/) ) {
-                _tmp = substr(astr, 1, RLENGTH)
-                gsub(" ", "\005",   _tmp)
-                gsub("\004", " ",   _tmp)      # Unwrap
-                gsub("\003", "",    _tmp)      # Unwrap
-                gsub("\002", "\"",  _tmp)
-                gsub("\001", "\\",  _tmp)      # Unwrap
-                TOKEN_ARRAY[_len] = TOKEN_ARRAY[_len] _tmp
-
-                astr = substr(astr, RLENGTH+1)
-            }
-        } else {
-            panic_param_define_error("Fail to tokenzied following line:\n  original_astr:" original_astr "\n  astr:|" astr "\n  _tmp: |" _tmp)
-        }
-
-        astr = str_trim_left(astr)
-    }
+function tokenize_argument_into_TOKEN_ARRAY( astr,  l ) {
+    l = param_tokenized( astr, TOKEN_ARRAY )
+    TOKEN_ARRAY[ L ] = l
+    return l
 }
-
 # EndSection
 
 # Section: Assert
@@ -496,7 +502,7 @@ function handle_optarg_declaration(optarg_definition, optarg_id,
 
     # debug( "handle_optarg_definition:\t" optarg_definition )
     # debug( "optarg_id:\t" optarg_id )
-    tokenize_argument_into_TOKEN_ARRAY( optarg_definition )
+    tokenize_argument_into_TOKEN_ARRAY_legacy( optarg_definition )
     optarg_definition_token1 = TOKEN_ARRAY[ 1 ]
 
 
@@ -505,7 +511,7 @@ function handle_optarg_declaration(optarg_definition, optarg_id,
     }
 
     optarg_name = substr( optarg_definition_token1, 2, RLENGTH-2 )
-        option_arr[ optarg_id S OPTARG_NAME ] = optarg_name
+    option_arr[ optarg_id S OPTARG_NAME ] = optarg_name
 
     optarg_definition_token1 = substr( optarg_definition_token1, RLENGTH+1 )
 
@@ -534,7 +540,7 @@ function handle_optarg_declaration(optarg_definition, optarg_id,
             return
         }
 
-        tokenize_argument_into_TOKEN_ARRAY( type_rule )
+        tokenize_argument_into_TOKEN_ARRAY_legacy( type_rule)
 
         for ( i=1; i<=TOKEN_ARRAY[ L ]; ++i ) {
             option_arr[ optarg_id S OPTARG_OPARR S i ] = TOKEN_ARRAY[i]
@@ -548,7 +554,7 @@ function handle_optarg_declaration(optarg_definition, optarg_id,
 function parse_param_dsl_for_positional_argument(line,
     option_id, option_desc, tmp, _arr_len, _arr, _index, _arg_name, _arg_no, _optarg_id){
 
-    tokenize_argument_into_TOKEN_ARRAY( line )
+    tokenize_argument_into_TOKEN_ARRAY_legacy( line )
 
     option_id = TOKEN_ARRAY[1]
 
@@ -600,7 +606,7 @@ function parse_param_dsl_for_positional_argument(line,
 function parse_param_dsl_for_all_positional_argument(line,
     option_id, option_desc, tmp){
 
-    tokenize_argument_into_TOKEN_ARRAY( line )
+    tokenize_argument_into_TOKEN_ARRAY_legacy( line )
 
     option_id = TOKEN_ARRAY[1]  # Should be #n
 
@@ -697,7 +703,7 @@ function parse_param_dsl(line,
                 option_arr[ L ] = len
                 option_arr[ len ] = line
 
-                tokenize_argument_into_TOKEN_ARRAY( line )
+                tokenize_argument_into_TOKEN_ARRAY_legacy( line )
                 option_id = TOKEN_ARRAY[1]
                 handle_option_id( option_id )
 
