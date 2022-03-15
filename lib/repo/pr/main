@@ -49,11 +49,22 @@ options:
     --labels            "labels"                                                             <>=""
 '
     param:run
-
     ___x_cmd_gt_param_init_owner_repo
-    ___ui_table_json "$(printf "%s" "______x_cmd_gt_get \"/v5/repos/$owner_repo/pulls\" state head base sort since direction milestone_number labels page per_page  || return 1" )" \
-        Id=.id Title=.title Body=.body User=.user.login TargetBranch=.base.ref SourceBranch=.head.ref \
-        CreateTime=.created_at UpdateTime=.updated_at Url=.html_url
+
+    if [ -t 1 ]; then
+        if ___ui_table_json Id=.id Title=.title Body=.body User=.user.login TargetBranch=.base.ref SourceBranch=.head.ref \
+            CreateTime=.created_at UpdateTime=.updated_at Url=.html_url \
+            -- "______x_cmd_gt_get" "/v5/repos/$owner_repo/pulls" state head base sort since direction milestone_number \
+            labels page per_page; then
+            return 0
+        fi
+    else
+        ______x_cmd_gt_get "/v5/repos/$owner_repo/pulls" state head base sort since direction milestone_number \
+            labels page per_page && \
+            return 0
+    fi
+    gt_log error "Couldn't find any data by: $owner_repo"
+    return 1
 }
 
 # Assume pr and owner_repo are environments

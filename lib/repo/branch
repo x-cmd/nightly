@@ -31,12 +31,17 @@ options:
 '
     param:run
     ___x_cmd_gt_param_init_owner_repo
-    if ___ui_table_json BranchName=.name Protected=.protected \
-        --  ______x_cmd_gt_get_multi "/v5/repos/${owner_repo}/branches" per_page page
-    then
-        return 0
+
+    if [ -t 1 ]; then
+        if ___ui_table_json BranchName=.name Protected=.protected \
+            --  ______x_cmd_gt_get_multi "/v5/repos/${owner_repo}/branches" per_page page; then
+            return 0
+        fi
+    else
+        ______x_cmd_gt_get_multi "/v5/repos/${owner_repo}/branches" per_page page && \
+            return 0
     fi
-    gt_log error "get repo ${owner_repo} branch list fail"
+    gt_log error "Couldn't find any data. By ${owner_repo}"
     return 1
 }
 

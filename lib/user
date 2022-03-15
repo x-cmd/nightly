@@ -90,14 +90,22 @@ ___x_cmd_gt_user_email(){
     param:scope     "github/$O"
     param:dsl       '
 options:
-    --page          "page"             <>:number=1
-    --per_page      "per_page"         <>:number=20
+    --page          "page"                        <>:number=1
+    --per_page      "per_page"                    <>:number=20
 '
     param:run
-    if [ -t 1 ] && ___ui_table_json Id=.id Name=.name Owner=.owner.login Url=.html_url \
-        -- "______x_cmd_gt_get_multi" "/v5/emails" ls "$@";then
-        return 0
+
+    if [ -t 1 ]; then
+        if ___ui_table_json Email=.email State=.state \
+            -- "______x_cmd_gt_get_multi" "/v5/emails" page per_page; then
+            return 0
+        fi
+    else
+        ______x_cmd_gt_get_multi "/v5/emails" page per_page && \
+            return 0
     fi
+    gt_log error "Couldn't find any data"
+    return 1
 }
 
 ___x_cmd_gt_user_issue(){
@@ -125,11 +133,17 @@ options:
 '
     param:run
 
-    if ___ui_table_json ID=.number State=.issue_state Assigner=.assignee.name \
-        Repo=.repository.full_name Type=.issue_type Title=.title Url=.html_url \
-        -- "______x_cmd_gt_get_multi" "/v5/user/issues" filter state labels direction\
-        since page per_page schedule deadline created_at finished_at "$@";then
-        return 0
+    if [ -t 1 ]; then
+        if ___ui_table_json ID=.number State=.issue_state Assigner=.assignee.name \
+            Repo=.repository.full_name Type=.issue_type Title=.title Url=.html_url \
+            -- "______x_cmd_gt_get_multi" "/v5/user/issues" filter state labels direction\
+            since page per_page schedule deadline created_at finished_at; then
+            return 0
+        fi
+    else
+        ______x_cmd_gt_get_multi "/v5/user/issues" filter state labels direction \
+            since page per_page schedule deadline created_at finished_at && \
+            return 0
     fi
     gt_log error "Couldn't find any data"
     return 1
@@ -172,9 +186,14 @@ options:
 '
     param:run
 
-    if ___ui_table_json Id=.id Title=.title Key=.key Url=.url \
-        -- "______x_cmd_gt_get" "/v5/user/keys" page per_page "$@";then
-        return 0
+    if [ -t 1 ]; then
+        if ___ui_table_json Id=.id Title=.title Key=.key Url=.url \
+            -- "______x_cmd_gt_get_multi" "/v5/user/keys" page per_page; then
+            return 0
+        fi
+    else
+        ______x_cmd_gt_get_multi "/v5/user/keys" page per_page && \
+            return 0
     fi
     gt_log error "Couldn't find any data"
     return 1

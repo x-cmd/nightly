@@ -89,6 +89,7 @@ options:
                     gt_log        "error" "Update issue failure"                               && return 1
 }
 
+# shellcheck disable=SC2154
 ___x_cmd_gt_issue_logs(){
     param:scope     "gitee/$O"
     param:dsl       '
@@ -98,8 +99,19 @@ options:
     --sort          "sort(asc、desc)"                                                    <>="desc"
 '
     param:run
-    ___ui_table_json "$(printf "%s" "O=$O ______x_cmd_gt_get \"/v5/repos/${owner##*/}/issues/${number}/operate_logs\" repo sort || return 1" )" \
-            time=.created_at user=.user.login type=.action_type content=.content  && return 0
+    ___x_cmd_gt_param_init_owner_repo
+
+    if [ -t 1 ]; then
+        if ___ui_table_json Time=.created_at User=.user.login Type=.action_type Content=.content \
+            -- "______x_cmd_gt_get" "/v5/repos/${owner_repo##*/}/issues/${number}/operate_logs" repo sort; then
+            return 0
+        fi
+    else
+        ______x_cmd_gt_get "/v5/repos/${owner_repo##*/}/issues/${number}/operate_logs" repo sort && \
+            return 0
+    fi
+    gt_log error "Couldn't find any data by: $repo $number"
+    return 1
 }
 
 # shellcheck shell=sh
@@ -127,9 +139,19 @@ options:
 '
     param:run
     ___x_cmd_gt_param_init_owner_repo
-    if [ -z $number ]; then
-        ___ui_table_json "$(printf "%s" "______x_cmd_gt_get_multi \"/v5/repos/${owner_repo}/issues\" state labels sort direction|| return 1" )" \
-            IssueNumber=.number Title=.title State=.issue_state Assigner=.assignee.name body=.body && return 0
+
+    if [ -z "$number" ]; then
+        if [ -t 1 ]; then
+            if ___ui_table_json IssueNumber=.number Title=.title State=.issue_state Assigner=.assignee.name Body=.body \
+                -- "______x_cmd_gt_get_multi" "/v5/repos/${owner_repo}/issues" state labels sort direction page per_page; then
+                return 0
+            fi
+        else
+            ______x_cmd_gt_get_multi "/v5/repos/${owner_repo}/issues" state labels sort direction page per_page && \
+                return 0
+        fi
+        gt_log error "Couldn't find any data by: ${owner_repo}"
+        return 1
     else
         local data
         local id
@@ -154,21 +176,32 @@ ___x_cmd_gt_org_issue(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
+    --org           "organization path"                            <>
     --filter        "filter(assigned,created,all)"                 <>="assigned"
     --state         "state(open,progerssing,closed,rejected)"      <>="open"
     --labels        "labels"                                       <>=""
     --sort          "sort(created,updated)"                        <>="created"
     --direction     "direction(asc、desc)"                         <>="desc"
-    --org           "organization path"                            <>
     --page          "page"                                         <>:number=1
     --per_page      "per_page"                                     <>:number=20
 '
     param:run
 
-    ___ui_table_json "$(printf "%s" "______x_cmd_gt_get_multi \"/v5/orgs/${org##*/}/issues\" filter state labels sort direction since page per_page || return 1" )" \
-        IssueNumber=.number State=.issue_state Assigner=.assignee.name Repository=.repository.full_name Type=.issue_type Title=.title Url=.html_url && return 0
+    if [ -t 1 ]; then
+        if ___ui_table_json IssueNumber=.number State=.issue_state Assigner=.assignee.name Repository=.repository.full_name Type=.issue_type Title=.title Url=.html_url \
+            -- "______x_cmd_gt_get_multi" "/v5/orgs/${org##*/}/issues" filter state labels sort direction since page per_page; then
+            return 0
+        fi
+    else
+        ______x_cmd_gt_get_multi "/v5/orgs/${org##*/}/issues" filter state labels sort direction since page per_page && \
+            return 0
+    fi
+    gt_log error "Couldn't find any data by: ${org}"
+    return 1
+
 }
 
+# shellcheck disable=SC2154
 ___x_cmd_gt_enterprise_issue(){
     param:scope     "gitee/$O"
     param:dsl       '
@@ -183,13 +216,25 @@ options:
     --assignee      "assignee"                                     <>=""
     --creator       "creator"                                      <>=""
     --program       "program"                                      <>=""
+    --page          "page"                                         <>:number=1
+    --per_page      "per_page"                                     <>:number=50
 '
     param:run
-    # param form bug
-    [ -z "$enterprise" ] && gt_log error "enterprise path is empty" && return 1
-    ______x_cmd_gt_get "/v5/enterprises/${enterprise##*/}/issues" > aaa
-    ___ui_table_json "$(printf "%s" "______x_cmd_gt_get \"/v5/enterprises/${enterprise##*/}/issues\" filter state labels sort direction since page per_page schedule deadline created_at finished_at milestone assignee creator program  || return 1" )" \
-        IssueNumber=.number State=.issue_state Assigner=.assignee.name AssignerMarkName=.assignee.remark Repository=.repository.full_name Type=.issue_type Title=.title Url=.html_url && return 0
+
+    if [ -t 1 ]; then
+        if ___ui_table_json IssueNumber=.number State=.issue_state Assigner=.assignee.name AssignerMarkName=.assignee.remark \
+            Repository=.repository.full_name Type=.issue_type Title=.title Url=.html_url \
+            -- "______x_cmd_gt_get_multi" "/v5/enterprises/${enterprise##*/}/issues" filter state labels sort direction since \
+            page per_page schedule deadline created_at finished_at milestone assignee creator program; then
+            return 0
+        fi
+    else
+        ______x_cmd_gt_get_multi "/v5/enterprises/${enterprise##*/}/issues" filter state labels sort direction since \
+            page per_page schedule deadline created_at finished_at milestone assignee creator program && \
+            return 0
+    fi
+    gt_log error "Couldn't find any data by: ${enterprise}"
+    return 1
 }
 
 # Section : comment
@@ -224,8 +269,19 @@ options:
     --order         "order(asc、desc)"                                                   <>="asc"
 '
     param:run
-    ___ui_table_json "$(printf "%s" "______x_cmd_gt_get_multi \"/v5/repos/${owner##*/}/${repo##*/}/issues/$number/comments\" since page per_page order || return 1" )" \
-        CommitId=.id IssueNumber=.target.issue.number Title=.target.issue.title User=.user.login body=.body && return 0
+    ___x_cmd_gt_param_init_owner_repo
+
+    if [ -t 1 ]; then
+        if ___ui_table_json CommitId=.id IssueNumber=.target.issue.number Title=.target.issue.title User=.user.login Body=.body \
+            -- "______x_cmd_gt_get_multi" "/v5/repos/${owner_repo}/issues/$number/comments" since order page per_page; then
+            return 0
+        fi
+    else
+        ______x_cmd_gt_get_multi "/v5/repos/${owner_repo}/issues/$number/comments" since order page per_page && \
+            return 0
+    fi
+    gt_log error "Couldn't find any data by: ${owner_repo}"
+    return 1
 }
 
 # shellcheck disable=SC2086,SC2154

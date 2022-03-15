@@ -53,9 +53,14 @@ options:
 '
     param:run
     if [ "$#" -eq 0 ]; then
-        if ___ui_table_json Id=.id Name=.name Path=.path \
-            -- "______x_cmd_gt_get_multi" "/v5/user/enterprises" admin; then
-            return 0
+        if [ -t 1 ]; then
+            if ___ui_table_json Id=.id Name=.name Path=.path \
+                -- "______x_cmd_gt_get_multi" "/v5/user/enterprises" admin page per_page; then
+                return 0
+            fi
+        else
+            ______x_cmd_gt_get_multi "/v5/user/enterprises" admin page per_page && \
+                return 0
         fi
         gt_log error "Couldn't find any data"
         return 1
@@ -87,12 +92,16 @@ options:
 '
     param:run
 
-    if ___ui_table_json Id=".id" Name=".name" public=".public" OwnerName=".owner.name" DefaultBranch=".default_branch" \
-        OpenIssuesCount=".open_issues_count" license=".license" Url=".html_url" \
-        -- "______x_cmd_gt_get_multi" "/v5/enterprises/$1/repos" repo_type direct page per_page; then
-        return 0
+    if [ -t 1 ]; then
+        if ___ui_table_json Id=".id" Name=".name" public=".public" OwnerName=".owner.name" \
+            DefaultBranch=".default_branch" OpenIssuesCount=".open_issues_count" license=".license" Url=".html_url" \
+            -- "______x_cmd_gt_get_multi" "/v5/enterprises/$1/repos" repo_type direct page per_page; then
+            return 0
+        fi
+    else
+        ______x_cmd_gt_get_multi "/v5/enterprises/$1/repos" repo_type direct page per_page && \
+            return 0
     fi
-
-    gt_log error "Couldn't find any data by $1"   && return 1
+    gt_log error "Couldn't find any data by $1"
     return 1
 }

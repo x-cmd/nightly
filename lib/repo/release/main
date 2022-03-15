@@ -33,10 +33,19 @@ options:
     --direction     "direction(asc,desc)"                                                <>:Direction="asc"
 '
     param:run
-
     ___x_cmd_gt_param_init_owner_repo
-    ___ui_table_json "$(printf "%s" "______x_cmd_gt_get \"/v5/repos/${owner_repo}/releases\" page per_page direction  || return 1" )" \
-        Id=.id ReleaseName=.name TagName=.tag_name Message=.body IsPreRelease=.prerelease User=.author.login Time=.created_at && return 0
+
+    if [ -t 1 ]; then
+        if ___ui_table_json Id=.id ReleaseName=.name TagName=.tag_name Message=.body IsPreRelease=.prerelease User=.author.login Time=.created_at \
+            -- "______x_cmd_gt_get" "/v5/repos/${owner_repo}/releases" direction page per_page; then
+            return 0
+        fi
+    else
+        ______x_cmd_gt_get "/v5/repos/${owner_repo}/releases" direction page per_page && \
+            return 0
+    fi
+    gt_log error "Couldn't find any data by: $owner_repo"
+    return 1
 }
 
 # shellcheck disable=SC2086,SC2154

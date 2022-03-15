@@ -36,9 +36,14 @@ options:
     param:run
     ___x_cmd_gt_param_init_owner_repo
 
-    if ___ui_table_json NameSpace=.login Name=.name Admin=.permissions.admin PushPermissions=.permissions.push \
-        -- "______x_cmd_gt_get_multi" "/v5/repos/${owner_repo}/collaborators" page per_page; then
-        return 0
+    if [ -t 1 ]; then
+        if ___ui_table_json NameSpace=.login Name=.name Admin=.permissions.admin PushPermissions=.permissions.push \
+            -- "______x_cmd_gt_get_multi" "/v5/repos/${owner_repo}/collaborators" role page per_page; then
+            return 0
+        fi
+    else
+        ______x_cmd_gt_get_multi "/v5/repos/${owner_repo}/collaborators" role page per_page && \
+            return 0
     fi
     gt_log error "Please provide correct repo name"
     return 1
