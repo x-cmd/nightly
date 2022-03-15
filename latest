@@ -3,6 +3,9 @@
 # author:       Li Junhao           l@x-cmd.com
 # maintainer:   Li Junhao
 
+
+___x_cmd_definelazyloader ___x_cmd_man_search man/lib/search
+
 # Section: main
 ___x_cmd_man() {
     case "$1" in
@@ -28,7 +31,7 @@ ___x_cmd_man() {
                 esac
             done
             # TODO: combine the result of man -k and tldr cat
-            ___x_cmd_man_run -k "$1"
+            ___x_cmd_man_search "$1"
         fi
     fi
     exec 3<&-
