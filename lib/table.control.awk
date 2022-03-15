@@ -36,7 +36,6 @@ function view(){
 
     _component_help   = view_help()
     _component_filter = view_filter()
-    # _component_header = view_header()
     _component_body   = view_body()
 
 
@@ -51,27 +50,42 @@ function view_filter(       data){
     else return
 }
 
-function view_header(       col_i, data){
-    data = "     "
-    for (col_i=1; col_i<=data_col_num; col_i++) {
-        # limit the length
+function view_header(       col_i, _col_start, data, _tmp){
+    _col_start = view_body_cal_beginning_col()
+    data = th( TH_TABLE_HEADER_ITEM_NORMAL, "     ")
+    for (col_i=_col_start; col_i<=data_col_num; col_i++) {
         if (col_max[ col_i ] > COL_MAX_SIZE) {
-            data = data sprintf( "%s", str_pad_right( data_header_arr[ col_i ], COL_MAX_SIZE + 6, data_header_arr_wlen[ 1 KSEP col_i ] ) )
+            _tmp = sprintf( "  %s", str_pad_right( data_header_arr[ col_i ], COL_MAX_SIZE + 6, data_header_arr_wlen[ 1 KSEP col_i ] ) )
         } else {
-            data = data sprintf( "%s  ", str_pad_right( data_header_arr[ col_i ], col_max[ col_i ], data_header_arr_wlen[ 1 KSEP col_i ] ) )
+            _tmp = sprintf( "  %s", str_pad_right( data_header_arr[ col_i ], col_max[ col_i ], data_header_arr_wlen[ 1 KSEP col_i ] ) )
         }
-        # buffer_append( sprintf( "%s  ", str_pad_right( data[ 1 KSEP col_i ], col_max[ col_i ], data_wlen[ 1 KSEP col_i ] ) ) )
+        if ( ctrl_rstate_get( CURRENT_COLUMN ) == col_i ) _tmp = th(TH_TABLE_HEADER_ITEM_FOCUSED, _tmp)
+        else _tmp = th( TH_TABLE_HEADER_ITEM_NORMAL,  _tmp )
+        data = data _tmp
     }
 
-    return th( TH_TABLE_HEADER_ITEM_NORMAL, data) "\n"
+    return data "\n"
 }
 
-function view_body(             model_row_i, col_i, model_start_row, _tmp_currow, _data){
+function view_body_cal_beginning_col(           _col, _col_size, i, _len){
+    _col = ctrl_rstate_get( CURRENT_COLUMN )
+    _col_size = max_col_size - 5
+    for (i=_col; i>=1; --i) {
+        _len = col_max[ i ] + 2
+        if (_col_size < _len) return i+1
+        _col_size -= _len
+    }
+    return 1
+}
+
+function view_body(             model_row_i, col_i, _col_start, model_start_row, _tmp_currow, _data){
     if (model_row == 0) {
         _data = "We couldn’t find any data ..."
-        _data = str_pad_left(_data, int(max_col_size/2), int(length(_data)/2))
-        return th(TH_TABLE_UINFIND, _data)
+        _data = str_pad_center(_data, max_col_size, length(_data))
+        return th(TH_TABLE_UNFIND, _data)
     }
+
+    _col_start = view_body_cal_beginning_col()
     _data = view_header()
 
     _tmp_currow = ctrl_rstate_get( CURRENT_ROW )
@@ -81,7 +95,7 @@ function view_body(             model_row_i, col_i, model_start_row, _tmp_currow
         if (model_row_i > model_row) break
         data_row_i = model[ model_row_i ]
         _data = _data sprintf("%s", str_pad_right( data_row_i, 5 ))
-        for (col_i=1; col_i<=data_col_num; col_i++) {
+        for (col_i=_col_start; col_i<=data_col_num; col_i++) {
             _data = _data update_view_print_cell( model_row_i, data_row_i, col_i )
         }
         _data = _data "\n"
@@ -99,15 +113,14 @@ function update_view_print_cell(model_row_i, data_row_i, col_i,       h, _size, 
 
     cord = data_row_i KSEP col_i
     if (col_max[ col_i ] <= COL_MAX_SIZE) {
-        _data =_data sprintf( "%s", str_pad_right( data[ cord ], col_max[ col_i ], data_wlen[ cord ] ) )
+        _data =_data sprintf( "│ %s", str_pad_right( data[ cord ], col_max[ col_i ], data_wlen[ cord ] ) )
     } else {
         if (data_wlen[ cord ] > COL_MAX_SIZE){
-            _data =_data sprintf( "%s", str_pad_right( substr(data[ cord ], 1, COL_MAX_SIZE) "...", COL_MAX_SIZE + 3, COL_MAX_SIZE + 3) )
+            _data =_data sprintf( "│ %s", str_pad_right( substr(data[ cord ], 1, COL_MAX_SIZE) "...", COL_MAX_SIZE + 3, COL_MAX_SIZE + 3) )
         } else {
-            _data =_data sprintf( "%s", str_pad_right( data[ cord ], COL_MAX_SIZE + 3, data_wlen[ cord ] ) )
+            _data =_data sprintf( "│ %s", str_pad_right( data[ cord ], COL_MAX_SIZE + 3, data_wlen[ cord ] ) )
         }
     }
-    _data =_data sprintf( "%s", "  " )
     return th(TH_TABLE_LINE_ITEM_FOCUSED, _data )
 }
 # EndSection

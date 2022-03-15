@@ -1,10 +1,8 @@
-# . ./lib/region
-# . ./lib/varctl
 xrc ui/lib/region
 xrc ui/lib/varctl
 
 ___x_cmd_ui_catsel(){
-    ___x_cmd_ui_region_update_with_keyboard ___x_cmd_ui_catsel_mainloop_awk
+    ___x_cmd_ui_region_autorefresh_with_keyboard ___x_cmd_ui_catsel_mainloop_awk
 }
 
 ___x_cmd_ui_catsel_mainloop_awk_(){

@@ -128,20 +128,20 @@ function view_body( _ctrl_current,                          data, _question, _li
         if ( _is_focused ) {
             STYLE_ANSWER_SELECTED       = TH_FORM_A_FOCUSED_SELECTED
             STYLE_ANSWER_UNSELECTED     = TH_FORM_A_FOCUSED_NOTSELECTED
-            _line                       = th( TH_FORM_Q_FOCUSED,   "> "_question ) th(UI_TEXT_DIM, ":") " "
+            _line                       = th(TH_FORM_Q_ARROW, "> ") th( TH_FORM_Q_FOCUSED, _question  ": " )
         } else {
             STYLE_ANSWER_SELECTED       = TH_FORM_A_UNFOCUSED_SELECTED
             STYLE_ANSWER_UNSELECTED     = TH_FORM_A_UNFOCUSED_NOTSELECTED
-            _line                       = th( TH_FORM_Q_UNFOCUSED,  "  " _question ) ": "
+            _line                       = th( TH_FORM_Q_UNFOCUSED,  "  " _question  ": " )
         }
 
         op = rule[ i ATT_OP ]
         if (op != "=") {
-            _answer     = ctrl_lineedit_get( rule, i ATT_ANS )
-            _answer_style=""
-            if (op ~ "=~") _answer_style = (judgment_of_regexp( rule, i )) ? UI_END : TH_FORM_Q_ERROR
-            _answer     = (op !~ /\*/) ? _answer : ui_str_rep( "*", length(_answer) )
-            _line       = _line th( _answer_style, _answer)
+            _answer       = ctrl_lineedit_get( rule, i ATT_ANS )
+            _answer_style = TH_FORM_Q_TRUE
+            if (op ~ "=~") _answer_style = (judgment_of_regexp( rule, i )) ? TH_FORM_Q_TRUE : TH_FORM_Q_FALSE
+            _answer       = (op !~ /\*/) ? _answer : ui_str_rep( "*", length(_answer) )
+            _line         = _line th( _answer_style, _answer)
         } else {
             _answer     = ctrl_rstate_get( rule, i ATT_ANS )
             for (j=1; j<=rule[ i L ]; ++j) {

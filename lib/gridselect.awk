@@ -63,9 +63,9 @@ function view_body(             _selected_item_idx, _iter_item_idx, _data_item_i
         _data = str_pad_left(_data, int(max_col_size/2), int(length(_data)/2))
         return th(TH_TABLE_UINFIND, _data)
     }
-    view_item_len = model_item_max + 3      # left 3 space
+    view_item_len = model_item_max      # left 3 space
 
-    view_body_col_num = int((max_col_size -1 -2) / view_item_len)
+    view_body_col_num = int((max_col_size -1 -4) / view_item_len)
     view_page_item_num = view_body_col_num * view_body_row_num
 
     view_page_num = int( ( model_len - 1 ) / view_page_item_num ) + 1
@@ -80,20 +80,21 @@ function view_body(             _selected_item_idx, _iter_item_idx, _data_item_i
             _data_item_idx = model[ _iter_item_idx ]
             _item_text = str_pad_right( data[ _data_item_idx ], view_item_len, data_wlen[ _data_item_idx ] )
             if ( ITEM_INDEX_STATE == true ) _item_index = _data_item_idx ": "
-            # if ( ITEM_INDEX_STATE == true ) _item_index = th(UI_FG_GREEN, _data_item_idx ": ")
-            if ( _iter_item_idx == _selected_item_idx )              _data = _data _item_index th(TH_GRIDSELECT_ITEM_FOCUSED, _item_text)
-            else if ( IS_SELECTED_ITEM[ _iter_item_idx ] == true )   _data = _data _item_index th(TH_GRIDSELECT_ITEM_SELECTED, _item_text)
-            else _data = _data _item_index _item_text
+            if (ctrl_sw_get( MULTIPLE_EDIT ) == true ) _item_icon = "  ● "
+            else _item_icon = "    "
+            if ( _iter_item_idx == _selected_item_idx )              _data = _data th(TH_GRIDSELECT_ITEM_SELECTED_INFO, "  > ") _item_index th(TH_GRIDSELECT_ITEM_FOCUSED, _item_text)
+            else if ( IS_SELECTED_ITEM[ _iter_item_idx ] == true )   _data = _data th(TH_GRIDSELECT_ITEM_ARROW, _item_icon) _item_index th(TH_GRIDSELECT_ITEM_SELECTED, _item_text)
+            else _data = _data th(TH_GRIDSELECT_ITEM_UNARROW, _item_icon) _item_index _item_text
             _iter_item_idx += max_data_row_num
         }
-        if (i != model_len) _data = _data "\n  "
+        if (i != model_len) _data = _data "\n"
         else _data = _data "\n"
     }
     # ctrl_rstate_set( SELECTED_ITEM_IDX, model[ _selected_item_idx ] )
     _data_idx = model[ _selected_item_idx ]
     _data_info = data_info[ _data_idx ]
     if ( _data_info != "" ) _data = _data "INFO: " th(TH_GRIDSELECT_ITEM_SELECTED_INFO, _data_info) "\n"
-    return "  " _data
+    return _data
 }
 
 function view_statusline(){
@@ -216,6 +217,7 @@ function consume_ctrl(      _cmd) {
 function consume_info(){
     if ( $0 == "---" ) {
         DATA_MODE = DATA_MODE_CTRL
+        if ( SELECT_FOCUS_ITEM_IDX != "" ) ctrl_rstate_set(SELECTED_ITEM_IDX, SELECT_FOCUS_ITEM_IDX)
         view()
         return
     }

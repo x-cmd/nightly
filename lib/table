@@ -168,7 +168,7 @@ ___x_cmd_ui_json2table(){
         if ($0 != "") {
             if (jiter_regexarr_parse(_, $0,  parl, par) == true ){
                 for (i=2; i<=arrl; i++) {
-                    item_text = jget(_, arr[i])
+                    item_text = jstr1(_, arr[i])
                     gsub("\"", "", item_text)
                     print item_text
                     print "\003"

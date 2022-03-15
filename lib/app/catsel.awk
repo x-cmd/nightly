@@ -24,16 +24,18 @@ function view_help(){
     return sprintf("%s", th_help_text( ctrl_help_get() ) )
 }
 
-function view_body_info_for_dir(view_grid, _selected_keypath,         i, l, _selected_index_of_this_column, _content){
+function view_body_info_for_dir(view_grid, _selected_keypath,         _max_len, i, l, _selected_index_of_this_column, _content){
     l = data[ _selected_keypath L]
     _selected_index_of_this_column = ctrl_win_val( treectrl, _selected_keypath )
+    _max_len = data[ _selected_keypath A "MAX_LEN" ] + 2
     for (i=1; i<=l; ++i) {
         _tmp = data[ _selected_keypath L i ]
-        _content = str_pad_right( _tmp, _max_col_len)
+        _content = str_pad_right( _tmp, _max_len)
         if ( _selected_index_of_this_column == i ) _content = th(TH_CATSEL_ITEM_UNFOCUSED_SELECT, _content)
+        else _content = th(TH_CATSEL_ITEM_UNFOCUSED_UNSELECT, _content)
         view_grid[ i S 0 ] = _content
     }
-    return data[ _selected_keypath A "MAX_LEN" ]
+    return _max_len
 }
 
 function view_body_info_for_file(view_grid, _selected_keypath, _selected,            _file_type, _file_size, _last_access, _last_modify, _last_change, _permission, _uid, _gid, i, l, _max_len){
@@ -47,17 +49,17 @@ function view_body_info_for_file(view_grid, _selected_keypath, _selected,       
     _uid             = data[ _selected_keypath A "UID" ]
     _gid             = data[ _selected_keypath A "GID" ]
 
-    view_grid[ 1 S 0 ] = sprintf("  Name: %s  Size: %s  Type: %s", _selected, _file_size, _file_type)
-    view_grid[ 2 S 0 ] = sprintf("Access: %s  Uid: ( %s )  Gid: ( %s )", _permission, _uid, _gid)
-    view_grid[ 3 S 0 ] = sprintf("Access: %s", _last_access)
-    view_grid[ 4 S 0 ] = sprintf("Modify: %s", _last_modify)
-    view_grid[ 5 S 0 ] = sprintf("Change: %s", _last_change)
+    view_grid[ 1 S 0 ] = th(TH_CATSEL_INFO_KEY, "  Name: ") UI_TEXT_BOLD _selected th(TH_CATSEL_INFO_KEY, " Size: ") UI_TEXT_BOLD _file_size th(TH_CATSEL_INFO_KEY, " Type: ") UI_TEXT_BOLD _file_type
+    view_grid[ 2 S 0 ] = th(TH_CATSEL_INFO_KEY, "Access: ") UI_TEXT_BOLD _permission th(TH_CATSEL_INFO_KEY, " Uid: ") UI_TEXT_BOLD "( " _uid " )" th(TH_CATSEL_INFO_KEY, " Gid: ") UI_TEXT_BOLD "( " _gid " )"
+    view_grid[ 3 S 0 ] = th(TH_CATSEL_INFO_KEY, "Access: ") UI_TEXT_BOLD _last_access
+    view_grid[ 4 S 0 ] = th(TH_CATSEL_INFO_KEY, "Modify: ") UI_TEXT_BOLD _last_modify
+    view_grid[ 5 S 0 ] = th(TH_CATSEL_INFO_KEY, "Change: ") UI_TEXT_BOLD _last_change
 
     for (i=1; i<=5; ++i) {
-        l = length( view_grid[ i S 0 ])
+        l = wcswidth( str_remove_style(view_grid[ i S 0 ]) )
+        view_grid[ i S 0 L ] = l
         if (_max_len < l)   _max_len = l
     }
-    view_grid[ 0 S 0 ] = ui_str_rep("_", _max_len)
     return _max_len
 }
 
@@ -77,23 +79,25 @@ function view_body_cal_beginning_col( info_view_maxlen,     _col_end, _col_size,
 function view_body_info( view_grid,             _selected, _selected_keypath ){
     _selected = data[ cur_keypath L ctrl_win_val( treectrl, cur_keypath ) ]
     _selected_keypath = cur_keypath S _selected
-    if ( is_expandable( _selected_keypath ) == true )    return     view_body_info_for_dir(  view_grid, _selected_keypath )
-    return                                                          view_body_info_for_file( view_grid, _selected_keypath , _selected)
+    if ( data[ _selected_keypath L ] > 0 )    return view_body_info_for_dir(  view_grid, _selected_keypath )
+    return                                           view_body_info_for_file( view_grid, _selected_keypath , _selected)
 }
 
-function view_body_show(view_grid, info_view_maxlen,                _return, i, _selected, _selected_keypath, _view_info_grid ){
+function view_body_show(view_grid, info_view_maxlen, _col_len,               _return, i, _selected, _selected_keypath, _view_info_grid ){
 
-    for (i=0; i<=VIEW_BODY_ROW_SIZE; ++i) {
+    _return = ui_str_rep(" ", _col_len + 4) "┌" ui_str_rep("─", info_view_maxlen) "┐"
+    for (i=1; i<=VIEW_BODY_ROW_SIZE; ++i) {
         _selected = data[ cur_keypath L ctrl_win_val( treectrl, cur_keypath ) ]
         _selected_keypath = cur_keypath S _selected
-        if ( is_expandable( _selected_keypath ) == false )      _view_info_grid = th(TH_CATSEL_INFO, str_pad_right(view_grid[ i S 0 ], info_view_maxlen))
-        else                                                    _view_info_grid = view_grid[ i S 0 ]
-        _return = _return UI_END "\n" "  " view_grid[ i ] "  " _view_info_grid
+        if ( data[ _selected_keypath L ] < 1 )                     _view_info_grid = view_grid[ i S 0 ] ui_str_rep(" ", info_view_maxlen - view_grid[ i S 0 L ])
+        else                                                       _view_info_grid = str_pad_right(view_grid[ i S 0 ], info_view_maxlen)
+        _return = _return UI_END "\n" "  " view_grid[ i ] "  " "│" _view_info_grid "│"
     }
+    _return = _return UI_END "\n" ui_str_rep(" ", _col_len + 4) "└" ui_str_rep("─", info_view_maxlen) "┘"
     return _return
 }
 
-function view_body( view_grid,                  _info_view_maxlen, _col_start, _col_size, j, i, _kp, _offset_for_this_column, _selected_index_of_this_column, _max_col_len, _i_for_this_column, _tmp, _content ){
+function view_body( view_grid,                  _info_view_maxlen, _col_start, _col_len, _col_size, j, i, _kp, _offset_for_this_column, _selected_index_of_this_column, _max_col_len, _i_for_this_column, _tmp, _content ){
     _info_view_maxlen = view_body_info( view_grid )
     _col_start = view_body_cal_beginning_col( _info_view_maxlen )
     _col_size  = stack_length( treectrl )
@@ -103,8 +107,8 @@ function view_body( view_grid,                  _info_view_maxlen, _col_start, _
         _offset_for_this_column = ctrl_win_begin( treectrl, _kp )
         _selected_index_of_this_column = ctrl_win_val( treectrl, _kp )
         _max_col_len = data[ _kp A "MAX_LEN" ] + 2
+        _col_len = _col_len + _max_col_len
 
-        view_grid[ 0 ] = view_grid[ 0 ] ui_str_rep("_", _max_col_len)
         for (i=1; i<=VIEW_BODY_ROW_SIZE; ++i) {
             _i_for_this_column = _offset_for_this_column + i - 1
             if (_i_for_this_column > data[ _kp L]) {
@@ -121,14 +125,14 @@ function view_body( view_grid,                  _info_view_maxlen, _col_start, _
                 STYLE_CATSEL_SELECTED      =   TH_CATSEL_ITEM_UNFOCUSED_SELECT
                 STYLE_CATSEL_UNSELECTED    =   TH_CATSEL_ITEM_UNFOCUSED_UNSELECT
             }
-            if ( is_expandable( _kp S _tmp ) == false )                     _content = th(TH_CATSEL_UNDIRECTORY,    _content)
+            if ( is_expandable( _kp S _tmp ) == true )                      _content = th(TH_CATSEL_DIRECTORY, _content)
             if ( _selected_index_of_this_column == _i_for_this_column )     _content = th(STYLE_CATSEL_SELECTED,    _content)
             else                                                            _content = th(STYLE_CATSEL_UNSELECTED,  _content)
             view_grid[ i ] = view_grid[ i ] _content
         }
     }
 
-    return view_body_show( view_grid, _info_view_maxlen )
+    return view_body_show( view_grid, _info_view_maxlen, _col_len )
 }
 
 # EndSection
@@ -157,7 +161,7 @@ function ctrl(char_type, char_value,        _selected, _selected_keypath ){
     if (char_value == "RIGHT") {
         _selected = data[ cur_keypath L ctrl_win_val( treectrl, cur_keypath ) ]
         _selected_keypath = cur_keypath S _selected
-        if (( is_expandable( _selected_keypath ) == false) || ( data[ _selected_keypath L ] < 1)) return
+        if ( data[ _selected_keypath L ] < 1 ) return
         cur_keypath = _selected_keypath
         stack_push( treectrl, cur_keypath )
         return
