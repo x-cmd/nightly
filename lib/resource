@@ -78,7 +78,6 @@ ___x_cmd_git_json_query(){
 }
 
 
-#TODO:awk!!!
 ___x_cmd_git_json_query_rename(){
     local data
     data="$(cat)"

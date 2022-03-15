@@ -6,9 +6,7 @@ ___x_cmd_gh_repo_pr(){
 subcmd:
     ls              "list pull requests"
     info            "pull request info"
-    log             "pull requests log"
-    commit          "get pull requests commit"
-    create          "create pull request"
+    add             "create pull request"
     update          "update pull requests"
     merge           "merge pull requests"
 '
@@ -16,103 +14,63 @@ subcmd:
 
     if [ -z "$PARAM_SUBCMD" ]; then
         gh_log error "Command Not Found. Show help."
-        return 0
+        ___x_cmd_gh_repo_pr _param_help_doc
+        return 1
     fi
 
     "___x_cmd_gh_repo_pr_${PARAM_SUBCMD}" "$@"
 }
 
 
-# Section: ls info log commit view
+# Section: ls info log comments view
 
 ___x_cmd_gh_repo_pr_ls() {
 
     param:scope     "github/$O"
     param:dsl       '
-type:
-    state = open merged closed all
-    sort  = created updated popularity long-running
-    direction = desc asc
 options:
-    --repo          "Provide owner name and repo name.(default:the current user repo)"  <>
+    --repo          "Provide owner name and repo name.(default:the current user repo)"  <>:RepoName
     --head          "source branch. Format: [username:]<branch>"                        <>=""
     --base          "target branch. Format: [username:]<branch>"                        <>=""
-    --state         "state"                                                             <>:state="open"
-    --sort          "sort"                                                              <>:sort="created"
-    --direction     "direction"                                                         <>:direction="desc"
+    --state         "state"                                                             <>:PrState="all"
+    --sort          "sort"                                                              <>:PrSort="created"
+    --direction     "direction"                                                         <>:Direction="desc"
 '
     param:run
 
     ___x_cmd_gh_param_init_owner_repo
-    ___x_cmd_gh_get "/repos/$owner_repo/pulls" state head base sort direction>a.json
+    if [ -t 1 ];then
+        if ___ui_table_json number=.number state=.state title=.title url=.html_url \
+            -- "___x_cmd_gh_get" "/repos/$owner_repo/pulls" state head base sort direction; then
+            return 0
+        fi
+    else
+        ___x_cmd_gh_get "/repos/$owner_repo/pulls" state head base sort direction && return 0
+    fi
+    ___x_cmd_ui_tf false "get $owner_repo pull request list fail"
+    return 1
 }
-
-# Assume pr and owner_repo are environments
-___parse_pr_init_owner_repo_and_pr_main(){
-    local pr_number=${pr##*/}
-    owner_repo=${pr%/$pr_number}
-    ___x_cmd_gh_param_normalize_repo "$owner_repo"
-    pr="$pr_number"
-}
-
-alias ___parse_pr_init_owner_repo_and_pr='
-    local pr
-    local owner_repo
-    ___parse_pr_init_owner_repo_and_pr_main || return
-'
 
 ___x_cmd_gh_repo_pr_info() {
     param:scope     "github/$O"
     param:dsl       '
 options:
-    #1|--pr             "pr id"     <>:number
+    --repo          "Provide owner name and repo name.(default:the current user repo)"  <>:RepoName
+    #1|--number     "pr number"     <>:NatureNumber
 '
     param:run
 
-    ___parse_pr_init_owner_repo_and_pr
-    ___x_cmd_gh_get "/repos/${owner_repo}/pulls/$pr"
+    ___x_cmd_gh_param_init_owner_repo
+    ___x_cmd_gh_get "/repos/${owner_repo}/pulls/$number" | (
+        ___x_cmd_git_json_query_rename url=.html_url state=.state title=.title body=.body
+        if [ -n "$state" ];then
+            ___x_cmd_ui_tf true "get number $number pr success" "Url:$url" "State:$state" "Title:$title" "Body:$body"
+        else
+            ___x_cmd_ui_tf false "get number $number pr fail"
+            return 1
+        fi
+    )
 }
-
-
-___x_cmd_gh_repo_pr_log() {
-    param:scope     "github/$O"
-    param:dsl       '
-type:
-    state  = desc asc
-options:
-    #1|--pr             "pr id"                 <>:number
-    --sort              "sort"                  <>:state="desc"
-'
-    param:run
-
-    ___parse_pr_init_owner_repo_and_pr
-    ___x_cmd_gh_get "/repos/${owner_repo}/pulls/$pr/operate_logs" sort
-}
-
-___x_cmd_gh_repo_pr_commit() {
-    param:scope     "github/$O"
-    param:dsl       '
-options:
-    #1|--pr             "pr id"                <>
-'
-    param:run
-    ___parse_pr_init_owner_repo_and_pr
-    ___x_cmd_gh_get "/repos/${owner_repo}/pulls/$pr/commits"
-}
-
-___x_cmd_gh_repo_pr_view() {
-    param:scope     "github/$O"
-    param:dsl       '
-options:
-    #1|--pr             "pr id"         <>:number
-'
-    param:run
-
-    ___parse_pr_init_owner_repo_and_pr
-
-    http browse "https://github.com/${owner_repo}/pulls/$pr"
-}
-
 # EndSection
 
 # Section: create update merge
@@ -160,7 +118,7 @@ options:
 '
     param:run
 
-    ___parse_pr_init_owner_repo_and_pr
+    ___x_cmd_gh_param_init_owner_repo
     ___x_cmd_gh_patch_json "/repos/${owner_repo}/pulls/$pr" title body milestone_number\
         labels assignees_number testers_number state
 }
@@ -179,12 +137,98 @@ options:
 '
     param:run
 
-    ___parse_pr_init_owner_repo_and_pr
+    ___x_cmd_gh_param_init_owner_repo
     ___x_cmd_gh_put_json "/repos/${owner_repo}/pulls/$pr/merge"  merge_method \
         prune_source_branch title description
 }
 
 # EndSection
 
+___x_cmd_gh_repo_pr_view() {
+    param:scope     "github/$O"
+    param:dsl       '
+options:
+    #1|--pr             "pr id"         <>:number
+'
+    param:run
 
+    ___x_cmd_gh_param_init_owner_repo
 
+    http browse "https://github.com/${owner_repo}/pulls/$pr"
+}
+
+___x_cmd_gh_repo_pr_comments(){
+    param:dsl       '
+subcmd:
+    ls              "list pull requests comments"
+    info            "pull request comments info"
+    add             "create pull request comments"
+    update          "update pull requests comments"
+'
+    param:run
+
+    if [ -z "$PARAM_SUBCMD" ]; then
+        gh_log error "Command Not Found. Show help."
+        ___x_cmd_gh_repo_pr_comments _param_help_doc
+        return 1
+    fi
+
+    "___x_cmd_gh_repo_pr_comments_${PARAM_SUBCMD}" "$@"
+}
+# TODO:github API error
+# Section:fail
+___x_cmd_gh_repo_pr_comments_ls() {
+    param:scope     "github/$O"
+    param:dsl       '
+options:
+    --repo      "Provide owner name and repo name.(default:the current user repo)"  <>:RepoName
+    #1|--number "pr number"                                                         <>
+'
+    param:run
+    ___x_cmd_gh_param_init_owner_repo
+    if [ -t 1 ];then
+        if ___ui_table_json id=.id body=.body url=.url \
+            -- "___x_cmd_gh_get" "/repos/${owner_repo}/pulls/$number/comments"; then
+            return 0
+        fi
+    else
+            ___x_cmd_gh_get "/repos/${owner_repo}/pulls/$number/comments" && return 0
+    fi
+    ___x_cmd_ui_tf false "get $owner_repo pull request comments list fail"
+    return 1
+}
+
+___x_cmd_gh_repo_pr_comments_add(){
+    param:scope     "github/$O"
+    param:dsl       '
+options:
+    --repo          "Provide owner name and repo name.(default:the current user repo)"  <>:RepoName
+    --number        "pr number"                                                         <>
+    --body          "The text of the review comment."                                   <>
+    --commit_id     "The SHA of the commit needing a comment"                           <>=""
+    -p|--path       "The relative path to the file"                                     <>=""
+    --position      "The position in the diff where you want to add a review comment"   <>=""
+    --side          ""                                                                  <>=""
+    --line          ""                                                                  <>=""
+    --start_line    ""                                                                  <>=""
+    --start_side    ""                                                                  <>=""
+    --in_reply_to   ""                                                                  <>=""
+'
+    param:run
+    ___x_cmd_gh_param_init_owner_repo
+    ___x_cmd_gh_post_json "/repos/${owner_repo}/pulls/$number/comments" body>a.json
+}
+
+___x_cmd_gh_repo_pr_comments_rm(){
+    param:scope     "github/$O"
+    param:dsl       '
+options:
+    --repo          "Provide owner name and repo name.(default:the current user repo)"  <>:RepoName
+    --comment_id    "comment id"                                                         <>
+'
+    param:run
+    ___x_cmd_gh_param_init_owner_repo
+    ___x_cmd_gh_post_json "/repos/${owner_repo}/pulls/comments/${comment_id}" body>a.json
+}
+
+# EndSection

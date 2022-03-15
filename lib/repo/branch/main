@@ -3,13 +3,12 @@
 ___x_cmd_gh_repo_branch(){
     param:dsl       '
 subcommand:
-    ls              "list member"
-    info            ""
-    rename          ""
-    add             "add member"
-    rm              "Remove member"
-    default         ""
-    protection      ""
+    ls              "list repo branch"
+    info            "get repo branch info"
+    rename          "rename the repo branch"
+    rm              "Remove repo branch"
+    default         "set default branch"
+    protection      "protection branch management"
 '
     param:run
 
@@ -109,10 +108,10 @@ options:
 ___x_cmd_gh_repo_branch_protection(){
     param:dsl       '
 subcommand:
-    info            ""
-    ls              ""
-    set             ""
-    rm              ""
+    info            "protection branch info"
+    ls              "protection branch list"
+    set             "set branch to protection branch"
+    rm              "remove branch protection"
 '
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
