@@ -25,7 +25,7 @@ BEGIN{
 
     RE_NUMBER = "^[-+]?[0-9]+$"
     RE_NUM = "[-+]?(0|[1-9][0-9]*)([.][0-9]+)?([eE][+-]?[0-9]+)?"
-    RE_REDUNDANT = "([ \\t]*[\n]+)+"
+    RE_REDUNDANT = "([ \t]*[\n]+)+"
 
     # RE_TRIM = re_or( "^" RE_SPACE, RE_SPACE "$" )
     RE_TRIM = "^" RE_SPACE RE_OR RE_SPACE "$"
@@ -71,7 +71,7 @@ BEGIN{
     RE_STR2 = "\"" RE_NOQUOTE2 re( RE_QUOTE_CONTROL_OR_UNICODE RE_NOQUOTE2, "*" ) "\""
 
     # RE_STR0 = "[^ \\t\\v\\n]*" "((\\\\[ ])[^ \\t\\v\\n]*)*"
-    RE_STR0 = "(\\\\[ ])*[^ \\t\\v\\n]+"  "((\\\\[ ])[^ \\t\\v\\n]*)*"
+    RE_STR0 = "[ ]*[^ \t\v\n]+"  "((\\\\[ ])[^ \t\v\n]*)*"
 }
 
 # awk 'BEGIN{ match("-b+cd", "[[:alnum:][:punct:]]*"); print RLENGTH " " RSTART; }'
