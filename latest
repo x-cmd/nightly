@@ -178,7 +178,7 @@ alias param:run='local IFS; ___x_cmd_param_int "$@" ; local _x_cmd_param_code="$
 
 ___x_cmd_param_int(){
     case "$1" in
-        _x_cmd_help)
+        _x_cmd_help | _param_help_doc)
             ___X_CMD_PARAM_AWK_PATH="$(xrc which param/lib/help.awk)" _param_main
             ;;
         _x_cmd_advise_json)

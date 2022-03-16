@@ -155,13 +155,11 @@ function str_joinwrap(sep, left, right, obj, prefix, start, end,     i, _result)
 
 # Section: token argument
 BEGIN{
-
-
-    PARAM_RE_1 = "<[A-Za-z0-9_ ]*>" "(:[A-Za-z\\-]+)*"
-    PARAM_RE_1_2 = "=" re( re( RE_STR2 ) RE_OR re( RE_STR0 ) )
+    PARAM_RE_1 = "<[A-Za-z0-9_ ]*>" "(:[A-Za-z_\\-]+)*"
+    PARAM_RE_1_2 = "=" re( RE_STR2 )
     PARAM_RE_1 = PARAM_RE_1 re( PARAM_RE_1_2, "?" )
 
-    PARAM_RE_ARG = re( PARAM_RE_1 ) RE_OR re( RE_STR2 ) RE_OR re( RE_STR0 ) # re( "[^ \\t\\v\\n]+" "((\\\\[ ])[^ \\t\\v\\n]*)*" )# re(RE_STR0) # re( "[A-Za-z0-9\\-_=\\#|]+" )
+    PARAM_RE_ARG = re( PARAM_RE_1 ) RE_OR re( RE_STR2 ) RE_OR re( RE_STR0 )# re( "[^ \\t\\v\\n]+" "((\\\\[ ])[^ \\t\\v\\n]*)*" )# re(RE_STR0) # re( "[A-Za-z0-9\\-_=\\#|]+" )
 }
 
 BEGIN{
