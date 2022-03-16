@@ -5,6 +5,7 @@
 # Section: main
 xrc dict/latest
 xrc param/latest
+xrc ps1env
 ___x_cmd_http() {
     local O="${O:-_HTTP_DEFAULT}"
     if [ "${1#@}" != "$1" ]; then
