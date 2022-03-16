@@ -1,0 +1,27 @@
+# shellcheck shell=sh disable=SC2039,SC1090,SC3043,SC2263    # xrc
+xrc env/lib/sdk
+
+# Section: Java ls_remote and la
+
+___x_cmd_env_java_ls_remote(){
+	___x_cmd_env_sdk_ls_remote java "$@"
+}
+
+# EndSection
+
+# Section: download, unpack
+
+___x_cmd_env_java_download_archive(){
+   ___x_cmd_env_sdk_download_archive java "$@"
+}
+
+___x_cmd_env_java_unpack(){
+	___x_cmd_env_sdk_unpack java "$@"
+}
+
+
+# EndSection
+
+___x_cmd_env_java_ws(){
+    :
+}

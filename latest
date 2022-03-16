@@ -1,0 +1,29 @@
+# shellcheck shell=sh disable=SC3043,SC2164,SC3000-SC4000     # xrc
+
+# author:       Li Junhao           l@x-cmd.com
+# license:      GPLv3
+
+# Inject the environment.
+___x_cmd_env_main() {
+    xrc env/lib/main
+    ___x_cmd_env_main "$@"
+}
+
+# Section: advise ls_version
+
+___x_cmd_env_advise_ls_remote_version(){
+    local candidate_idx="${1:-2}"
+    [ -n "$ZSH_VERSION" ] && candidate_idx=$((candidate_idx+1))
+    # TODO:Here, the previous argument should be obtained through the interface provided by advise
+    x env ls -r "${COMP_WORDS[candidate_idx]}"
+}
+
+___x_cmd_env_advise_ls_local_version(){
+    local candidate_idx="${1:-2}"
+    [ -n "$ZSH_VERSION" ] && candidate_idx=$((candidate_idx+1))
+    x env ls "${COMP_WORDS[candidate_idx]}"
+}
+
+# EndSection
+
+xrc setmain ___x_cmd_env_main
