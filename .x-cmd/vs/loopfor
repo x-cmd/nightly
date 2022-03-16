@@ -50,7 +50,7 @@ console.log(s)
 A
 }
 
-time loop_awk   1000000
-time loop_py    1000000
-time loop_py2   1000000
-time loop_node  1000000
+time (loop_awk   1000000)
+time (loop_py    1000000)
+time (loop_py2   1000000)
+time (loop_node  1000000)

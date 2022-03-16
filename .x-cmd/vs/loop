@@ -39,7 +39,7 @@ print(s)
     "
 }
 
-time loop_awk   100000000
+time (loop_awk   100000000)
 # time loop_sh    1000000
-time loop_py    100000000
-time loop_py2   100000000
+time (loop_py    100000000)
+time (loop_py2   100000000)

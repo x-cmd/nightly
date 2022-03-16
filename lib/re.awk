@@ -71,7 +71,7 @@ BEGIN{
     RE_STR2 = "\"" RE_NOQUOTE2 re( RE_QUOTE_CONTROL_OR_UNICODE RE_NOQUOTE2, "*" ) "\""
 
     # RE_STR0 = "[^ \\t\\v\\n]*" "((\\\\[ ])[^ \\t\\v\\n]*)*"
-    RE_STR0 = "[ ]*[^ \t\v\n]+"  "((\\\\[ ])[^ \t\v\n]*)*"
+    RE_STR0 = "(\\\\[ ])*[^ \t\v\n]+"  "((\\\\[ ])[^ \t\v\n]*)*"
 }
 
 # awk 'BEGIN{ match("-b+cd", "[[:alnum:][:punct:]]*"); print RLENGTH " " RSTART; }'

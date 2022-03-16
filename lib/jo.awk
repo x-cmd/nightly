@@ -3,9 +3,11 @@ BEGIN {
     T_LIST = "["
     T_DICT = "{"
 
-    JO_WORDS = "null|false|true"
+    JO_WORDS  = "null|false|true"
+    JO_SYMBOL = ":|,|]|\\[|\\{|\\}"
 
-    JO_TOKEN = re( RE_STR2 ) RE_OR re( RE_STR1 ) RE_OR ":|,|\\[|\\]|\\{|\\}" RE_OR re( RE_STR0 )
+    JO_TOKEN = re( RE_STR2 ) RE_OR re( RE_STR1 ) RE_OR JO_SYMBOL
+    # JO_TOKEN = JO_SYMBOL RE_OR re( RE_STR2 ) RE_OR re( RE_STR1 ) RE_OR re( RE_STR0 )
     JO_TOKEN = JO_TOKEN RE_OR re( RE_NUM ) RE_OR JO_WORDS
 
     JO_RE_NEWLINE_TRIM_SPACE = "[ \n\t\v]+"
