@@ -2,7 +2,7 @@
 
 # author:       Li Junhao           l@x-cmd.com
 
-___X_CMD_TAB_AWK="$___X_CMD_ROOT/tab/lib/tab.awk)"
+___X_CMD_TAB_AWK="$___X_CMD_ROOT/tab/lib/tab.awk"
 
 ___x_cmd_tab(){
     command awk -v ROW="$1" -v COL="$2" -f "$___X_CMD_TAB_AWK"
