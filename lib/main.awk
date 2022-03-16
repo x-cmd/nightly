@@ -215,7 +215,7 @@ function handle_arguments(          i, j, arg_name, arg_name_short, arg_val, opt
         if ( arg_name == "--" )  break
 
         if ( ( arg_name == "--help") && ( arg_name == "-h") ) {
-            print_helpdoc()
+            exec_help()
         }
 
         option_id     = option_alias_2_option_id[arg_name]

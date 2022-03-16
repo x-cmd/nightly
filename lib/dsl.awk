@@ -173,6 +173,7 @@ function param_tokenized(s, arr,       l){
     gsub( PARAM_RE_ARG, "\n&", s )
     gsub( PARAM_RE_NEWLINE_TRIM, "\n", s )
     gsub( "^[\n]+" RE_OR "[\n]+$", "", s)
+    gsub( "\"", "", s)
     l = split(s, arr, "\n")
     return l
 }
@@ -200,6 +201,7 @@ function param_print_tokenized(s, arr){
 #     s0 = "--license               \"Test regex arg3\"  <regex_arg3>   =   \"MulanPSL-2.0\" \"0BSD\" \"AFL-3.0\" \"AGPL-3.0\" \"\" \"XXXX License\""
 #     s1 = "--license               \"Test regex arg3\"  <regex_arg3>=abcb   =   \"MulanPSL-2.0\" \"0BSD\" \"AFL-3.0\" \"AGPL-3.0\" \"\" \"XXXX License\""
 #     s2 = "#3|#n|#a|--regex_arg3|-s      \"Repo name 3\"        <>:repo"
+#     s3 = "-y|--fsdfsd|-o          \"Test regex arg1\"  <regex_arg1>=888  =~  \"[0-9]+\""
 
 #     param_print_tokenized( s0 )
 #     param_print_tokenized( s1 )
@@ -502,9 +504,8 @@ function handle_optarg_declaration(optarg_definition, optarg_id,
 
     # debug( "handle_optarg_definition:\t" optarg_definition )
     # debug( "optarg_id:\t" optarg_id )
-    tokenize_argument_into_TOKEN_ARRAY_legacy( optarg_definition )
+    tokenize_argument_into_TOKEN_ARRAY( optarg_definition )
     optarg_definition_token1 = TOKEN_ARRAY[ 1 ]
-
 
     if (! match( optarg_definition_token1, /^<[-_A-Za-z0-9]*>/) ) {
         panic_param_define_error("Unexpected optarg declaration: \n" optarg_definition)
@@ -540,7 +541,7 @@ function handle_optarg_declaration(optarg_definition, optarg_id,
             return
         }
 
-        tokenize_argument_into_TOKEN_ARRAY_legacy( type_rule)
+        tokenize_argument_into_TOKEN_ARRAY( type_rule)
 
         for ( i=1; i<=TOKEN_ARRAY[ L ]; ++i ) {
             option_arr[ optarg_id S OPTARG_OPARR S i ] = TOKEN_ARRAY[i]
@@ -554,7 +555,7 @@ function handle_optarg_declaration(optarg_definition, optarg_id,
 function parse_param_dsl_for_positional_argument(line,
     option_id, option_desc, tmp, _arr_len, _arr, _index, _arg_name, _arg_no, _optarg_id){
 
-    tokenize_argument_into_TOKEN_ARRAY_legacy( line )
+    tokenize_argument_into_TOKEN_ARRAY( line )
 
     option_id = TOKEN_ARRAY[1]
 
@@ -606,7 +607,7 @@ function parse_param_dsl_for_positional_argument(line,
 function parse_param_dsl_for_all_positional_argument(line,
     option_id, option_desc, tmp){
 
-    tokenize_argument_into_TOKEN_ARRAY_legacy( line )
+    tokenize_argument_into_TOKEN_ARRAY( line )
 
     option_id = TOKEN_ARRAY[1]  # Should be #n
 
@@ -703,7 +704,7 @@ function parse_param_dsl(line,
                 option_arr[ L ] = len
                 option_arr[ len ] = line
 
-                tokenize_argument_into_TOKEN_ARRAY_legacy( line )
+                tokenize_argument_into_TOKEN_ARRAY( line )
                 option_id = TOKEN_ARRAY[1]
                 handle_option_id( option_id )
 
