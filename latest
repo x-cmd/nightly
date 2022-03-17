@@ -13,6 +13,10 @@ ___x_cmd_man() {
             x tldr "${1#:}"
             return
             ;;
+        -k|search)
+            shift
+            ___x_cmd_man_search "$@"
+            ;;
         _x_cmd_advise_json)
             xrc cat man/lib/___x_cmd_man.json
             return 126
