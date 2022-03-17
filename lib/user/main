@@ -59,8 +59,11 @@ options:
         url="/user/repos"
     fi
 
-    ___x_cmd_gh_get_multi "$url" visibility affiliation sort direction
-
+    if [ -t 1 ] && ___ui_table_json Id=.id Name=.name Owner=.owner.login Url=.html_url \
+        -- "___x_cmd_gh_get" "$url" visibility affiliation sort direction;then
+        return 0
+    fi
+    ___x_cmd_gh_get "$url" visibility affiliation sort direction && return 0
 }
 
 ___x_cmd_gh_user_email(){

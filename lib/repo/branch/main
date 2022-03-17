@@ -33,16 +33,13 @@ options:
     param:run
 
     ___x_cmd_gh_param_init_owner_repo
-    if [ -t 1 ];then
-        if ___ui_table_json BranchName=.name Protected=.protected \
-            EnforcementLevel=.protection.required_status_checks.enforcement_level \
-            --  "___x_cmd_gh_get_multi" "/repos/${owner_repo}/branches" protected per_page page
-        then
-            return 0
-        fi
-    else
-        ___x_cmd_gh_get_multi "/repos/${owner_repo}/branches" protected per_page page && return 0
+    if [ -t 1 ] && ___ui_table_json BranchName=.name Protected=.protected \
+                   EnforcementLevel=.protection.required_status_checks.enforcement_level \
+                    --  "___x_cmd_gh_get_multi" "/repos/${owner_repo}/branches" protected per_page page;then
+        return 0
     fi
+    ___x_cmd_gh_get_multi "/repos/${owner_repo}/branches" protected per_page page && return 0
+
     ___x_cmd_ui_tf false "get reppo ${owner_repo} branch list fail"
     return 1
 }

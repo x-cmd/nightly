@@ -39,14 +39,14 @@ options:
     param:run
 
     ___x_cmd_gh_param_init_owner_repo
-    if [ -t 1 ];then
-        if ___ui_table_json number=.number state=.state title=.title url=.html_url \
-            -- "___x_cmd_gh_get" "/repos/$owner_repo/pulls" state head base sort direction; then
-            return 0
-        fi
-    else
-        ___x_cmd_gh_get "/repos/$owner_repo/pulls" state head base sort direction && return 0
+
+    if [ -t 1 ] && ___ui_table_json number=.number state=.state title=.title url=.html_url \
+         -- "___x_cmd_gh_get" "/repos/$owner_repo/pulls" state head base sort direction; then
+        return 0
     fi
+
+    ___x_cmd_gh_get "/repos/$owner_repo/pulls" state head base sort direction && return 0
+
     ___x_cmd_ui_tf false "get $owner_repo pull request list fail"
     return 1
 }
@@ -186,14 +186,12 @@ options:
 '
     param:run
     ___x_cmd_gh_param_init_owner_repo
-    if [ -t 1 ];then
-        if ___ui_table_json id=.id body=.body url=.url \
+    if [ -t 1 ] && ___ui_table_json id=.id body=.body url=.url \
             -- "___x_cmd_gh_get" "/repos/${owner_repo}/pulls/$number/comments"; then
             return 0
-        fi
-    else
-            ___x_cmd_gh_get "/repos/${owner_repo}/pulls/$number/comments" && return 0
     fi
+    ___x_cmd_gh_get "/repos/${owner_repo}/pulls/$number/comments" && return 0
+
     ___x_cmd_ui_tf false "get $owner_repo pull request comments list fail"
     return 1
 }
