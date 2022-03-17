@@ -52,18 +52,18 @@ BEGIN {
 
 # Section: handle data
 
-function foreachrow(        i, j, start, end, sep ){
-    h = 0
+function foreachrow(        i, j, _first, _start, _end, _sep ){
+    _add_comma = 0
     for (i=1; i<=coll; ++i) {
-        start   = col[ i "S" ]
-        end     = col[ i "E" ]
-        sep     = col[ i "P" ]
-        if (end < 0 ) end = NF + end + 1
+        _start   = col[ i "S" ]
+        _end     = col[ i "E" ]
+        _sep     = col[ i "P" ]
+        if (_end < 0 ) _end = NF + _end + 1
 
-        for (j=start; j<end && j<=NF; j+=sep) {
-            if (h == 0) {
-                h=1;            printf("%s", $j)
-            } else              printf("\t%s", $j)
+        for (j=_start; j<_end && j<=NF; j+=_sep) {
+            if (_add_comma == 0) {
+                _add_comma=1;       printf("%s", $j)
+            } else                  printf("\t%s", $j)
         }
     }
     printf("\n")
@@ -89,7 +89,7 @@ function foreachline( lineno ){
     else                    foreachline( NR )
 }
 
-END {
+_end {
     for (i=1; i<=rowl; ++i) {
         row_end     = row[ i "E" ]
         if (row_end < 0)    row[ i "E" ] = row_end + NR + 1
