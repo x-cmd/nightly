@@ -3,9 +3,8 @@
 # author:       Li Junhao           l@x-cmd.com
 
 # Section: main
-xrc dict/latest
-xrc param/latest
-xrc ps1env
+xrc dict
+xrc param
 ___x_cmd_http() {
     local O="${O:-_HTTP_DEFAULT}"
     if [ "${1#@}" != "$1" ]; then
@@ -44,7 +43,7 @@ subcommands:
 }
 
 ___x_cmd_http_cli(){
-    xrc ps1env/latest
+    xrc ps1env
     ps1env init "http >"
     ps1env alias + "http"
     ps1env alias :h "http help"
