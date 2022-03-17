@@ -42,8 +42,9 @@ BEGIN {
 
     # Section: gridselect
     TH_GRIDSELECT_HEADER_NORMAL           =       ""
-    TH_GRIDSELECT_ITEM_FOCUSED            =       UI_TEXT_UNDERLINE UI_FG_CYAN
+    TH_GRIDSELECT_ITEM_FOCUSED            =       UI_FG_CYAN
     TH_GRIDSELECT_ITEM_SELECTED           =       UI_TEXT_BOLD
+    TH_GRIDSELECT_ITEM_UNSELECTED         =       ""
     TH_GRIDSELECT_ITEM_SELECTED_INFO      =       UI_FG_CYAN
     TH_GRIDSELECT_ITEM_ARROW              =       UI_FG_GREEN
     TH_GRIDSELECT_ITEM_UNARROW            =       UI_FG_DARKGRAY

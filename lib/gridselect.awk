@@ -65,7 +65,7 @@ function view_body(             _selected_item_idx, _iter_item_idx, _data_item_i
     }
     view_item_len = model_item_max      # left 3 space
 
-    view_body_col_num = int((max_col_size -1 -4) / view_item_len)
+    view_body_col_num = int((max_col_size -7) / view_item_len)
     view_page_item_num = view_body_col_num * view_body_row_num
 
     view_page_num = int( ( model_len - 1 ) / view_page_item_num ) + 1
@@ -84,7 +84,7 @@ function view_body(             _selected_item_idx, _iter_item_idx, _data_item_i
             else _item_icon = "    "
             if ( _iter_item_idx == _selected_item_idx )              _data = _data th(TH_GRIDSELECT_ITEM_SELECTED_INFO, "  > ") _item_index th(TH_GRIDSELECT_ITEM_FOCUSED, _item_text)
             else if ( IS_SELECTED_ITEM[ _iter_item_idx ] == true )   _data = _data th(TH_GRIDSELECT_ITEM_ARROW, _item_icon) _item_index th(TH_GRIDSELECT_ITEM_SELECTED, _item_text)
-            else _data = _data th(TH_GRIDSELECT_ITEM_UNARROW, _item_icon) _item_index _item_text
+            else _data = _data th(TH_GRIDSELECT_ITEM_UNARROW, _item_icon) _item_index th(TH_GRIDSELECT_ITEM_UNSELECTED, _item_text)
             _iter_item_idx += max_data_row_num
         }
         if (i != model_len) _data = _data "\n"

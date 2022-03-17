@@ -10,6 +10,7 @@ ___x_cmd_definelazyloader   ___x_cmd_ui_form          ui/lib/form
 ___x_cmd_definelazyloader   ___x_cmd_ui_tf            ui/lib/truefalse
 ___x_cmd_definelazyloader   ___x_cmd_ui_prompt        ui/lib/prompt
 ___x_cmd_definelazyloader   ___x_cmd_ui_markdown      ui/lib/markdown
+___x_cmd_definelazyloader   ___x_cmd_ui_catsel        ui/lib/app/catsel
 
 # EndSection
 
@@ -29,6 +30,7 @@ ___x_cmd_ui(){
         tf|truefalse)                                               ___x_cmd_ui_tf "$@" ;;
         prompt)                                                     ___x_cmd_ui_prompt "$@" ;;
         md|markdown)                                                ___x_cmd_ui_markdown "$@" ;;
+        catsel)                                                     ___x_cmd_ui_catsel ;;
         spin)                                                       ___x_cmd_ui_spin "$@" ;;
         sep)                                                        ___x_cmd_ui_sep "$@" ;;
         sep2)                                                       ___x_cmd_ui_sep2 "${1:--}" $(( $(___x_cmd_ui cols) / 2 )) ;;
