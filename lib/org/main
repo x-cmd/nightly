@@ -8,7 +8,8 @@ ___x_cmd_gt_org(){
     param:scope     "gitee/$O"
     param:dsl       '
 subcmd:
-    ls                      "Show org information or List all org"
+    ls                      "List all org"
+    info                    "Show org information"
     create                  "Create org"
     repo                    "List all repos"
     quit                    "Quit org"
@@ -25,6 +26,7 @@ subcmd:
     "___x_cmd_gt_org_${PARAM_SUBCMD}" "$@"
 }
 
+# Section: list & info
 # shellcheck disable=SC2154
 ___x_cmd_gt_org_ls() {
     param:scope     "gitee/$O"
@@ -36,19 +38,28 @@ options:
 '
     param:run
 
-    if [ $# -eq 0 ]; then
-        if [ -t 1 ]; then
-            if ___ui_table_json Id=.id Name=.name FollowCount=.follow_count Url=.repos_url \
-                -- "______x_cmd_gt_get_multi" "/v5/user/orgs" admin admin page per_page; then
-                return 0
-            fi
-        else
-            ______x_cmd_gt_get_multi "/v5/user/orgs" admin admin page per_page && \
-                return 0
+    if [ -t 1 ]; then
+        if ___ui_table_json Id=.id Name=.name FollowCount=.follow_count Url=.repos_url \
+            -- "______x_cmd_gt_get_multi" "/v5/user/orgs" admin admin page per_page; then
+            return 0
         fi
-        gt_log error "Couldn't find any data"
-        return 1
+    else
+        ______x_cmd_gt_get_multi "/v5/user/orgs" admin admin page per_page && \
+            return 0
     fi
+    gt_log error "Couldn't find any data"
+    return 1
+}
+
+# NOTE: ______x_cmd_gt_owner_type_query
+# shellcheck disable=SC2154
+___x_cmd_gt_org_info() {
+    param:scope     "gitee/$O"
+    param:dsl       '
+options:
+    #1|--org            "organization path"     <>=""
+'
+    param:run
 
     ______x_cmd_gt_get "/v5/orgs/${1:?Provide organization}" \
     | (
@@ -61,7 +72,9 @@ options:
         fi
     )
 }
+# EndSection
 
+# Section: create
 # It is very rare TODO: batch?
 # shellcheck disable=SC2181
 ___x_cmd_gt_org_create() {
@@ -86,7 +99,9 @@ options:
         fi
     )
 }
+# EndSection
 
+# Section: org repo
 ___x_cmd_gt_org_repo(){
     param:dsl       '
 subcmd:
@@ -129,7 +144,9 @@ options:
     gt_log error "Couldn't find any data. By $1"
     return 1
 }
+# EndSection
 
+# Section: quit
 # shellcheck disable=SC2181
 ___x_cmd_gt_org_quit() {
     param:scope     "gitee/$O"
@@ -151,3 +168,4 @@ options:
         fi
     done
 }
+# EndSection

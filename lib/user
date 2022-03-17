@@ -23,10 +23,7 @@ subcmd:
 
     # list issues of user
     # list repo of user
-   case "${PARAM_SUBCMD}" in
-       repo)  "___x_cmd_gt_repo_ls"              "$@"    ;;
-       *)     "___x_cmd_gt_user_${PARAM_SUBCMD}" "$@"
-   esac
+    ___x_cmd_gt_user_"${PARAM_SUBCMD}" "$@"
 }
 
 # Section: info repo email issue
@@ -79,10 +76,25 @@ options:
     --per_page      "per_page"          <>:number=20
 '
     param:run
+
+    local url
     if [ "$#" -gt 0 ]; then
-         ______x_cmd_gt_get_multi "/v5/users/$1/repos" visibility affiliation sort direction
-    else ______x_cmd_gt_get_multi "/v5/user/repos"     visibility affiliation sort direction
+        url="/v5/users/$1/repos"
+    else
+        url="/v5/user/repos"
     fi
+
+    if [ -t 1 ]; then
+        if ___ui_table_json Id=.id Name=.name Owner=.owner.login Url=.html_url \
+            -- ______x_cmd_gt_get_multi "$url" visibility affiliation sort direction; then
+            return 0
+        fi
+    else
+        ______x_cmd_gt_get_multi "$url" visibility affiliation sort direction && \
+            return 0
+    fi
+    gt_log error "Couldn't find any data"
+    return 1
 }
 
 # https://gitee.com/api/v5/swagger#/getV5Emails

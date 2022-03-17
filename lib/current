@@ -17,7 +17,7 @@ subcmd:
 
     case "${PARAM_SUBCMD}" in
         type)       "___x_cmd_gt_current_owner_${PARAM_SUBCMD}"   "$@"     ;;
-        *)          "___x_cmd_gt_current_${PARAM_SUBCMD}"        "$@"     ;;
+        *)          "___x_cmd_gt_current_${PARAM_SUBCMD}"         "$@"     ;;
     esac
 }
 
@@ -97,4 +97,3 @@ ______x_cmd_gt_owner_type_query() {
     done
     return 1
 }
-

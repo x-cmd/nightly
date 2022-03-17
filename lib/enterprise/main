@@ -7,7 +7,8 @@ ___x_cmd_gt_enterprise(){
     param:scope     "gitee/$O"
     param:dsl       '
 subcmd:
-    ls              "Show information"
+    ls              "List all enterprise"
+    info            "Show enterprise information"
     repo            "List all repos"
     issue           "List all issues"
     member          "enterprise member management"
@@ -25,6 +26,57 @@ subcmd:
     "___x_cmd_gt_enterprise_${PARAM_SUBCMD}" "$@"
 }
 
+# Section: list & info
+# shellcheck disable=SC2154
+___x_cmd_gt_enterprise_ls() {
+    param:scope     "gitee/$O"
+    param:dsl       '
+
+options:
+    --admin      "list only managed enterprise"     <>:bool=false
+    --page       "page"                             <>:number=1
+    --per_page   "per_page"                         <>:number=20
+'
+    param:run
+
+    if [ -t 1 ]; then
+        if ___ui_table_json Id=.id Name=.name Path=.path \
+            -- "______x_cmd_gt_get_multi" "/v5/user/enterprises" admin page per_page; then
+            return 0
+        fi
+    else
+        ______x_cmd_gt_get_multi "/v5/user/enterprises" admin page per_page && \
+            return 0
+    fi
+    gt_log error "Couldn't find any data"
+    return 1
+}
+
+# NOTE: ______x_cmd_gt_owner_type_query
+# shellcheck disable=SC2154
+___x_cmd_gt_enterprise_info() {
+    param:scope     "gitee/$O"
+    param:dsl       '
+
+options:
+    #1              "Please provide enterprise path"    <>
+'
+    param:run
+
+    ______x_cmd_gt_get "/v5/enterprises/${1:?Provide enterprise}" \
+    | (
+        ___x_cmd_git_json_query_rename id=.id name=.name path=.path
+        if [ -n "$id" ]; then
+            ___x_cmd_ui_tf true   "Success" "id: $id" "name: $name" "path: $path"
+        else
+            ___x_cmd_ui_tf false  "Couldn't find any enterprise info data by $1"
+            return 1
+        fi
+    )
+}
+# EndSection
+
+# Section: repo ls & repo create
 ___x_cmd_gt_enterprise_repo(){
     param:dsl       '
 subcmd:
@@ -39,42 +91,6 @@ subcmd:
     fi
 
     "___x_cmd_gt_enterprise_repo_${PARAM_SUBCMD}" "$@"
-}
-
-# shellcheck disable=SC2154
-___x_cmd_gt_enterprise_ls() {
-    param:scope     "gitee/$O"
-    param:dsl       '
-
-options:
-    --admin      "list only managed enterprise"     <>:bool=false
-    --page       "page"                             <>:number=1
-    --per_page   "per_page"                         <>:number=20
-'
-    param:run
-    if [ "$#" -eq 0 ]; then
-        if [ -t 1 ]; then
-            if ___ui_table_json Id=.id Name=.name Path=.path \
-                -- "______x_cmd_gt_get_multi" "/v5/user/enterprises" admin page per_page; then
-                return 0
-            fi
-        else
-            ______x_cmd_gt_get_multi "/v5/user/enterprises" admin page per_page && \
-                return 0
-        fi
-        gt_log error "Couldn't find any data"
-        return 1
-    fi
-    ______x_cmd_gt_get "/v5/enterprises/${1:?Provide enterprise}" \
-    | (
-        ___x_cmd_git_json_query_rename id=.id name=.name path=.path
-        if [ -n "$id" ]; then
-            ___x_cmd_ui_tf true   "Success" "id: $id" "name: $name" "path: $path"
-        else
-            ___x_cmd_ui_tf false  "Couldn't find any enterprise info data by $1"
-            return 1
-        fi
-    )
 }
 
 # https://gitee.com/api/v5/swagger#/getV5EnterprisesEnterpriseRepos
@@ -105,3 +121,4 @@ options:
     gt_log error "Couldn't find any data by $1"
     return 1
 }
+# EndSection

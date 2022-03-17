@@ -208,16 +208,7 @@ ___x_cmd_gt_repo_ls() {
         owner_type="$(______x_cmd_gt_owner_type_query "$owner")"
     fi
 
-    if [ -t 1 ]; then
-        if ___ui_table_json Id=.id Name=.name Owner=.owner.login Url=.html_url \
-            -- "___x_cmd_gt_${owner_type}_repo" ls "$@"; then
-            return 0
-        fi
-    else
-        ___x_cmd_gt_"${owner_type}"_repo ls "$@" && \
-            return 0
-    fi
-    gt_log error "Couldn't find any data"
+    ___x_cmd_gt_"${owner_type}"_repo ls "$@" && return 0
     return 1
 }
 # EndSection
