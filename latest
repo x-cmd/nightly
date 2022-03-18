@@ -1,56 +1,47 @@
-# shellcheck shell=sh disable=SC2039,SC3043 # xrc
+# Author:       Li Junhao           l@x-cmd.com         # xrc
+# shellcheck shell=sh disable=SC2039,SC3043
 
-# author:       Li Junhao           l@x-cmd.com
-
-___X_CMD_JO_AWK="$___X_CMD_ROOT/awk/lib/jo.awk"
-
-# x jo '{
-#     abc: cde,
-#     cde: eft,
-#     abc: aaa
-# }'
-
-# x jo abc cde abc
 ___x_cmd_jo(){
     if [ ! -t 1 ]; then
-        command awk -f "$___X_CMD_JO_AWK"
+        ___x_cmd_jo_awk
+        return
     fi
 
-    local op="${1:?Provide op}"
-    case "$op" in
-        list)
-            return
-            ;;
-        dict)
-            return
-            ;;
-        -)
-            command awk -f "$___X_CMD_ROOT/awk/lib/re.awk" -f "$___X_CMD_ROOT/awk/lib/jo.awk"
-            return
-            ;;
+    case "${1:?Provide op}" in
+        fmt)    if [ -t 1 ]; then       COLOR=1 ___x_cmd_jo_fmt "$@"
+                else                            ___x_cmd_jo_fmt "$@"
+                fi ;;
+        color)                          COLOR=1 ___x_cmd_jo_fmt "$@" ;;
+        list)   shift;                          ___x_cmd_jo_wrap ___x_cmd_jo_list "$@" ;;
+        dict)   shift;                          ___x_cmd_jo_wrap ___x_cmd_jo_dict "$@" ;;
+        -)                                      ___x_cmd_jo_wrap ___x_cmd_jo_awk ;;
+        *)      local IFS; printf "%s" "$*" |   ___x_cmd_jo_wrap ___x_cmd_jo_awk
     esac
-
-    local IFS
-    printf "%s" "$*" | command awk -f "$___X_CMD_ROOT/awk/lib/re.awk" -f "$___X_CMD_ROOT/awk/lib/jo.awk"
 }
 
-# Section: list
+___x_cmd_jo_awk(){  command awk -f "$___X_CMD_ROOT/awk/lib/re.awk" -f "$___X_CMD_ROOT/awk/lib/jo.awk";    }
 
-# x jo list 1 2 3
-___x_cmd_jo_list(){
-    :
+___x_cmd_jo_wrap(){
+    if [ ! -t 1 ]; then
+        "$@"
+    else
+        "$@" | COLOR=1 ___x_cmd_jo_awk_fmt
+    fi
 }
 
-# EndSection
-
-# Section: dict
-
-# x jo dict abc cde fge abc=123 aaa=$abc
-# x jo "{ abc: $abc, cde: $cde, fge: $fge }"
-___x_cmd_jo_dict(){
-    :
+# arg: indent
+___x_cmd_jo_fmt(){
+    command awk -v COLOR="$COLOR" -v INDENT="${1:-2}}" \
+        -f "$___X_CMD_ROOT/awk/lib/re.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/json.awk" \
+        -f "$___X_CMD_ROOT/jo/lib/fmt.awk"
 }
 
-# EndSection
+# time ___x_cmd_jo_list 1 2 \"true\" $( ___x_cmd_jo_list 1 2 3)
+if [ -n "${BASH_VERSION}${ZSH_VERSION}${KSH_VERSION}" ]; then
+    . "$___X_CMD_ROOT/jo/lib/list_dict"             # xrc jo/lib/list_dict
+else
+    . "$___X_CMD_ROOT/jo/lib/list_dict_posix"       # xrc jo/lib/list_dict_posix
+fi
 
 xrc setmain ___x_cmd_jo

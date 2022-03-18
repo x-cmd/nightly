@@ -1,0 +1,94 @@
+# shellcheck shell=bash disable=SC3010,SC3060,SC3003
+___x_cmd_jo_escape___(){
+    ___="${___//$'\\'/\\}"
+    ___="${___//$'\n'/\\n}"
+    ___="${___//$'\r'/\\n}"
+    ___="${___//$'\t'/\\t}"
+    ___="${___//$'\b'/\\b}"
+    ___="${___//\"/\\\"}"
+    ___="\"$___\""
+}
+
+___x_cmd_jo_list(){
+    local s=
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            true|false|null)    s="$s,$1"   ;;
+            \[*)                 s="$s,$1";;
+            \{*)                s="$s,$1";;
+            # =\"*)             s="$2,${1:1}"   ;;
+            *)
+                if [[ "$1" =~ ^[+-]?[0-9]+(.[0-9]+)*([eE][0-9]+(.[0-9]+))*$ ]];
+                then            s="$s,$1" ;
+                else
+                    ___="$1"
+                    ___x_cmd_jo_escape___
+                    s="$s,${___}" # s="$s,\"${1//\"/\\\"}\"" ;
+                fi
+                ;;
+        esac
+        shift
+    done
+    printf "%s" "[${s#?}]"
+}
+
+# shellcheck disable=SC3010,SC3060
+
+# jo dict abc="$abc"
+___x_cmd_jo_dict(){
+    printf "{\n"
+
+    local key
+    local first=0
+
+    local i
+
+    local ____
+    for i in "$@"; do
+        if [ "$first" -eq 0 ]; then
+            first=1
+        else
+            printf ',\n'
+        fi
+
+        ___=${i%%=*}
+        if [ "$___" != "$i" ]; then
+            ___x_cmd_jo_escape___
+            key="$___"
+            ___=${i#*=}
+
+            case "$___" in
+                true|false|null|\{*\}|\[*\]|\"*)
+                    printf '  %s: %s' "$key" "$___" ;;
+                *)
+                    if [[ "$___" =~ ^[+-]?[0-9]+(.[0-9]+)*([eE][0-9]+(.[0-9]+))*$ ]]; then
+                        printf '  %s: %s' "$key" "$___"
+                    else
+                        ___x_cmd_jo_escape___
+                        printf '  %s: %s' "$key" "$___"
+                    fi
+            esac
+            continue
+        fi
+
+        ___=${i%%\:*}
+        if [ "$___" != "$i" ]; then
+            ___x_cmd_jo_escape___
+            key="$___"
+            ___=${i#*\:}
+            ___x_cmd_jo_escape___
+            printf '  %s: %s' "$key" "$___"
+            continue
+        fi
+
+        ___x_cmd_jo_escape___
+        key="$___"
+        eval "___=\"\$$i\""
+        ___x_cmd_jo_escape___
+
+        printf '  %s: %s' "$key" "$___"
+    done
+
+    printf "\n}"
+}
+
