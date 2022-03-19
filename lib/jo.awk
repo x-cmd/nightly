@@ -4,9 +4,11 @@ BEGIN {
     T_DICT = "{"
 
     JO_WORDS  = "null|false|true"
-    JO_SYMBOL = ":|,|]|\\[|\\{|\\}"
+    JO_SYMBOL = ":|,|\\]|\\[|\\{|\\}"
 
-    JO_TOKEN = re( RE_STR2 ) RE_OR re( RE_STR1 ) RE_OR JO_SYMBOL
+    JO_RE_STR0   = "(\\\\[ ])*[^ \t\v\n:,\\[\\]}{]+"  "((\\\\[ ])[^ \t\v\n:,\\[\\]}{]*)*"
+
+    JO_TOKEN = re( RE_STR2 ) RE_OR re( RE_STR1 ) RE_OR JO_SYMBOL RE_OR re( JO_RE_STR0 )
     # JO_TOKEN = JO_SYMBOL RE_OR re( RE_STR2 ) RE_OR re( RE_STR1 ) RE_OR re( RE_STR0 )
     JO_TOKEN = JO_TOKEN RE_OR re( RE_NUM ) RE_OR JO_WORDS
 
@@ -75,7 +77,7 @@ function jinormal( obj, item ){
     } else if (item ~ /^[\]\}]$/) {
         print item
         JITER_FA_KEYPATH = obj[ --JITER_LEVEL ]
-        JITER_STATE = obj[ JITER_LEVEL ]
+        JITER_STATE = obj[ JITER_LEVEL "STATE" ]
         JITER_CURLEN = obj[ JITER_LEVEL "LEN" ]
     } else {
         jinormal_printkv( item )
