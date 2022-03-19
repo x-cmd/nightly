@@ -1,7 +1,5 @@
-# shellcheck shell=bash # xrc
-
-# author:       Li Junhao           l@x-cmd.com
-
+# Author:       Li Junhao           l@x-cmd.com     # xrc
+# shellcheck    shell=sh
 
 ___x_cmd_definelazyloader ___x_cmd_man_search man/lib/search
 

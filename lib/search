@@ -5,10 +5,6 @@ ___x_cmd_man_search(){
         return
     fi
 
-    ___x_cmd_man_search_base "$@"
-}
-
-___x_cmd_man_search_base(){
     command man -k "$@"
 }
 
@@ -27,12 +23,21 @@ ___x_cmd_man_search_ui(){
 
     while ___x_cmd_ui_gridselect ___x_cmd_man_search_ui_data ; do
         [ "$___X_CMD_UI_GRIDSELECT_FINAL_COMMAND" = "q" ] && break
-        local tmppath="${___X_CMD_UI_GRIDSELECT_CURRENT_ITEM%%\(*}"
-        tmppath="${tmppath% *}"
-        [ "$tmppath" == "" ] && break
-        ___x_cmd_man_run "$tmppath"
+
+        eval "$(command awk -v a="$___X_CMD_UI_GRIDSELECT_CURRENT_ITEM" 'BEGIN {
+            if (a == "") {
+                print "break"
+                exit(0)
+            }
+            r = index(a, "(")
+            name = substr(a, 1, r-1)
+            section = substr(a, r+1, length(a) - r - 1 )
+            gsub(/[ ]*$/, "", name)
+
+            print "___x_cmd_man_run " section " " name
+        }')"
+
         ___X_CMD_UI_SELECT_FOCUS_ITEM_IDX="$___X_CMD_UI_GRIDSELECT_CURRENT_ITEM_INDEX"
     done
-
 }
 
