@@ -20,10 +20,11 @@ function quote( a ){
             res = quote(res)
         }
     }
-    s= (s == "") ? res : ( s "," res )
+    gsub(",", "\n,\n", res)
+    s= (s == "") ? res : ( s "\n,\n" res )
 }
 END{
-    print "[" s "]"
+    print "[\n" s "\n]"
 }
 '
 }
@@ -89,18 +90,20 @@ END {
                     value = quote(value)
                 }
             }
-            printf( "  %s: %s", quote(key), value )
+            printf( "%s\n:\n%s\n", quote(key), value )
         } else if (var ~ /:/) {
             idx = index(var, ":")
             key = substr(var, 1, idx-1)
             value = substr(var, idx+1)
 
-            printf( "  %s: %s", quote(key), quote(value) )
+            printf( "%s\n:\n%s\n", quote(key), quote(value) )
         } else {
-            printf( "  %s: %s", quote(var), quote(env[var]) )
+            value = env[var]
+            if (value ~ /^(true)|(false)|(null)$/) printf( "%s\n:\n%s\n", quote(var), value )
+            else printf( "%s\n:\n%s\n", quote(var), quote(value) )
         }
     }
-    printf "\n}"
+    printf "}\n"
 }
 '
 
