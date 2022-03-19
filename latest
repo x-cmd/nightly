@@ -19,15 +19,18 @@ ___x_cmd_json(){
         push|append)        ___x_cmd_json_push          "$@" ;;
         unshift|prepend)    ___x_cmd_json_prepend       "$@" ;;
         put)                ___x_cmd_json_put           "$@" ;;
-        keys)               ___x_cmd_json_keys          "$@" ;;
-        values)             ___x_cmd_json_values        "$@" ;;
-        query)              ___x_cmd_json_query         "$@" ;;
+
         del)                ___x_cmd_json_del           "$@" ;;
         shift)              ___x_cmd_json_shift         "$@" ;;
         pop)                ___x_cmd_json_pop           "$@" ;;
-        length)             ___x_cmd_json_length        "$@" ;;
+
+        # Remove the following ...
         unescape)           ___x_cmd_json_unescape      "$@" ;;
         data)               ___x_cmd_json_data          "$@" ;;
+        keys)               ___x_cmd_json_keys          "$@" ;;
+        values)             ___x_cmd_json_values        "$@" ;;
+        query)              ___x_cmd_json_query         "$@" ;;
+        length)             ___x_cmd_json_length        "$@" ;;
         *)                  ___x_cmd_json_query         "$op" "$@" ;;
     esac
 }
