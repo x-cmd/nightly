@@ -220,11 +220,19 @@ function append_code(code){
 
 # TODO: check whether all of the invocator correctly quote the value
 function append_code_assignment(varname, value) {
+    if( varname == "path" ){
+        HAS_PATH = true
+        varname  = "___x_cmd_param_path"
+    }
     append_code( "local " varname " >/dev/null 2>&1" )
     append_code( varname "=" single_quote_string( value ) )
 }
 
 function append_query_code(varname, description, typestr){
+    if( varname == "path" ){
+        HAS_PATH = true
+        varname = "___x_cmd_param_path"
+    }
     append_code( "local " varname " >/dev/null 2>&1" )
     # append_code( "ui prompt main " quote_string(description) " " varname " " typestr )
     # append_query_code( quote_string(description) " " varname " " "\"\"" " " typestr )
@@ -453,6 +461,7 @@ BEGIN {
     OPTARG_OPARR = "val_oparr"
 
     HAS_SUBCMD = false
+    HAS_PATH   = false
 }
 
 function handle_option_id(option_id,            _arr, _arr_len, _arg_name, _index){

@@ -190,6 +190,10 @@ function handle_arguments_restargv(         final_rest_argv_len, i, arg_val, opt
     if (QUERY_CODE != ""){
         QUERY_CODE="___x_cmd_ui form " substr(QUERY_CODE, 9)
         append_code(QUERY_CODE)
+        if( HAS_PATH == true){
+            append_code( "local path >/dev/null 2>&1" )
+            append_code( "path=$___x_cmd_param_path" )
+        }
     }
 
     if (_need_set_arg == true) {
