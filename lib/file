@@ -1,0 +1,109 @@
+
+
+# Section: file service
+___x_cmd_hub_file(){
+    local subcmd="$1";  shift
+    case "$subcmd" in
+        ls)             ___x_cmd_hub_file_ls "$@" ;;
+        which)           "$@" ;;
+        upload)         ___x_cmd_hub_file_upload "$@" ;;
+        share)          ___x_cmd_hub_file_share "$@" ;;
+        private)        ___x_cmd_hub_file_private "$@" ;;
+    esac
+}
+
+___x_cmd_hub_file_ls(){
+    local respath="${1:-@me/}"
+    respath="$(___x_cmd_hub_file_normalize_respath "$respath")"
+
+    # curl \
+    #     "$___X_CMD_HUB_SERVICE_URL/api/v0/file/ls?token=$(___x_cmd_hub_token)&res=${respath}" 2>/dev/null
+
+    local res
+    res="$(curl \
+        "$___X_CMD_HUB_SERVICE_URL/api/v0/file/ls?token=$(___x_cmd_hub_token)&res=${respath}" 2>/dev/null)"
+
+    printf "%s" "$res" | x jq -r .[]
+
+}
+
+___x_cmd_hub_file_which(){
+    local respath="${1:?Provide respath}"
+    # case "$respath" in
+    #     @me/*|@i/*|@/*)
+    #         local user
+    #         user=$(___x_cmd_hub_login_user)
+    #         if [ -z "$user" ]; then
+    #             printf "Cannot not find out login user for resource: %s" "$respath" >&2
+    #             return 1
+    #         fi
+    #         respath="$user/${respath#@*/}"
+    # esac
+
+    respath="$(___x_cmd_hub_file_normalize_respath "$respath")"
+
+    local CACHE="${___X_CMD_ROOT%/}/${respath#/}"
+    if ___xcmd_curl "$___X_CMD_HUB_SERVICE_URL/api/v0/file/cat?token=$(___x_cmd_hub_token)&res=${respath}"; then
+        printf "%s" "$CACHE"
+    else
+        printf "Failed: %s" "$CACHE" 2>/dev/null
+        return 1
+    fi
+}
+
+___x_cmd_hub_file_normalize_respath(){
+    local respath="${1}"
+    case "$respath" in
+        @me/*|@i/*|@/*)
+            local user
+            user=$(___x_cmd_hub_login_user)
+            if [ -z "$user" ]; then
+                printf "Cannot not find out login user for resource: %s" "$respath" >&2
+                return 1
+            fi
+            printf "%s" "$user/${respath#@*/}"
+            ___X_CMD_WHICH_ONE_RESOURCE_TYPE=me@hub
+            ;;
+        *@*)
+            ___X_CMD_WHICH_ONE_RESOURCE_TYPE=hub
+            printf "%s" "$respath" ;;
+        *)
+            ___X_CMD_WHICH_ONE_RESOURCE_TYPE=hub
+            printf "%s" "$(___x_cmd_hub_login_user)/${respath#/}" ;;
+    esac
+}
+
+___x_cmd_hub_file_upload(){
+    local localfp="${1:?Provide local file}"
+
+    [ ! -f "$localfp" ] && {
+        printf "File Not Existed: %s\n" "$localfp" >&2
+        return
+    }
+
+    local respath="${2:?Please provide path}"
+    respath="$(___x_cmd_hub_file_normalize_respath "$respath")"
+
+    curl \
+        -F "file=@$localfp" \
+        "$___X_CMD_HUB_SERVICE_URL/api/v0/file/upload?token=$(___x_cmd_hub_token)&res=${respath}" 2>/dev/null
+    printf "\n"
+}
+
+___x_cmd_hub_file_share(){
+    local respath="${1:?Please provide path}"
+    respath="$(___x_cmd_hub_file_normalize_respath "$respath")"
+
+    curl "$___X_CMD_HUB_SERVICE_URL/api/v0/file/share/true?token=$(___x_cmd_hub_token)&res=${respath}" 2>/dev/null
+    printf "\n"
+}
+
+___x_cmd_hub_file_private(){
+    local respath="${1:?Please provide path}"
+    respath="$(___x_cmd_hub_file_normalize_respath "$respath")"
+
+    curl "$___X_CMD_HUB_SERVICE_URL/api/v0/file/share/false?token=$(___x_cmd_hub_token)&res=${respath}" 2>/dev/null
+    printf "\n"
+}
+
+# EndSection

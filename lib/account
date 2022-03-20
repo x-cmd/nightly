@@ -1,0 +1,78 @@
+___x_cmd_hub_login(){
+    local email="${1}"
+    if [ -z "$email" ]; then
+        printf "%s" "Email: "
+        read -r email
+    fi
+
+    local result
+    result="$(___x_cmd_httpget "$___X_CMD_HUB_SERVICE_URL/api/v0/account/login/$email" 2>/dev/null)"
+    # printf "Result: %s\n" "$result" >&2
+
+    if [ "${result#ERR=}" = "$result" ]; then
+        ___x_cmd_hub_verify "$email"
+    else
+        printf "%s\n" "$result"
+    fi
+}
+
+___x_cmd_hub_register(){
+    local email=${1:-""}
+    if [ -z "$email" ]; then
+        printf "%s" "Email: "
+        read -r email
+    fi
+
+    local result
+    result="$(___x_cmd_httpget "$___X_CMD_HUB_SERVICE_URL/api/v0/account/register/$email" 2>/dev/null)"
+    local msg=${result#ERR=}
+
+    if [ "$msg" = "$result" ]; then
+        ___x_cmd_hub_verify "$email"
+    else
+        printf "%s\n" "$result"
+    fi
+}
+
+___x_cmd_hub_verify(){
+    local email="${1:?email}"
+
+    local code
+    printf "%s" "Code: "
+    read -r code
+
+    result="$(curl "$___X_CMD_HUB_SERVICE_URL/api/v0/account/verify/$email/$code" 2>/dev/null)"
+
+    local token=${result#TOKEN=}
+    if [ "$token" != "$result" ]; then
+        printf "%s" "$email" > "$___X_CMD_ROOT/.env/.me"
+        printf "%s" "$token" > "$___X_CMD_ROOT/.env/.token"
+        printf "%s\n" "Login Success."
+    else
+        printf "%s\n" "$result"
+    fi
+}
+
+# shellcheck disable=SC2120
+___x_cmd_hub_token(){
+    if [ -z "$1" ]; then
+        cat "$___X_CMD_ROOT/.env/.token" 2>/dev/null
+        return
+    fi
+
+    if [ "$1" = "${1#*/}" ]; then
+        printf "%s" "${1%/*}" > "$___X_CMD_ROOT/.env/.me"
+        printf "%s" "${1#*/}" > "$___X_CMD_ROOT/.env/.token"
+        return
+    fi
+
+    local res
+    if res=$(___x_cmd_httpget "$___X_CMD_HUB_SERVICE_URL/api/v0/token/info/email?token=$(___x_cmd_hub_token)"); then
+        printf "%s" "$res" > "$___X_CMD_ROOT/.env/.me"
+        printf "%s" "$1" > "$___X_CMD_ROOT/.env/.token"
+    fi
+}
+
+___x_cmd_hub_login_user(){
+    cat "$___X_CMD_ROOT/.env/.me" 2>/dev/null
+}
