@@ -3,6 +3,7 @@
 # author:       Li Junhao           l@x-cmd.com
 
 xrc dict/latest
+xrc jo/latest
 
 # Section 1: Global definitions
 ############################
@@ -196,6 +197,9 @@ ___x_cmd_param_int(){
         _ls_option)
             ___X_CMD_PARAM_AWK_PATH="$(xrc which param/lib/meta.awk)" _param_main "$@"
             ;;
+        _ls_option_name)
+            ___X_CMD_PARAM_AWK_PATH="$(xrc which param/lib/meta.awk)" _param_main "$@"
+            ;;
         _ls_option_subcmd)
             ___X_CMD_PARAM_AWK_PATH="$(xrc which param/lib/meta.awk)" _param_main "$@"
             ;;
@@ -372,7 +376,7 @@ ___x_cmd_param_flag_to_bool(){
 alias param:flag2bool=___x_cmd_param_flag_to_bool
 
 # param:option2json repository=repo has_wiki=^no_wiki enable_page=^^has_page
-___x_cmd_param_option_to_json()(
+___x_cmd_param_option_to_json(){
     code="___x_cmd_jo dict"
     to_remove=""
 
@@ -428,15 +432,14 @@ ___x_cmd_param_option_to_json()(
     done
 
     while read -r i; do
-        if [ "${to_remove#* $i *}" = "$to_remove" ]; then
+        if [ "${to_remove#* "$i" *}" = "$to_remove" ]; then
             code="$code $i"
         fi
     done <<A
-$(___x_cmd_param_int _ls_option)
+$(___x_cmd_param_int ls_option_name)
 A
-
     eval "$code"
-)
+}
 
 alias param:option2json=___x_cmd_param_option_to_json
 
