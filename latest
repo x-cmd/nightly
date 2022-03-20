@@ -1,6 +1,5 @@
-# shellcheck shell=sh disable=SC2039,SC3043 # xrc
-
-# author:       Li Junhao           l@x-cmd.com
+# Author:       Li Junhao   l@x-cmd.com     # xrc
+# shellcheck    shell=sh    disable=SC2039,SC3043
 
 # Section: main
 xrc dict
@@ -450,8 +449,8 @@ ______x_cmd_http_body_mput(){
 ___x_cmd_http_resp() {
     param:dsl      '
 subcommands:
-    header|h            "Show header of latest response"
-    body|b              "Show body of latest response"
+    header              "Show header of latest response"
+    body                "Show body of latest response"
     header_filepath     "show header filepath of latest response"
     body_filepath       "show body filepath of latest response"
 '
@@ -491,6 +490,8 @@ ______x_cmd_http_resp_body_filepath(){
 }
 
 # #1: path; #2 data
+
+# TODO: next time review
 ___x_cmd_http_request() {
     local IFS=" "
     local X=${X:-get}
@@ -503,7 +504,7 @@ ___x_cmd_http_request() {
     fi
     local tmp
     tmp=$(mktemp)
-    echo "$data" >"$tmp"
+    printf "%s" "$data" >"$tmp"
     # TODO: Display the data if only if body is text and data is NOT a lot
     # http_log debug "body is: $data"
     # [ -n "$DEBUG" ] && echo "body is: $data" >&2
@@ -537,7 +538,7 @@ A
     return 1
 }
 
-____x_cmd_http_request_json_body() (# Notice: Using subshell
+____x_cmd_http_request_json_body() (    # Notice: Using subshell
     url=$1
     shift
     ___x_cmd_http_body mput "$@"
@@ -548,7 +549,7 @@ ____x_cmd_http_request_json_body() (# Notice: Using subshell
 
 # Section 6: CRUD -- post get put delete
 # crud
-___x_cmd_http_get() (# Notice: Using subshell
+___x_cmd_http_get() (   # Notice: Using subshell
     url=$1
     shift
     ___x_cmd_http_qs mput "$@"
@@ -556,8 +557,8 @@ ___x_cmd_http_get() (# Notice: Using subshell
 )
 
 ___x_cmd_http_post() {
-    local op="$1"; shift;
-    case "$op" in
+    local content_op="$1"; shift;
+    case "$content_op" in
         json)   ___x_cmd_http_header put Content-Type application/json
                 X=POST ____x_cmd_http_request_json_body "$@"
                 ;;
@@ -565,13 +566,13 @@ ___x_cmd_http_post() {
         form)   : ;;
         text)   : ;;
         bin)    : ;;
-        *)      X=POST ___x_cmd_http_request "$op" "$@" ;;
+        *)      X=POST ___x_cmd_http_request "$content_op" "$@" ;;
     esac
 }
 
 ___x_cmd_http_put() {
-    local op="$1"; shift;
-    case "$op" in
+    local content_op="$1"; shift;
+    case "$content_op" in
         json)   ___x_cmd_http_header put Content-Type application/json
                 X=PUT ____x_cmd_http_request_json_body "$@" ;;
         # TODO: add more data form.
@@ -582,8 +583,8 @@ ___x_cmd_http_put() {
     esac
 }
 ___x_cmd_http_patch() {
-    local op="$1"; shift;
-    case "$op" in
+    local content_op="$1"; shift;
+    case "$content_op" in
         json)   ___x_cmd_http_header put Content-Type application/json
                 X=PATCH ____x_cmd_http_request_json_body "$@"
                 ;;
@@ -604,34 +605,32 @@ ___x_cmd_http_head() { X=HEAD ___x_cmd_http_request "$@"; }
 ___x_cmd_http_graphql() {
     local op="$1"; shift
     case "$op" in
-        q|query)
-            local url=$1; shift
-            ___x_cmd_http_graphql execute "$1" "query { $2 }"
+        query)
+            local url=${1:?Provide URL}
+            local body="query { ${2:?Provide GRAPHQL} }"
+            shift 2
+            ___x_cmd_http_graphql execute "$url" "$body" "$@"
             ;;
-        qj|query-json)
-            local url=$1; shift
-            ___x_cmd_http_graphql execute-json "$1" "{ \"query\": \"{ $2 }\""
+        query-json)
+            local url=${1:?Provide URL}
+            local body
+            body="{ \"query\": $(jo quote "{ ${2:?Provide GRAPHQL} }")"
+            shift 2
+            ___x_cmd_http_graphql execute-json "$url" "$body" "$@"
             ;;
-        e|execute)
-            if [ -z $url ]; then
-                local url=$1; shift
-            fi
+        execute)
             http header put content-type application/graphql
-            ___x_cmd_http_post $url "$1"
+            ___x_cmd_http_post "$@"   # TODO:
             ;;
-        ej|execute-json)
-            if [ -z $url ]; then
-                local url=$1; shift
-            fi
+        execute-json)
             http header put content-type application/json
-            ___x_cmd_http_post $url "$1"
+            ___x_cmd_http_post "$@"   # TODO:
             ;;
         *)
             ___x_cmd_http_graphql execute "$op" "$@"
             ;;
     esac
 }
-
 # EndSection
 
 # TODO: Honor set-cookie
