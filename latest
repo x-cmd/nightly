@@ -1,18 +1,14 @@
 # Author:       Li Junhao   l@x-cmd.com     # xrc
-# shellcheck    shell=sh    disable=SC2039,SC1090,SC3043,SC2263
+# shellcheck    shell=sh    disable=SC2039,SC1090,SC3043,SC2263,SC1091
 
 
 mkdir -p "$___X_CMD_ROOT/.env"
 
-___X_CMD_HUB_SERVICE_URL="http://47.115.207.205"
-# ___X_CMD_HUB_SERVICE_URL="https://hub.x-cmd.com"
+___X_CMD_HUB_SERVICE_URL="https://hub.x-cmd.com"
 # ___X_CMD_HUB_SERVICE_URL="http://127.0.0.1:3000"
 
-# shellcheck disable=SC1091
-{
-    . "$___X_CMD_ROOT/hub/lib/account"
-    . "$___X_CMD_ROOT/hub/lib/file"
-}
+. "$___X_CMD_ROOT/hub/lib/account"
+. "$___X_CMD_ROOT/hub/lib/file"
 
 ___x_cmd_hub(){
     local subcmd="$1";  shift

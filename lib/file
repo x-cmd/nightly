@@ -1,6 +1,5 @@
+# shellcheck shell=sh disable=SC3043
 
-
-# Section: file service
 ___x_cmd_hub_file(){
     local subcmd="$1";  shift
     case "$subcmd" in
@@ -43,7 +42,7 @@ ___x_cmd_hub_file_which(){
     respath="$(___x_cmd_hub_file_normalize_respath "$respath")"
 
     local CACHE="${___X_CMD_ROOT%/}/${respath#/}"
-    if ___xcmd_curl "$___X_CMD_HUB_SERVICE_URL/api/v0/file/cat?token=$(___x_cmd_hub_token)&res=${respath}"; then
+    if ___x_cmd_httpget "$___X_CMD_HUB_SERVICE_URL/api/v0/file/cat?token=$(___x_cmd_hub_token)&res=${respath}"; then
         printf "%s" "$CACHE"
     else
         printf "Failed: %s" "$CACHE" 2>/dev/null
@@ -105,5 +104,3 @@ ___x_cmd_hub_file_private(){
     curl "$___X_CMD_HUB_SERVICE_URL/api/v0/file/share/false?token=$(___x_cmd_hub_token)&res=${respath}" 2>/dev/null
     printf "\n"
 }
-
-# EndSection

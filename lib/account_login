@@ -1,0 +1,85 @@
+
+___x_cmd_hub_login(){
+    local op="$1"
+    case "$op" in
+        *@*)                    ___x_cmd_hub_login_email_witharg "$@" ;;
+        wx|weixin)              ___x_cmd_hub_login_weixin ;;
+        tg|telegram)            ___x_cmd_hub_login_telegram ;;
+        "")
+                ___x_cmd_hub_select \
+                    "Login Methods:" \
+                    "Open Browser to x-cmd.com" \
+                    "Email Verfication Code" \
+                    "Weixin QR Login" \
+                    "Telegram Bot"
+
+                case "$_SELECT" in
+                    1)          ___x_cmd_hub_login_official_site "$@" ;;
+                    2)          ___x_cmd_hub_login_email_interactive "$@" ;;
+                    3)          ___x_cmd_hub_login_weixin "$@" ;;
+                    # 4)          ___x_cmd_hub_login_telegram "$@" ;;
+                    *)          ;;
+                esac
+                ;;
+        *)
+                ___x_cmd_hub_login_official_site ;;
+    esac
+}
+
+
+___x_cmd_hub_login_official_site(){
+    local TOKEN_TO_ACTIVATE="$1"
+    ___x_cmd_http_browse "https://hub.x-cmd.com/login?token_to_activate=${TOKEN_TO_ACTIVATE}"
+}
+
+___x_cmd_hub_login_weixin(){
+    :
+}
+
+___x_cmd_hub_login_telegram(){
+    :
+}
+
+# Section: email
+___x_cmd_hub_login_email_witharg(){
+    local email="${1:?Provide email}"
+
+    local result
+    result="$(___x_cmd_httpget "$___X_CMD_HUB_SERVICE_URL/api/v0/account/login/$email" 2>/dev/null)"
+    # printf "Result: %s\n" "$result" >&2
+
+    if [ "${result#ERR=}" = "$result" ]; then
+        ___x_cmd_hub_verify "$email"
+    else
+        printf "%s\n" "$result"
+    fi
+}
+
+___x_cmd_hub_login_email_interactive(){
+    local email="${1}"
+    if [ -z "$email" ]; then
+        printf "%s" "Email: "
+        read -r email
+    fi
+    ___x_cmd_hub_login_email_witharg "$email"
+}
+
+___x_cmd_hub_verify(){
+    local email="${1:?email}"
+
+    local code
+    printf "%s" "Code: "
+    read -r code
+
+    result="$(___x_cmd_httpget "$___X_CMD_HUB_SERVICE_URL/api/v0/account/verify/$email/$code" 2>/dev/null)"
+
+    local token="${result#TOKEN=}"
+    if [ "$token" != "$result" ]; then
+        printf "%s" "$email" > "$___X_CMD_HUB_ENV/.me"
+        printf "%s" "$token" > "$___X_CMD_HUB_ENV/.token"
+        printf "%s\n" "Login Success."
+    else
+        printf "%s\n" "$result"
+    fi
+}
+# EndSection

@@ -1,0 +1,61 @@
+
+___x_cmd_hub_register(){
+    local op="$1"
+    case "$op" in
+        wx|weixin)              ___x_cmd_hub_register_weixin ;;
+        tg|telegram)            ___x_cmd_hub_register_telegram ;;
+        "")
+                ___x_cmd_hub_select \
+                    "Register Methods:" \
+                    "Open Browser to x-cmd.com" \
+                    "Weixin QR" \
+                    "Telegram Bot"
+
+                case "$_SELECT" in
+                    1)          ___x_cmd_hub_register_official_site "$@" ;;
+                    2)          ___x_cmd_hub_register_weixin "$@" ;;
+                    # 3)          ___x_cmd_hub_register_telegram "$@" ;;
+                    *)          ;;
+                esac
+                ;;
+        *)
+                ___x_cmd_hub_register_official_site ;;
+    esac
+}
+
+
+# Section: Registration
+
+___x_cmd_hub_register_official_site(){
+    local TOKEN_TO_ACTIVATE="$1"
+    ___x_cmd_http_browse "https://hub.x-cmd.com/register?token_to_activate=${TOKEN_TO_ACTIVATE}"
+}
+
+___x_cmd_hub_register_weixin(){
+    local TOKEN_TO_ACTIVATE="$1"
+    ___x_cmd_http_browse "https://hub.x-cmd.com/register?token_to_activate=${TOKEN_TO_ACTIVATE}"
+}
+
+# EndSection
+
+# Section: frozen
+
+___x_cmd_hub_register_email(){
+    local email=${1:-""}
+    if [ -z "$email" ]; then
+        printf "%s" "Email: "
+        read -r email
+    fi
+
+    local result
+    result="$(___x_cmd_httpget "$___X_CMD_HUB_SERVICE_URL/api/v0/account/register/$email" 2>/dev/null)"
+    local msg=${result#ERR=}
+
+    if [ "$msg" = "$result" ]; then
+        ___x_cmd_hub_verify "$email"
+    else
+        printf "%s\n" "$result"
+    fi
+}
+
+# EndSection
