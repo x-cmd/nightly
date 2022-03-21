@@ -14,16 +14,6 @@ BEGIN {
 
 # Section: view
 function view_calcuate_geoinfo( ){
-    # command line >
-    # help: 2/4
-    # empty line
-    # Filter: 1
-    # body:         view_body_row_num
-    # INFO: 1
-    # status-line
-
-    # 7, 9
-
     if ( ctrl_help_toggle_state() == true ) {
         view_body_row_num = max_row_size - 10 -1
     } else {
@@ -63,23 +53,26 @@ function view_body(             _selected_item_idx, _iter_item_idx, _data_item_i
         _data = str_pad_left(_data, int(max_col_size/2), int(length(_data)/2))
         return th(TH_TABLE_UINFIND, _data)
     }
-    view_item_len = model_item_max      # left 3 space
+    view_item_len       = model_item_max + 4
+    view_item_index_len = length(model_len)
+    if ( ITEM_INDEX_STATE == true ) view_item_len = view_item_len + view_item_index_len + 2
+    view_body_col_num   = int(max_col_size / view_item_len)
+    view_page_item_num  = view_body_col_num * view_body_row_num
 
-    view_body_col_num = int((max_col_size -7) / view_item_len)
-    view_page_item_num = view_body_col_num * view_body_row_num
-
-    view_page_num = int( ( model_len - 1 ) / view_page_item_num ) + 1
-    _selected_item_idx = ctrl_rstate_get( SELECTED_ITEM_IDX )
+    view_page_num       = int( ( model_len - 1 ) / view_page_item_num ) + 1
+    _selected_item_idx  = ctrl_rstate_get( SELECTED_ITEM_IDX )
     page_index = int( (_selected_item_idx - 1) / view_page_item_num ) + 1
     page_begin = int( (page_index - 1) * view_page_item_num)
+
     for (i=1; i<=view_body_row_num; i ++ ) {
         if (i > model_len) break
         for (j=0; j<view_body_col_num; j++ ) {
             _iter_item_idx = page_begin + i + ( j * view_body_row_num )
             if (_iter_item_idx > model_len) break
             _data_item_idx = model[ _iter_item_idx ]
-            _item_text = str_pad_right( data[ _data_item_idx ], view_item_len, data_wlen[ _data_item_idx ] )
-            if ( ITEM_INDEX_STATE == true ) _item_index = _data_item_idx ": "
+            _item_text = str_pad_right( data[ _data_item_idx ], model_item_max, data_wlen[ _data_item_idx ] )
+
+            if ( ITEM_INDEX_STATE == true ) _item_index = str_pad_left( _data_item_idx, view_item_index_len) ": "
             if (ctrl_sw_get( MULTIPLE_EDIT ) == true ) _item_icon = "  ● "
             else _item_icon = "    "
             if ( _iter_item_idx == _selected_item_idx )              _data = _data th(TH_GRIDSELECT_ITEM_SELECTED_INFO, "  > ") _item_index th(TH_GRIDSELECT_ITEM_FOCUSED, _item_text)
@@ -90,7 +83,6 @@ function view_body(             _selected_item_idx, _iter_item_idx, _data_item_i
         if (i != model_len) _data = _data "\n"
         else _data = _data "\n"
     }
-    # ctrl_rstate_set( SELECTED_ITEM_IDX, model[ _selected_item_idx ] )
     _data_idx = model[ _selected_item_idx ]
     _data_info = data_info[ _data_idx ]
     if ( _data_info != "" ) _data = _data "INFO: " th(TH_GRIDSELECT_ITEM_SELECTED_INFO, _data_info) "\n"
@@ -106,8 +98,7 @@ function view_statusline(){
 # Section: model
 function model_generate(    _filter,    i, l){
     _filter = filter[""]
-    # model_len = 0
-    # model_item_max = 0
+    model_item_max = 0
     model_len = 0
     for (i=1; i<=data_len; ++i) {
         if (( index( data[ i ], _filter ) > 0 ) || ( _filter == "" )){
@@ -151,8 +142,8 @@ function handle_ctrl_in_find_state(char_type, char_value,      i, _find){
 }
 
 function handle_ctrl_to_move_focus(char_type, char_value){
-    if (char_value == "n")                          return ctrl_rstate_add( SELECTED_ITEM_IDX, + view_page_item_num )
-    if (char_value == "p")                          return ctrl_rstate_add( SELECTED_ITEM_IDX, - view_page_item_num )
+    if ((char_value == "n") && (model_len > view_page_item_num) && (page_index < view_page_num))   return ctrl_rstate_add( SELECTED_ITEM_IDX, + view_page_item_num )
+    if ((char_value == "p") && (model_len > view_page_item_num) && (page_index > 1))   return ctrl_rstate_add( SELECTED_ITEM_IDX, - view_page_item_num )
 
     if (char_value == "UP")                         return ctrl_rstate_dec( SELECTED_ITEM_IDX )
     if (char_value == "DN")                         return ctrl_rstate_inc( SELECTED_ITEM_IDX )
@@ -200,9 +191,7 @@ function ctrl(char_type, char_value) {
 }
 
 function consume_ctrl(      _cmd) {
-    if (try_update_width_height( $0 ) == true) {
-        return
-    }
+    if (try_update_width_height( $0 ) == true) return
 
     DATA_HAS_CHANGED = true
     _cmd=$0
@@ -236,7 +225,7 @@ function consume_item(       l ){
     data_wlen[ data_len ] = wcswidth( $0 )
 
     # Show the first screen to improve use experience
-    if ( data_len == ((max_row_size - 9) * 2)) {
+    if ( data_len == ((max_row_size - 10) * 2)) {
         model_generate()
         view()
     }

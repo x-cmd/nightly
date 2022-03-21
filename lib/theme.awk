@@ -21,7 +21,7 @@ BEGIN {
     TH_FORM_Q_TRUE                        =      UI_FG_CYAN
 
     TH_FORM_Q_FOCUSED   =  UI_TEXT_BOLD
-    TH_FORM_Q_ARROW     =  UI_TEXT_BOLD UI_FG_CYAN
+    TH_FORM_Q_ARROW     =  UI_FG_CYAN
     TH_FORM_Q_UNFOCUSED =  ""
 
     TH_FORM_A_FOCUSED_SELECTED                   =       UI_TEXT_REV UI_FG_CYAN

@@ -1,0 +1,21 @@
+. ./lib/region
+xrc cowsay
+___ui_region_demo(){
+    {
+        while ___x_cmd_ui_getchar; do
+            printf "C:%s:%s\n" "${___X_CMD_UI_GETCHAR_TYPE}" "${___X_CMD_UI_GETCHAR_CHAR}" || break
+        done
+    } | {
+        for i in $(seq 50); do
+            ___x_cmd_ui_region_send_update "$(cowsay Hi Good work "$i")"
+            sleep 0.1
+        done
+    }
+}
+
+f(){
+    ___x_cmd_ui_region_run  ___ui_region_demo
+    # ___x_cmd_ui_region_autorefresh_with_keyboard ___ui_region_demo
+}
+
+f

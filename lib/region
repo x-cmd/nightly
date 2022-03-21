@@ -108,9 +108,15 @@ ___x_cmd_ui_region_send_screeninfo(){
 
 # Section: pidofsubshell
 case "$___X_CMD_SHELL" in
-    bash|zsh)
+    bash)
 ___x_cmd_pidofsubshell(){
     $SHELL -c 'printf "%s\n" "$PPID"'
+}
+    ;;
+
+    zsh)
+___x_cmd_pidofsubshell(){
+    sh -c 'printf "%s\n" "$PPID"'
 }
     ;;
 
