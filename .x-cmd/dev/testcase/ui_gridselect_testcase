@@ -1,5 +1,6 @@
 . ./lib/gridselect
 . ./lib/region
+. ./lib/getchar
 # xrc ui/lib/select
 f1(){
 

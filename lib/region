@@ -176,7 +176,10 @@ ___x_cmd_ui_region___run_inner(){
     trap ___x_cmd_ui_region___run_clear INT
 
     local START=1
-    "$@" | ___x_cmd_ui_region_update
+    {
+        trap " : " INT
+        "$@"
+    } | ___x_cmd_ui_region_update
 
     ___x_cmd_ui_region___run_clear
 }
@@ -194,6 +197,8 @@ ___x_cmd_ui_region___update_with_keyboard_mainloop(){
         ___x_cmd_pidofsubshell
 
         printf "R:%s:%s:%s\n" "1" "$COLUMNS" "$LINES"
+
+        trap ":; exit 130" INT
         while ___x_cmd_ui_getchar; do
             printf "C:%s:%s\n" "${___X_CMD_UI_GETCHAR_TYPE}" "${___X_CMD_UI_GETCHAR_CHAR}" || break
         done
@@ -258,6 +263,7 @@ ___x_cmd_ui_region___autorefresh_with_keyboard_mainloop(){
             done
         ) &
 
+        trap ":; exit 130" INT
         while ___x_cmd_ui_getchar; do
             printf "C:%s:%s\n" "${___X_CMD_UI_GETCHAR_TYPE}" "${___X_CMD_UI_GETCHAR_CHAR}" || break
         done
