@@ -1,23 +1,25 @@
 
 ___x_cmd_hub_login(){
     local op="$1"
+    local _SELECT
     case "$op" in
         *@*)                    ___x_cmd_hub_login_email_witharg "$@" ;;
-        wx|weixin)              ___x_cmd_hub_login_weixin ;;
-        tg|telegram)            ___x_cmd_hub_login_telegram ;;
+        wx|weixin)              ___x_cmd_hub_login_weixin_qr ;;
+        tg|telegram)            ___x_cmd_hub_login_telegram_qr ;;
         "")
-                ___x_cmd_hub_select \
+                ___x_cmd_ui_select "_SELECT" \
                     "Login Methods:" \
-                    "Open Browser to x-cmd.com" \
-                    "Email Verfication Code" \
-                    "Weixin QR Login" \
-                    "Telegram Bot"
+                        "Open Browser to x-cmd.com" \
+                        "Login With Telegram QR" \
+                        "Login With Weixin QR" \
+                        "Login With Email Verification"
+                        # "Login With OneTime Password"    # SMS, Telegram, Email, Weixin
 
                 case "$_SELECT" in
                     1)          ___x_cmd_hub_login_official_site "$@" ;;
-                    2)          ___x_cmd_hub_login_email_interactive "$@" ;;
-                    3)          ___x_cmd_hub_login_weixin "$@" ;;
-                    # 4)          ___x_cmd_hub_login_telegram "$@" ;;
+                    2)          ___x_cmd_hub_login_telegram_qr "$@" ;;
+                    3)          ___x_cmd_hub_login_weixin_qr "$@" ;;
+                    4)          ___x_cmd_hub_login_email "$@" ;;
                     *)          ;;
                 esac
                 ;;
@@ -26,19 +28,39 @@ ___x_cmd_hub_login(){
     esac
 }
 
+# Section: telegram weixin
+
+___x_cmd_hub_login_telegram_qr(){
+    local TOKEN_TO_ACTIVATE
+    TOKEN_TO_ACTIVATE="$(___x_cmd_hub_token_generate)"
+    ___x_cmd_hub_token "${TOKEN_TO_ACTIVATE}"
+
+    echo x qrencode -t ANSI "https://....${TOKEN_TO_ACTIVATE}"
+}
+
+___x_cmd_hub_login_weixin_qr(){
+    local TOKEN_TO_ACTIVATE
+    TOKEN_TO_ACTIVATE="$(___x_cmd_hub_token_generate)"
+    ___x_cmd_hub_token "${TOKEN_TO_ACTIVATE}"
+
+    echo x qrencode -t ANSI "https://....${TOKEN_TO_ACTIVATE}"
+}
 
 ___x_cmd_hub_login_official_site(){
-    local TOKEN_TO_ACTIVATE="$1"
-    ___x_cmd_http_browse "https://hub.x-cmd.com/login?token_to_activate=${TOKEN_TO_ACTIVATE}"
+    if [ -n "$(___x_cmd_hub_token)" ]; then
+        # TODO: ask
+        printf "Detect token in this folder. Erase the token in the disk?" >&2
+        ___x_cmd_hub_token ""
+    fi
+
+    local TOKEN_TO_ACTIVATE
+    TOKEN_TO_ACTIVATE="$(___x_cmd_hub_token_generate)"
+    ___x_cmd_hub_token "$TOKEN_TO_ACTIVATE"
+
+    echo ___x_cmd_http_browse "$___X_CMD_HUB_SERVICE_URL/login?token_to_activate=${TOKEN_TO_ACTIVATE}"
 }
 
-___x_cmd_hub_login_weixin(){
-    :
-}
-
-___x_cmd_hub_login_telegram(){
-    :
-}
+# EndSection
 
 # Section: email
 ___x_cmd_hub_login_email_witharg(){
@@ -47,15 +69,14 @@ ___x_cmd_hub_login_email_witharg(){
     local result
     result="$(___x_cmd_httpget "$___X_CMD_HUB_SERVICE_URL/api/v0/account/login/$email" 2>/dev/null)"
     # printf "Result: %s\n" "$result" >&2
-
     if [ "${result#ERR=}" = "$result" ]; then
-        ___x_cmd_hub_verify "$email"
+        printf "%s\n" "Please check your email to approve this visit: $email" >/dev/stderr
     else
-        printf "%s\n" "$result"
+        printf "ERROR: %s\n" "${result#ERR=}" >/dev/stderr
     fi
 }
 
-___x_cmd_hub_login_email_interactive(){
+___x_cmd_hub_login_email(){
     local email="${1}"
     if [ -z "$email" ]; then
         printf "%s" "Email: "
@@ -63,6 +84,10 @@ ___x_cmd_hub_login_email_interactive(){
     fi
     ___x_cmd_hub_login_email_witharg "$email"
 }
+
+# EndSection
+
+# Section: deprecated
 
 ___x_cmd_hub_verify(){
     local email="${1:?email}"

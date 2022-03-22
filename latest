@@ -4,7 +4,7 @@
 
 mkdir -p "$___X_CMD_ROOT/.env"
 
-___X_CMD_HUB_SERVICE_URL="https://hub.x-cmd.com"
+___X_CMD_HUB_SERVICE_URL="$___X_CMD_HUB_SERVICE_URL"
 # ___X_CMD_HUB_SERVICE_URL="http://127.0.0.1:3000"
 
 . "$___X_CMD_ROOT/hub/lib/account"

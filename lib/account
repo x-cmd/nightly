@@ -58,11 +58,8 @@ ___x_cmd_hub_token(){
     fi
 }
 
-___x_cmd_hub_select(){
-    :
-}
 
 # EndSection
-
-. "$___X_CMD_ROOT/lib/account_login"
-. "$___X_CMD_ROOT/lib/account_registration"
+. "$___X_CMD_ROOT/ui/lib/select"
+. "$___X_CMD_ROOT/hub/lib/account_login"
+. "$___X_CMD_ROOT/hub/lib/account_registration"
