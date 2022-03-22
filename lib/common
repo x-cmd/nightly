@@ -2,6 +2,7 @@
 
 # Section: full_version ls_local ls_remote
 
+# TODO: Not proper implemented
 ___x_cmd_env_common_full_version(){
     local candidate="${1:?Provide candidate}"
     local version="${2:?Provide version}"
@@ -20,36 +21,65 @@ ___x_cmd_env_common_la(){
 }
 # EndSection
 
+# Section: use file
+___x_cmd_env_common_init_file_add(){
+    local candidate="$1"
+    local version_path="$2"
+
+    if [ ! -f "$___X_CMD_ROOT/.env/env/use" ]; then
+        printf "%s" "$2" >"$___X_CMD_ROOT/.env/env/use"
+    fi
+
+    ___x_cmd_env_common_init_file_rm "$candidate"
+    printf "%s\n" "$version_path" >>"$___X_CMD_ROOT/.env/env/use"
+}
+
+___x_cmd_env_common_init_file_rm(){
+    local candidate="$1"
+
+    local content
+    content="$(grep -v "/$candidate/" <"$___X_CMD_ROOT/.env/env/use")"
+    printf "%s" "$content" >"$___X_CMD_ROOT/.env/env/use"
+}
+# EndSection
+
 # Section: use, try, ws
 
 ___x_cmd_env_common_use(){
     local candidate="${1:?Provide candidate}"
     local version="${2:?Provide version}"
-    local shims="${3:-""}"
+    local use_shims="${3:-""}"
 
-    ___x_cmd_env_util_is_downloaded "$candidate" "$version" 2>/dev/null || return 1
+    if ! ___x_cmd_env_util_is_downloaded "$candidate" "$version" 2>/dev/null; then
+        # TODO: Add prompt: download from the website.
+        printf "%s" "Not downloaded" >&2
+        return 0
+    fi
 
-    local versions_path
-    if [ -z "$shims" ]; then
-        versions_path="${___X_CMD_ENV_PATH}/$candidate/versions/$version/bin"
+    local version_path
+    if [ -z "$use_shims" ]; then
+        version_path="${___X_CMD_ENV_PATH}/$candidate/versions/$version/bin"
     else
-        versions_path="${___X_CMD_ENV_PATH}/$candidate/shims"
+        version_path="${___X_CMD_ENV_PATH}/$candidate/shims"
         ___x_cmd_env_util_make_shim_dir "$candidate" "${version}" || return 1
     fi
 
-    ___x_cmd_env_util_add_path "$versions_path" || return 1
-    x boot rc add "x-env-$candidate" "xrc env/lib/util && ___x_cmd_env_util_add_path \"$versions_path\"" && \
+    ___x_cmd_env_util_add_path "$candidate" "$version_path" || return 1
+
+    ___x_cmd_env_common_init_file_add "$candidate"  "$version_path" && \
+
+    ___x_cmd_modfile_add "$___X_CMD_ROOT/.env/env/use" "$version_path" && \
         printf "%s\n" "$version" > "$___X_CMD_ENV_PATH/$candidate/version" && \
-        env_log info "Using $candidate $version -> $___X_CMD_ENV_PATH/$candidate/version"
+            env_log info "Using $candidate $version -> $___X_CMD_ENV_PATH/$candidate/version"
 }
 
 ___x_cmd_env_common_try(){
     local candidate="${1:?Provide candidate}"
     local version="${2:?Provide version}"
-    local versions_path="${3:-"$___X_CMD_ENV_PATH/$candidate/versions/$version/bin"}"
+    local version_path="${3:-"$___X_CMD_ENV_PATH/$candidate/versions/$version/bin"}"
 
     ___x_cmd_env_util_is_downloaded "$candidate" "$version" 2>/dev/null || return 1
-    ___x_cmd_env_util_add_path "$versions_path" && \
+    ___x_cmd_env_util_add_path "$version_path" && \
         env_log info "Setting ${candidate} ${version} in current Shell."
 }
 
@@ -125,7 +155,7 @@ ___x_cmd_env_common_download(){
 ___x_cmd_env_common_install(){
     local candidate="${1:?Provide canddidate}"
     local version="${2:?Provide version}"
-    local shims="${3:-""}"
+    local use_shims="${3:-""}"
 
     env_log info "Installing $candidate $version"
     if ! ___x_cmd_env_run_common_if_notfound download "$candidate" "$version"; then
@@ -133,7 +163,7 @@ ___x_cmd_env_common_install(){
         return 1
     fi
 
-    ___x_cmd_env_common_use "$candidate" "$version" "$shims" || return 1
+    ___x_cmd_env_common_use "$candidate" "$version" "$use_shims" || return 1
     env_log info "Successfully installed $candidate $version"
 }
 

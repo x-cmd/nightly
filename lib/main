@@ -10,6 +10,9 @@ java
 deno
 scala
 kotlin
+maven
+springboot
+gradle
 perl
 "
 
@@ -159,7 +162,7 @@ ___x_cmd_env_main_use(){
 advise:
     #2        xrc env/latest && ___x_cmd_env_advise_ls_local_version
 options:
-    --shims       "Use shims"
+    --use_shims   "Use shims"
     #1            "Environment Candidates" <candidates>:candidates_list
     #2            "Version"                <version>="default"
 A
@@ -173,7 +176,7 @@ A
     fi
     shift 2
 
-    ___x_cmd_env_run_common_if_notfound use "$candidate" "$version" "$shims" "$@"
+    ___x_cmd_env_run_common_if_notfound use "$candidate" "$version" "$use_shims" "$@"
 }
 
 ___x_cmd_env_main_ws(){
@@ -208,9 +211,9 @@ ___x_cmd_env_main_install(){
 advise:
     #2        xrc env/latest && ___x_cmd_env_advise_ls_remote_version
 options:
-    --shims   "Use shims"
-    #1        "Environment Candidates" <candidates>:candidates_list
-    #2        "Version"                <version>="default"
+    --use_shims     "Use shims"
+    #1              "Environment Candidates" <candidates>:candidates_list
+    #2              "Version"                <version>="default"
 A
     param:run
 
@@ -227,7 +230,7 @@ A
     fi
     shift 2
 
-    ___x_cmd_env_run_common_if_notfound install "$candidate" "$version" "$shims" "$@"
+    ___x_cmd_env_run_common_if_notfound install "$candidate" "$version" "$use_shims" "$@"
 }
 
 ___x_cmd_env_main_uninstall(){

@@ -1,3 +1,5 @@
+# shellcheck shell=sh disable=SC3043,SC2164,SC3000-SC4000
+
 xrc ui/lib/region
 xrc ui/lib/varctl
 
@@ -7,13 +9,14 @@ ___x_cmd_ui_lsenv(){
 
 ___x_cmd_ui_lsenv_mainloop_awk_(){
     command awk "$@" \
+        -v CANDIDATE="$CANDIDATE" \
         -f "$___X_CMD_ROOT/awk/lib/default.awk" \
         -f "$___X_CMD_ROOT/awk/lib/str.awk" \
         -f "$___X_CMD_ROOT/awk/lib/wcwidth.awk" \
         -f "$___X_CMD_ROOT/awk/lib/ui.awk" \
         -f "$___X_CMD_ROOT/ui/lib/theme.awk" \
         -f "$___X_CMD_ROOT/ui/lib/share.awk" \
-        -f "$___X_CMD_ROOT/ui/lib/app/lsenv.awk"
+        -f "$___X_CMD_ROOT/env/lib/app/lsenv.awk"
         # -f "./lib/theme.awk" \
         # -f "./lib/share.awk" \
         # -f "./lib/app/lsenv.awk"

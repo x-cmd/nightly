@@ -1,0 +1,8 @@
+
+mkdir -p "$___X_CMD_ROOT/.env/env"
+
+while read -r line; do
+
+done <<A
+$(___x_cmd_modfile_ls)
+A

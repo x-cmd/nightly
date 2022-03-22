@@ -1,25 +1,5 @@
 # shellcheck shell=sh disable=SC2039,SC1090,SC3043,SC2263    # xrc
 
-___x_cmd_env_util_add_path(){
-    local dir="${1:?Provide a directory}"
-    local tmp="$PATH:"
-
-    if [ ! -d "$dir" ] ; then
-        env_log error "Failed to add path: $dir, not a directory"
-        return 1
-    fi
-
-    PATH="$dir"
-    local cur
-    while [ ! "$tmp" = "" ]; do
-        cur=${tmp%%:*}
-        tmp=${tmp#*:}
-        if [ "$cur" != "$dir" ]; then
-            PATH="$PATH:$cur"
-        fi
-    done
-}
-
 ___x_cmd_env_util_is_downloaded(){
     local candidate="${1:?Provide candidate}"
     local version="${2:?Provide version}"
@@ -35,9 +15,7 @@ ___x_cmd_env_util_is_archive_cached(){
     local candidate="${1:?Provide candidate}"
     local version="${2:?Provide version}"
 
-    local dir_list
-    dir_list="$(ls "$___X_CMD_ENV_PATH/$candidate/archive" 2>/dev/null)"
-    if [ "$dir_list" = "${dir_list#*"$candidate-$version"}" ]; then
+    if ! find . -name "$___X_CMD_ENV_PATH/$candidate/archive/$candidate-$version.*"; then
         env_log error "The archive of ${candidate} ${version} does not exist !"
         return 1
     fi
@@ -50,6 +28,7 @@ ___x_cmd_env_util_is_archive_cached(){
 ___x_cmd_env_util_shims_which_version(){
     local candidate="${1:?Provide candidate}"
 
+    local cur
     cur=$(pwd)
     while [ ! "$cur" = "" ]; do
         if [ -f "$cur/.x-cmd/.env/$candidate/version" ]; then
