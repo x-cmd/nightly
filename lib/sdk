@@ -113,14 +113,14 @@ ___x_cmd_env_sdk_unpack(){
     env_log info "Unpacking: $candidate ${version}"
 
     local archive_path="$___X_CMD_ENV_PATH/$candidate/archive/$candidate-$version.zip"
-	x uz "$archive_path" "$(dirname "$archive_path")" || return 1
-
     local archive_unpack_files
     archive_unpack_files="$(dirname "$archive_path")/$candidate-$version"
 
+	x uz "$archive_path" "$archive_unpack_files" || return 1
+
     local versions_path="$___X_CMD_ENV_PATH/$candidate/versions"
 	mkdir -p "$versions_path/${version}"
-	mv -f "$archive_unpack_files/"* "$versions_path/${version}"
+	mv -f "$archive_unpack_files"/*/* "$versions_path/${version}"
 	rm -rf "$archive_unpack_files"
 	env_log info "Done unpacking!"
 }

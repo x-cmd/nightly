@@ -15,7 +15,7 @@ ___x_cmd_env_util_is_archive_cached(){
     local candidate="${1:?Provide candidate}"
     local version="${2:?Provide version}"
 
-    if ! find . -name "$___X_CMD_ENV_PATH/$candidate/archive/$candidate-$version.*"; then
+    if [ -z "$(find "$___X_CMD_ENV_PATH/$candidate/archive" -name "$candidate-$version.*")" ]; then
         env_log error "The archive of ${candidate} ${version} does not exist !"
         return 1
     fi

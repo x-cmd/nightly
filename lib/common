@@ -27,19 +27,19 @@ ___x_cmd_env_common_init_file_add(){
     local version_path="$2"
 
     if [ ! -f "$___X_CMD_ROOT/.env/env/use" ]; then
-        printf "%s" "$2" >"$___X_CMD_ROOT/.env/env/use"
+        printf "\n%s" "$version_path" > "$___X_CMD_ROOT/.env/env/use"
     fi
 
     ___x_cmd_env_common_init_file_rm "$candidate"
-    printf "%s\n" "$version_path" >>"$___X_CMD_ROOT/.env/env/use"
+    printf "\n%s" "$version_path" >> "$___X_CMD_ROOT/.env/env/use"
 }
 
 ___x_cmd_env_common_init_file_rm(){
     local candidate="$1"
 
     local content
-    content="$(grep -v "/$candidate/" <"$___X_CMD_ROOT/.env/env/use")"
-    printf "%s" "$content" >"$___X_CMD_ROOT/.env/env/use"
+    content="$(grep -v "/$candidate/" < "$___X_CMD_ROOT/.env/env/use")"
+    printf "%s" "$content" > "$___X_CMD_ROOT/.env/env/use"
 }
 # EndSection
 
@@ -64,13 +64,12 @@ ___x_cmd_env_common_use(){
         ___x_cmd_env_util_make_shim_dir "$candidate" "${version}" || return 1
     fi
 
-    ___x_cmd_env_util_add_path "$candidate" "$version_path" || return 1
+    ___x_cmd_env_util_add_path "$version_path" || return 1
 
-    ___x_cmd_env_common_init_file_add "$candidate"  "$version_path" && \
-
-    ___x_cmd_modfile_add "$___X_CMD_ROOT/.env/env/use" "$version_path" && \
-        printf "%s\n" "$version" > "$___X_CMD_ENV_PATH/$candidate/version" && \
-            env_log info "Using $candidate $version -> $___X_CMD_ENV_PATH/$candidate/version"
+    ___x_cmd_env_common_init_file_add "$candidate" "$version_path" && \
+        # ___x_cmd_modfile_add "$___X_CMD_ROOT/.env/env/use" "$version_path" && \
+            printf "%s\n" "$version" > "$___X_CMD_ENV_PATH/$candidate/version" && \
+                env_log info "Using $candidate $version -> $___X_CMD_ENV_PATH/$candidate/version"
 }
 
 ___x_cmd_env_common_try(){

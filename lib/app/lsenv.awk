@@ -66,15 +66,15 @@ function view_body_info( view_grid,             _selected, _selected_keypath ){
 
 function view_body_show(view_grid, info_view_maxlen, _col_len,                _return, i, _selected, _selected_keypath, _view_info_grid ){
 
-    _return = ui_str_rep(" ", _col_len + 4) "┌" ui_str_rep("‒", info_view_maxlen) "┐"
+    _return = ui_str_rep(" ", _col_len + 4) "┌" ui_str_rep("─", info_view_maxlen) "┐"
     for (i=1; i<=VIEW_BODY_ROW_SIZE; ++i) {
         _selected = data[ cur_keypath L ctrl_win_val( treectrl, cur_keypath ) ]
         _selected_keypath = cur_keypath S _selected
         if ( data[ _selected_keypath L ] < 1 )                     _view_info_grid = th(TH_LSENV_INFO, str_pad_right(view_grid[ i S 0 ], info_view_maxlen))
         else                                                       _view_info_grid = str_pad_right(view_grid[ i S 0 ], info_view_maxlen)
-        _return = _return UI_END "\n" "  " view_grid[ i ] "  " "╎" _view_info_grid "╎"
+        _return = _return UI_END "\n" "  " view_grid[ i ] "  " "│" _view_info_grid "│"
     }
-    _return = _return UI_END "\n" ui_str_rep(" ", _col_len + 4) "└" ui_str_rep("‒", info_view_maxlen) "┘"
+    _return = _return UI_END "\n" ui_str_rep(" ", _col_len + 4) "└" ui_str_rep("─", info_view_maxlen) "┘"
     return _return
 }
 
@@ -192,11 +192,11 @@ function prepare_selected_item_data(        _selected, _selected_keypath ){
 
 function get_data( curkp,            cmd_format, _curkp_arrl, _curkp_arr, _line, curkp_to_json, _len, _max_len, i ){
     if (data[ curkp L ] != "")  return
-    cmd_format = "ls ~/.x-cmd/env/lib/candidate 2>/dev/null"
+    cmd_format = "ls ~/.x-cmd/.env/ 2>/dev/null"
     # cmd_format = "cd ~/.x-cmd/env/lib/app/candidate/sdk; ls; cd - >/dev/null"
     if (curkp != ".") {
         _curkp_arrl  = split( curkp, _curkp_arr, S)
-        cmd_format = "cat ~/.x-cmd/.env/%s/cache/%s.json"
+        cmd_format = "cat ~/.x-cmd/.env/%s/cache/%s.json  2>/dev/null"
 
         cmd_format = sprintf(cmd_format, _curkp_arr[2], _curkp_arr[2])
         cmd_format = ". ~/.x-cmd/xrc/latest; xrc env/lib/app/lsenv;" cmd_format "| ___x_cmd_ui_get_env_ls %s"
@@ -223,9 +223,10 @@ function get_data( curkp,            cmd_format, _curkp_arrl, _curkp_arr, _line,
 END {
     if ( exit_is_with_cmd() == true ) {
         _selected = data[ cur_keypath L ctrl_win_val( treectrl, cur_keypath ) ]
-        _selected_keypath = cur_keypath S _selected
+        split(  cur_keypath, cur_arr, S)
         send_env( "___X_CMD_UI_LSENV_FINAL_COMMAND",    exit_get_cmd() )
-        send_env( "___X_CMD_UI_LSENV_CURRENT_ITEM",  _selected_keypath )
+        send_env( "___X_CMD_UI_LSENV_CURRENT_CANDIDATE",  cur_arr[2] )
+        send_env( "___X_CMD_UI_LSENV_CURRENT_VERSION",  _selected )
     }
 }
 # EndSection
