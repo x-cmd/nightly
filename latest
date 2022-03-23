@@ -934,6 +934,8 @@ ___x_cmd_which_panic(){
     fi
 }
 
+. "$___X_CMD_ROOT/x-cmd/lib/qr"
+
 ___x_cmd_main(){
     local IFS=" "
 
@@ -1032,6 +1034,7 @@ ___x_cmd_main(){
                                                     ___x_cmd_which_panic || return 1
                                                 done
                                                 ;;
+        qr)                                     ___x_cmd_qr "$@" ;;
         _x_cmd_advise_json)                     ___x_cmd_x_cmd_advise_json "$@" ;;
         wsroot)                                 ___x_cmd_workspace_root "$@" ;;
         ws)                                     ___x_cmd_ws "$@" ;;
