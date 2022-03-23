@@ -1,7 +1,7 @@
 # shellcheck shell=sh disable=SC3043
 
 ___x_cmd_hub_file(){
-    local subcmd="$1";  shift
+    local subcmd="$1";  [ "$#" -gt 0 ] && shift
     case "$subcmd" in
         ls)             ___x_cmd_hub_file_ls "$@" ;;
         which)           "$@" ;;

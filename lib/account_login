@@ -1,3 +1,4 @@
+# shellcheck shell=sh disable=SC1072,SC3043
 
 ___x_cmd_hub_login(){
     local op="$1"

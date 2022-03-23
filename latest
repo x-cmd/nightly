@@ -4,14 +4,14 @@
 
 mkdir -p "$___X_CMD_ROOT/.env"
 
-___X_CMD_HUB_SERVICE_URL="$___X_CMD_HUB_SERVICE_URL"
+___X_CMD_HUB_SERVICE_URL="https://x-cmd.com"
 # ___X_CMD_HUB_SERVICE_URL="http://127.0.0.1:3000"
 
 . "$___X_CMD_ROOT/hub/lib/account"
 . "$___X_CMD_ROOT/hub/lib/file"
 
 ___x_cmd_hub(){
-    local subcmd="$1";  shift
+    local subcmd="$1";  [ "$#" -gt 0 ] && shift
     case "$subcmd" in
         file)           ___x_cmd_hub_file "$@"      ;;
         login)          ___x_cmd_hub_login "$@"     ;;
