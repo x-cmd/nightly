@@ -40,19 +40,19 @@ xrc gt/lib/_type/main
 ___x_cmd_gt(){
     param:dsl       '
 subcmd:
-    repo                                    "repo command"
-    issue                                   "issue"
-    pr                                      "pull request"
-    member                                  "repo member"
-    current                                 "set current owner, repo"
-    release                                 "release management"
-    enterprise                              "manage enterprise"
-    org                                     "manage org"
-    tag                                     "repo tag"
-    user                                    "user"
-    config                                  "save, load, which"
-    token                                   "set token"
-    new                                     "new client"
+    repo                             "repo command"
+    issue                            "issue"
+    pr                               "pull request"
+    member                           "repo member"
+    current                          "set current owner, repo"
+    release                          "release management"
+    enterprise                       "manage enterprise"
+    org                              "manage org"
+    tag                              "repo tag"
+    user                             "user"
+    config                           "save, load, which"
+    token                            "set token"
+    new                              "new client"
 '
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
@@ -62,8 +62,8 @@ subcmd:
     fi
 
     case "${PARAM_SUBCMD}" in
-        pr|release|member|tag)               "___x_cmd_gt_repo_${PARAM_SUBCMD}"   "$@"        ;;
-        *)                                   "___x_cmd_gt_${PARAM_SUBCMD}"  "$@"              ;;
+        pr|release|member|tag)        "___x_cmd_gt_repo_${PARAM_SUBCMD}"   "$@"        ;;
+        *)                            "___x_cmd_gt_${PARAM_SUBCMD}"        "$@"        ;;
     esac
 }
 

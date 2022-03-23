@@ -84,13 +84,15 @@ options:
         url="/v5/user/repos"
     fi
 
+    local gen_gt_json
+    gen_gt_json="$(param:option2json -page -per_page)"
     if [ -t 1 ]; then
         if ___ui_table_json Id=.id Name=.name Owner=.owner.login Url=.html_url \
-            -- ______x_cmd_gt_get_multi "$url" visibility affiliation sort direction; then
+            -- ______x_cmd_gt_get_multi "$url" "$gen_gt_json"; then
             return 0
         fi
     else
-        ______x_cmd_gt_get_multi "$url" visibility affiliation sort direction && \
+        ______x_cmd_gt_get_multi "$url" "$gen_gt_json" && \
             return 0
     fi
     gt_log error "Couldn't find any data"
@@ -109,11 +111,11 @@ options:
 
     if [ -t 1 ]; then
         if ___ui_table_json Email=.email State=.state \
-            -- "______x_cmd_gt_get_multi" "/v5/emails" page per_page; then
+            -- "______x_cmd_gt_get_multi" "/v5/emails"; then
             return 0
         fi
     else
-        ______x_cmd_gt_get_multi "/v5/emails" page per_page && \
+        ______x_cmd_gt_get_multi "/v5/emails" && \
             return 0
     fi
     gt_log error "Couldn't find any data"
@@ -131,8 +133,6 @@ options:
     --filter        "filter(assigned,created,all)"                 <>:Screen="assigned"
     --state         "state(open,progerssing,closed,rejected)"      <>:Sort="open"
     --direction     "direction(asc、desc)"                         <>:Direction="desc"
-    --page          "page"                                         <>:numbers=""
-    --per_page      "per_page"                                     <>:numbers=""
 
     --page          "page"                                         <>:number=1
     --per_page      "per_page"                                     <>:number=20
@@ -144,17 +144,17 @@ options:
     --finished_at   "finish date"                                  <>=""
 '
     param:run
+    local gen_gt_json
+    gen_gt_json="$(param:option2json -page -per_page)"
 
     if [ -t 1 ]; then
         if ___ui_table_json ID=.number State=.issue_state Assigner=.assignee.name \
             Repo=.repository.full_name Type=.issue_type Title=.title Url=.html_url \
-            -- "______x_cmd_gt_get_multi" "/v5/user/issues" filter state labels direction\
-            since page per_page schedule deadline created_at finished_at; then
+            -- "______x_cmd_gt_get_multi" "/v5/user/issues" "$gen_gt_json"; then
             return 0
         fi
     else
-        ______x_cmd_gt_get_multi "/v5/user/issues" filter state labels direction \
-            since page per_page schedule deadline created_at finished_at && \
+        ______x_cmd_gt_get_multi "/v5/user/issues" "$gen_gt_json" && \
             return 0
     fi
     gt_log error "Couldn't find any data"
@@ -200,11 +200,11 @@ options:
 
     if [ -t 1 ]; then
         if ___ui_table_json Id=.id Title=.title Key=.key Url=.url \
-            -- "______x_cmd_gt_get_multi" "/v5/user/keys" page per_page; then
+            -- "______x_cmd_gt_get_multi" "/v5/user/keys"; then
             return 0
         fi
     else
-        ______x_cmd_gt_get_multi "/v5/user/keys" page per_page && \
+        ______x_cmd_gt_get_multi "/v5/user/keys" && \
             return 0
     fi
     gt_log error "Couldn't find any data"
@@ -223,7 +223,7 @@ options:
     ______x_cmd_gt_get "v5/user/keys/$id" | (
         ___x_cmd_git_json_query_rename key=.key
         if [ -n "$key" ]; then
-            printf "%s" "$key"                     && return 0
+            printf "%s" "$key"                        && return 0
         else
             gt_log error "Couldn't find key by $id"   && return 1
         fi
@@ -258,7 +258,7 @@ options:
 '
     param:run
 
-    ______x_cmd_gt_post_json "/v5/user/keys" key title | (
+    ______x_cmd_gt_post_json "/v5/user/keys" "$(param:option2json)" | (
         ___x_cmd_git_json_query_rename "$data" id=.id title=.title key=.key
         if [ -n "$id" ]; then
             ___x_cmd_ui_tf true  "Success" "Id: $id" "title: $title" "key: $key"

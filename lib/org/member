@@ -38,14 +38,16 @@ options:
     --per_page      "per_page"              <>:number=20
 '
     param:run
+    local gen_gt_json
+    gen_gt_json="$(param:option2json -page -per_page)"
 
     if [ -t 1 ]; then
         if ___ui_table_json NameSpace=.login Name=.name Role=.member_role Url=.html_url \
-            -- "______x_cmd_gt_get_multi" "/v5/orgs/${org##*/}/members" role page per_page; then
+            -- "______x_cmd_gt_get_multi" "/v5/orgs/${org##*/}/members" "$gen_gt_json"; then
             return 0
         fi
     else
-        ______x_cmd_gt_get_multi "/v5/orgs/${org##*/}/members" role page per_page && \
+        ______x_cmd_gt_get_multi "/v5/orgs/${org##*/}/members" "$gen_gt_json" && \
             return 0
     fi
     gt_log error "Couldn't find any data by $org"
@@ -94,7 +96,7 @@ options:
 
     for username in "$@"; do
         # TODO:http handle，delete repo return data is null.Status: 204 No Content
-        if ______x_cmd_gt_put_json "/v5/orgs/${org##*/}/memberships/${username##*/}" role >/dev/null; then
+        if ______x_cmd_gt_put_json "/v5/orgs/${org##*/}/memberships/${username##*/}" "$gen_gt_json" >/dev/null; then
             gt_log info  "Add $username successfully"
         else
             gt_log error "Add $username failure"

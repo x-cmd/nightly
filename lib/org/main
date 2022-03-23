@@ -37,14 +37,15 @@ options:
     --per_page      "per_page"          <>:number=20
 '
     param:run
-
+    local gen_gt_json
+    gen_gt_json="$(param:option2json -page -per_page)"
     if [ -t 1 ]; then
         if ___ui_table_json Id=.id Name=.name FollowCount=.follow_count Url=.repos_url \
-            -- "______x_cmd_gt_get_multi" "/v5/user/orgs" admin admin page per_page; then
+            -- "______x_cmd_gt_get_multi" "/v5/user/orgs" "$gen_gt_json"; then
             return 0
         fi
     else
-        ______x_cmd_gt_get_multi "/v5/user/orgs" admin admin page per_page && \
+        ______x_cmd_gt_get_multi "/v5/user/orgs" "$gen_gt_json" && \
             return 0
     fi
     gt_log error "Couldn't find any data"
@@ -130,15 +131,17 @@ options:
     --per_page      "per_page"                          <>:number=20
 '
     param:run
+    local gen_gt_json
+    gen_gt_json="$(param:option2json -page -per_page)"
 
     if [ -t 1 ]; then
         if ___ui_table_json Id=.id Name=.name public=.public OwnerName=.owner.name DefaultBranch=.default_branch \
             OpenIssuesCount=.open_issues_count license=.license Url=.html_url \
-            -- "______x_cmd_gt_get_multi" "/v5/orgs/$1/repos" type page per_page; then
+            -- "______x_cmd_gt_get_multi" "/v5/orgs/$1/repos" "$gen_gt_json"; then
             return 0
         fi
     else
-        ______x_cmd_gt_get_multi "/v5/orgs/$1/repos" type page per_page && \
+        ______x_cmd_gt_get_multi "/v5/orgs/$1/repos" "$gen_gt_json" && \
             return 0
     fi
     gt_log error "Couldn't find any data. By $1"

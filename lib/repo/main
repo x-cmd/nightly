@@ -32,42 +32,36 @@ ___x_cmd_gt_repo_create() {
 
     param:scope     "gitee/$O"
     param:dsl       '
-type:
-    Access  =   private public
 option:
-    #n                      "repo names"
+    #n                      "repo names"                    <>:RepoName
 
-    --access                "private,public"                <>:Access=private
+    --access                "private,public"                <>:RepoAccess=private
     --description           "description"                   <>=""
     --homepage              "homepage"                      <>=""
-    --no_issues             "Provide issue"
+    --no_issue              "Provide issue"
     --no_wiki               "Provide wiki"
     --no_comment            "Provide can_comment"
     --no_auto_init          "Not auto init README"
     --gitignore_template    "Git Ignore"                    <>:Ignore=" "
-    --license_template      "license"                       <>:license=" "
-    -p|--path               "repo path"                     <>:url_type=""
+    --license_template      "license"                       <>:License=" "
+    -p|--path               "repo path"                     <>:RepoPath=""
 '
 
     param:run
+    [ $# -eq 0 ] && gt_log error "Repo name is empty" && return 1
 
     local private
     case "$access" in
         public)     private=false ;;
         private)    private=true ;;
     esac
+    local gen_gt_json
+    gen_gt_json="$(param:option2json has_issues=^no_issue has_wiki=^no_wiki \
+        can_comment=^no_comment auto_init=^no_auto_init +private -access)"
 
-    local has_issues="${no_issues:+false}";      has_issues="${has_issues:-true}"
-    local has_wiki="${no_wiki:+false}";          has_wiki="${has_wiki:-true}"
-    local can_comment="${no_comment:+false}";    can_comment="${can_comment:-true}"
-    local auto_init="${no_auto_init:+false}";    auto_init="${auto_init:-true}"
-
-    [ $# -eq 0 ] && gt_log error "Repo name is empty" && return 1
     local name
     for name in "$@"; do
-        ______x_cmd_gt_post_json "/v5/user/repos" name="${name##*/}" description homepage has_issues \
-            has_wiki can_comment auto_init gitignore_template license_template path private \
-        | (
+        ______x_cmd_gt_post_json "/v5/user/repos" name="${name##*/}" "$gen_gt_json" | (
             ___x_cmd_git_json_query_rename repo_id=.id url=.html_url repo_owner=.owner.login
             if [ -n "$repo_id" ]; then
                 ___x_cmd_ui_tf true  "Creating repo $name successfully" "repo_id: $repo_id" "repo_owner: $repo_owner" "url: $url"
@@ -88,25 +82,22 @@ ___x_cmd_gt_org_repo_create() {
     # path is null default repo name as path
     param:scope     "gitee/$O"
     param:dsl       '
-type:
-    Access  =   private public innerSource
 option:
     #n                      "repo names"
-    --org                   "organization space path"       <>:name
+    --org                   "organization space path"       <>:OrgSpaceName
 
     --description           "description"                   <>=""
-    --access                "private,public,innerSource"    <>:Access=private
-    --homepage              "homepage"                      <>:url_type=""
-    --no_issues             "Provide issue"
+    --access                "private,public,innerSource"    <>:ExtraAccess=private
+    --homepage              "homepage"                      <>:Address=""
+    --no_issue              "Provide issue"
     --no_wiki               "Provide wiki"
     --no_comment            "Provide can_comment"
     --no_auto_init          "auto init README"
     --gitignore_template    "Git Ignore"                    <>:Ignore=""
-    --license_template      "license"                       <>:license=""
-    -p|--path               "repo path"                     <>:url_type=""
+    --license_template      "license"                       <>:License=""
+    -p|--path               "repo path"                     <>:RepoPath=""
 '
     param:run
-
 
     case "$access" in
         private)        private=0 ;;
@@ -114,18 +105,14 @@ option:
         innerSource)    private=2 ;;
     esac
 
-    local has_issues="${no_issues:+false}";      has_issues="${has_issues:-true}"
-    local has_wiki="${no_wiki:+false}";          has_wiki="${has_wiki:-true}"
-    local can_comment="${no_comment:+false}";    can_comment="${can_comment:-true}"
-    local auto_init="${no_auto_init:+false}";    auto_init="${auto_init:-true}"
+    local gen_gt_json
+    gen_gt_json="$(param:option2json has_issues=^no_issue has_wiki=^no_wiki \
+        can_comment=^no_comment auto_init=^no_auto_init +private -access)"
 
     # TODO: owner may be personal
     local name
     for name in "$@"; do
-        ______x_cmd_gt_post_json "/v5/orgs/$org/repos" name description homepage \
-            has_issues has_wiki can_comment auto_init gitignore_template license_template \
-            path public \
-        | (
+        ______x_cmd_gt_post_json "/v5/orgs/$org/repos" "$gen_gt_json" | (
             ___x_cmd_git_json_query_rename url=.html_url
             if [ -n "$url" ]; then
                 ___x_cmd_ui_tf true     "Creating repo $name successfully" "url: $url"
@@ -146,43 +133,38 @@ type:
     Access  =   private public innerSource
 option:
     #n                      "repo names"
-    --enterprise            "enterprise space address"          <>
+    --enterprise            "enterprise space address"          <>:EnterpriseSpaceName
 
-    --Access                "private,public,innerSource"        <>:Access=private
+    --Access                "private,public,innerSource"        <>:EnterpriseRepoAccess=private
     --description           "description"                       <>=""
-    --homepage              "homepage"                          <>:url_type=""
-    -p|--path               "repo path"                         <>:url_type=""
-    --no_issues             "Provide issue"
+    --homepage              "homepage"                          <>:Address=""
+    --no_issue              "Provide issue"
     --no_wiki               "Provide wiki"
     --no_comment            "Provide can_comment"
     --no_auto_init          "auto init README"
     --outsourced            "Provide outsourced"
     --gitignore_template    "Git Ignore"                        <>:Ignore=""
-    --license_template      "license"                           <>:license=""
-    --project_creator       "Provide project_creator"           <>:name=""
+    --license_template      "license"                           <>:License=""
+    --project_creator       "Provide project_creator"           <>=""
     --members               "Provide members(name or email)"    <>=""
+    -p|--path               "repo path"                         <>:RepoPath=""
 '
     param:run
+    param:option2json has_issues=^no_issue has_wiki=^no_wiki can_comment=^no_comment auto_init=^no_auto_init
 
     case "$access" in
         private)        private=0 ;;
         public)         private=1 ;;
         innerSource)    private=2 ;;
     esac
-    local has_issues="${no_issues:+false}";      has_issues="${has_issues:-true}"
-    local has_wiki="${no_wiki:+false}";          has_wiki="${has_wiki:-true}"
-    local can_comment="${no_comment:+false}";    can_comment="${can_comment:-true}"
-    local auto_init="${no_auto_init:+false}";    auto_init="${auto_init:-true}"
-
     outsourced=${outsourced:-false}
+    local gen_gt_json
+    gen_gt_json="$(param:option2json has_issues=^no_issue has_wiki=^no_wiki \
+        can_comment=^no_comment auto_init=^no_auto_init outsourced=^^outsourced +private -access)"
 
     local name
     for name in "$@"; do
-        ______x_cmd_gt_post_json "/v5/enterprises/${enterprise##*/}/repos" \
-            name description homepage has_issues can_comment auto_init \
-            gitignore_template license_template path private enterprise \
-            outsourced project_creator members \
-        | (
+        ______x_cmd_gt_post_json "/v5/enterprises/${enterprise##*/}/repos" "$gen_gt_json" | (
             ___x_cmd_git_json_query_rename url=.html_url
             if [ -n "$url" ]; then
                 ___x_cmd_ui_tf true     "Creating repo $name successfully" "url: $url"
@@ -222,20 +204,20 @@ type:
     Access  =   private public
 options:
     #1|--repo               "Provide owner name and repo name.(default:the current user repo)"      <>:RepoName
-    --name                  "repo name"                                                             <>=""
+    --name                  "rename repo"                                                           <>:RepoName=""
 
     --access                "private,public"                                                        <>:Access=private
     --description           "repo description"                                                      <>=""
     --homepage              "homepage"                                                              <>=""
-    -p|--path               "repo path"                                                             <>:url_type=""
     --default_branch        "repo default branch"                                                   <>=""
-    --no_issues             "Provide issue"
+    --no_issue              "Provide issue"
     --no_wiki               "Provide wiki"
     --no_comment            "Provide can comment"
     --no_security_hole      "Provide issue security"
     --no_pull_requests      "Provide pull request"
     --no_online_edit        "Provide online edit"
     --no_lightweight_pr     "Provide lightweight pr"
+    -p|--path               "repo path"                                                             <>:RepoPath=""
 '
     param:run
 
@@ -245,21 +227,17 @@ options:
         private)    private=true ;;
     esac
     [ -z "$name" ] && name=${repo##*/}
+    local gen_gt_json
+    gen_gt_json="$(param:option2json has_issues=^no_issue has_wiki=^no_wiki \
+        can_comment=^no_comment security_hole_enabled=^no_security_hole \
+        pull_requests_enabled=^no_pull_requests no_online_edit=^no_online_edit \
+        lightweight_pr_enabled=^no_lightweight_pr \
+        +private -access -name +name)"
 
-    local has_issues="${no_issues:+false}";                      has_issues="${has_issues:-true}"
-    local has_wiki="${no_wiki:+false}";                          has_wiki="${has_wiki:-true}"
-    local can_comment="${no_comment:+false}";                    can_comment="${can_comment:-true}"
-    local security_hole_enabled="${no_security_hole:+false}";    security_hole_enabled="${security_hole_enabled:-true}"
-    local pull_requests_enabled="${no_pull_requests:+false}";    pull_requests_enabled="${pull_requests_enabled:-true}"
-    local online_edit_enabled="${no_online_edit:+false}";        online_edit_enabled="${online_edit_enabled:-true}"
-    local lightweight_pr_enabled="${no_lightweight_pr:+false}";  lightweight_pr_enabled="${lightweight_pr_enabled:-true}"
 
     [ $# -eq 0 ] && gt_log error "Repo name is empty" && return 1
     ___x_cmd_gt_param_init_owner_repo
-    ______x_cmd_gt_patch_json "/v5/repos/${owner_repo}" name private description \
-        homepage path default_branch has_issues has_wiki can_comment security_hole_enabled \
-        pull_requests_enabled online_edit_enabled lightweight_pr_enabled \
-    | (
+    ______x_cmd_gt_patch_json "/v5/repos/${owner_repo}" "$gen_gt_json" | (
         ___x_cmd_git_json_query_rename url=.html_url
         if [ -n "$url" ]; then
             ___x_cmd_ui_tf true     "Update $name successfully" "url: $url"
@@ -306,8 +284,6 @@ options:
 '
     param:run
 
-    ___X_CMD_UI_FORM_EXIT_STRATEGY="execute|exit" ___x_cmd_ui_form "Are you sure you want to $(___x_cmd_ui bold red delete "repo:") $(___x_cmd_ui bold "$*")" tf 1 = "yes" "no"
-    [ "$tf" != "yes" ] && gt_log info "Delete repo has been canceled" &&  return 0
     local i
     for i in "$@"; do
         ______x_cmd_gt_param_normalize_repo "$i"
@@ -332,10 +308,6 @@ options:
 
     ___x_cmd_gt_param_init_owner_repo
 
-    local ___X_CMD_UI_FORM_EXIT_STRATEGY="execute|exit"
-    ___x_cmd_ui_form "Are you sure you want to $(ui bold red clear repo) $(ui bold "${owner_repo}")" tf 1 = "yes" "no"
-    [ "$tf" != "yes" ] && gt_log info "Clear repo has been canceled" &&  return 0
-
     # TODO:http handle，delete repo return data is null.Status: 204 No Content
     if ______x_cmd_gt_put_json "/v5/repos/${owner_repo}/clear" >/dev/null; then
         ___x_cmd_ui_tf true   "Clearing repo ${owner_repo} successfully"
@@ -354,14 +326,15 @@ ___x_cmd_gt_repo_review(){
     param:dsl       '
 options:
     #1|--repo             "Provide owner name and repo name.(default:the current user repo)"   <>:RepoName
-    --assignees           "assignees username"                                                 <>:assignees
-    --testers             "testers usrename"                                                   <>:testers
-    --assignees_number    "number of reviewers"                                                <>:assignees_number="1"
-    --testers_number      "number of people tested"                                            <>:testers_number="1"
+    --assignees           "assignees username"                                                 <>:UserName
+    --testers             "testers usrename"                                                   <>:UserName
+    --assignees_number    "number of reviewers"                                                <>:NatureNumber="1"
+    --testers_number      "number of people tested"                                            <>:NatureNumber="1"
 '
     param:run
     ___x_cmd_gt_param_init_owner_repo
-    ______x_cmd_gt_put_json "/v5/repos/${owner_repo}/reviewer" assignees testers \
+
+    ______x_cmd_gt_put_json "/v5/repos/${owner_repo}/reviewer" "$(param:option2json)" \
     | (
         ___x_cmd_git_json_query_rename name=.name
         if [ -n "$name" ]; then
