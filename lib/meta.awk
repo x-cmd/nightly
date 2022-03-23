@@ -67,12 +67,19 @@ function ls_subcmd(         i,_cmd_name){
     }
 }
 
+function _param_list_subcmd(         i){
+    for (i=1; i <= subcmd_arr[ L ]; ++i) {
+        printf("%s\n", subcmd_arr[ i ] )
+    }
+}
+
 NR==4{
     if( arg_arr[1] == "_param_has_subcmd" ){
         for(i=1; i<=subcmd_arr[ L ]; ++i) if( subcmd_arr[i] == arg_arr[2] ) exit 0
         exit 1
     }
-    else if( arg_arr[1] == "_ls_subcmd" || arg_arr[1] == "_param_list_subcmd" )           ls_subcmd()
+    else if( arg_arr[1] == "_param_list_subcmd" )                                         _param_list_subcmd()
+    else if( arg_arr[1] == "_ls_subcmd" )                                                 ls_subcmd()
     else if( arg_arr[1] == "_ls_option" )                                                 ls_option()
     else if( arg_arr[1] == "_ls_option_name" )                                            ls_option_name()
     else if( arg_arr[1] == "_ls_option_subcmd" ){

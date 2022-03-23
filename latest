@@ -432,11 +432,13 @@ ___x_cmd_param_option_to_json()(
     done
 
     while read -r i; do
-        if [ "${to_remove#* "$i" *}" = "$to_remove" ]; then
+        local j="${i%=*}"
+        j="${j#-}"
+        if [ "${to_remove#* "$j" *}" = "$to_remove" ]; then
             code="$code $i"
         fi
     done <<A
-$(___x_cmd_param_int ls_option_name)
+$(___x_cmd_param_int _ls_option_name)
 A
     eval "$code"
 )
