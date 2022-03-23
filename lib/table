@@ -68,7 +68,7 @@ ___ui_table_clear(){
 # 1. Input data is primitive data
 # 2. Input json, then tranfer as primitive data to awk
 # 3. Using instruction to control table
-___x_cmd_ui_table_control_awk_(){
+___x_cmd_ui_table_control_awk(){
     command awk \
         "$@" \
         -f "$___X_CMD_ROOT/awk/lib/default.awk" \
@@ -77,14 +77,14 @@ ___x_cmd_ui_table_control_awk_(){
         -f "$___X_CMD_ROOT/awk/lib/ui.awk" \
         -f "$___X_CMD_ROOT/ui/lib/share.awk" \
         -f "$___X_CMD_ROOT/ui/lib/theme.awk" \
-        -f "$___X_CMD_ROOT/ui/lib/table.control.awk"
+        -f "$___X_CMD_ROOT/ui/lib/table.awk"
 }
 
-___x_cmd_ui_table_control_awk(){
+___x_cmd_ui_table_control_main(){
     if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
-        ___x_cmd_ui_table_control_awk_ -W interactive "$@"
+        ___x_cmd_ui_table_control_awk -W interactive
     else
-        ___x_cmd_ui_table_control_awk_ "$@"
+        ___x_cmd_ui_table_control_awk
     fi
 }
 
@@ -120,7 +120,7 @@ END{
 '
         fi
         cat
-    } | ___x_cmd_ui_table_control_awk
+    } | ___x_cmd_ui_table_control_main
 }
 
 ___ui_table_out_func(){

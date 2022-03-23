@@ -1,16 +1,54 @@
+. ./lib/region
+. ./lib/getchar
+
+# ___x_cmd_ui_region_getchar_read1(){
+#     stty raw
+#     ___X_CMD_UI_GETCHAR_CHAR="$(dd bs=1 count="${1:-1}" 2> /dev/null)"
+#     local code=$?
+#     stty -raw
+#     if [ "$___X_CMD_UI_GETCHAR_CHAR" = "$(printf "\003")" ]; then return 130; fi
+#     return $code
+# }
+
+# ___x_cmd_ui_region_getchar_read1(){
+#     local IFS="$(printf "\001")"
+#     read -rsk "${1:-1}" ___X_CMD_UI_GETCHAR_CHAR
+#     local code=$?
+#     debug "code: $code"
+#     return $code
+# }
+
+___x_cmd_ui_region_getchar_read1(){
+    read  ___X_CMD_UI_GETCHAR_CHAR
+}
+
+
 f(){
-    stty -echo
-    reset(){
-        printf "zzzz\n" >&2;
-        printf "\033[34h\033[?25h" >&2; 
-        # stty sane;
-        stty echo
-        return 130
+    echo "run_inner"
+    trap 'echo "tap1"' INT
+    {
+        # (
+        #     while true; do
+        #         sleep 1
+        #     done
+        # ) &
+        # sleep 100
+        # echo hi
+        trap ':; echo "auto"; exit 130' INT
+
+        ___x_cmd_ui_region_getchar_read1
+        # ___x_cmd_ui_getchar
+
+        while ___x_cmd_ui_region_getchar_read1; do
+            :
+        done
+        # # read -n 1 a
+        # echo $?
+    } | {
+
+        trap 'echo "trap2"; ' INT
+        awk '{ }'
     }
-    for i in $(seq 10);do
-        printf "%s " "test"
-        sleep 1
-        trap reset INT
-    done
+    echo "clear"
 }
 f
