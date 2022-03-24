@@ -51,4 +51,19 @@ f(){
     }
     echo "clear"
 }
+
+
+# f(){
+#     echo "start"
+#     {
+#         trap ':;echo "trap auto keyboard" >> ccc;exit 130' INT
+#         read  a
+#     } | {
+#         awk '{print $0}'
+#     } | {
+#         trap 'echo "trap update" >> ccc; return 130' INT
+#         awk '{  }'
+#     }
+#     echo "clear test"
+# }
 f

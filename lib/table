@@ -189,25 +189,3 @@ ___ui_table_json(){
 }
 
 # EndSection
-
-
-# Section: test1
-
-# ___x_cmd_ui_table -
-# ___x_cmd_ui_table h B%USER               PID  %CPU %MEM      VSZ    RSS   TT  STAT STARTED      TIME COMMAND
-# for i in $(seq 10); do
-#     ___x_cmd_ui_table + edwinjhlee       45694  69.7  3.2 12906080 542124   "??"  R    "三02下午" 2171:02.57 "com.docker.hyperkit -A -u -F vms/0/hyperkit.pid -c 4 -m 8192M -s 0:0,hostbridge -s"
-#     ___x_cmd_ui_table + _windowserver    24773   9.6  0.9  9289004 146772   "??"  Ss   "29 521"  2827:26.66 "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer -daemo"
-#     ___x_cmd_ui_table + edwinjhlee       40627   9.1  0.8  9704844 133228   "??"  Ss   "25 621"  351:58.88 "/Applications/Visual Studio Code.app/Contents/MacOS/Electron /Users/edwinjhlee/x-b"
-#     ___x_cmd_ui_table + edwinjhlee       81250   5.9  1.7 57448804 293384   "??"  S    "2:25下午"  18:21.02 "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Renderer).app1"
-#     ___x_cmd_ui_table + edwinjhlee       81250   5.9  1.7 57448804 293384   "??"  S    "2:25下午"  18:21.02 "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Renderer).app2"
-#     ___x_cmd_ui_table + edwinjhlee       99999   5.9  1.7 57448804 293384   "??"  S    "2:25下午"  18:21.02 "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Renderer).app3"
-# done
-# ___x_cmd_ui_table
-
-# printf "%s\n" "___X_CMD_UI_TABLE_FINAL_COMMAND: $___X_CMD_UI_TABLE_FINAL_COMMAND"
-# printf "%s\n" "___X_CMD_UI_TABLE_CURRENT_ROW: $___X_CMD_UI_TABLE_CURRENT_ROW"
-# printf "%s\n" "___X_CMD_UI_TABLE_CURRENT_COLUMN: $___X_CMD_UI_TABLE_CURRENT_COLUMN"
-# printf "%s\n" "___X_CMD_UI_TABLE_CUR_LINE: $___X_CMD_UI_TABLE_CUR_LINE"
-
-# EndSection

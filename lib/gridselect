@@ -66,25 +66,3 @@ ___x_cmd_ui_gridselect_control(){
 ___x_cmd_ui_gridselect_main(){
     ___x_cmd_ui_region_autorefresh_with_keyboard ___x_cmd_ui_gridselect_control "$@"
 }
-
-# f(){
-#      ___x_cmd_ui_gridselect num \
-#     "Please select the app you want to install:" \
-#     "Install docker" \
-#     "Install k8s" \
-#     "Install minikube" \
-#     "Install jvm" \
-#     "Install nvm" \
-#     "---" \
-#     "It's the 1 app descriptor." \
-#     "It's the 2 app descriptor." \
-#     "" \
-#     "" \
-#     "It's the 5 app descriptor." \
-#     "---"
-#     echo "___X_CMD_UI_GRIDSELECT_FINAL_COMMAND:" "$___X_CMD_UI_GRIDSELECT_FINAL_COMMAND"
-#     echo "___X_CMD_UI_GRIDSELECT_CURRENT_ITEM_INDEX:" "$___X_CMD_UI_GRIDSELECT_CURRENT_ITEM_INDEX"
-#     echo "___X_CMD_UI_GRIDSELECT_CURRENT_ITEM:" "$___X_CMD_UI_GRIDSELECT_CURRENT_ITEM"
-
-# }
-# f
