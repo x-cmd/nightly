@@ -52,7 +52,7 @@ options:
 '
     param:run
 
-    ___x_cmd_gh_get "/orgs/${org##*/}/memberships/${username##*/}" | (
+    ___x_cmd_gh_http get "/orgs/${org##*/}/memberships/${username##*/}" | (
         ___x_cmd_git_json_query_rename role=.role url=.organization_url name=.user.login state=.state
         if [ -n "$state" ];then
             ___x_cmd_ui_tf true "get $username in organizations info  success" "Name: $name" "Role: $role" "state: $state" "Url: $url"
@@ -81,7 +81,7 @@ options:
 
     for username in "$@"; do
         {
-            ___x_cmd_gh_put_json "/orgs/${org##*/}/memberships/${username##*/}" role | (
+            ___x_cmd_gh_http put json "/orgs/${org##*/}/memberships/${username##*/}" role | (
             ___x_cmd_git_json_query_rename state=.state
             if [ -n "$state" ];then
                 ___x_cmd_ui_tf true "add $username to organizations  success"
@@ -111,7 +111,7 @@ options:
     local username
     for username in "$@"; do
         {
-            if ___x_cmd_gh_delete "/orgs/${org##*/}/members/${username##*/}"; then
+            if ___x_cmd_gh_http delete "/orgs/${org##*/}/members/${username##*/}"; then
                 ___x_cmd_ui_tf  true "del $username to organizations  success"
             else
                 ___x_cmd_ui_tf false "del $username to organizations fail"

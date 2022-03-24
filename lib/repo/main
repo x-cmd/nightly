@@ -49,7 +49,7 @@ options:
 
     ___x_cmd_gh_param_init_owner_repo
 
-    ___x_cmd_gh_get "/repos/${owner_repo}" | (
+    ___x_cmd_gh_http get "/repos/${owner_repo}" | (
         ___x_cmd_git_json_query_rename id=.id html_url=.html_url name=.full_name;
         if [ -n "$id" ]; then
             ___x_cmd_ui_tf true     "repo $name info:" "repo_id: $id" "name: $name" "url: $html_url"
@@ -89,31 +89,24 @@ option:
 '
     param:run
 
-    local private=true
-    [ "$access" = "public" ] && private=false
-
-    local has_issues="${no_issues:+false}";      has_issues="${has_issue:-true}"
-    local has_wiki="${no_wiki:+false}";          has_wiki="${has_wiki:-true}"
-    local has_projects="${no_projects:+false}";  has_projects="${has_projects:-true}"
-    local auto_init="${no_auto_init:+false}";    auto_init="${auto_init:-true}"
-    local allow_squash_merge="${no_squash_merge:+false}";   allow_squash_merge="${allow_squash_merge:-true}"
-    local allow_merge_commit="${no_merge_commit:+false}";   allow_merge_commit="${allow_merge_commit:-true}"
-    local allow_rebase_merge="${no_rebase_merge:+false}";   allow_rebase_merge="${allow_rebase_merge:-true}"
-
     if [ $# -eq 0  ];then
         gh_log error "repo create name is null"
         return 1
     fi
 
+    local private=true
+    [ "$access" = "public" ] && private=false
+    local gen_gh_json
+    gen_gh_json="$(param:option2json has_issues=^no_issues has_wiki=^no_wiki has_projects=^no_projects \
+                    auto_init=^no_auto_init allow_squash_merge=^no_squash_merge allow_merge_commit=^no_merge_commit \
+                    allow_rebase_merge=^no_rebase_merge -access  +private)"
+
     local name
+    xrc json
     for name in "$@"; do
         {
-            ___x_cmd_gh_post_json "/user/repos" name="${name##*/}" \
-                private description homepage team_id gitignore_template \
-                license_template has_issues has_wiki has_projects auto_init \
-                allow_squash_merge allow_merge_commit allow_rebase_merge \
-                allow_auto_merge delete_branch_on_merge has_downloads is_template \
-            | (
+            ___x_cmd_json_put gen_gh_json.name "${name##*/}"
+            ___x_cmd_gh_http post "/user/repos" "$gen_gh_json"| (
             ___x_cmd_git_json_query_rename id=.id url=.html_url owner=.owner.login
             if [ -n "$id" ];then
                 ___x_cmd_ui_tf true "Creating repo $name success" "repo_id: $id" "repo_owner: $owner" "url: $url"
@@ -141,7 +134,7 @@ options:
     for i in "$@"; do
         ___x_cmd_gh_param_normalize_repo "$i"
         # TODO:http handle，delete repo return data is null
-        if ___x_cmd_gh_delete "/repos/$owner_repo" >/dev/null; then
+        if ___x_cmd_gh_http delete "/repos/$owner_repo" >/dev/null; then
             ___x_cmd_ui_tf true  "deleted repo $owner_repo"
         else
             ___x_cmd_ui_tf false "Deleting repo failure: $owner_repo. Probably because it desn't exists."
@@ -182,40 +175,30 @@ option:
     #n                          "repo names"
 '
     param:run
-
-    local private=true
-    [ "$access" = "public" ] && private=false
-
-    local has_issues="${no_issues:+false}";      has_issues="${has_issue:-true}"
-    local has_wiki="${no_wiki:+false}";          has_wiki="${has_wiki:-true}"
-    local has_projects="${no_projects:+false}";  has_projects="${has_projects:-true}"
-    local auto_init="${no_auto_init:+false}";    auto_init="${auto_init:-true}"
-    local allow_squash_merge="${no_squash_merge:+false}";   allow_squash_merge="${allow_squash_merge:-true}"
-    local allow_merge_commit="${no_merge_commit:+false}";   allow_merge_commit="${allow_merge_commit:-true}"
-    local allow_rebase_merge="${no_rebase_merge:+false}";   allow_rebase_merge="${allow_rebase_merge:-true}"
-
     if [ $# -eq 0 ];then
         gh_log error "repo name is null"
         return 1
     fi
 
-    # local tmp="{security_and_analysis:{}}"
-    # xrc json
-    # [ -n "$scanning" ] && ___x_cmd_json_put tmp.security_and_analysis.secret_scanning "{\"status\": \"$scanning\"}"
-    # [ -n "$advanced_security" ] && ___x_cmd_json_put tmp.security_and_analysis.advanced_security "{\"status\": \"$advanced_security\"}"
-    # [ -n "$secret_scanning_push_protection" ] && ___x_cmd_json_put tmp.security_and_analysis.secret_scanning_push_protection "{\"status\": \"$secret_scanning_push_protection\"}"
-    # [ "$tmp" = "{security_and_analysis:{}}" ] && tmp=""
+    local private=true
+    [ "$access" = "public" ] && private=false
+
+    xrc jo
+    ___x_cmd_jo "{security_and_analysis:{secret_scanning:{status:$scanning},advanced_security:{status: $advanced_security}, \
+                 secret_scanning_push_protection:{status: $scanning_push_protection}}}"
+
+    local gen_gh_json
+    gen_gh_json="$(param:option2json has_issues=^no_issues has_wiki=^no_wiki has_projects=^no_projects \
+                    auto_init=^no_auto_init allow_squash_merge=^no_squash_merge allow_merge_commit=^no_merge_commit \
+                    allow_rebase_merge=^no_rebase_merge visibility=access -repo)"
 
     ___x_cmd_gh_param_init_owner_repo
     local name
+    xrc json
     for name in "$@"; do
         {
-            ___x_cmd_gh_patch_json "/repos/${owner_repo}" private \
-                visibility="$access" description homepage team_id default_branch \
-                has_issues has_wiki has_projects \
-                allow_squash_merge allow_merge_commit allow_rebase_merge archived \
-                allow_auto_merge delete_branch_on_merge is_template allow_forking \
-            | (
+            ___x_cmd_json_put gen_gh_json.name "${name##*/}"
+            ___x_cmd_gh_http patch "/repos/${owner_repo}" "$gen_gh_json"| (
             ___x_cmd_git_json_query_rename id=.id url=.html_url owner=.owner.login
             if [ -n "$id" ];then
                 ___x_cmd_ui_tf true "Creating repo $name success" "repo_id: $id" "repo_owner: $owner" "url: $url"

@@ -55,7 +55,7 @@ options:
 '
     param:run
 
-    ___x_cmd_gh_get "/orgs/$org" | (
+    ___x_cmd_gh_http get "/orgs/$org" | (
         ___x_cmd_git_json_query_rename id=.id url=.html_url name=.login
         if [ -n "$id" ]; then
             ___x_cmd_ui_tf true "get $org organizations info success" "Id: $id" "Name: $name" "Url: $url"

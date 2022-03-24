@@ -79,7 +79,7 @@ options:
     param:run
 
     ___x_cmd_gh_param_init_owner_repo
-    ___x_cmd_gh_post_json "/repos/${owner_repo}/branches/$branch/rename" new_name | (
+    ___x_cmd_gh_http post json "/repos/${owner_repo}/branches/$branch/rename" new_name | (
         ___x_cmd_git_json_query_rename name=.name
         if [ "$name" = "$new_name" ]; then
             ___x_cmd_ui_tf true "branch renamed from $branch to $new_name successfully"
@@ -134,7 +134,7 @@ options:
     param:run
 
     ___x_cmd_gh_param_init_owner_repo
-    ___x_cmd_gh_get "/repos/${owner_repo}/branches/${branch}/protection" | (
+    ___x_cmd_gh_http get "/repos/${owner_repo}/branches/${branch}/protection" | (
     ___x_cmd_git_json_query_rename admins=.enforce_admins.enabled \
         deletions=.allow_deletions.enabled linear=.required_linear_history.enabled \
         pushes=.allow_force_pushes.enabled signatures=.required_signatures.enabled
@@ -163,7 +163,7 @@ options:
     param:run
 
     ___x_cmd_gh_param_init_owner_repo
-    if ___x_cmd_gh_delete "/repos/${owner_repo}/branches/${branch}/protection"; then
+    if ___x_cmd_gh_http delete "/repos/${owner_repo}/branches/${branch}/protection"; then
         ___x_cmd_ui_tf  true "del ${branch} branch protection success"
     else
         ___x_cmd_ui_tf false "del ${branch} branch protection fail"

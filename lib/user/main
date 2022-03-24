@@ -30,9 +30,9 @@ options:
     local owner="$1"
     local data
     if [ -z "$owner" ]; then
-        data=$(___x_cmd_gh_get "/user" )
+        data=$(___x_cmd_gh_http get "/user" )
     else
-        data=$(___x_cmd_gh_get "/users/$1")
+        data=$(___x_cmd_gh_http get "/users/$1")
     fi
     print "$data"
 }
@@ -60,10 +60,10 @@ options:
     fi
 
     if [ -t 1 ] && ___ui_table_json Id=.id Name=.name Owner=.owner.login Url=.html_url \
-        -- "___x_cmd_gh_get" "$url" visibility affiliation sort direction;then
+        -- "___x_cmd_gh_http get" "$url" visibility affiliation sort direction;then
         return 0
     fi
-    ___x_cmd_gh_get "$url" visibility affiliation sort direction && return 0
+    ___x_cmd_gh_http get "$url" visibility affiliation sort direction && return 0
 }
 
 ___x_cmd_gh_user_email(){

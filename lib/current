@@ -47,7 +47,7 @@ ___x_cmd_gh_current_owner() {
 
     [ -n "$___X_CMD_GITHUB_DEFAULT_OWNER" ] && printf "%s\n" "$___X_CMD_GITHUB_DEFAULT_OWNER" && return 0
 
-    ___X_CMD_GITHUB_DEFAULT_OWNER="$(___x_cmd_gh_get "/user" | ___x_cmd_git_json_query ".login")"
+    ___X_CMD_GITHUB_DEFAULT_OWNER="$(___x_cmd_gh_http get "/user" | ___x_cmd_git_json_query ".login")"
     if [ -n "$___X_CMD_GITHUB_DEFAULT_OWNER" ];then
         ___x_cmd_gh_config_set  "user" "$___X_CMD_GITHUB_DEFAULT_OWNER" 1>/dev/null 2>&1
         printf "%s\n" "$___X_CMD_GITHUB_DEFAULT_OWNER"

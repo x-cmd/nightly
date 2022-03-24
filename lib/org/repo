@@ -62,22 +62,16 @@ option:
     local private=true
     [ "$access" = "public" ] && private=false
 
-    local has_issues="${no_issues:+false}";                 has_issues="${has_issue:-true}"
-    local has_wiki="${no_wiki:+false}";                     has_wiki="${has_wiki:-true}"
-    local has_projects="${no_projects:+false}";             has_projects="${has_projects:-true}"
-    local auto_init="${no_auto_init:+false}";               auto_init="${auto_init:-true}"
-    local allow_squash_merge="${no_squash_merge:+false}";   allow_squash_merge="${allow_squash_merge:-true}"
-    local allow_merge_commit="${no_merge_commit:+false}";   allow_merge_commit="${allow_merge_commit:-true}"
-    local allow_rebase_merge="${no_rebase_merge:+false}";   allow_rebase_merge="${allow_rebase_merge:-true}"
-
+    local gen_gh_json
+    gen_gh_json="$(param:option2json has_issues=^no_issues has_wiki=^no_wiki has_projects=^no_projects \
+                    auto_init=^no_auto_init allow_squash_merge=^no_squash_merge allow_merge_commit=^no_merge_commit \
+                    allow_rebase_merge=^no_rebase_merge -access -org  +private)"
     # TODO:owner may be personal
     local name
+    xrc json
     for name in "$@"; do
-        ___x_cmd_gh_post_json "/orgs/$org/repos" name description homepage team_id \
-                gitignore_template license_template visibility="$access" has_issues \
-                has_projects auto_init is_template allow_squash_merge allow_merge_commit \
-                allow_rebase_merge  allow_auto_merge delete_branch_on_merge \
-        | (
+        ___x_cmd_json_put gen_gh_json.name "${name##*/}"
+        ___x_cmd_gh_http post "/orgs/$org/repos" "$gen_gh_json" | (
             ___x_cmd_git_json_query_rename repo_id=.id url=.html_url repo_owner=.owner.login
             if [ -n "$repo_id" ]; then
                 ___x_cmd_ui_tf true "Creating repo $name success" "repo_id: $repo_id" "repo_owner: $repo_owner" "url: $url"

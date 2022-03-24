@@ -13,19 +13,17 @@ ___x_cmd_gh_resp_body() {
     http "@___x_cmd_gh_${O:-GITHUB_DEFAULT}" resp body "$@"
 }
 
-___x_cmd_gh_get() {
-    http "@___x_cmd_gh_${O:-GITHUB_DEFAULT}" get "$@"
-}
+
 
 ___x_cmd_gh_get_multi() {
     if [ -n "$page" ] || [ -n "$per_page" ]; then
-        ___x_cmd_gh_get "$@" page per_page
+        ___x_cmd_gh_http get "$@" page per_page
         return
     fi
     local i=1
     local total_page=100000
     while [ "$i" -le "$total_page" ]; do
-        ___x_cmd_gh_get "$@" page="$i" per_page=100
+        ___x_cmd_gh_http get "$@" page="$i" per_page=100
         total_page="$(___x_cmd_gh_resp_header "total_page")"
         [ -z "$total_page" ] && return
         # echo "total_page:$total_page" >&2
@@ -33,30 +31,12 @@ ___x_cmd_gh_get_multi() {
     done
 }
 
-___x_cmd_gh_post_json() {
-    http "@___x_cmd_gh_${O:-GITHUB_DEFAULT}" post  json "$@"
+___x_cmd_gh_http(){
+    if ! O="___x_cmd_gh_${O:-GITHUB_DEFAULT}" http header get Content-Type 1>/dev/null 2>&1; then
+         O="___x_cmd_gh_${O:-GITHUB_DEFAULT}" http header put Content-Type application/json
+    fi
+    O="___x_cmd_gh_${O:-GITHUB_DEFAULT}" http "$@"
 }
-
-___x_cmd_gh_put_json() {
-    http "@___x_cmd_gh_${O:-GITHUB_DEFAULT}" put json "$@"
-}
-
-___x_cmd_gh_patch_json() {
-    http "@___x_cmd_gh_${O:-GITHUB_DEFAULT}" patch json "$@"
-}
-
-___x_cmd_gh_delete() {
-    http "@___x_cmd_gh_${O:-GITHUB_DEFAULT}" delete "$@"
-}
-
-___x_cmd_gh_dict_get() {
-    http "@___x_cmd_gh_${O:-GITHUB_DEFAULT}" dict "$@"
-}
-
-___x_cmd_gh_dict_put() {
-    http "@___x_cmd_gh_${O:-GITHUB_DEFAULT}" dict "$@"
-}
-
 
 ############################
 # Section 3: Parameter Utilities
