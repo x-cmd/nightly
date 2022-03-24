@@ -1,3 +1,6 @@
+# Author:       Li Junhao   l@x-cmd.com     # xrc
+# shellcheck    shell=sh    disable=SC3043
+
 ___x_cmd_qr(){
     local op="${1}";
 
@@ -10,12 +13,12 @@ ___x_cmd_qr(){
 }
 
 ___x_cmd_qr_enc(){
-    ___x_cmd_static_build_file qrencode "$@"
+    ___x_cmd_static_build_file qrencode qrencode "$@"
 }
 
 ___x_cmd_qr_enc_default(){
     : Provide param
-    ___x_cmd_static_build_file qrencode -t utf8i "${1:?Provide URL}"
+    ___x_cmd_static_build_file qrencode qrencode -t utf8i "${1:?Provide URL}"
 }
 
 ___x_cmd_qr_dec(){
