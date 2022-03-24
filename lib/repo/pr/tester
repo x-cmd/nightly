@@ -30,7 +30,7 @@ options:
     param:run
 
     ___parse_pr_init_owner_repo_and_pr
-    ______x_cmd_gt_post_json "/v5/repos/${owner_repo}/pulls/$pr/testers" testers
+    ___x_cmd_gt_http post "/v5/repos/${owner_repo}/pulls/$pr/testers" testers
 }
 
 ___x_cmd_gt_repo_pr_testers_delete() {
@@ -43,7 +43,7 @@ options:
     param:run
 
     ___parse_pr_init_owner_repo_and_pr
-    ______x_cmd_gt_delete "/v5/repos/${owner_repo}/pulls/$pr/testers?testers=$testers"
+    ___x_cmd_gt_http delete "/v5/repos/${owner_repo}/pulls/$pr/testers?testers=$testers"
 }
 
 ___x_cmd_gt_repo_pr_testers_reset() {
@@ -57,7 +57,7 @@ options:
 
     ___parse_pr_init_owner_repo_and_pr
 
-    ______x_cmd_gt_patch_json "/v5/repos/${owner_repo}/pulls/$pr/testers" reset_all
+    ___x_cmd_gt_http patch "/v5/repos/${owner_repo}/pulls/$pr/testers" reset_all
 }
 
 ___x_cmd_gt_repo_pr_testers_test() {
@@ -71,7 +71,7 @@ options:
 
     ___parse_pr_init_owner_repo_and_pr
 
-    ______x_cmd_gt_post_json "/v5/repos/${owner_repo}/pulls/$pr/test" force
+    ___x_cmd_gt_http post "/v5/repos/${owner_repo}/pulls/$pr/test" force
 }
 
 

@@ -40,11 +40,11 @@ options:
 
     if [ -t 1 ]; then
         if ___ui_table_json NameSpace=.user.login Name=.user.name MarkName=.remark IsOutSourced=.outsourced Role=.role \
-            -- "______x_cmd_gt_get_multi" "/v5/enterprises/${enterprise##*/}/members" role page per_page; then
+            -- "___x_cmd_gt_get_multi" "/v5/enterprises/${enterprise##*/}/members" role page per_page; then
             return 0
         fi
     else
-        ______x_cmd_gt_get_multi "/v5/enterprises/${enterprise##*/}/members" role page per_page && \
+        ___x_cmd_gt_get_multi "/v5/enterprises/${enterprise##*/}/members" role page per_page && \
             return 0
     fi
     gt_log error "Couldn't find any data by $enterprise"
@@ -63,7 +63,7 @@ options:
 '
     param:run
 
-    ______x_cmd_gt_get_multi "/v5/enterprises/${enterprise}/members/${username}" | (
+    ___x_cmd_gt_get_multi "/v5/enterprises/${enterprise}/members/${username}" | (
         ___x_cmd_git_json_query_rename name_space=.user.login mark_name=.remark role=.role is_active=.active is_out_sourced=.outsourced
         if [ -n "$name_space" ]; then
              ___x_cmd_ui_tf true  "NameSpace: $name_space" "MarkName: $mark_name" "Role: $role" "IsActive: $is_active" "IsOutSourced: $is_out_sourced"
@@ -91,11 +91,14 @@ options:
     param:run
 
     [ $# -eq 0 ] && gt_log error "At least one user's spatial address or email is needed" && return 1
+    local gen_gt_json
+    gen_gt_json="$(param:option2json )"
+
     local username
     for username in "$@"; do
+    ___x_cmd_json_put gen_gt_json.mode "${username##*/}"
         # TODO:http handle，delete repo return data is null.Status: 204 No Content
-        if ______x_cmd_gt_post_json "/v5/enterprises/${enterprise}/members" \
-            role $mode="$username" >/dev/null; then
+        if ___x_cmd_gt_http post "/v5/enterprises/${enterprise}/members" "$gen_gt_json" >/dev/null; then
             gt_log info  "Add $username successfully"
         else
             gt_log error "Add $username failure"
@@ -118,7 +121,7 @@ options:
     local username
     for username in "$@"; do
         # TODO:http handle，delete repo return data is null.Status: 204 No Content
-        if ______x_cmd_gt_delete "/v5/enterprises/${enterprise##*/}/members/${username##*/}" >/dev/null; then
+        if ___x_cmd_gt_http delete "/v5/enterprises/${enterprise##*/}/members/${username##*/}" >/dev/null; then
             gt_log info  "Remove user successfully: $username"
         else
             gt_log error "Remove user failure by $username $enterprise"
@@ -139,9 +142,10 @@ options:
     --active            "Access to corporate resources"
 '
     param:run
-    active=${active:-false}
+    local gen_gt_json
+    gen_gt_json="$(param:option2json active=^^active -enterprise -username)"
 
-    ______x_cmd_gt_put_json "/v5/enterprises/${enterprise##*/}/members/${username##*/}" name role active | (
+    ___x_cmd_gt_http put "/v5/enterprises/${enterprise##*/}/members/${username##*/}" "$gen_gt_json" | (
         ___x_cmd_git_json_query_rename user=.user
         if [ -n "$user" ]; then
             gt_log info  "Modify access successfully: $username"

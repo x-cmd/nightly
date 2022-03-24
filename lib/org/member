@@ -43,11 +43,11 @@ options:
 
     if [ -t 1 ]; then
         if ___ui_table_json NameSpace=.login Name=.name Role=.member_role Url=.html_url \
-            -- "______x_cmd_gt_get_multi" "/v5/orgs/${org##*/}/members" "$gen_gt_json"; then
+            -- "___x_cmd_gt_get_multi" "/v5/orgs/${org##*/}/members" "$gen_gt_json"; then
             return 0
         fi
     else
-        ______x_cmd_gt_get_multi "/v5/orgs/${org##*/}/members" "$gen_gt_json" && \
+        ___x_cmd_gt_get_multi "/v5/orgs/${org##*/}/members" "$gen_gt_json" && \
             return 0
     fi
     gt_log error "Couldn't find any data by $org"
@@ -64,7 +64,7 @@ options:
 '
     param:run
 
-    ______x_cmd_gt_get "/v5/orgs/${org##*/}/memberships/${username##*/}" | (
+    ___x_cmd_gt_http get "/v5/orgs/${org##*/}/memberships/${username##*/}" | (
         ___x_cmd_git_json_query_rename organization=.organization.name name=.user.name name_space=.user.login role=.role html_url=.user.html_url
         if [ -n "$name" ]; then
              ___x_cmd_ui_tf true  "Success" "Organization: $organization" "Name: $name" "NameSpace: $name_space" "Role: $role" "UserUrl: $html_url"
@@ -96,7 +96,7 @@ options:
 
     for username in "$@"; do
         # TODO:http handle，delete repo return data is null.Status: 204 No Content
-        if ______x_cmd_gt_put_json "/v5/orgs/${org##*/}/memberships/${username##*/}" "$gen_gt_json" >/dev/null; then
+        if ___x_cmd_gt_http put "/v5/orgs/${org##*/}/memberships/${username##*/}" "$gen_gt_json" >/dev/null; then
             gt_log info  "Add $username successfully"
         else
             gt_log error "Add $username failure"
@@ -123,7 +123,7 @@ options:
     local username
     for username in "$@"; do
         # TODO:http handle，delete repo return data is null.Status: 204 No Content
-        if ______x_cmd_gt_delete "/v5/orgs/${org##*/}/memberships/${username##*/}" >/dev/null; then
+        if ___x_cmd_gt_http delete "/v5/orgs/${org##*/}/memberships/${username##*/}" >/dev/null; then
             gt_log info  "Remove $username successfully."
         else
             gt_log error "Remove $username failure"

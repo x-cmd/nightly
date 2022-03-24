@@ -37,15 +37,14 @@ options:
     --per_page      "per_page"          <>:number=20
 '
     param:run
-    local gen_gt_json
-    gen_gt_json="$(param:option2json -page -per_page)"
+
     if [ -t 1 ]; then
         if ___ui_table_json Id=.id Name=.name FollowCount=.follow_count Url=.repos_url \
-            -- "______x_cmd_gt_get_multi" "/v5/user/orgs" "$gen_gt_json"; then
+            -- ___x_cmd_gt_get_multi "/v5/user/orgs" admin; then
             return 0
         fi
     else
-        ______x_cmd_gt_get_multi "/v5/user/orgs" "$gen_gt_json" && \
+        ___x_cmd_gt_get_multi "/v5/user/orgs" admin && \
             return 0
     fi
     gt_log error "Couldn't find any data"
@@ -62,7 +61,7 @@ options:
 '
     param:run
 
-    ______x_cmd_gt_get "/v5/orgs/${1:?Provide organization}" \
+    ___x_cmd_gt_http get "/v5/orgs/${1:?Provide organization}" \
     | (
         ___x_cmd_git_json_query_rename id=.id name=.name public=.public follow_count=.follow_count owner=.owner.name
         if [ -n "$id" ]; then
@@ -89,7 +88,7 @@ options:
     param:run
     org=${org:-$1}
 
-    ______x_cmd_gt_post_json "/v5/users/organization" name="$1" org description \
+    ___x_cmd_gt_http post "/v5/users/organization" name="$1" "$(param:option2json)" \
     | (
         ___x_cmd_git_json_query_rename id=.id
         if [ -n "$id" ]; then
@@ -137,11 +136,11 @@ options:
     if [ -t 1 ]; then
         if ___ui_table_json Id=.id Name=.name public=.public OwnerName=.owner.name DefaultBranch=.default_branch \
             OpenIssuesCount=.open_issues_count license=.license Url=.html_url \
-            -- "______x_cmd_gt_get_multi" "/v5/orgs/$1/repos" "$gen_gt_json"; then
+            -- ___x_cmd_gt_get_multi "/v5/orgs/$1/repos" type; then
             return 0
         fi
     else
-        ______x_cmd_gt_get_multi "/v5/orgs/$1/repos" "$gen_gt_json" && \
+        ___x_cmd_gt_get_multi "/v5/orgs/$1/repos" type && \
             return 0
     fi
     gt_log error "Couldn't find any data. By $1"
@@ -163,7 +162,7 @@ options:
 
     for org in "$@"; do
         # TODO:http handle，delete repo return data is null.Status: 204 No Content
-        if ______x_cmd_gt_delete "/v5/user/memberships/orgs/${org##*/}" >/dev/null; then
+        if ___x_cmd_gt_http delete "/v5/user/memberships/orgs/${org##*/}" >/dev/null; then
             gt_log info  "Quit $org organization successfully."
         else
             gt_log error "Quit $org organization failure"

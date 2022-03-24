@@ -31,7 +31,7 @@ options:
     # TODO: interactive ui
 
     ___parse_pr_init_owner_repo_and_pr
-    ______x_cmd_gt_post_json "/v5/repos/${owner_repo}/pulls/$pr/assignees" assignees
+    ___x_cmd_gt_http post "/v5/repos/${owner_repo}/pulls/$pr/assignees" assignees
 }
 
 ___x_cmd_gt_repo_pr_assign_del() {
@@ -44,7 +44,7 @@ options:
     param:run
 
     ___parse_pr_init_owner_repo_and_pr
-    ______x_cmd_gt_delete "/v5/repos/${owner_repo}/pulls/$pr/assignees?assignees=$assignees"
+    ___x_cmd_gt_http delete "/v5/repos/${owner_repo}/pulls/$pr/assignees?assignees=$assignees"
 }
 
 ___x_cmd_gt_repo_pr_assign_reset() {
@@ -59,7 +59,7 @@ options:
     ___parse_pr_init_owner_repo_and_pr
 
     reset_all=${reset_all:-false}
-    ______x_cmd_gt_patch_json "/v5/repos/${owner_repo}/pulls/$pr/assignees" reset_all
+    ___x_cmd_gt_http patch "/v5/repos/${owner_repo}/pulls/$pr/assignees" reset_all
 }
 
 ___x_cmd_gt_repo_pr_assign_review() {
@@ -73,5 +73,5 @@ options:
 
     ___parse_pr_init_owner_repo_and_pr
 
-    ______x_cmd_gt_post_json "/v5/repos/${owner_repo}/pulls/$pr/review" force
+    ___x_cmd_gt_http post "/v5/repos/${owner_repo}/pulls/$pr/review" force
 }

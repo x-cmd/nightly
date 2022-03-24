@@ -26,7 +26,7 @@ subcmd:
 }
 
 
-# shellcheck disable=SC2154
+# shellcheck disable=SC2154,SC2034
 ___x_cmd_gt_issue_create() {
     param:scope     "gitee/$O"
     param:dsl      '
@@ -42,21 +42,25 @@ options:
     --program       "project ID"                                                         <>=""
     --security      "is it private"
 '
-    security=${security:-false}
     param:run
 
-    local data
-    local id
-    local title
-    local html_url
-    data="$(______x_cmd_gt_post_json "/v5/repos/${owner##*/}/issues" repo="$repo" title issue_type="$type" body assignee \
-        collaborators milestone labels program security_hole="$security" || return 1)"
-    ___x_cmd_gt_json_query_rename "$data" id=.number title=.title html_url=.html_url
-    [ -n "$id" ] && ___x_cmd_ui tf "true" "Success" "id: $id" "title: $title" "url: $html_url" && return 0
-                    gt_log        "error" "Create issue failure"                               && return 1
+    local security="${security:-false}"
+    local gen_gt_json
+    gen_gt_json="$(param:option2json security_hole=^^security issue_type=type -security -type)"
+
+    ___x_cmd_gt_http post "/v5/repos/${repo##*/}/issues" "$gen_gt_json" | (
+        ___x_cmd_git_json_query_rename id=.number title=.title html_url=.html_url
+        if [ -n "$id" ]; then
+            ___x_cmd_ui_tf true  "Success" "id: $id" "title: $title" "url: $html_url"
+            return 0
+        else
+            ___x_cmd_ui_tf false "Create issue failure"
+            return 1
+        fi
+    )
 }
 
-# shellcheck disable=SC2154
+# shellcheck disable=SC2154,SC2034
 ___x_cmd_gt_issue_update() {
     param:scope     "gitee/$O"
     param:dsl       '
@@ -76,17 +80,21 @@ options:
     --security      "is it private"
 '
     param:run
-    security=${security:-false}
 
-    local data
-    local id
-    local state
-    local html_url
-    data="$(______x_cmd_gt_patch_json "/v5/repos/${owner##*/}/issues/${number}" repo title state body assignee \
-        collaborators milestone labels program security_hole="$security" || return 1)"
-    ___x_cmd_gt_json_query_rename "$data" id=.number state=.state html_url=.html_url
-    [ -n "$id" ] && ___x_cmd_ui tf "true" "Success" "id: $id" "state: $state" "url: $html_url" && return 0
-                    gt_log        "error" "Update issue failure"                               && return 1
+    local security="${security:-false}"
+    local gen_gt_json
+    gen_gt_json="$(param:option2json issue_type=type security_hole=^^security -security -type)"
+
+    ___x_cmd_gt_http patch "/v5/repos/${owner##*/}/issues/${number}" "$gen_gt_json" | (
+        ___x_cmd_git_json_query_rename id=.number state=.state html_url=.html_url
+        if [ -n "$id" ]; then
+            ___x_cmd_ui_tf true  "Success" "id: $id" "state: $state" "url: $html_url"
+            return 0
+        else
+            ___x_cmd_ui_tf false "Update issue failure"
+            return 1
+        fi
+    )
 }
 
 # shellcheck disable=SC2154
@@ -103,11 +111,11 @@ options:
 
     if [ -t 1 ]; then
         if ___ui_table_json Time=.created_at User=.user.login Type=.action_type Content=.content \
-            -- "______x_cmd_gt_get" "/v5/repos/${owner_repo##*/}/issues/${number}/operate_logs" repo sort; then
+            -- ___x_cmd_gt_http get "/v5/repos/${owner_repo##*/}/issues/${number}/operate_logs" repo sort; then
             return 0
         fi
     else
-        ______x_cmd_gt_get "/v5/repos/${owner_repo##*/}/issues/${number}/operate_logs" repo sort && \
+        ___x_cmd_gt_http get "/v5/repos/${owner_repo##*/}/issues/${number}/operate_logs" repo sort && \
             return 0
     fi
     gt_log error "Couldn't find any data by: $repo $number"
@@ -126,7 +134,6 @@ options:
     --repo          "Provide owner name and repo name.(default:the current user repo)"   <>:RepoName
     --state         "issue state"                                                        <>:State=all
     --labels        "labels"                                                             <>=""
-    --labels        "labels"                                                             <>=""
     --milestone     "milestone"                                                          <>=""
     --assignee      "assignee"                                                           <>=""
     --creator       "creator"                                                            <>=""
@@ -140,33 +147,34 @@ options:
     param:run
     ___x_cmd_gt_param_init_owner_repo
 
+    local gen_gt_json
+    gen_gt_json="$(param:option2json -repo -page -per_page)"
+
     if [ -z "$number" ]; then
         if [ -t 1 ]; then
             if ___ui_table_json IssueNumber=.number Title=.title State=.issue_state Assigner=.assignee.name Body=.body \
-                -- "______x_cmd_gt_get_multi" "/v5/repos/${owner_repo}/issues" state labels sort direction page per_page; then
+                -- "___x_cmd_gt_get_multi" "/v5/repos/${owner_repo}/issues" state labels milestone \
+                    assignee creator program sort direction number; then
                 return 0
             fi
         else
-            ______x_cmd_gt_get_multi "/v5/repos/${owner_repo}/issues" state labels sort direction page per_page && \
+            ___x_cmd_gt_get_multi "/v5/repos/${owner_repo}/issues" state labels milestone \
+                    assignee creator program sort direction number && \
                 return 0
         fi
         gt_log error "Couldn't find any data by: ${owner_repo}"
         return 1
     else
-        local data
-        local id
-        local title
-        local state
-        local assignee
-        data="$(______x_cmd_gt_get "/v5/repos/${owner_repo}/issues/${number}")"
-        ___x_cmd_gt_json_query_rename "$data" id=.number title=.title state=.state assignee=.assignee.name
-        if [ -n "$id" ];then
-            ___x_cmd_ui tf "true" "Success" "id: $id" "title: $title" "state: $state" "assignee: $assignee"
-            return 0
-        else
-            gt_log "err" "Getting repo issue info failure by $owner_repo $number"
-            return 1
-        fi
+        ___x_cmd_gt_http get "/v5/repos/${owner_repo}/issues/${number}" | (
+            ___x_cmd_gt_json_query_rename "$data" id=.number title=.title state=.state assignee=.assignee.name
+            if [ -n "$id" ]; then
+                ___x_cmd_ui_tf true  "Success" "id: $id" "title: $title" "state: $state" "assignee: $assignee"
+                return 0
+            else
+                ___x_cmd_ui_tf false "Getting repo issue info failure by $owner_repo $number"
+                return 1
+            fi
+        )
     fi
     return
 }
@@ -187,13 +195,16 @@ options:
 '
     param:run
 
+    local gen_gt_json
+    gen_gt_json="$(param:option2json -org -page -per_page)"
+
     if [ -t 1 ]; then
         if ___ui_table_json IssueNumber=.number State=.issue_state Assigner=.assignee.name Repository=.repository.full_name Type=.issue_type Title=.title Url=.html_url \
-            -- "______x_cmd_gt_get_multi" "/v5/orgs/${org##*/}/issues" filter state labels sort direction since page per_page; then
+            -- ___x_cmd_gt_get_multi "/v5/orgs/${org##*/}/issues" filter state labels sort direction since page per_page; then
             return 0
         fi
     else
-        ______x_cmd_gt_get_multi "/v5/orgs/${org##*/}/issues" filter state labels sort direction since page per_page && \
+        ___x_cmd_gt_get_multi "/v5/orgs/${org##*/}/issues" filter state labels sort direction since page per_page && \
             return 0
     fi
     gt_log error "Couldn't find any data by: ${org}"
@@ -224,13 +235,13 @@ options:
     if [ -t 1 ]; then
         if ___ui_table_json IssueNumber=.number State=.issue_state Assigner=.assignee.name AssignerMarkName=.assignee.remark \
             Repository=.repository.full_name Type=.issue_type Title=.title Url=.html_url \
-            -- "______x_cmd_gt_get_multi" "/v5/enterprises/${enterprise##*/}/issues" filter state labels sort direction since \
-            page per_page schedule deadline created_at finished_at milestone assignee creator program; then
+            -- ___x_cmd_gt_get_multi "/v5/enterprises/${enterprise##*/}/issues" filter state labels sort direction \
+                milestone assignee creator program; then
             return 0
         fi
     else
-        ______x_cmd_gt_get_multi "/v5/enterprises/${enterprise##*/}/issues" filter state labels sort direction since \
-            page per_page schedule deadline created_at finished_at milestone assignee creator program && \
+        ___x_cmd_gt_get_multi "/v5/enterprises/${enterprise##*/}/issues" filter state labels sort direction \
+            milestone assignee creator program && \
             return 0
     fi
     gt_log error "Couldn't find any data by: ${enterprise}"
@@ -271,13 +282,16 @@ options:
     param:run
     ___x_cmd_gt_param_init_owner_repo
 
+    local gen_gt_json
+    gen_gt_json="$(param:option2json -number -repo -page -per_page)"
+
     if [ -t 1 ]; then
         if ___ui_table_json CommitId=.id IssueNumber=.target.issue.number Title=.target.issue.title User=.user.login Body=.body \
-            -- "______x_cmd_gt_get_multi" "/v5/repos/${owner_repo}/issues/$number/comments" since order page per_page; then
+            -- "___x_cmd_gt_get_multi" "/v5/repos/${owner_repo}/issues/$number/comments" "$gen_gt_json"; then
             return 0
         fi
     else
-        ______x_cmd_gt_get_multi "/v5/repos/${owner_repo}/issues/$number/comments" since order page per_page && \
+        ___x_cmd_gt_get_multi "/v5/repos/${owner_repo}/issues/$number/comments" "$gen_gt_json" && \
             return 0
     fi
     gt_log error "Couldn't find any data by: ${owner_repo}"
@@ -295,11 +309,19 @@ options:
 '
     param:run
 
-    local data
-    data="$(______x_cmd_gt_post_json "/v5/repos/${owner##*/}/${repo##*/}/issues/$number/comments" body || return 1)"
-    ___x_cmd_gt_json_query_rename "$data" id=.target.issue.number title=.target.issue.title body=.body
-    [ -n "$id" ] && ___x_cmd_ui tf "true" "Success" "id: $id" "title: $title" "comment_body: $body" && return 0
-                    gt_log        "error" "Create Comment failure"                                  && return 1
+    local gen_gt_json
+    gen_gt_json="$(param:option2json -repo -number)"
+
+    ___x_cmd_gt_http post "/v5/repos/${owner##*/}/${repo##*/}/issues/$number/comments" "$(param:option2json)" | (
+        ___x_cmd_git_json_query_rename "$data" id=.target.issue.number title=.target.issue.title body=.body
+        if [ -n "$id" ]; then
+            ___x_cmd_ui_tf true  "Success" "Success" "id: $id" "title: $title" "comment_body: $body"
+            return 0
+        else
+            ___x_cmd_ui_tf false "Create Comment failure"
+            return 1
+        fi
+    )
 }
 
 ___x_cmd_gt_issue_comment_update(){
@@ -311,12 +333,19 @@ options:
     --body          "The contents of the comment"                                        <>
 '
     param:run
+    local gen_gt_json
+    gen_gt_json="$(param:option2json -repo -id)"
 
-    local data
-    data="$(______x_cmd_gt_patch_json "/v5/repos/${owner##*/}/${repo##*/}/issues/comments/${id}" body || return 1)"
-    ___x_cmd_gt_json_query_rename "$data" id=.target.issue.number title=.target.issue.title body=.body
-    [ -n "$id" ] && ___x_cmd_ui tf "true" "Success" "id: $id" "title: $title" "comment_body: $body" && return 0
-                    gt_log        "error" "Update Comment failure"                                  && return 1
+    ___x_cmd_gt_http patch "/v5/repos/${owner##*/}/${repo##*/}/issues/comments/${id}" "$(param:option2json)" | (
+        ___x_cmd_git_json_query_rename "$data" id=.target.issue.number title=.target.issue.title body=.body
+        if [ -n "$id" ]; then
+            ___x_cmd_ui_tf true  "Success" "id: $id" "title: $title" "comment_body: $body"
+            return 0
+        else
+            ___x_cmd_ui_tf false "Update Comment failure"
+            return 1
+        fi
+    )
 }
 
 # shellcheck disable=SC2181
@@ -328,9 +357,14 @@ options:
     --id            "comments id"                                                        <>
 '
     param:run
-    ______x_cmd_gt_delete "/v5/repos/${owner##*/}/${repo##*/}/issues/comments/${id}" 1>/dev/null 2>&1
-    [ $? -eq 0 ] && ___x_cmd_ui tf "true" "Deleted comment successfully"                      && return 0
-                    gt_log error "Deleting comment failure by ${owner##*/} ${repo##*/} $id."  && return 1
+    ___x_cmd_gt_param_init_owner_repo
+    # TODO:http handle，delete repo return data is null.Status: 204 No Content
+    if ___x_cmd_gt_http delete "/v5/repos/${owner_repo}/issues/comments/${id}" >/dev/null; then
+        ___x_cmd_ui_tf true  "Deleted comment successfully"
+    else
+        ___x_cmd_ui_tf false "Deleting comment failure by ${owner_repo} $id."
+        return 1
+    fi
 }
 
 # EndSection

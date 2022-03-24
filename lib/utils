@@ -4,59 +4,37 @@
 ############################
 # Section 2: Wrapping std/http module with object naming changing
 ############################
-______x_cmd_gt_resp_header() {
+___x_cmd_gt_resp_header() {
     http "@___x_cmd_gt_${O:-GITEE_DEFAULT}" resp header "$@"
 }
 
 # TODO: Not supported yet
-______x_cmd_gt_resp_body() {
+___x_cmd_gt_resp_body() {
     http "@___x_cmd_gt_${O:-GITEE_DEFAULT}" resp body "$@"
 }
 
-______x_cmd_gt_get() {
-    http "@___x_cmd_gt_${O:-GITEE_DEFAULT}" get "$@"
-}
-
-______x_cmd_gt_get_multi() {
+___x_cmd_gt_get_multi() {
     if [ -n "$page" ] || [ -n "$per_page" ]; then
-        ______x_cmd_gt_get "$@" page per_page
+        ___x_cmd_gt_http get "$@" page per_page
         return "$?"
     fi
     local i=1
     local total_page=100000
     while [ "$i" -le "$total_page" ]; do
-        ______x_cmd_gt_get "$@" page="$i" per_page=100
-        total_page="$(______x_cmd_gt_resp_header "total_page")"
+        ___x_cmd_gt_http get "$@" page="$i" per_page=100
+        total_page="$(___x_cmd_gt_resp_header "total_page")"
         [ -z "$total_page" ] && return
         # echo "total_page:$total_page" >&2
         i=$((i+1))
     done
 }
 
-______x_cmd_gt_post_json() {
-    http "@___x_cmd_gt_${O:-GITEE_DEFAULT}" post    json "$@"
+___x_cmd_gt_http(){
+    if ! O="___x_cmd_gt_${O:-GITEE_DEFAULT}" http header get Content-Type 1>/dev/null 2>&1; then
+         O="___x_cmd_gt_${O:-GITEE_DEFAULT}" http header put Content-Type application/json
+    fi
+    O="___x_cmd_gt_${O:-GITEE_DEFAULT}" http "$@"
 }
-
-______x_cmd_gt_put_json() {
-    http "@___x_cmd_gt_${O:-GITEE_DEFAULT}" put     json "$@"
-}
-
-______x_cmd_gt_patch_json() {
-    http "@___x_cmd_gt_${O:-GITEE_DEFAULT}" patch   json "$@"
-}
-
-______x_cmd_gt_delete() {
-    http "@___x_cmd_gt_${O:-GITEE_DEFAULT}" delete "$@"
-}
-
-______x_cmd_gt_dict_get() {
-    http "@___x_cmd_gt_${O:-GITEE_DEFAULT}" dict "$@"
-}
-
-______x_cmd_gt_dict_put() {
-    http "@___x_cmd_gt_${O:-GITEE_DEFAULT}" dict "$@"
-}
-
 
 ############################
 # Section 3: Parameter Utilities
@@ -64,10 +42,10 @@ ______x_cmd_gt_dict_put() {
 
 alias ___x_cmd_gt_param_init_owner_repo='
     local owner_repo
-    ______x_cmd_gt_param_normalize_repo  || return
+    ___x_cmd_gt_param_normalize_repo  || return
 '
 
-______x_cmd_gt_param_normalize_repo() {
+___x_cmd_gt_param_normalize_repo() {
     local op="$repo"
     [ -z "$op" ] && op="$1"
     case "$op" in
@@ -104,7 +82,7 @@ ______x_cmd_gt_param_normalize_repo() {
 
 ### Repo #1
 
-______x_cmd_gt_parse_owner_repo() {
+___x_cmd_gt_parse_owner_repo() {
     local O="${O:-GITEE_DEFAULT}"
     if [ -z "$repo" ]; then
         repo="$(___x_cmd_gt_current_repo)"

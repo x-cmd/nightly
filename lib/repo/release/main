@@ -37,11 +37,11 @@ options:
 
     if [ -t 1 ]; then
         if ___ui_table_json Id=.id ReleaseName=.name TagName=.tag_name Message=.body IsPreRelease=.prerelease User=.author.login Time=.created_at \
-            -- "______x_cmd_gt_get" "/v5/repos/${owner_repo}/releases" direction page per_page; then
+            -- "___x_cmd_gt_http get" "/v5/repos/${owner_repo}/releases" direction page per_page; then
             return 0
         fi
     else
-        ______x_cmd_gt_get "/v5/repos/${owner_repo}/releases" direction page per_page && \
+        ___x_cmd_gt_http get "/v5/repos/${owner_repo}/releases" direction page per_page && \
             return 0
     fi
     gt_log error "Couldn't find any data by: $owner_repo"
@@ -60,7 +60,7 @@ options:
     param:run
     ___x_cmd_gt_param_init_owner_repo
 
-    ______x_cmd_gt_get "/v5/repos/${owner_repo}/releases/tags/${tag}"
+    ___x_cmd_gt_http get "/v5/repos/${owner_repo}/releases/tags/${tag}"
 }
 
 # shellcheck disable=SC2154,SC2181
@@ -81,7 +81,7 @@ options:
 
     ___x_cmd_gt_param_init_owner_repo
 
-    ______x_cmd_gt_post_json "/v5/repos/${owner_repo}/releases" \
+    ___x_cmd_gt_http post "/v5/repos/${owner_repo}/releases" \
         tag_name="$tag" name body prerelease target_commitish 1>/dev/null 2>&1
     [ $? -ne 0 ] && gt_log error "Create release failure: $name by $owner_repo $tag" && return 1
     ___x_cmd_ui tf "true" "Success release" "name: $name" "owner_repo: $owner_repo" "tag: $tag"  && return 0
@@ -93,7 +93,7 @@ ______x_cmd_gt_repo_release_init_owner_repo_and_release_main(){
     local release_id=${release##*/}
     owner_repo=${release%$release_id}
 
-    owner_repo="$(______x_cmd_gt_param_normalize_repo "$owner_repo")"
+    owner_repo="$(___x_cmd_gt_param_normalize_repo "$owner_repo")"
     release="${release_id}"
 }
 
@@ -118,7 +118,7 @@ options:
 '
     param:run
     ______x_cmd_gt_repo_release_init_owner_repo_and_release
-    ______x_cmd_gt_patch_json "/v5/repos/${owner_repo}/releases/${release}" \
+    ___x_cmd_gt_http patch "/v5/repos/${owner_repo}/releases/${release}" \
         tag_name="$tag" name body prerelease 1>/dev/null 2>&1
     [ $? -ne 0 ] && gt_log error "Update release failure: $name by $owner_repo $release" && return 1
     ___x_cmd_ui tf "true" "Success release" "name: $name" "body: $body" "prerelease: $prerelease"  && return 0
@@ -135,7 +135,7 @@ options:
     param:run
 
     ______x_cmd_gt_repo_release_init_owner_repo_and_release
-    ______x_cmd_gt_delete "/v5/repos/${owner_repo}/releases/$release"
+    ___x_cmd_gt_http delete "/v5/repos/${owner_repo}/releases/$release"
 }
 
 # TODO:https://gitee.com/api/v5/swagger#/getV5ReposOwnerRepoReleasesLatest
@@ -149,7 +149,7 @@ options:
     param:run
 
     ___x_cmd_gt_param_init_owner_repo
-    ______x_cmd_gt_get "/v5/repos/${owner_repo}/releases/latest"
+    ___x_cmd_gt_http get "/v5/repos/${owner_repo}/releases/latest"
 }
 
 # TODO:https://gitee.com/api/v5/swagger#/getV5ReposOwnerRepoReleasesId
@@ -163,5 +163,5 @@ options:
     param:run
 
     ______x_cmd_gt_repo_release_init_owner_repo_and_release
-    ______x_cmd_gt_get "/v5/repos/${owner_repo}/releases/${release}"
+    ___x_cmd_gt_http get "/v5/repos/${owner_repo}/releases/${release}"
 }

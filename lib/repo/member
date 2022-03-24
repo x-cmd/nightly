@@ -38,11 +38,11 @@ options:
 
     if [ -t 1 ]; then
         if ___ui_table_json NameSpace=.login Name=.name Admin=.permissions.admin PushPermissions=.permissions.push \
-            -- "______x_cmd_gt_get_multi" "/v5/repos/${owner_repo}/collaborators"; then
+            -- "___x_cmd_gt_get_multi" "/v5/repos/${owner_repo}/collaborators"; then
             return 0
         fi
     else
-        ______x_cmd_gt_get_multi "/v5/repos/${owner_repo}/collaborators" && \
+        ___x_cmd_gt_get_multi "/v5/repos/${owner_repo}/collaborators" && \
             return 0
     fi
     gt_log error "Please provide correct repo name"
@@ -69,7 +69,7 @@ options:
 
     local username
     for username in "$@"; do
-       ______x_cmd_gt_put_json "/v5/repos/$owner_repo/collaborators/${username##*/}" "$(param:option2json -repo)" \
+       ___x_cmd_gt_http put "/v5/repos/$owner_repo/collaborators/${username##*/}" "$(param:option2json -repo)" \
        | (
             ___x_cmd_git_json_query_rename id=.id
             if [ -n "$id" ]; then
@@ -100,7 +100,7 @@ options:
     local username
     for username in "$@"; do
         # TODO:http handle，delete repo return data is null.Status: 204 No Content
-        if ______x_cmd_gt_delete "/v5/repos/$owner_repo/collaborators/${username##*/}" >/dev/null; then
+        if ___x_cmd_gt_http delete "/v5/repos/$owner_repo/collaborators/${username##*/}" >/dev/null; then
             ___x_cmd_ui_tf true  "Remove $username to $owner_repo successfully"
         else
             ___x_cmd_ui_tf false "Remove user failure: $username"

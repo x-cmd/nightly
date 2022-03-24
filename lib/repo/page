@@ -32,7 +32,7 @@ options:
 
     ___x_cmd_gt_param_init_owner_repo
 
-    ______x_cmd_gt_get "/v5/repos/${owner_repo}/pages"
+    ___x_cmd_gt_http get "/v5/repos/${owner_repo}/pages"
 }
 
 # https://gitee.com/api/v5/swagger#/postV5ReposOwnerRepoPagesBuilds
@@ -48,5 +48,5 @@ options:
 
     ___x_cmd_gt_param_init_owner_repo
 
-    ______x_cmd_gt_post_json "/v5/repos/${owner_repo}/pages/builds"
+    ___x_cmd_gt_http post "/v5/repos/${owner_repo}/pages/builds"
 }

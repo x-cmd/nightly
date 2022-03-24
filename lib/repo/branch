@@ -34,11 +34,11 @@ options:
 
     if [ -t 1 ]; then
         if ___ui_table_json BranchName=.name Protected=.protected \
-            --  ______x_cmd_gt_get_multi "/v5/repos/${owner_repo}/branches" per_page page; then
+            --  ___x_cmd_gt_get_multi "/v5/repos/${owner_repo}/branches" per_page page; then
             return 0
         fi
     else
-        ______x_cmd_gt_get_multi "/v5/repos/${owner_repo}/branches" per_page page && \
+        ___x_cmd_gt_get_multi "/v5/repos/${owner_repo}/branches" per_page page && \
             return 0
     fi
     gt_log error "Couldn't find any data. By ${owner_repo}"
@@ -56,7 +56,7 @@ options:
     param:run
     ___x_cmd_gt_param_init_owner_repo
 
-    ______x_cmd_gt_get "/v5/repos/${owner_repo}/branches/${branch}" | (
+    ___x_cmd_gt_http get "/v5/repos/${owner_repo}/branches/${branch}" | (
         ___x_cmd_git_json_query_rename branch_name=.name is_protected=.protected _links=._links.html;
         if [ -n "$branch_name" ]; then
             ___x_cmd_ui_tf true  "Success" "branch_name: $branch_name" "is_protected: $is_protected" "url: $_links"
@@ -82,7 +82,7 @@ options:
     ___x_cmd_gt_param_init_owner_repo
 
     # TODO:http handle，delete repo return data is null.Status: 204 No Content
-    if ______x_cmd_gt_post_json "/v5/repos/${owner_repo}/branches" refs branch_name >/dev/null; then
+    if ___x_cmd_gt_http post "/v5/repos/${owner_repo}/branches" refs branch_name >/dev/null; then
         ___x_cmd_ui_tf true  "Add repo ${owner_repo} ${branch_name} brach successfully"
     else
         ___x_cmd_ui_tf false "Add repo failure" "owner_repo: $owner_repo" "branch: $branch_name" "refs: $refs"
@@ -128,8 +128,8 @@ options:
 '
     param:run
     ___x_cmd_gt_param_init_owner_repo
-    ______x_cmd_gt_put_json "/v5/repos/${owner_repo}/branches/${branch}/protection"
-    ______x_cmd_gt_put_json "/v5/repos/${owner_repo}/branches/${branch}/protection" | (
+    ___x_cmd_gt_http put "/v5/repos/${owner_repo}/branches/${branch}/protection"
+    ___x_cmd_gt_http put "/v5/repos/${owner_repo}/branches/${branch}/protection" | (
         ___x_cmd_git_json_query_rename html_url=._links.self;
         if [ -n "$html_url" ]; then
             ___x_cmd_ui_tf true  "Success" "branch_name: $branch" "url: $html_url"
@@ -151,7 +151,7 @@ options:
     ___x_cmd_gt_param_init_owner_repo
 
     # TODO:http handle，delete repo return data is null.Status: 204 No Content
-    if ______x_cmd_gt_delete "/v5/repos/${owner_repo}/branches/${branch}/protection" >/dev/null; then
+    if ___x_cmd_gt_http delete "/v5/repos/${owner_repo}/branches/${branch}/protection" >/dev/null; then
         ___x_cmd_ui_tf true  "Unset branch: $branch protection successfully"
     else
         ___x_cmd_ui_tf false "Unset branch protection failure: $owner_repo $branch"

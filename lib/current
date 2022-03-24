@@ -51,7 +51,7 @@ ___x_cmd_gt_current_owner() {
     owner="$(___x_cmd_gt_default get "gitee_$O" owner)"
     [ -n "$owner" ] && printf "%s" "$owner" && return
 
-    ___X_CMD_GITEE_DEFAULT_OWNER="$(______x_cmd_gt_get "/v5/user" | ___x_cmd_git_json_query ".login")"
+    ___X_CMD_GITEE_DEFAULT_OWNER="$(___x_cmd_gt_http get "/v5/user" | ___x_cmd_git_json_query ".login")"
     if [ -n "$___X_CMD_GITEE_DEFAULT_OWNER" ];then
         ___x_cmd_gt_config_set  "user" "$___X_CMD_GITEE_DEFAULT_OWNER" 1>/dev/null 2>&1
         printf "%s" "$___X_CMD_GITEE_DEFAULT_OWNER"
