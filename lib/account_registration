@@ -9,13 +9,13 @@ ___x_cmd_hub_register(){
         "")
                 ___x_cmd_ui_select "_SELECT" \
                     "Register Methods:" \
-                        "Open Browser to x-cmd.com" \
                         "Weixin QR" \
-                        "Telegram Bot"
+                        # "Open Browser to x-cmd.com" \
+                        # "Telegram Bot"
 
                 case "$_SELECT" in
-                    1)          ___x_cmd_hub_register_official_site "$@" ;;
-                    2)          ___x_cmd_hub_register_weixin "$@" ;;
+                    # 1)          ___x_cmd_hub_register_official_site "$@" ;;
+                    1)          ___x_cmd_hub_register_weixin "$@" ;;
                   # 3)          ___x_cmd_hub_register_telegram "$@" ;;
                     *)          ;;
                 esac
@@ -32,7 +32,20 @@ ___x_cmd_hub_register_official_site(){
 }
 
 ___x_cmd_hub_register_weixin(){
-    ___x_cmd_httpget_gitx x-cmd x-cmd main "lib/resource/qrcode/weixin" "" -
+    local username="${1}"
+    if [ -z "$username" ]; then
+        printf "%s" "Username: "
+        read -r username
+    fi
+
+    ___x_cmd_hub_qrcode "$(___x_cmd_hub_wechat_register_url "$(___x_cmd_hub_token_generate)" "$username")"
+
+    # ___x_cmd_httpget_gitx x-cmd x-cmd main "lib/resource/qrcode/weixin" "" -
+    local ok
+    if [ -z "$ok" ]; then
+        printf "%s" "Are you ok? [Y]: "
+        read -r ok
+    fi
 }
 
 # EndSection
@@ -40,7 +53,7 @@ ___x_cmd_hub_register_weixin(){
 # Section: frozen
 
 ___x_cmd_hub_register_email(){
-    local email=${1:-""}
+    local email="${1:-""}"
     if [ -z "$email" ]; then
         printf "%s" "Email: "
         read -r email
@@ -48,7 +61,7 @@ ___x_cmd_hub_register_email(){
 
     local result
     result="$(___x_cmd_httpget "$___X_CMD_HUB_SERVICE_URL/api/v0/account/register/$email" 2>/dev/null)"
-    local msg=${result#ERR=}
+    local msg="${result#ERR=}"
 
     if [ "$msg" = "$result" ]; then
         ___x_cmd_hub_verify "$email"

@@ -6,7 +6,9 @@ xrc http
 
 if command -v md5sum; then
     ___x_cmd_hub_token_md5(){
-        md5sum "$@"
+        local token
+        token="$(md5sum "$@")"
+        printf "%s" "${token%% *}"
     }
 else
     ___x_cmd_hub_token_md5(){

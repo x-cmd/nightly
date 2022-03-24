@@ -21,9 +21,8 @@ ___x_cmd_hub_file_ls(){
     local res
     res="$(curl \
         "$___X_CMD_HUB_SERVICE_URL/api/v0/file/ls?token=$(___x_cmd_hub_token)&res=${respath}" 2>/dev/null)"
-
-    printf "%s" "$res" | x jq -r .[]
-
+    hub_log debug "res: $res"
+    printf "%s" "$res" | x jq -r ".[]"
 }
 
 ___x_cmd_hub_file_which(){
@@ -74,13 +73,13 @@ ___x_cmd_hub_file_normalize_respath(){
 
 ___x_cmd_hub_file_upload(){
     local localfp="${1:?Provide local file}"
+    local respath="${2:?provide respath}"
 
     [ ! -f "$localfp" ] && {
         printf "File Not Existed: %s\n" "$localfp" >&2
         return
     }
 
-    local respath="${2:?Please provide path}"
     respath="$(___x_cmd_hub_file_normalize_respath "$respath")"
 
     curl \
