@@ -1,3 +1,4 @@
+x log init jo
 . ./latest
 
 ___x_cmd_jo_fmt(){
@@ -7,7 +8,7 @@ ___x_cmd_jo_fmt(){
 ___x_cmd_jo_color(){
     command awk -v INDENT="${INDENT:-2}}" -f "./lib/color.awk"
 }
-___x_cmd_jo_awk(){  command awk -f "../awk/lib/re.awk" -f "../awk/lib/jo.awk";    }
+___x_cmd_jo_awk(){  command awk -f  "$___X_CMD_ROOT/awk/lib/re.awk" -f "./lib/normalize.awk";    }
 
 
 
@@ -28,6 +29,19 @@ test_dict(){
 }
 
 case "$1" in
-    list|dict)      test_${1} ;;
-    *)              test_jo ;;
+    list|dict)  test_${1} ;;
+    *)          jo_log info "copy all files from ./* to ~/.x-cmd/jo/"
+                cp -r ./* ~/.x-cmd/jo
+                test_jo ;;
 esac
+
+
+
+# awk -f re.awk -f jo.awk <<A
+# {
+#     a: bc,
+#     d: ef,
+#     g: abc,
+#     k: [1 , 2,"sd sd", 3 ,4]
+# }
+# A

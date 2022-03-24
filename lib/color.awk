@@ -8,12 +8,8 @@ BEGIN {
     TH_BLUE         = "\033[1;34m"
     TH_KEY          = "\033[32m"
 
-
-
-
     TH_BOLD         = "\033[1m"
     TH_DIM          = "\033[2m"
-
 
     JO_TH_COLON     = ":"
     JO_TH_COMMA     = TH_DIM "," TH_END
@@ -58,25 +54,27 @@ function jiter_print_color( obj, item ){
         }
     } else if (item ~ /^[\[\{]$/) { # }
         JITER_LAST_IS_VALUE = 0
-        JITER_LEVEL ++
-        obj[ JITER_LEVEL T_INDENT ] = JITER_PRINT_INDENT
+        JITER_LEVEL += JITER_LEVEL_STEP
         obj[ JITER_LEVEL ] = JITER_STATE
+        obj[ JITER_LEVEL + JITER_LEVEL_INDENT ] = JITER_PRINT_INDENT
 
         JITER_PRINT_INDENT = JITER_PRINT_INDENT INDENT
         JITER_STATE = item
         if (item == "[")    printf("%s\n%s", JO_TH_LBOX, JITER_PRINT_INDENT)
         else                printf("%s\n%s", JO_TH_LCURLY, JITER_PRINT_INDENT)
     } else {
-        JITER_PRINT_INDENT = obj[ JITER_LEVEL T_INDENT ]
         JITER_STATE = obj[ JITER_LEVEL ]
-        JITER_LEVEL --
+        JITER_PRINT_INDENT = obj[ JITER_LEVEL + JITER_LEVEL_INDENT ]
+        JITER_LEVEL -= JITER_LEVEL_STEP
         if (item == "]")    printf("\n%s%s", JITER_PRINT_INDENT, JO_TH_RBOX)
         else                printf("\n%s%s", JITER_PRINT_INDENT, JO_TH_RCURLY)
     }
 }
 
 BEGIN{
-    T_INDENT = "\003"
+    JITER_LEVEL_STEP = 2
+    JITER_LEVEL_INDENT = 1
+
     if (INDENT == "")  INDENT = "  "
     if ( int(INDENT) > 0 )  INDENT = sprintf("%" int(INDENT) "s", "")
 }

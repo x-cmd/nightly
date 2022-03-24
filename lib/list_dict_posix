@@ -1,4 +1,7 @@
 # Start this at one time.
+
+# jo list '"true"' '"false"'
+# jo list /true/ /false/
 ___x_cmd_jo_list(){
     local IFS
     IFS="$(printf "\001")"
@@ -15,8 +18,10 @@ function quote( a ){
 
 {
     res = $0
-    if (res !~ /(^{.*}$)|(^\[.*\]$)/) {
-        if(res !~ /^([+-]?[0-9]+(.[0-9]+)*([eE][0-9]+(.[0-9]+))*)|(true)|(false)|(null)$/) {
+    if (res ~ /^:/) {
+        res = quote(substr(res,2))
+    } else if (res !~ /(^{.*}$)|(^\[.*\]$)/) {
+        if (res !~ /^([-+]?(0|[1-9][0-9]*)([.][0-9]+)?([eE][+-]?[0-9]+)?)|(true)|(false)|(null)$/) {
             res = quote(res)
         }
     }
@@ -30,27 +35,27 @@ END{
 }
 
 ___x_cmd_jo_dict(){
-    local i
+    local ___arg
 
     local IFS=
     IFS="$(printf "\002")"
 
-    local RS
-    RS="$(printf "\001")"
+    local ___RS
+    ___RS="$(printf "\001")"
 
     {
-        printf "%s${RS}" "$*"
-        for i in "$@"; do
-            case "$i" in
+        printf "%s${___RS}" "$*"
+        for ___arg in "$@"; do
+            case "$___arg" in
                 *=*)          ;;
                 *:*)          ;;
                 *)
-                    printf "%s${RS}" "$i"
-                    eval 'printf "%s${RS}"' " \"\$$i\""
+                    printf "%s${___RS}" "$___arg"
+                    eval 'printf "%s${___RS}"' " \"\$$___arg\""
                 ;;
             esac
         done
-    } | awk -v RS="$RS" '
+    } | awk -v RS="$___RS" '
 function quote( a ){
     gsub(/"/, "\\\"", a)
     gsub(/\n/, "\\n", a)
@@ -86,7 +91,7 @@ END {
             value = substr(var, idx+1)
 
             if (value !~ /(^{.*}$)|(^\[.*\]$)/) {
-                if(value !~ /^([+-]?[0-9]+(.[0-9]+)*([eE][0-9]+(.[0-9]+))*)|(true)|(false)|(null)$/) {
+                if(value !~ /^([-+]?(0|[1-9][0-9]*)([.][0-9]+)?([eE][+-]?[0-9]+)?)|(true)|(false)|(null)$/) {
                     value = quote(value)
                 }
             }

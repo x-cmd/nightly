@@ -13,6 +13,12 @@ ___x_cmd_jo_list(){
     local s=
     while [ $# -gt 0 ]; do
         case "$1" in
+            :*)                 ___="${1#:}"
+                                ___x_cmd_jo_escape___
+                                ___x_cmd_jo_escape___
+                                s="$s,
+${___}
+";;
             true|false|null)    s="$s,
 $1
 ";;
@@ -24,7 +30,7 @@ $1
 ";;
             # =\"*)             s="$2,${1:1}"   ;;
             *)
-                if [[ "$1" =~ ^[+-]?[0-9]+(.[0-9]+)*([eE][0-9]+(.[0-9]+))*$ ]];
+                if [[ "$1" =~ ^[-+]?(0|[1-9][0-9]*)([.][0-9]+)?([eE][+-]?[0-9]+)?$ ]];
                 then            s="$s,
 $1
 " ;
@@ -48,59 +54,59 @@ ${___}
 ___x_cmd_jo_dict(){
     printf "{\n"
 
-    local key
-    local first=0
+    local ___key
+    local ___first=0
 
-    local i
+    local ___arg
 
     local ____
-    for i in "$@"; do
-        if [ "$first" -eq 0 ]; then
-            first=1
+    for ___arg in "$@"; do
+        if [ "$___first" -eq 0 ]; then
+            ___first=1
         else
             printf ',\n'
         fi
 
-        ___=${i%%=*}
-        if [ "$___" != "$i" ]; then
+        ___=${___arg%%=*}
+        if [ "$___" != "$___arg" ]; then
             ___x_cmd_jo_escape___
-            key="$___"
-            ___=${i#*=}
+            ___key="$___"
+            ___=${___arg#*=}
 
             case "$___" in
                 true|false|null|\{*\}|\[*\]|\"*)
-                    printf '%s\n:\n%s\n' "$key" "$___" ;;
+                    printf '%s\n:\n%s\n' "$___key" "$___" ;;
                 *)
-                    if [[ "$___" =~ ^[+-]?[0-9]+(.[0-9]+)*([eE][0-9]+(.[0-9]+))*$ ]]; then
-                        printf '%s\n:\n%s\n' "$key" "$___"
+                    if [[ "$___" =~ ^[-+]?(0|[1-9][0-9]*)([.][0-9]+)?([eE][+-]?[0-9]+)?$ ]]; then
+                        printf '%s\n:\n%s\n' "$___key" "$___"
                     else
                         ___x_cmd_jo_escape___
-                        printf '%s\n:\n%s\n' "$key" "$___"
+                        printf '%s\n:\n%s\n' "$___key" "$___"
                     fi
             esac
             continue
         fi
 
-        ___=${i%%\:*}
-        if [ "$___" != "$i" ]; then
+        ___=${___arg%%\:*}
+        if [ "$___" != "$___arg" ]; then
             ___x_cmd_jo_escape___
-            key="$___"
-            ___=${i#*\:}
+            ___key="$___"
+            ___=${___arg#*\:}
             ___x_cmd_jo_escape___
-            printf '%s\n:\n%s\n' "$key" "$___"
+            printf '%s\n:\n%s\n' "$___key" "$___"
             continue
         fi
 
         ___x_cmd_jo_escape___
-        key="$___"
-        eval "___=\"\$$i\""
+        ___key="$___"
+        eval "___=\"\$$___arg\""
 
         case "$___" in
                 true|false|null) ;;
                 *)    ___x_cmd_jo_escape___      ;;
         esac
-        
-        printf '%s\n:\n%s\n' "$key" "$___"
+
+        printf '%s\n:\n%s\n' "$___key" "$___"
     done
 
     printf "}\n"
