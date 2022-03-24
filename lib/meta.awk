@@ -49,13 +49,11 @@ function ls_option(         i, j, _tmp_len, _option_id, _tmp, _option_argc){
 function ls_option_name(         i, j, _option_id, _option_name, _option_argc){
     for (i=1; i<=option_id_list[ L ]; ++i) {
         _option_id = option_id_list[i]
-        _option_name = option_arr[ _option_id S OPTION_NAME ]
-        printf("%s=", _option_name)
-
         _option_argc = option_arr[ _option_id L ]
         for(j=1; j<=_option_argc; ++j){
-            _option_default = option_arr[ _option_id S j S OPTARG_DEFAULT ]
-            if (_option_default != "" && _option_default != OPTARG_DEFAULT_REQUIRED_VALUE)  printf("%s\n",_option_default)
+            _option_name = option_arr[ _option_id S OPTION_NAME ]
+            gsub("-","",_option_name)
+            printf("%s\n", _option_name)
         }
     }
 }
