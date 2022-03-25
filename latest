@@ -43,7 +43,7 @@ subcommands:
 
 ___x_cmd_http_cli(){
     xrc ps1env
-    ps1env init "http >"
+    ps1env init "http"
     ps1env alias + "http"
     ps1env alias :h "http help"
     local IFS
@@ -504,7 +504,11 @@ ___x_cmd_http_request() {
     fi
     local tmp
     tmp=$(mktemp)
-    printf "%s" "$data" >"$tmp"
+    if [ "$data" = "-" ];then
+        tmp="$data"
+    else
+        printf "%s" "$data" >"$tmp"
+    fi
     # TODO: Display the data if only if body is text and data is NOT a lot
     # http_log debug "body is: $data"
     # [ -n "$DEBUG" ] && echo "body is: $data" >&2
@@ -579,7 +583,7 @@ ___x_cmd_http_put() {
         form)   ;;
         text)   ;;
         bin)    ;;
-        *)      X=PUT ___x_cmd_http_request "$@" ;;
+        *)      X=PUT ___x_cmd_http_request "$content_op" "$@" ;;
     esac
 }
 ___x_cmd_http_patch() {
