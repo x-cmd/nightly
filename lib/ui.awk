@@ -23,6 +23,7 @@ BEGIN {
     UI_TEXT_HID         = "\033[8m"
     UI_TEXT_ITALIC      = "\033[3m"
     UI_TEXT_UNDERLINE   = "\033[4m"
+    UI_TEXT_BLINK       = "\033[5m"
     UI_TEXT_REV         = "\033[7m"
 
 
