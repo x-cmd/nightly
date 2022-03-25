@@ -38,6 +38,10 @@ ___x_cmd_env_python_get_miniconda_filename_and_compression(){
 
 # Section: ls, la
 
+___x_cmd_env_python_sort_versions(){
+	sort -t . -k 1,1 -k 2,2n
+}
+
 ___x_cmd_env_python_ls_remote(){
     # local pattern="${1:-""}"    # TODO: ls remote filter
     local cache_expiration="${2:-1}"
@@ -54,7 +58,7 @@ ___x_cmd_env_python_ls_remote(){
                 split($2, a, /-/)
                 print a[2]
             }
-        }' <"$cache_path"
+        }' <"$cache_path" | ___x_cmd_env_python_sort_versions
 }
 
 # EndSection
@@ -105,6 +109,21 @@ ___x_cmd_env_python_unpack(){
     "${archive_path}" -b -u -p "${versions_path}/${version}" 1>&2
 }
 
+# EndSection
+
+# Section: ui_catsel
+
+#TODO: Should be optimized
+___x_cmd_env_python_ui_catsel(){
+    case "$#" in
+        0)
+            ___x_cmd_env_python_ls_remote | awk '{ split($0,arr,"."); vmap[arr[1]]=1 } END{ for(key in vmap){print key} }'
+            ;;
+        1)
+            ___x_cmd_env_python_ls_remote | grep ^"$1" | awk '{ print $0 }'
+            ;;
+    esac
+}
 
 # EndSection
 

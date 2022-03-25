@@ -6,6 +6,11 @@
 ___x_cmd_env_common_full_version(){
     local candidate="${1:?Provide candidate}"
     local version="${2:?Provide version}"
+
+    if [ "$version" = "default" ]; then
+        ___x_cmd_env_"$candidate"_ls_remote "$version" "$3" | awk 'END{ if (NR<=0) { exit(1) } else print $1;}'
+        return 0
+    fi
     printf "%s\n" "$version"
 }
 
@@ -23,23 +28,22 @@ ___x_cmd_env_common_la(){
 
 # Section: use file
 ___x_cmd_env_common_init_file_add(){
-    local candidate="$1"
+    local version="$1"
     local version_path="$2"
 
     if [ ! -f "$___X_CMD_ROOT/.env/env/use" ]; then
-        printf "\n%s" "$version_path" > "$___X_CMD_ROOT/.env/env/use"
+        printf "%s\n" "$version_path" > "$___X_CMD_ROOT/.env/env/use"
     fi
 
-    ___x_cmd_env_common_init_file_rm "$candidate"
-    printf "\n%s" "$version_path" >> "$___X_CMD_ROOT/.env/env/use"
+    ___x_cmd_env_common_init_file_rm "$version"
+    printf "%s\n" "$version_path" >> "$___X_CMD_ROOT/.env/env/use"
 }
 
 ___x_cmd_env_common_init_file_rm(){
-    local candidate="$1"
-
+    local version="$1"
     local content
-    content="$(grep -v "/$candidate/" < "$___X_CMD_ROOT/.env/env/use")"
-    printf "%s" "$content" > "$___X_CMD_ROOT/.env/env/use"
+    content="$(grep -v "/$version/" < "$___X_CMD_ROOT/.env/env/use")"
+    printf "%s\n" "$content" > "$___X_CMD_ROOT/.env/env/use"
 }
 # EndSection
 
@@ -66,7 +70,7 @@ ___x_cmd_env_common_use(){
 
     ___x_cmd_env_util_add_path "$version_path" || return 1
 
-    ___x_cmd_env_common_init_file_add "$candidate" "$version_path" && \
+    ___x_cmd_env_common_init_file_add "$version" "$version_path" && \
         # ___x_cmd_modfile_add "$___X_CMD_ROOT/.env/env/use" "$version_path" && \
             printf "%s\n" "$version" > "$___X_CMD_ENV_PATH/$candidate/version" && \
                 env_log info "Using $candidate $version -> $___X_CMD_ENV_PATH/$candidate/version"
@@ -93,7 +97,7 @@ ___x_cmd_env_common_current(){
 
     # No any candidate version
     if [ -z "$candidate_path" ]; then
-        env_log error "No version of %s $candidate detected, please install it first! "
+        env_log error "No version of $candidate detected, please install it first! "
         return 1
 
     # After try and no candidate version in xenv, but has candidate version in current shell.
@@ -111,7 +115,7 @@ ___x_cmd_env_common_current(){
     else
         local version
         if ! version=$(___x_cmd_env_util_shims_which_version "$candidate"); then
-            env_log error "No version of %s $candidate detected, please download it first! "
+            env_log error "No version of $candidate detected, please download it first! "
             return 1
         fi
 
@@ -178,7 +182,7 @@ ___x_cmd_env_common_uninstall(){
         env_log  warn "This ${candidate} ${version} is no exist."
         return 1
     fi
-    x boot rc del "x-env-$candidate"
+    ___x_cmd_env_common_init_file_rm "$version"
     # TODO: remove the shims from $PATH
 }
 # EndSection
@@ -211,5 +215,36 @@ ___x_cmd_env_common_exec(){
     ___x_cmd_env_util_is_downloaded "${candidate}" "${version}" 2>/dev/null || return 1
     local PATH="${___X_CMD_ENV_PATH}/${candidate}/versions/${version}/bin:$PATH"
     "${candidate}" "$@"
+}
+# EndSection
+
+# Section: ui_catsel
+
+___x_cmd_env_common_rec(){
+    local cmd="$1"
+    local space="${2:-""}"
+    eval "$cmd" | while read -r line ; do
+        if [ -n "$line" ] ; then
+            CODE="${CODE}
+${space}  \"$line\":{"
+
+            ___x_cmd_env_common_rec "$cmd $line" "$space  "
+
+            CODE="${CODE%,}
+${space}  },"
+        fi
+    done
+}
+
+___x_cmd_env_common_gen(){
+    if [ -f "${___X_CMD_ENV_PATH}/${candidate}/cache/${candidate}.json" ]; then
+        return 0
+    fi
+    local CODE="{"
+    local candidate="$1"
+    cmd="x env ___x_cmd_ui_catsel $candidate"
+    ___x_cmd_env_common_rec "$cmd"
+    printf "%s" "${CODE%,}
+}" > "${___X_CMD_ENV_PATH}/${candidate}/cache/${candidate}.json"
 }
 # EndSection

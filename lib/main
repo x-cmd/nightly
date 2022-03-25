@@ -2,8 +2,7 @@
 
 # Section: Candidate API
 ___x_cmd_env_candidate_all(){
-    printf "%s" "
-python
+    printf "%s" "python
 node
 go
 java
@@ -13,21 +12,10 @@ kotlin
 maven
 springboot
 gradle
-perl
-"
+perl"
 
 }
 
-___x_cmd_env_candidate_has(){
-    local target="${1:?Provide target}"
-    local s="$(___x_cmd_env_candidate_all)"
-    if [ "$s" = "${s#*
-$target
-}" ]; then
-        return 1
-    fi
-    return 0
-}
 
 # EndSection
 
@@ -67,6 +55,13 @@ A
     # TODO: la---"list all available environments"
     # TODO: ws---"Set workspace default environment"
 
+    #TODO: Should be optimized
+    if [ "${1}" = "___x_cmd_ui_catsel" ]; then
+        shift
+        ___x_cmd_env_ui_catsel "$@"
+        return
+    fi
+
     if [ -z "$PARAM_SUBCMD" ]; then
         ___x_cmd_env_main help
         return 1
@@ -80,11 +75,6 @@ A
 ___x_cmd_env_run_common_if_notfound(){
     local op="${1:?Provide op}";  shift
     local candidate="${1:?Provide candidate}";  shift
-
-    if ! ___x_cmd_env_candidate_has "$candidate"; then
-        env_log error "Candidate in existed: $candidate"
-        return 1
-    fi
 
     # TODO: It might be better to have one folder for one language.
     xrc "env/lib/candidate/$candidate"
@@ -121,6 +111,7 @@ A
     # TODO: V8 -> V8.2   --> (Remote) V8.6
     if [ -n "$remote" ] ; then
 		___x_cmd_env_run_common_if_notfound ls_remote "$@"
+        ___x_cmd_env_run_common_if_notfound gen "$@"
         return
     fi
 
@@ -212,15 +203,21 @@ advise:
     #2        xrc env/latest && ___x_cmd_env_advise_ls_remote_version
 options:
     --use_shims     "Use shims"
-    #1              "Environment Candidates" <candidates>:candidates_list
+    #1              "Environment Candidates" <candidates>:candidates_list=""
     #2              "Version"                <version>="default"
 A
     param:run
 
     local candidate="${1}"
     if [ -z "$candidate" ]; then
-        ___x_cmd_env_main_install help
-        return 1
+        xrc env/lib/app/lsenv && ___x_cmd_ui_lsenv
+        # TODO: how to use shims
+        if [ "$___X_CMD_UI_LSENV_FINAL_COMMAND" = "ENTER" ]; then
+            candidate="$___X_CMD_UI_LSENV_CURRENT_CANDIDATE"
+            local version="$___X_CMD_UI_LSENV_CURRENT_VERSION"
+            ___x_cmd_env_run_common_if_notfound install "$candidate" "$version" "$@"
+        fi
+        return 0
     fi
 
     local version
@@ -269,15 +266,21 @@ ___x_cmd_env_main_download(){
 advise:
     #2        xrc env/latest && ___x_cmd_env_advise_ls_remote_version
 options:
-    #1        "Environment Candidates" <candidates>:candidates_list
+    #1        "Environment Candidates" <candidates>:candidates_list=""
     #2        "Version"                <version>="default"
 A
     param:run
 
     local candidate="${1}"
     if [ -z "$candidate" ]; then
-        ___x_cmd_env_main_download help
-        return 1
+        xrc env/lib/app/lsenv && ___x_cmd_ui_lsenv
+        # TODO: how to use shims
+        if [ "$___X_CMD_UI_LSENV_FINAL_COMMAND" = "ENTER" ]; then
+            candidate="$___X_CMD_UI_LSENV_CURRENT_CANDIDATE"
+            local version="$___X_CMD_UI_LSENV_CURRENT_VERSION"
+            ___x_cmd_env_run_common_if_notfound download "$candidate" "$version" "$@"
+        fi
+        return 0
     fi
 
     local version
@@ -336,6 +339,19 @@ A
     ___x_cmd_env_run_common_if_notfound exec "$candidate" "$version" "$@"
 }
 
-
 # EndSection
 
+# Section: ui_catsel
+
+___x_cmd_env_ui_catsel() {
+    if [ $# -eq 0 ]; then
+        ___x_cmd_env_candidate_all | awk '($0!=""){
+            print $0 " info has"
+        }'
+        return
+    fi
+
+    ___x_cmd_env_run_common_if_notfound ui_catsel "$@"
+}
+
+# EndSection
