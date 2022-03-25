@@ -56,14 +56,17 @@ f(){
 # f(){
 #     echo "start"
 #     {
-#         trap ':;echo "trap auto keyboard" >> ccc;exit 130' INT
-#         read  a
+#         trap 'echo "trap 1" >> ccc' INT
+#         while read   a;do
+#             printf  "%s\n" "$a"
+#         done
 #     } | {
-#         awk '{print $0}'
+#         trap 'echo "trap 2" >> ccc' INT
+#         awk '{print  $0}'
 #     } | {
-#         trap 'echo "trap update" >> ccc; return 130' INT
-#         awk '{  }'
+#         trap 'echo "trap 3" >> ccc' INT
+#         awk '{ }'
 #     }
-#     echo "clear test"
+#     echo "END"
 # }
 f

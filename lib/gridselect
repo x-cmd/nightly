@@ -1,8 +1,7 @@
 # shellcheck shell=sh disable=SC3043
 
-# . ./lib/region
 xrc ui/lib/region
-xrc ui/lib/getchar
+xrc ui/latest
 xrc awk
 # Section: main
 ___x_cmd_ui_gridselect(){
@@ -39,8 +38,6 @@ ___x_cmd_ui_gridselect_control_awk(){
         -f "$___X_CMD_ROOT/ui/lib/theme.awk" \
         -f "$___X_CMD_ROOT/ui/lib/share.awk" \
         -f "$___X_CMD_ROOT/ui/lib/gridselect.awk"
-        # -f "./lib/share.awk" \
-        # -f "./lib/gridselect.awk"
 }
 
 ___x_cmd_ui_gridselect_control_main(){

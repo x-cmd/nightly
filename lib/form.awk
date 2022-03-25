@@ -141,6 +141,7 @@ function view_body( _ctrl_current,                          data, _question, _li
             _answer_style = TH_FORM_Q_TRUE
             if (op ~ "=~") _answer_style = (judgment_of_regexp( rule, i )) ? TH_FORM_Q_TRUE : TH_FORM_Q_FALSE
             _answer       = (op !~ /\*/) ? _answer : ui_str_rep( "*", length(_answer) )
+            _answer       = ( !_is_focused ) ? _answer : th(TH_FORM_A_FOCUSED, _answer)
             _line         = _line th( _answer_style, _answer)
         } else {
             _answer     = ctrl_rstate_get( rule, i ATT_ANS )

@@ -253,8 +253,8 @@ END {
             for (i=1; i<=data_len; ++ i) {
                 if ( IS_SELECTED_ITEM[i] == true ) {
                     _item_idx = model[i]
-                    _tmp_cur_iter_item_idx = _tmp_cur_iter_item_idx "\003" _item_idx
-                    _tmp_cur_iter_item = _tmp_cur_iter_item "\003" data[ _item_idx ]
+                    _tmp_cur_iter_item_idx = ( _tmp_cur_iter_item_idx == "" ) ? _item_idx : _tmp_cur_iter_item_idx "\003" _item_idx
+                    _tmp_cur_iter_item = ( _tmp_cur_iter_item == "" ) ? data[ _item_idx ] : _tmp_cur_iter_item "\003" data[ _item_idx ]
                 }
             }
         } else {

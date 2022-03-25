@@ -2,8 +2,7 @@
 # shellcheck shell=sh disable=SC3043
 
 # author:       Li Junhao           l@x-cmd.com
-
-# . ./lib/region
+xrc ui/latest
 xrc ui/lib/region
 xrc ui/lib/getchar
 xrc awk
