@@ -2,7 +2,7 @@
 # shellcheck disable=SC2039,3043
 
 # define lazy loader
-___x_cmd_definelazyloader   ___x_cmd_gt_repo_ls             gt/lib/repo/main
+# ___x_cmd_definelazyloader   ___x_cmd_gt_repo_ls             gt/lib/repo/main
 
 ___x_cmd_gt_user(){
     param:scope     "gitee/$O"
@@ -43,7 +43,8 @@ options:
     else
         data=$(___x_cmd_gt_http get "/v5/users/$1")
     fi
-    printf "%s" "$data" | (
+    printf "%s" "$data" \ |
+    {
         ___x_cmd_git_json_query_rename name=.login email=.email html_url=.html_url types=.type
         if [ -n "$name" ]; then
              ___x_cmd_ui_tf true    "Success" "name: $name" "email: $email" "url: $html_url" "type: $types"
@@ -52,7 +53,7 @@ options:
              ___x_cmd_ui_tf false   "Couldn't find any data"
             return 1
         fi
-    )
+    }
 }
 
 # https://gitee.com/api/v5/swagger#/getV5UserRepos
@@ -99,7 +100,7 @@ options:
 
 # https://gitee.com/api/v5/swagger#/getV5Emails
 ___x_cmd_gt_user_email(){
-    param:scope     "github/$O"
+    param:scope     "gitee/$O"
     param:dsl       '
 options:
     --page          "page"                        <>:number=1
@@ -146,7 +147,7 @@ options:
     if [ -t 1 ]; then
         if ___ui_table_json ID=.number State=.issue_state Assigner=.assignee.name \
             Repo=.repository.full_name Type=.issue_type Title=.title Url=.html_url \
-            -- ___x_cmd_gt_get_multi "/v5/user/issues" filter state direction labels \
+            -- "___x_cmd_gt_get_multi" "/v5/user/issues" filter state direction labels \
                 since schedule deadline created_at finished_at; then
             return 0
         fi
@@ -218,14 +219,15 @@ options:
 '
     param:run
 
-    ___x_cmd_gt_http get "v5/user/keys/$id" | (
+    ___x_cmd_gt_http get "v5/user/keys/$id" | \
+    {
         ___x_cmd_git_json_query_rename key=.key
         if [ -n "$key" ]; then
             printf "%s" "$key"                        && return 0
         else
             gt_log error "Couldn't find key by $id"   && return 1
         fi
-    )
+    }
 }
 
 # shellcheck disable=SC2181
@@ -233,7 +235,7 @@ ___x_cmd_gt_user_key_del(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
-    --id        "provided key id"           <>:number
+    #1|--id        "provided key id"           <>:number
 '
     param:run
 
@@ -255,8 +257,11 @@ options:
     --title     "add key title"             <>
 '
     param:run
+    local gen_gt_json
+    gen_gt_json="$(param:option2json)"
 
-    ___x_cmd_gt_http post "/v5/user/keys" "$(param:option2json)" | (
+    ___x_cmd_gt_http post "/v5/user/keys" "$gen_gt_json" | \
+    {
         ___x_cmd_git_json_query_rename "$data" id=.id title=.title key=.key
         if [ -n "$id" ]; then
             ___x_cmd_ui_tf true  "Success" "Id: $id" "title: $title" "key: $key"
@@ -265,6 +270,6 @@ options:
             ___x_cmd_ui_tf false "Add user key failure."
             return 1
         fi
-    )
+    }
 }
 

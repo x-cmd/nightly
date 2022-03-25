@@ -220,7 +220,7 @@ options:
     param:run
 
     ___parse_pr_init_owner_repo_and_pr
-    ___x_cmd_gt_http put "/v5/repos/${owner_repo}/pulls/$pr/merge"  merge_method \
+    ___x_cmd_gt_http put json "/v5/repos/${owner_repo}/pulls/$pr/merge"  merge_method \
         prune_source_branch title description
 }
 

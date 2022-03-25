@@ -5,12 +5,12 @@
 # Section 2: Wrapping std/http module with object naming changing
 ############################
 ___x_cmd_gt_resp_header() {
-    http "@___x_cmd_gt_${O:-GITEE_DEFAULT}" resp header "$@"
+    http "___x_cmd_gt_${O:-GITEE_DEFAULT}" resp header "$@"
 }
 
 # TODO: Not supported yet
 ___x_cmd_gt_resp_body() {
-    http "@___x_cmd_gt_${O:-GITEE_DEFAULT}" resp body "$@"
+    http "___x_cmd_gt_${O:-GITEE_DEFAULT}" resp body "$@"
 }
 
 ___x_cmd_gt_get_multi() {
@@ -30,6 +30,7 @@ ___x_cmd_gt_get_multi() {
 }
 
 ___x_cmd_gt_http(){
+    printf "%s" "$@">>a.json
     if ! O="___x_cmd_gt_${O:-GITEE_DEFAULT}" http header get Content-Type 1>/dev/null 2>&1; then
          O="___x_cmd_gt_${O:-GITEE_DEFAULT}" http header put Content-Type application/json
     fi

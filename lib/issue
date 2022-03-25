@@ -48,7 +48,8 @@ options:
     local gen_gt_json
     gen_gt_json="$(param:option2json security_hole=^^security issue_type=type -security -type)"
 
-    ___x_cmd_gt_http post "/v5/repos/${repo##*/}/issues" "$gen_gt_json" | (
+    ___x_cmd_gt_http post "/v5/repos/${repo##*/}/issues" "$gen_gt_json" | \
+    {
         ___x_cmd_git_json_query_rename id=.number title=.title html_url=.html_url
         if [ -n "$id" ]; then
             ___x_cmd_ui_tf true  "Success" "id: $id" "title: $title" "url: $html_url"
@@ -57,7 +58,7 @@ options:
             ___x_cmd_ui_tf false "Create issue failure"
             return 1
         fi
-    )
+    }
 }
 
 # shellcheck disable=SC2154,SC2034
@@ -85,7 +86,8 @@ options:
     local gen_gt_json
     gen_gt_json="$(param:option2json issue_type=type security_hole=^^security -security -type)"
 
-    ___x_cmd_gt_http patch "/v5/repos/${owner##*/}/issues/${number}" "$gen_gt_json" | (
+    ___x_cmd_gt_http patch "/v5/repos/${owner##*/}/issues/${number}" "$gen_gt_json" | \
+    {
         ___x_cmd_git_json_query_rename id=.number state=.state html_url=.html_url
         if [ -n "$id" ]; then
             ___x_cmd_ui_tf true  "Success" "id: $id" "state: $state" "url: $html_url"
@@ -94,7 +96,7 @@ options:
             ___x_cmd_ui_tf false "Update issue failure"
             return 1
         fi
-    )
+    }
 }
 
 # shellcheck disable=SC2154
@@ -165,7 +167,8 @@ options:
         gt_log error "Couldn't find any data by: ${owner_repo}"
         return 1
     else
-        ___x_cmd_gt_http get "/v5/repos/${owner_repo}/issues/${number}" | (
+        ___x_cmd_gt_http get "/v5/repos/${owner_repo}/issues/${number}" | \
+        {
             ___x_cmd_gt_json_query_rename "$data" id=.number title=.title state=.state assignee=.assignee.name
             if [ -n "$id" ]; then
                 ___x_cmd_ui_tf true  "Success" "id: $id" "title: $title" "state: $state" "assignee: $assignee"
@@ -174,7 +177,7 @@ options:
                 ___x_cmd_ui_tf false "Getting repo issue info failure by $owner_repo $number"
                 return 1
             fi
-        )
+        }
     fi
     return
 }
@@ -282,16 +285,13 @@ options:
     param:run
     ___x_cmd_gt_param_init_owner_repo
 
-    local gen_gt_json
-    gen_gt_json="$(param:option2json -number -repo -page -per_page)"
-
     if [ -t 1 ]; then
         if ___ui_table_json CommitId=.id IssueNumber=.target.issue.number Title=.target.issue.title User=.user.login Body=.body \
-            -- "___x_cmd_gt_get_multi" "/v5/repos/${owner_repo}/issues/$number/comments" "$gen_gt_json"; then
+            -- "___x_cmd_gt_get_multi" "/v5/repos/${owner_repo}/issues/$number/comments" since order; then
             return 0
         fi
     else
-        ___x_cmd_gt_get_multi "/v5/repos/${owner_repo}/issues/$number/comments" "$gen_gt_json" && \
+        ___x_cmd_gt_get_multi "/v5/repos/${owner_repo}/issues/$number/comments" since order && \
             return 0
     fi
     gt_log error "Couldn't find any data by: ${owner_repo}"
@@ -312,7 +312,8 @@ options:
     local gen_gt_json
     gen_gt_json="$(param:option2json -repo -number)"
 
-    ___x_cmd_gt_http post "/v5/repos/${owner##*/}/${repo##*/}/issues/$number/comments" "$(param:option2json)" | (
+    ___x_cmd_gt_http post "/v5/repos/${owner##*/}/${repo##*/}/issues/$number/comments" "$gen_gt_json" | \
+    {
         ___x_cmd_git_json_query_rename "$data" id=.target.issue.number title=.target.issue.title body=.body
         if [ -n "$id" ]; then
             ___x_cmd_ui_tf true  "Success" "Success" "id: $id" "title: $title" "comment_body: $body"
@@ -321,7 +322,7 @@ options:
             ___x_cmd_ui_tf false "Create Comment failure"
             return 1
         fi
-    )
+    }
 }
 
 ___x_cmd_gt_issue_comment_update(){
@@ -336,7 +337,8 @@ options:
     local gen_gt_json
     gen_gt_json="$(param:option2json -repo -id)"
 
-    ___x_cmd_gt_http patch "/v5/repos/${owner##*/}/${repo##*/}/issues/comments/${id}" "$(param:option2json)" | (
+    ___x_cmd_gt_http patch "/v5/repos/${owner##*/}/${repo##*/}/issues/comments/${id}" "$(param:option2json)" | \
+    {
         ___x_cmd_git_json_query_rename "$data" id=.target.issue.number title=.target.issue.title body=.body
         if [ -n "$id" ]; then
             ___x_cmd_ui_tf true  "Success" "id: $id" "title: $title" "comment_body: $body"
@@ -345,7 +347,7 @@ options:
             ___x_cmd_ui_tf false "Update Comment failure"
             return 1
         fi
-    )
+    }
 }
 
 # shellcheck disable=SC2181

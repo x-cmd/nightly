@@ -66,11 +66,11 @@ options:
         gt_log error "At least one user's spatial address is needed, gt member add <user>"
         return 1
     fi
-
     local username
+
     for username in "$@"; do
-       ___x_cmd_gt_http put "/v5/repos/$owner_repo/collaborators/${username##*/}" "$(param:option2json -repo)" \
-       | (
+        ___x_cmd_gt_http put json "/v5/repos/$owner_repo/collaborators/${username##*/}" permission | \
+        (
             ___x_cmd_git_json_query_rename id=.id
             if [ -n "$id" ]; then
                 ___x_cmd_ui_tf true  "Add $username to $owner_repo successfully"

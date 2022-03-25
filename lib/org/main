@@ -61,8 +61,8 @@ options:
 '
     param:run
 
-    ___x_cmd_gt_http get "/v5/orgs/${1:?Provide organization}" \
-    | (
+    ___x_cmd_gt_http get "/v5/orgs/${1:?Provide organization}" | \
+    {
         ___x_cmd_git_json_query_rename id=.id name=.name public=.public follow_count=.follow_count owner=.owner.name
         if [ -n "$id" ]; then
             ___x_cmd_ui_tf true   "Success" "id: $id" "name: $name" "public: $public" "follow_count: $follow_count" "owner: $owner"
@@ -70,7 +70,7 @@ options:
             ___x_cmd_ui_tf false  "Couldn't find any organization info data by $1"
             return 1
         fi
-    )
+    }
 }
 # EndSection
 
@@ -86,10 +86,15 @@ options:
     #1              "organization name"     <>
 '
     param:run
-    org=${org:-$1}
 
-    ___x_cmd_gt_http post "/v5/users/organization" name="$1" "$(param:option2json)" \
-    | (
+    org=${org:-$1}
+    local gen_gt_json
+    local name
+    name="$1"
+    gen_gt_json="$(param:option2json +name)"
+
+    ___x_cmd_gt_http post "/v5/users/organization" "$gen_gt_json" | \
+    {
         ___x_cmd_git_json_query_rename id=.id
         if [ -n "$id" ]; then
             ___x_cmd_ui_tf true   "Creating Organization Successfully"
@@ -97,7 +102,7 @@ options:
             ___x_cmd_ui_tf false  "Creating organization failure by $1."
             return 1
         fi
-    )
+    }
 }
 # EndSection
 

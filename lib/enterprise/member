@@ -63,7 +63,8 @@ options:
 '
     param:run
 
-    ___x_cmd_gt_get_multi "/v5/enterprises/${enterprise}/members/${username}" | (
+    ___x_cmd_gt_get_multi "/v5/enterprises/${enterprise}/members/${username}" | \
+    {
         ___x_cmd_git_json_query_rename name_space=.user.login mark_name=.remark role=.role is_active=.active is_out_sourced=.outsourced
         if [ -n "$name_space" ]; then
              ___x_cmd_ui_tf true  "NameSpace: $name_space" "MarkName: $mark_name" "Role: $role" "IsActive: $is_active" "IsOutSourced: $is_out_sourced"
@@ -72,7 +73,7 @@ options:
              ___x_cmd_ui_tf false "Couldn't find any data by: ${enterprise} ${username}"
             return 1
         fi
-    )
+    }
 }
 
 # shellcheck disable=SC2181,SC2086,SC2154
@@ -91,14 +92,14 @@ options:
     param:run
 
     [ $# -eq 0 ] && gt_log error "At least one user's spatial address or email is needed" && return 1
+    local username="%%username%%"
     local gen_gt_json
     gen_gt_json="$(param:option2json )"
 
-    local username
+    # TODO:http handle，delete repo return data is null.Status: 204 No Content
     for username in "$@"; do
-    ___x_cmd_json_put gen_gt_json.mode "${username##*/}"
-        # TODO:http handle，delete repo return data is null.Status: 204 No Content
-        if ___x_cmd_gt_http post "/v5/enterprises/${enterprise}/members" "$gen_gt_json" >/dev/null; then
+        if printf "%s" "${gen_gt_json}" | sed s/%%username%%/"${username##%/}"/g | \
+            ___x_cmd_gt_http post "/v5/enterprises/${enterprise}/members" - >/dev/null; then
             gt_log info  "Add $username successfully"
         else
             gt_log error "Add $username failure"
@@ -145,7 +146,8 @@ options:
     local gen_gt_json
     gen_gt_json="$(param:option2json active=^^active -enterprise -username)"
 
-    ___x_cmd_gt_http put "/v5/enterprises/${enterprise##*/}/members/${username##*/}" "$gen_gt_json" | (
+    ___x_cmd_gt_http put "/v5/enterprises/${enterprise##*/}/members/${username##*/}" "$gen_gt_json" | \
+    {
         ___x_cmd_git_json_query_rename user=.user
         if [ -n "$user" ]; then
             gt_log info  "Modify access successfully: $username"
@@ -154,5 +156,5 @@ options:
             gt_log error "Modify access failure by $username $enterprise"
             return 1
         fi
-    )
+    }
 }

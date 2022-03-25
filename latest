@@ -20,7 +20,7 @@ ____x_cmd_gt_xrc(){
 }
 
 ____x_cmd_gt_xrc utils config token user current issue enterprise/main enterprise/member enterprise/team org/main org/member \
-    repo/utils repo/main repo/pr/main repo/release/main repo/member repo/tag repo/page repo/branch
+    repo/utils repo/main repo/pr/main repo/release/main repo/member repo/tag repo/page repo/branch _type/main
 
 
 # define lazy loader TODO: advise fix it
@@ -36,7 +36,6 @@ ____x_cmd_gt_xrc utils config token user current issue enterprise/main enterpris
 
 
 x log init gt
-xrc gt/lib/_type/main
 ___x_cmd_gt(){
     param:dsl       '
 subcmd:
@@ -74,20 +73,19 @@ subcmd:
 ___x_cmd_gt_make() {
     param:void
 
-    local O_ORIGINAL="${1:-GITEE_DEFAULT}"
+    local O_ORIGINAL="${1:?Provide client name by O environment}"
     local O="___x_cmd_gt_$O_ORIGINAL"
 
-    http "@$O" make         'https://gitee.com/api'
-    http "@$O" header type  "application/json;charset=utf-8"
+    http make         'https://gitee.com/api'
+    http header type  "application/json;charset=utf-8"
 
     local token
     token="$(O="$O_ORIGINAL" ___x_cmd_gt_config_get "oauth_token")"
 
     if [ -n "$token" ]; then
-        http "___x_cmd_gt_$O_ORIGINAL" header put Authorization "token $token"
-        local user
-        user="$(O="$O_ORIGINAL" ___x_cmd_gt_current_owner)" || return 1
-        gt_log info "Hi $user! You've successfully authenticated."
+        O="___x_cmd_gt_$O_ORIGINAL" http header put Authorization "token $token"
+        O="$O_ORIGINAL" ___x_cmd_gt_current_owner || return 1
+        gt_log info "Hi $___X_CMD_GITEE_DEFAULT_OWNER! You've successfully authenticated."
         return 0
     fi
 

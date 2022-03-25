@@ -107,7 +107,7 @@ options:
         innerSource)    public=2 ;;
     esac
 
-    ___x_cmd_gt_http put "/enterprises/${enterprise_id}/groups/${group_id}" public name description user_ids
+    ___x_cmd_gt_http put json "/enterprises/${enterprise_id}/groups/${group_id}" public name description user_ids
 }
 
 # TODO: strange parameters： https://gitee.com/api/v8/swagger#/deleteEnterpriseIdGroupsGroupId
