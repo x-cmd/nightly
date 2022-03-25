@@ -9,26 +9,54 @@ ___x_cmd_hub_register(){
         "")
                 ___x_cmd_ui_select "_SELECT" \
                     "Register Methods:" \
+                        "Open Browser to x-cmd.com" \
                         "Weixin QR" \
-                        # "Open Browser to x-cmd.com" \
+                        "Email Verification"
                         # "Telegram Bot"
 
+                # TODO: Should move official site login to the first of the list
                 case "$_SELECT" in
-                    # 1)          ___x_cmd_hub_register_official_site "$@" ;;
-                    1)          ___x_cmd_hub_register_weixin "$@" ;;
-                  # 3)          ___x_cmd_hub_register_telegram "$@" ;;
+                    1)          ___x_cmd_hub_register_official_site "$@" ;;
+                    2)          ___x_cmd_hub_register_weixin        "$@" ;;
+                    3)          ___x_cmd_hub_register_email         "$@" ;;
+                    4)          ___x_cmd_hub_register_telegram      "$@" ;;
                     *)          ;;
                 esac
                 ;;
         *)
-                ___x_cmd_hub_register_official_site ;;
+                ___x_cmd_hub_register_official_site "$@" ;;
     esac
 }
 
 # Section: Registration
 
 ___x_cmd_hub_register_official_site(){
-    ___x_cmd_http_browse "$___X_CMD_HUB_SERVICE_URL/register"
+
+    local username="${1}"
+    if [ -z "$username" ]; then
+        printf "%s" "Username: "
+        read -r username
+    fi
+
+    if [ -n "$(___x_cmd_hub_token)" ]; then
+        # TODO: ask
+        printf "Detect token in this folder. Erase the token in the disk?" >&2
+        ___x_cmd_hub_token ""
+    fi
+
+    local token_to_activate
+    token_to_activate="$(___x_cmd_hub_token_generate)"
+
+    ___x_cmd_http_browse "$___X_CMD_HUB_SERVICE_URL/xlogin?token_to_activate=${token_to_activate}&username=${username}"
+    printf "Please register to hub.x-cmd.com, then press [Enter] to continue: "
+    read -r _
+
+    local userinfo
+    if userinfo="$(___x_cmd_hub_get_and_save_userinfo_by_token "${token_to_activate}")" ; then
+        hub_log info "Register Successfully, ${userinfo})"
+    else
+        hub_log error "Register Failed"
+    fi
 }
 
 ___x_cmd_hub_register_weixin(){
@@ -38,13 +66,17 @@ ___x_cmd_hub_register_weixin(){
         read -r username
     fi
 
-    ___x_cmd_hub_qrcode "$(___x_cmd_hub_wechat_register_url "$(___x_cmd_hub_token_generate)" "$username")"
+    local token_to_activate
+    token_to_activate="$(___x_cmd_hub_token_generate)"
+    ___x_cmd_hub_print_qrcode "$(___x_cmd_hub_wechat_register_url "${token_to_activate}" "$username")"
+    printf "%s" "Please scan the QR code above, then press [Enter] to continue: "
+    read -r _
 
-    # ___x_cmd_httpget_gitx x-cmd x-cmd main "lib/resource/qrcode/weixin" "" -
-    local ok
-    if [ -z "$ok" ]; then
-        printf "%s" "Are you ok? [Y]: "
-        read -r ok
+    local userinfo
+    if userinfo="$(___x_cmd_hub_get_and_save_userinfo_by_token "${token_to_activate}")" ; then
+        hub_log info "Register Successfully, ${userinfo}"
+    else
+        hub_log error "Register Failed"
     fi
 }
 
@@ -60,7 +92,7 @@ ___x_cmd_hub_register_email(){
     fi
 
     local result
-    result="$(___x_cmd_httpget "$___X_CMD_HUB_SERVICE_URL/api/v0/account/register/$email" 2>/dev/null)"
+    result="$(___x_cmd_httpget "$___X_CMD_HUB_SERVICE_URL/api/v0/account/register/$email")"
     local msg="${result#ERR=}"
 
     if [ "$msg" = "$result" ]; then

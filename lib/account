@@ -2,7 +2,7 @@
 
 xrc http
 
-# Section: utils
+# Section(utils): ___x_cmd_hub_token_generate, ___x_cmd_hub_get_and_save_userinfo_by_token
 
 if command -v md5sum; then
     ___x_cmd_hub_token_md5(){
@@ -32,7 +32,27 @@ ___x_cmd_hub_token_generate(){
 
 # EndSection
 
-# Section: env
+# Section: qrcode
+
+___x_cmd_hub_print_qrcode(){
+    x qr enc -s 1 -m 3 -t ANSIUTF8 "$1"
+    hub_log debug "QR Code url: $1"
+}
+
+___x_cmd_hub_wechat_register_url(){
+    local token_to_activate="${1:?provide token_to_activate}"
+    local username="${2:?provide username}"
+    printf "%s" "${___X_CMD_HUB_WECHAT_AUTHORIZE_URL_PREFIX}r%3Fu%3D${username}&response_type=code&scope=snsapi_userinfo&state=${token_to_activate}#wechat_redire"
+}
+
+___x_cmd_hub_wechat_login_url(){
+    local token_to_activate="${1:?provide token_to_activate}"
+    printf "%s" "${___X_CMD_HUB_WECHAT_AUTHORIZE_URL_PREFIX}l&response_type=code&scope=snsapi_userinfo&state=${token_to_activate}#wechat_redire"
+}
+
+# EndSection
+
+# Section(env): ___x_cmd_hub_login_user, ___x_cmd_hub_token, ___x_cmd_hub_get_and_save_userinfo_by_token
 
 ___x_cmd_hub_login_user(){
     cat "$___X_CMD_HUB_ENV/.me" 2>/dev/null
@@ -47,21 +67,41 @@ ___x_cmd_hub_token(){
         return
     fi
 
-    if [ "$1" = "${1#*/}" ]; then
-        printf "%s" "${1%/*}" > "$___X_CMD_HUB_ENV/.me"
-        printf "%s" "${1#*/}" > "$___X_CMD_HUB_ENV/.token"
+    if [ "$1" != "${1#*/}" ]; then
+        hub_log debug "userid: ${1%/*}, token: ${1##*/}"
+        printf "%s" "${1%/*}"  > "$___X_CMD_HUB_ENV/.me"
+        printf "%s" "${1##*/}" > "$___X_CMD_HUB_ENV/.token"
         return
     fi
 
-    local res
-    if res=$(___x_cmd_httpget "$___X_CMD_HUB_SERVICE_URL/api/v0/token/info/email?token=$(___x_cmd_hub_token)"); then
-        printf "%s" "$res" > "$___X_CMD_HUB_ENV/.me"
-        printf "%s" "$1" > "$___X_CMD_HUB_ENV/.token"
-    fi
+    # TODO
+    # local res
+    # if res=$(___x_cmd_httpget "$___X_CMD_HUB_SERVICE_URL/api/v0/token/info/email?token=$(___x_cmd_hub_token)"); then
+    #     printf "%s" "$res" > "$___X_CMD_HUB_ENV/.me"
+    #     printf "%s" "$1" > "$___X_CMD_HUB_ENV/.token"
+    # fi
 }
 
+___x_cmd_hub_get_and_save_userinfo_by_token(){
+    local token="${1:?Please provide token}"
+
+    local res
+    if ! res="$(___x_cmd_httpget "$___X_CMD_HUB_SERVICE_URL/api/v0/account/user?token=${token}")" ; then
+        hub_log error "Failed to get userinfo by token: $res"
+        return 1
+    fi
+    hub_log debug "response: ${res}"
+
+    local userid
+    local username
+    userid="$(printf "%s" "$res" | x jq -r '.id')"
+    username="$(printf "%s" "$res" | x jq -r '.username')"
+    ___x_cmd_hub_token "${userid}/${token}"
+    printf "%s\n" "${username} ${userid}"
+}
 
 # EndSection
-. "$___X_CMD_ROOT/ui/lib/select"
-. "$___X_CMD_ROOT/hub/lib/account_login"
-. "$___X_CMD_ROOT/hub/lib/account_registration"
+
+
+___x_cmd_source_inner_lib ui select
+___x_cmd_source_inner_lib hub account_login account_registration
