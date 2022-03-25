@@ -432,6 +432,7 @@ ___x_cmd_main(){
 
     local subcmd=$1; [ $# -gt 0 ] && shift
     case "$subcmd" in
+        log)                                    ___x_cmd_log "$@" ;;
         ""|help)                                printf "x     x-bash core function.
     Uasge:  x <subcommand> [<subcommand>...]
     Please visit our homepage for more information: https://x-cmd.com
