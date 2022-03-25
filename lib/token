@@ -44,7 +44,6 @@ ____x_cmd_gh_auth(){
 subcommand:
     login:      "Authenticate with a GitHub host"
     logout:     "Log out of a GitHub host"
-    refresh:    "Refresh stored authentication credentials"
     setup-git:  "Configure git to use GitHub CLI as a credential helper"
     status:     "View authentication status"
 '
@@ -74,6 +73,7 @@ ____x_cmd_gh_auth_login(){
         http browse "$verification_uri"
         local gh_status="authorization_pending"
         local data
+        ___x_cmd_ui_select "Are you sure you want to delete repo $*" "yes" "no" "---" "---"
         while [ "$gh_status" = "authorization_pending" ];do
             data="$(http "@____x_cmd_log_GITHUB" post json https://github.com/login/oauth/access_token client_id="$client_id" grant_type="$grant_type" device_code="$device_code")"
             ___x_cmd_git_json_query_rename "$data" gh_status=.error

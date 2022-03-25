@@ -3,18 +3,10 @@
 
 # author:       Li Junhao           l@x-cmd.com
 
-xrc http param json str ui
+xrc http param str ui
 xrc ui/lib/table
-# TODO: Precompile it into one file.
-___x_cmd_gh_xrc(){
-    local i
-    for i in "$@"; do
-    xrc "gh/lib/$i"
-    # . "lib/$i"
-    done
-}
 
-___x_cmd_gh_xrc  utils resource config token repo/main repo/branch/main current user/main org/main \
+xrc:inner:lib gh utils resource config token repo/main repo/branch/main current user/main org/main \
     repo/member/main repo/pr/main _type/main org/member org/repo repo/release/main
 
 x log init gh
@@ -55,14 +47,14 @@ ____x_cmd_gh_make() {
     local O_ORIGINAL=${1:?Provide client name by O environment}
     local O="___x_cmd_gh_$O_ORIGINAL"
 
-    http "@$O" make  'https://api.github.com'
-    http "@$O" header Accept "application/vnd.github.v3+json"
+    http make  'https://api.github.com'
+    http header Accept "application/vnd.github.v3+json"
 
     local token
     token="$(O="$O_ORIGINAL" ___x_cmd_gh_config_get "oauth_token")"
 
     if [ -n "$token" ]; then
-        http "@___x_cmd_gh_$O_ORIGINAL" header put Authorization "token $token"
+        O="___x_cmd_gh_$O_ORIGINAL" http header put Authorization "token $token"
         local user
         user="$(O="$O_ORIGINAL" ___x_cmd_gh_current_owner)" || return 1
         gh_log info "Hi $user! You've successfully authenticated."

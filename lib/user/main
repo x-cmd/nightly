@@ -60,7 +60,7 @@ options:
     fi
 
     if [ -t 1 ] && ___ui_table_json Id=.id Name=.name Owner=.owner.login Url=.html_url \
-        -- "___x_cmd_gh_http get" "$url" visibility affiliation sort direction;then
+        -- "___x_cmd_gh_http" "get" "$url" visibility affiliation sort direction;then
         return 0
     fi
     ___x_cmd_gh_http get "$url" visibility affiliation sort direction && return 0
