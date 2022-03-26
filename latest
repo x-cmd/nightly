@@ -2,6 +2,7 @@
 # shellcheck    shell=sh    disable=SC2039,SC1090,SC3043,SC2263,SC1091
 
 x log init hub
+xrc param/latest
 
 mkdir -p "$___X_CMD_ROOT/.env/hub"
 
@@ -12,13 +13,16 @@ ___X_CMD_HUB_WECHAT_AUTHORIZE_URL_PREFIX="https://open.weixin.qq.com/connect/oau
 ___x_cmd_source_inner_lib hub file account
 
 ___x_cmd_hub(){
-    local subcmd="$1";  [ "$#" -gt 0 ] && shift
-    case "$subcmd" in
-        file)           ___x_cmd_hub_file "$@"      ;;
-        login)          ___x_cmd_hub_login "$@"     ;;
-        register)       ___x_cmd_hub_register "$@"  ;;
-        token)          ___x_cmd_hub_token "$@"     ;;
-    esac
+    param:dsl <<A
+subcommands:
+    file           "File management"
+    login          "Login to hub service"
+    register       "Register to hub service"
+    token          "User token management"
+A
+    param:run
+    [ -z "${PARAM_SUBCMD}" ] && ___x_cmd_hub help && return
+    "___x_cmd_hub_$PARAM_SUBCMD" "$@"
 }
 
 ___x_cmd_hub_advise_json(){

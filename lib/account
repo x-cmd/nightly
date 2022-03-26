@@ -62,6 +62,7 @@ ___X_CMD_HUB_ENV="$___X_CMD_ROOT/.env/hub"
 
 # shellcheck disable=SC2120
 ___x_cmd_hub_token(){
+    param:void
     if [ -z "$1" ]; then
         cat "$___X_CMD_HUB_ENV/.token" 2>/dev/null
         return
@@ -101,7 +102,6 @@ ___x_cmd_hub_get_and_save_userinfo_by_token(){
 }
 
 # EndSection
-
 
 ___x_cmd_source_inner_lib ui select
 ___x_cmd_source_inner_lib hub account_login account_registration

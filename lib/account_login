@@ -1,6 +1,7 @@
 # shellcheck shell=sh disable=SC1072,SC3043
 
 ___x_cmd_hub_login(){
+    param:void
     local op="$1"
     local _SELECT
     case "$op" in
@@ -11,8 +12,8 @@ ___x_cmd_hub_login(){
                 ___x_cmd_ui_select "_SELECT" \
                     "Login Methods:" \
                         "Open Browser to x-cmd.com" \
-                        "Login With Weixin QR" \
-                        "Login With Email Verification"
+                        "Login With Weixin QR"
+                        # "Login With Email Verification"1
                         # "Login With Telegram QR" \
                         # "Login With OneTime Password"    # SMS, Telegram, Email, Weixin
 
@@ -21,7 +22,7 @@ ___x_cmd_hub_login(){
                     # 2)          ___x_cmd_hub_login_telegram_qr "$@" ;;
                     1)          ___x_cmd_hub_login_official_site "$@" ;;
                     2)          ___x_cmd_hub_login_weixin_qr     "$@" ;;
-                    3)          ___x_cmd_hub_login_email         "$@" ;;
+                    # 3)          ___x_cmd_hub_login_email         "$@" ;;
                     *)          ;;
                 esac
                 ;;
@@ -50,7 +51,7 @@ ___x_cmd_hub_login_weixin_qr(){
 
     local userinfo
     if userinfo="$(___x_cmd_hub_get_and_save_userinfo_by_token "${token_to_activate}")" ; then
-        hub_log info "Login Successfully, ${userinfo})"
+        hub_log info "Login Successfully, ${userinfo}"
     else
         hub_log error "Login Failed"
     fi
@@ -73,7 +74,7 @@ ___x_cmd_hub_login_official_site(){
 
     local userinfo
     if userinfo="$(___x_cmd_hub_get_and_save_userinfo_by_token "${token_to_activate}")" ; then
-        hub_log info "Login Successfully, ${userinfo})"
+        hub_log info "Login Successfully, ${userinfo}"
     else
         hub_log error "Login Failed"
     fi

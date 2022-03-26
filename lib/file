@@ -1,17 +1,21 @@
 # shellcheck shell=sh disable=SC3043
 
 ___x_cmd_hub_file(){
-    local subcmd="$1";  [ "$#" -gt 0 ] && shift
-    case "$subcmd" in
-        ls)             ___x_cmd_hub_file_ls      "$@" ;;
-        which)          ___x_cmd_hub_file_which   "$@" ;;
-        upload)         ___x_cmd_hub_file_upload  "$@" ;;
-        share)          ___x_cmd_hub_file_share   "$@" ;;
-        private)        ___x_cmd_hub_file_private "$@" ;;
-    esac
+    param:dsl<<A
+subcommands:
+    ls          "List files in hub"
+    which       "Find file in hub"
+    upload      "Update file to hub"
+    share       "Set file to public"
+    private     "Set file to private"
+A
+    param:run
+    [ -z "${PARAM_SUBCMD}" ] && ___x_cmd_hub_file help && return
+    "___x_cmd_hub_file_$PARAM_SUBCMD" "$@"
 }
 
 ___x_cmd_hub_file_ls(){
+    param:void
     local respath="${1:-@me/}"
     respath="$(___x_cmd_hub_file_normalize_respath "$respath")"
 
@@ -26,18 +30,8 @@ ___x_cmd_hub_file_ls(){
 }
 
 ___x_cmd_hub_file_which(){
+    param:void
     local respath="${1:?Provide respath}"
-    # case "$respath" in
-    #     @me/*|@i/*|@/*)
-    #         local user
-    #         user=$(___x_cmd_hub_login_user)
-    #         if [ -z "$user" ]; then
-    #             printf "Cannot not find out login user for resource: %s" "$respath" >&2
-    #             return 1
-    #         fi
-    #         respath="$user/${respath#@*/}"
-    # esac
-
     respath="$(___x_cmd_hub_file_normalize_respath "$respath")"
 
     local CACHE="${___X_CMD_ROOT%/}/${respath#/}"
@@ -73,6 +67,7 @@ ___x_cmd_hub_file_normalize_respath(){
 }
 
 ___x_cmd_hub_file_upload(){
+    param:void
     local localfp="${1:?Provide local file}"
     local respath="${2:?provide respath}"
 
@@ -89,6 +84,7 @@ ___x_cmd_hub_file_upload(){
 }
 
 ___x_cmd_hub_file_share(){
+    param:void
     local respath="${1:?Please provide path}"
     respath="$(___x_cmd_hub_file_normalize_respath "$respath")"
 
@@ -97,6 +93,7 @@ ___x_cmd_hub_file_share(){
 }
 
 ___x_cmd_hub_file_private(){
+    param:void
     local respath="${1:?Please provide path}"
     respath="$(___x_cmd_hub_file_normalize_respath "$respath")"
 

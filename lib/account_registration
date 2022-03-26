@@ -1,6 +1,7 @@
 # shellcheck shell=sh disable=SC1072,SC3043
 
 ___x_cmd_hub_register(){
+    param:void
     local op="$1"
     local _SELECT
     case "$op" in
@@ -10,17 +11,17 @@ ___x_cmd_hub_register(){
                 ___x_cmd_ui_select "_SELECT" \
                     "Register Methods:" \
                         "Open Browser to x-cmd.com" \
-                        "Weixin QR" \
-                        "Email Verification"
+                        "Weixin QR"
+                        # "Email Verification"
                         # "Telegram Bot"
 
                 # TODO: Should move official site login to the first of the list
                 case "$_SELECT" in
-                    1)          ___x_cmd_hub_register_official_site "$@" ;;
-                    2)          ___x_cmd_hub_register_weixin        "$@" ;;
-                    3)          ___x_cmd_hub_register_email         "$@" ;;
-                    4)          ___x_cmd_hub_register_telegram      "$@" ;;
-                    *)          ;;
+                    1)          ___x_cmd_hub_register_official_site "$@"  ;;
+                    2)          ___x_cmd_hub_register_weixin        "$@"  ;;
+                    # 3)          ___x_cmd_hub_register_email         "$@"  ;;
+                    # 4)          ___x_cmd_hub_register_telegram      "$@"  ;;
+                    *)          hub_log error "Unknown _SELECT: $_SELECT" ;;
                 esac
                 ;;
         *)
@@ -38,11 +39,11 @@ ___x_cmd_hub_register_official_site(){
         read -r username
     fi
 
-    if [ -n "$(___x_cmd_hub_token)" ]; then
-        # TODO: ask
-        printf "Detect token in this folder. Erase the token in the disk?" >&2
-        ___x_cmd_hub_token ""
-    fi
+    # if [ -n "$(___x_cmd_hub_token)" ]; then
+    #     # TODO: ask
+    #     printf "Detect token in this folder. Erase the token in the disk?" >&2
+    #     ___x_cmd_hub_token ""
+    # fi
 
     local token_to_activate
     token_to_activate="$(___x_cmd_hub_token_generate)"
@@ -53,7 +54,7 @@ ___x_cmd_hub_register_official_site(){
 
     local userinfo
     if userinfo="$(___x_cmd_hub_get_and_save_userinfo_by_token "${token_to_activate}")" ; then
-        hub_log info "Register Successfully, ${userinfo})"
+        hub_log info "Register Successfully, ${userinfo}"
     else
         hub_log error "Register Failed"
     fi
@@ -91,15 +92,23 @@ ___x_cmd_hub_register_email(){
         read -r email
     fi
 
-    local result
-    result="$(___x_cmd_httpget "$___X_CMD_HUB_SERVICE_URL/api/v0/account/register/$email")"
-    local msg="${result#ERR=}"
-
-    if [ "$msg" = "$result" ]; then
-        ___x_cmd_hub_verify "$email"
-    else
-        printf "%s\n" "$result"
+    local res
+    hub_log debug "Registering email: $email"
+    if ! res="$(___x_cmd_httpget "$___X_CMD_HUB_SERVICE_URL/api/v0/account/register/$email")" ; then
+        hub_log error "Failed to ls file: $res"
+        return 1
     fi
+    hub_log debug "response: ${res}"
+
+    local ticket
+    ticket="$(printf "%s" "$res" | x jq -r '.ticket')"
+
+    # if [ "$msg" = "$result" ]; then
+    #     ticket="${result#TICKET=}"
+    #     ___x_cmd_hub_verify "$email" "$ticket"
+    # else
+    #     printf "%s\n" "$result"
+    # fi
 }
 
 # EndSection
