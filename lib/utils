@@ -30,7 +30,6 @@ ___x_cmd_gt_get_multi() {
 }
 
 ___x_cmd_gt_http(){
-    printf "%s" "$@">>a.json
     if ! O="___x_cmd_gt_${O:-GITEE_DEFAULT}" http header get Content-Type 1>/dev/null 2>&1; then
          O="___x_cmd_gt_${O:-GITEE_DEFAULT}" http header put Content-Type application/json
     fi
