@@ -68,12 +68,13 @@ ___x_cmd_log_init_inner(){
 # Section: redirect view
 
 ___x_cmd_log_redirect(){
-    mkdir -p $___X_CMD_ROOT/.tmp/log/$$
-    "$@" 2>"$___X_CMD_ROOT/.tmp/log/$$/$(date +%s)"
+    local folder="$___X_CMD_ROOT_TMP/log/$$"
+    mkdir -p "$folder"
+    "$@" 2>"$folder/$(date +%s)"
 }
 
 ___x_cmd_log_view(){
-    :
+    awk -f "$___X_CMD_ROOT_MOD/log/lib/view.awk"
 }
 
 # EndSection
