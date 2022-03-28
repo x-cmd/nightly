@@ -18,7 +18,7 @@ test_jo(){
     ___x_cmd_jo '[1, 2 3 {a: a, a1:123,abv:[1 2 3] ,d:{d1:12, d2:asc,d3:true , d4:{e1:true,2e:null}}}  ]'
 }
 test_list(){
-    ___x_cmd_jo list 1 2 3 aaa a1 2b c3c3c
+    ___x_cmd_jo list 1 2 3 aaa a1 2b c3c3c true false null "123" :"ef" "[7, 8, 9]" "{a:1, b:2}"
 }
 test_dict(){
     local abc=123
@@ -27,12 +27,17 @@ test_dict(){
     local hij=true
     ___x_cmd_jo dict a=12 b:12 b:cscs  abc cde efg e1=null e2=false e3=true hij
 }
+test_posix(){
+    . "$___X_CMD_ROOT/jo/lib/list_dict_posix"
+    test_list
+    test_dict
+}
 
 case "$1" in
-    list|dict)  test_${1} ;;
+    list|dict|posix|jo)  test_${1} ;;
     *)          jo_log info "copy all files from ./* to ~/.x-cmd/jo/"
                 cp -r ./* ~/.x-cmd/jo
-                test_jo ;;
+                echo "x test [list|dict|posix|jo]"
 esac
 
 
