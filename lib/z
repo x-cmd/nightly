@@ -2,9 +2,11 @@
 # Section: zip the file
 ___x_cmd_zuz_z(){
     param:dsl <<A
+advise:
+    #n          ___advise_ls
 option:
     --size        ""  <size>=0       =~   [^.]+
-    #1          "target file"
+    #n          "target file"
 A
     param:run
 
