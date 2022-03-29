@@ -3,7 +3,6 @@
 xrc param/latest
 
 # Section: main
-
 ___x_cmd_theme_control(){
     local zinit
     local font
@@ -36,13 +35,12 @@ ___x_cmd_theme_which(){
     if [ "$name" = "index.yml" ]; then
         expiration=1
     fi
-    ___x_cmd_curl_gitx x-cmd theme main "${name}" "$cache" "$expiration" && printf "%s" "$cache"
+    ___x_cmd_curl_gitx x-cmd theme main "style/${name}" "$cache" "$expiration" && printf "%s" "$cache"
 }
 
 # EndSection
 
 # Section: subcmd
-
 ___x_cmd_theme_control_ls() {
     param:void
     local fp
@@ -51,8 +49,7 @@ ___x_cmd_theme_control_ls() {
     fi
 }
 
-xrc theme/_v0/lib
-xrc theme/_v0/style
+xrc:mod:lib theme   lib   style
 
 ___x_cmd_theme_control_use(){
     param:dsl <<A
@@ -91,7 +88,7 @@ A
     local name="${1}"
     case "$name" in
         ys|"")
-            ___x_cmd_theme_load_format "$(xrc which theme/_v0/ys)"
+            ___x_cmd_theme_load_format "$(xrc which theme/lib/ys)"
             return
             ;;
         */*)
@@ -153,8 +150,8 @@ ___x_cmd_theme_control_zinit(){
 
 ___x_cmd_theme_control_use_plugin() {
     { [ -z "$1" ] || [ -z "$ZSH_VERSION" ]; } && return 1
-    xrc theme/third-party/"$1"/"$1".plugin.zsh
-    x boot rc add "x-plugin-$1" "[ -n \"\$ZSH_VERSION\" ] && xrc theme/third-party/$1/$1.plugin.zsh"
+    xrc:mod theme/lib/third-party/"$1"/"$1".plugin.zsh
+    x boot rc add "x-plugin-$1" "[ -n \"\$ZSH_VERSION\" ] && xrc:mod theme/lib/third-party/$1/$1.plugin.zsh"
 }
 
 ___x_cmd_theme_control_font() {
@@ -178,9 +175,9 @@ ___x_cmd_theme_control_font() {
     local cache="$_font_dir/$_font_name"
     local expiration=""
     ___x_cmd_curl_gitx x-cmd theme main "font/$_font_name" "$cache" "$expiration"
-    if [ -n "$(command -v fc-cache)" ] ; then
+    if command -v fc-cache ; then
         printf "%s\n" "[x-cmd]: Resetting font cache, this may take a moment..."
-        fc-cache -f "$_font_dir"
+        command fc-cache -f "$_font_dir"
     fi
 }
 
