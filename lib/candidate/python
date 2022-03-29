@@ -1,4 +1,4 @@
-# shellcheck shell=sh disable=SC2039,SC1090,SC3043,SC2263    # xrc
+# shellcheck shell=sh disable=SC2039,SC1090,SC3043,SC2263,SC2120    # xrc
 
 # Section: utils
 
@@ -58,7 +58,7 @@ ___x_cmd_env_python_ls_remote(){
                 split($2, a, /-/)
                 print a[2]
             }
-        }' <"$cache_path" | ___x_cmd_env_python_sort_versions
+        }' <"$cache_path" | ___x_cmd_env_python_sort_versions | uniq
 }
 
 # EndSection

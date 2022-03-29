@@ -1,12 +1,16 @@
 # shellcheck shell=sh disable=SC2039,SC1090,SC3043,SC2263    # xrc
 xrc env/lib/sdk
 
+___x_cmd_env_scala_sort_versions(){
+	sort -t . -n
+}
+
 ___x_cmd_env_scala_ls_remote(){
 	local cache_path="$___X_CMD_ENV_PATH/scala/cache/cache_list"
 	local cache_expiration="${2:-1}"
 
 	___x_cmd_httpget "https://www.scala-lang.org/download/all.html" "$cache_path" "$cache_expiration" 2>/dev/null && \
-	awk ' match($0, /download[0-9a-z./">]+Scala[0-9. ]+<\/a>/) {gsub(/^[ ]+/,"",$0);gsub(/<a href="\/download\/[0-9. ]{1,}html">Scala/," ",$0);gsub(/<\/a>/," "$0);print(substr($0,1,10)) }' <"$cache_path"
+	awk ' match($0, /download[0-9a-z./">]+Scala[0-9. ]+<\/a>/) {gsub(/^[ ]+/,"",$0);gsub(/<a href="\/download\/[0-9. ]{1,}html">Scala/," ",$0);gsub(/<\/a>/," "$0);print(substr($0,3,8)) }' <"$cache_path" | ___x_cmd_env_scala_sort_versions | uniq
 }
 
 

@@ -19,13 +19,15 @@ ___x_cmd_env_util_add_path(){
         return 1
     fi
 
-    local tmp0="${tmp%:"$dir":}"
-    if [ "$tmp" = "$tmp0" ]; then
-        PATH="$dir:$PATH"
-    else
-        local tmp1="${tmp##:"$dir":}"
-        PATH="$dir:$tmp0:$tmp1"
-    fi
+    PATH="$dir"
+    local cur
+    while [ ! "$tmp" = "" ]; do
+        cur=${tmp%%:*}
+        tmp=${tmp#*:}
+        if [ "$cur" != "$dir" ]; then
+            PATH="$PATH:$cur"
+        fi
+    done
 }
 
 ___x_cmd_env_main_init_file_load(){

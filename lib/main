@@ -4,18 +4,17 @@
 ___x_cmd_env_candidate_all(){
     printf "%s" "python
 node
-go
 java
 deno
-scala
+go
+gradle
 kotlin
 maven
-springboot
-gradle
-perl"
+perl
+scala
+springboot"
 
 }
-
 
 # EndSection
 
@@ -97,10 +96,11 @@ ___x_cmd_env_main_ls(){
 options:
     --cache|-c         "Use cache"
     --remote|-r        "List version including remote"
-    #1|--candidate     "Environment Candidates" <candidates>:candidates_list
+    #1                 "Environment Candidates" <candidates>:candidates_list
 A
     param:run
 
+    local candidate="${1}"
     if [ -z "$candidate" ]; then
         env_log warn "No candidate specified"
         ___x_cmd_env_main_ls --help
@@ -110,12 +110,12 @@ A
     # TODO: 增加 本地简写版本对应关系 和 全局简写版本对应关系
     # TODO: V8 -> V8.2   --> (Remote) V8.6
     if [ -n "$remote" ] ; then
-		___x_cmd_env_run_common_if_notfound ls_remote "$@"
-        ___x_cmd_env_run_common_if_notfound gen "$@"
+		___x_cmd_env_run_common_if_notfound ls_remote "$candidate" "$@"
+        ___x_cmd_env_run_common_if_notfound gen "$candidate" "$@"
         return
     fi
 
-    ___x_cmd_env_run_common_if_notfound ls_local "$@"
+    ___x_cmd_env_run_common_if_notfound ls_local "$candidate" "$@"
 }
 
 ___x_cmd_env_main_la(){

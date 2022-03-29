@@ -134,6 +134,6 @@ case $1 in
         done
         ;;
     *)
-        echo "Usage: x test python|node|java|deno|perl|kotlin"
+        echo "Usage: x test python|node|java|deno|go|gradle|kotlin|maven|perl|scala|springboot"
         ;;
 esac

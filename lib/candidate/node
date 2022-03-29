@@ -1,4 +1,4 @@
-# shellcheck shell=sh disable=SC2039,SC1090,SC3043,SC2263    # xrc
+# shellcheck shell=sh disable=SC2039,SC1090,SC3043,SC2263,SC2120    # xrc
 
 ___X_CMD_ENV_NODE_MIRROR="https://nodejs.org/dist"
 
