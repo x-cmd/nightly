@@ -68,17 +68,18 @@ ___x_cmd_http_dict() {
 # TODO: how to cd back
 ___x_cmd_http_cd() {
     if [ $# -eq 0 ]; then
-        printf "%s" "$(O=$O dict get url)"
+        printf "%s" "$(O=$O dict get url 2>/dev/null)"
         return
     fi
 
     local target_url="${1%/}"
 
     local url
-    url="$(O=$O dict get url)"
+    url="$(O=$O dict get url 2>/dev/null)"
     case "$target_url" in
         http://*|https://*)
             O=$O dict put url "$target_url"
+            printf "%s" "$target_url"
             ;;
         ..)
             case "$url" in
