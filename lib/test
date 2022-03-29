@@ -1,0 +1,66 @@
+# shellcheck disable=SC1090,SC1091
+# load in need
+
+x log init test
+
+___x_cmd_test(){
+   ___x_cmd_test_main "$@"
+}
+
+___x_cmd_test_main(){
+    local target="${1}"
+    if [ -z "$target" ]; then
+        target="$(x wsroot)/.x-cmd/testcase"
+    fi
+    if [ ! -d "$target" ]; then
+        test:warn "Expecting to be folder: $target"
+        return 1
+    fi
+    (
+        cd "$target" && NAME="root" INDENT="" ___x_cmd_test_folder "$(pwd)"
+    )
+}
+
+___x_cmd_test_folder(){
+    # test:info "Test: $(basename "$target") Begin"
+    # printf "%s\n" "${INDENT}================"
+    local testcase
+    local code
+    for testcase in *; do
+        case "$testcase" in
+            setup|teardown)         continue ;;
+        esac
+
+        ( ___x_cmd_test___folder_exec "$@" )
+        code=$?
+        [ $code -ne 0 ] && return "$code"
+    done
+    # printf "%s\n" "${INDENT}================"
+}
+
+___x_cmd_test___folder_exec() {
+    if [ -f "$testcase" ]; then
+        printf "%s\n" "${INDENT}────────────────────────────────────────"
+        printf "%s\n" "${INDENT}│───> $NAME: $testcase"
+
+        [ -f ./setup ] && . ./setup
+        . "$testcase"
+        code="$?"
+        [ -f ./teardown ] &&  . ./teardown
+        return "$code"
+
+    elif [ -d "$testcase" ]; then
+        printf "%s\n" "${INDENT}────────────────────────────────────────"
+        printf "%s\n" "${INDENT}+ $NAME: $testcase"
+        cd "$testcase" || return 1
+
+        [ -f ./setup ] && . ./setup
+        NAME="$NAME/$testcase" INDENT="${INDENT}    " \
+            ___x_cmd_test_folder "$(pwd)"
+        code=$?
+        [ -f ./teardown ] &&  . ./teardown
+        return "$code"
+    else
+        :
+    fi
+}

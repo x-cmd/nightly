@@ -342,9 +342,9 @@ ___x_cmd_workspace_root(){
 
 ___x_cmd_main_otherwise(){
     local subcmd="$1";  shift
-
+    local code
     ___x_cmd_alias_exec ___x_cmd "$subcmd" "$@"
-    local code=$?
+    code=$?
     if [ -n "$___X_CMD_ALIAS_EXEC_EXIST" ]; then
         return $?
     fi
@@ -361,8 +361,9 @@ ___x_cmd_main_otherwise(){
             hub)            ___x_cmd_run_by_file    "$p" "$@" ;;
             official)       ___x_cmd_run_by_file    "$p" "$@" ;;
         esac
+        code=$?
         ___xrc_log debug "$p"
-        return 0
+        return "$code"
     else
         printf "%s" "Error" >&2
         return 1
@@ -530,6 +531,7 @@ ___x_cmd_main(){
         wsroot)                                 ___x_cmd_workspace_root "$@" ;;
         ws)                                     ___x_cmd_ws "$@" ;;
         _ws)                                    ___x_cmd_ws_ "$@" ;;
+        test)                                   command -v ___x_cmd_test >/dev/null 2>&1 || xrc:mod x-cmd/lib/test; ___x_cmd_test "$@" ;;
         *)                                      ___x_cmd_main_otherwise "$subcmd" "$@" ;;
 
     esac
