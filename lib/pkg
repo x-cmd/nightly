@@ -26,6 +26,27 @@ ___x_cmd_dev_pkg_pull(){
     git subtree pull --prefix="mod/$name" "$position" "$branch" --squash
 }
 
+___x_cmd_dev_pkg_update_main(){
+    local mod="$1"
+    if [ -e "mod/$mod" ]; then
+        ___x_cmd_dev_pkg_pull "$mod"
+    else
+        ___x_cmd_dev_pkg_add "$mod"
+    fi
+}
+
+___x_cmd_dev_pkg_update0(){
+    param:void
+    local IFS
+    local mod
+    git prune
+
+    ___x_cmd_dev_pkg_lsmod "$@" | \
+    while read -r mod; do
+        ___x_cmd_dev_pkg_update_main "$mod"
+    done
+}
+
 ___x_cmd_dev_pkg_update(){
     param:void
     local IFS
@@ -34,12 +55,12 @@ ___x_cmd_dev_pkg_update(){
 
     ___x_cmd_dev_pkg_lsmod "$@" | \
     while read -r mod; do
-        if [ -e "mod/$mod" ]; then
-            ___x_cmd_dev_pkg_pull "$mod"
-        else
-            ___x_cmd_dev_pkg_add "$mod"
-        fi
+        # OUT=/dev/null
+        x job put 5 ___x_cmd_dev_pkg_update_main "$mod"
+        printf "%s\n" "Update: $mod" >&2
     done
+
+    x job wait
 }
 
 # EndSection
@@ -138,6 +159,12 @@ ___x_cmd_dev_pkg_7z()(
 
 # EndSection
 
+___x_cmd_dev_pkg_pub0(){
+    param:void
+    ___x_cmd_dev_pkg_update0 "$@" && ___x_cmd_dev_pkg_tgz "$@" && git add . && git commit -m ...
+    ___x_cmd_dev_ws_push
+}
+
 ___x_cmd_dev_pkg_pub(){
     param:void
     ___x_cmd_dev_pkg_update "$@" && ___x_cmd_dev_pkg_tgz "$@" && git add . && git commit -m ...
@@ -156,6 +183,7 @@ subcommand:
     install         "install all modules"
 
     update          "update or add module"
+    pub0            "publish the package"
     pub             "publish the package"
     lsmod           "ls module"
     lsfile          ""
