@@ -1,6 +1,7 @@
-# Author:       Li Junhao       l@x-cmd.com         # xrc
-# shellcheck    shell=sh        disable=SC3043
+# shellcheck shell=bash # xrc
 
+# author:       Li Junhao           l@x-cmd.com
+# maintainer:   Li Junhao
 
 # https://stackoverflow.com/questions/1527049/how-can-i-join-elements-of-an-array-in-bash
 # join_ws also works
@@ -98,6 +99,15 @@ A
 # a=(1 2 3)
 # IFS=$'\n'; echo "${a[*]}"
 
+str_selftest(){
+    xrc doctest/latest
+    doctest "${BASH_SOURCE[0]}"
+}
+
+: <<'DOCTEST'
+> str_join "++" 1 2 3
+1++2++3
+DOCTEST
 str_join(){
     local sep=$1
     shift 1
@@ -143,6 +153,13 @@ str_trim_right(){
     printf "%s" "$var"
 }
 
+: <<'DOCTEST'
+> str_split , "$(echo -e "a\nc,b,c")" arr; echo "${#arr[@]}"
+3
+> IFS=$'\n' result_list=( $(str_split_to_lines , "$(echo -e "a\nc,b,c")") ); echo "${#result_list[@]}"  # str_split supermacy over str_split_to_lines
+4
+DOCTEST
+
 # https://stackoverflow.com/questions/40686922/howto-split-a-string-on-a-multi-character-delimiter-in-bash#comment99425158_47633817
 
 # Split into list.
@@ -177,6 +194,16 @@ str_split <delimiter> [string] <arary_name>
     done
 }
 
+: <<'DOCTEST'
+> str_split_to_lines : 1:2:3
+1
+2
+3
+> str_split_to_lines : 1:2:3:4:5 -- a b c - d; echo $a $b $c $d
+1 2 3 5
+> IFS=$'\n' result_list=( $(str_split_to_lines : 1:2:3) ); echo "${#result_list[@]}" "${result_list[1]}"
+3 2
+DOCTEST
 # According to str_split
 _str_split_to_lines(){
     # tr "${1:?split char}" '\n'
@@ -241,6 +268,16 @@ _str_split_to_lines(){
 #     fi
 # }
 
+: <<'DOCTEST'
+> str_upper "3abcDEF9"
+3ABCDEF9
+DOCTEST
+
+: <<'DOCTEST'
+> str_lower "3abcDEF9"
+3abcdef9
+DOCTEST
+
 case "$BASH_VERSION" in
     4*)
 str_upper(){
@@ -280,14 +317,31 @@ esac
 
 # other format using library
 
+: <<'DOCTEST'
+> str_startswith "hi world" hi && echo yes
+yes
+DOCTEST
 str_startswith(){
     [ "${1:?Provide string}" != "${1#${2:?Provide prefix}}" ]
 }
+
+
+: <<'DOCTEST'
+> str_endswith "hi world" ld && echo yes
+yes
+DOCTEST
 
 str_endswith(){
     [ "${1:?Provide string}" != "${1%${2:?Provide suffix}}" ]
 }
 
+
+: <<'DOCTEST'
+> str_slice "hi world" 3:
+world
+> str_slice "hi world" 3:-1
+worl
+DOCTEST
 str_slice(){    
     local srcStr=${1:?Please input a string to slice}
     local start end
@@ -313,6 +367,10 @@ str_slice(){
     echo "${srcStr:start:(( end - start ))}"
 }
 
+: <<'DOCTEST'
+> str_indexof "hi world" "world"
+3
+DOCTEST
 str_indexof(){
     local src=${1:?Provide src string} 
     local tgt=${2:?Provide target str}
@@ -461,6 +519,15 @@ _str_md5(){
 
 # Wrap the function with output variable
 
+: <<'DOCTEST'
+> printf "%s" hi | str_md5
+49f68a5c8493ec2c0bf489821c21fc3b
+> str_md5 "hi"
+49f68a5c8493ec2c0bf489821c21fc3b
+> str_md5 "hi" -- a
+> echo "$a"
+49f68a5c8493ec2c0bf489821c21fc3b
+DOCTEST
 # shellcheck disable=SC2086
 str_md5(){
     case $# in
@@ -476,6 +543,10 @@ str_md5(){
     esac
 }
 
+: <<'DOCTEST'
+> str_sha "hi x-bash"
+b595755ac2c4a251bef3187cda6550e25e72752a
+DOCTEST
 str_sha(){
     local ALGOR=${ALGOR:-1}
     if command -v shasum >/dev/null 2>&1; then
