@@ -31,8 +31,8 @@ ___x_cmd_ui(){
         # md|markdown)                                                ___x_cmd_ui_markdown "$@" ;;
         spin)                                                       ___x_cmd_ui_spin "$@" ;;
         sep)                                                        ___x_cmd_ui_sep "$@" ;;
-        sep2)                                                       ___x_cmd_ui_sep2 "${1:--}" $(( $(___x_cmd_ui cols) / 2 )) ;;
-        sep3)                                                       ___x_cmd_ui_sep3 "${1:--}" $(( $(___x_cmd_ui cols) / 3 )) ;;
+        sep2)                                                       ___x_cmd_ui_sep "${1:--}" $(( $(___x_cmd_ui cols) / 2 )) ;;
+        sep3)                                                       ___x_cmd_ui_sep "${1:--}" $(( $(___x_cmd_ui cols) / 3 )) ;;
 
         cols)                                                       printf "%s" "$COLUMNS" ;;
         rows)                                                       printf "%s" "$LINES" ;;
@@ -212,7 +212,7 @@ ___x_cmd_ui_draw_seperator(){
 }
 
 ___x_cmd_ui_sep(){
-    local maxw="${2:?$COLUMNS}"
+    local maxw="${2:-$COLUMNS}"
 
     # TODO: Introducing a much better solution
     # printf "%s\n" "$(seq -f "\xE2\x80\x95" -s '' "$COLUMNS")"

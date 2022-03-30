@@ -44,11 +44,12 @@ BEGIN {
     # Section: gridselect
     TH_GRIDSELECT_HEADER_NORMAL           =       ""
     TH_GRIDSELECT_ITEM_FOCUSED            =       UI_FG_CYAN
+    TH_GRIDSELECT_ITEM_UNFOCUSED          =       ""
     TH_GRIDSELECT_ITEM_SELECTED           =       UI_TEXT_BOLD
     TH_GRIDSELECT_ITEM_UNSELECTED         =       ""
     TH_GRIDSELECT_ITEM_SELECTED_INFO      =       UI_FG_CYAN
-    TH_GRIDSELECT_ITEM_ARROW              =       UI_FG_GREEN
-    TH_GRIDSELECT_ITEM_UNARROW            =       UI_FG_DARKGRAY
+    TH_GRIDSELECT_ITEM_ICON               =       UI_FG_GREEN
+    TH_GRIDSELECT_ITEM_UNICON             =       UI_FG_DARKGRAY
     # EndSection
 
     # Section: selectn
@@ -89,10 +90,16 @@ BEGIN {
     TH_LSENV_ITEM_UNFOCUSED_UNSELECT  =       UI_TEXT_DIM
     # EndSection
 
+    # Section: lsenv
+    TH_THEME_PREVIEW_FOCUSE = UI_FG_CYAN
+    TH_THEME_PREVIEW_SELECT = UI_TEXT_REV
+    # EndSection
+
     # help panel
 
     # Status line   # ...
     TH_STATUSLINE_TEXT                  =       ""
+    TH_DATA_UNFIND                     =       UI_TEXT_DIM
 }
 
 # Section: statusline help
