@@ -2,10 +2,8 @@
 
 # author:       Li Junhao           l@x-cmd.com
 
-xrc node/lib/node
-
-___x_cmd_node(){
-    ___x_cmd_node_inner "$@"
+___x_cmd_perl(){
+    :
 }
 
-xrc setmain ___x_cmd_node
+xrc setmain ___x_cmd_perl
