@@ -22,7 +22,7 @@ else
     return 1
 fi
 
-xrc env
+xrc env/latest
 [ -f "$HOME/.x-cmd/.boot/mod" ] && x boot mod load
 [ -f "$HOME/.x-cmd/.boot/rc" ] && . "$HOME/.x-cmd/.boot/rc"
 :
@@ -117,13 +117,13 @@ A
             ;;
         mod)
                 subcmd="$1"; shift
-                local ___X_CMD_ROOT_MOD="$___X_CMD_ROOT/.boot/mod"
+                local ___X_CMD_BOOT_MOD="$___X_CMD_ROOT/.boot/mod"
                 case "$subcmd" in
-                    path)       printf "%s" "$___X_CMD_ROOT_MOD" ;;
+                    path)       printf "%s" "$___X_CMD_BOOT_MOD" ;;
                     add|+)
 
                                 (
-                                    s="$(cat "$___X_CMD_ROOT_MOD" 2>/dev/null)"
+                                    s="$(cat "$___X_CMD_BOOT_MOD" 2>/dev/null)"
                                     {
                                         if [ "$s" = "" ]; then
                                             s="$(printf "%s\n" "# Do NOT modifiy this file manually for it is auto generated.")"
@@ -142,11 +142,11 @@ $mod
                                                 printf "Module ALREADY automatically imported during boot: %s\n" "$mod" >&2
                                             fi
                                         done
-                                    } >> "$___X_CMD_ROOT_MOD"
+                                    } >> "$___X_CMD_BOOT_MOD"
                                 ) ;;
                     del|-)
                                 (
-                                    s="$(cat "$___X_CMD_ROOT_MOD" 2>/dev/null)"
+                                    s="$(cat "$___X_CMD_BOOT_MOD" 2>/dev/null)"
                                     s="$s
 "
                                     d="$s"
@@ -163,13 +163,13 @@ $d2"
                                     done
 
                                     if [ "$d" != "$s" ]; then
-                                        printf "%s" "$d" > "$___X_CMD_ROOT_MOD"
+                                        printf "%s" "$d" > "$___X_CMD_BOOT_MOD"
                                     fi
                                 )
                                 ;;
                     load)
                                 local mod_list
-                                mod_list="$(awk '$1~/[A-Za-z0-9_\-]+/{ print $1;  }'<"$___X_CMD_ROOT_MOD" | tr '\n' ' ')"
+                                mod_list="$(awk '$1~/[A-Za-z0-9_\-]+/{ print $1;  }'<"$___X_CMD_BOOT_MOD" | tr '\n' ' ')"
                                 [ -n "${mod_list}" ] && eval xrc "$mod_list"
                                 ;;
                     ask)        (
@@ -185,13 +185,13 @@ $d2"
                                     done
                                 )
                                 ;;
-                    which)      printf "%s\n" "$___X_CMD_ROOT_MOD" ;;
-                    cat)        cat "$___X_CMD_ROOT_MOD" 2>/dev/null ;;
+                    which)      printf "%s\n" "$___X_CMD_BOOT_MOD" ;;
+                    cat)        cat "$___X_CMD_BOOT_MOD" 2>/dev/null ;;
                     ls|*)
-                                if [ -e "$___X_CMD_ROOT_MOD" ]; then
-                                    awk '$1~/[A-Za-z0-9_\-]+/{ print $1;  }'<"$___X_CMD_ROOT_MOD"
+                                if [ -e "$___X_CMD_BOOT_MOD" ]; then
+                                    awk '$1~/[A-Za-z0-9_\-]+/{ print $1;  }'<"$___X_CMD_BOOT_MOD"
                                 else
-                                    touch "$___X_CMD_ROOT_MOD"
+                                    touch "$___X_CMD_BOOT_MOD"
                                     return 0
                                 fi
                                 ;;
