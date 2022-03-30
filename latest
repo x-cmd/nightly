@@ -1,68 +1,72 @@
-# Author:       Li Junhao   l@x-cmd.com     # xrc
-# shellcheck    shell=sh    disable=SC2039,SC3043
+# shellcheck shell=sh disable=SC3043 # xrc
 
-xrc param
+# author:       Li Junhao           l@x-cmd.com
+# maintainer:   Li Junhao
 
-___x_cmd_http() {
-    local O="${O:-_HTTP_DEFAULT}"
-    if [ "${1#@}" != "$1" ]; then
-        O="${1#@}"
-        shift
-    fi
-    O="___X_BASH_HTTP_${O}"
 
-    param:dsl      '
-subcommands:
-    make            "make a new client"
-    browse          "open browser"
-    cd              "enter into the subpath relative to current path"
-    qs              "set the default query string parameter"
-    dict            ""
-    header          "set the default header"
-    body            "set the default attribute in body"
-    head            "launch a head request"
-    get             "launch a head request"
-    post            "launch a post request"
-    put             "launch a put request"
-    patch           "launch a patch request"
-    delete          "launch a delete request"
-    graphql|gq      "launch a graphql request"
-    response        "get the response information of latest request"
-'
-    param:run
-    if [ -z "$PARAM_SUBCMD" ]; then
-        ___x_cmd_http_cli "$@"
-        return
-    fi
-    "___x_cmd_http_${PARAM_SUBCMD}" "$@"
-}
-
-___x_cmd_http_cli(){
-    xrc ps1env
-    ps1env init "http"
-    ps1env alias + "http"
-    ps1env alias :h "http help"
+# https://serverfault.com/questions/93407/what-command-prints-a-string-as-big-ascii-text-art-in-bash
+cowsay(){
     local IFS
-    local subcmd
-    while read -r subcmd; do
-        ps1env alias "+$subcmd" "http $subcmd"
-    done <<A
-$(http _param_list_subcmd)
+    local typ="${1:-cow}"
+
+    case "$typ" in
+        help|h) 
+            cat <<A
+cowsay [tux|cow|help]
 A
-}
-
-x log init http
-
-# shellcheck disable=SC1091
+        return 1
+        ;;
+        _x_cmd_advise_json) cat <<A
 {
-    . "$___X_CMD_ROOT/http/lib/utils"
-    . "$___X_CMD_ROOT/http/lib/header"
-    . "$___X_CMD_ROOT/http/lib/qs"
-    . "$___X_CMD_ROOT/http/lib/body"
-    . "$___X_CMD_ROOT/http/lib/request"
-    . "$___X_CMD_ROOT/http/lib/resp"
-    . "$___X_CMD_ROOT/http/lib/crud"
-    . "$___X_CMD_ROOT/http/lib/graphql"
+    "tux": {},
+    "cow": {},
+    "help|h": {}
+}
+A
+        return 126
+        ;;
+
+        cow|tux)  shift;  ;;
+    esac
+        
+    cat <<-A
+ ______________________
+< ${*:-$text} >
+ ----------------------
+A
+
+    case "${typ:-cow}" in
+        tux) cat <<'A'
+   \
+    \
+        .--.
+       |o_o |
+       |:_/ |
+      //   \ \
+     (|     | )
+    /'\_   _/`\
+    \___)=(___/
+A
+    ;;
+
+        *) cat <<'A'
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+A
+    ;;
+    esac
 }
 
-xrc setmain ___x_cmd_http
+if [ -n "${BASH_VERSION}${ZSH_VERSION}" ] && [ "${-#*i}" != "$-" ]; then
+    xrc advise/latest
+    advise cowsay
+fi
+
+if [ -n "$___X_CMD_ENABLE_AUTO_RUN" ]; then
+    cowsay "$@"
+fi
+
+xrc setmain cowsay
