@@ -1,8 +1,7 @@
-# shellcheck shell=sh disable=SC3043 # xrc
+# shellcheck shell=sh
 
 # author:       Li Junhao           l@x-cmd.com
+# maintainer:   Li Junhao
+# license:      GPLv3
 
-___x_cmd_terraform(){
-    :
-}
-
+xrc list/v0
