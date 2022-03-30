@@ -1,14 +1,11 @@
-# Author:       Li Junhao      l@x-cmd.com      # xrc
-# shellcheck    shell=sh       disable=SC3043
+# shellcheck shell=sh disable=SC2039,SC3043 # xrc
 
-xrc:mod:lib el alpine code container git k8s udpn utils wubi
+# author:       Li Junhao           l@x-cmd.com
 
-+ xdk
-alias xdk=xdk   # xdk="x dk"
-alias l='x ll'
+___X_CMD_TAB_AWK="$___X_CMD_ROOT/tab/lib/tab.awk"
 
-if [ -z "$___X_CMD_THEME_NAME" ]; then
-    x theme try el
-fi
+___x_cmd_tab(){
+    command awk -v ROW="$1" -v COL="$2" -f "$___X_CMD_TAB_AWK"
+}
 
-x boot mod ask el
+xrc setmain ___x_cmd_tab
