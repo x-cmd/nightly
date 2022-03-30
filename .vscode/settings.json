@@ -1,8 +1,11 @@
 {
     "files.defaultLanguage": "shellscript",
     "files.associations": {
-        "*.json": "json",
-        "*.md": "markdown",
-        "*": "shellscript",
-    }
+        "**/*.awk": "awk",
+        "**/*": "shellscript",
+        "**/*.json": "json",
+        "**/*.md": "markdown"
+    },
+    "editor.detectIndentation": true,
+    "editor.tabSize": 4,
 }
