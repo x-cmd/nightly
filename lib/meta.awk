@@ -67,6 +67,7 @@ function ls_subcmd(         i,_cmd_name){
 
 function _param_list_subcmd(         i){
     for (i=1; i <= subcmd_arr[ L ]; ++i) {
+        gsub(/\|/, "\n", subcmd_arr[ i ])
         printf("%s\n", subcmd_arr[ i ] )
     }
 }

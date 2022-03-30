@@ -340,6 +340,9 @@ ___param_plugin_print() {
 # Section 8: param:flag2bool param:option2json
 
 ___x_cmd_param_flag_to_bool(){
+    local true="${true:-true}"
+    local false="${false:-false}"
+
     local ___name
     local ___key
     local ___value
@@ -347,9 +350,9 @@ ___x_cmd_param_flag_to_bool(){
         ___key="${___name%=*}"
         if [ "$___key" = "$___name" ]; then
             if eval [ -n \"\$"$___key"\" ]; then
-                eval "$___key=true"
+                eval "$___key=$true"
             else
-                eval "$___key=false"
+                eval "$___key=$false"
             fi
             continue
         fi
@@ -358,23 +361,23 @@ ___x_cmd_param_flag_to_bool(){
         case "$___value" in
             ^^*)
                 if eval [ -n \"\$"${___value#^^}"\" ]; then
-                    eval "$___key=true"
+                    eval "$___key=$true"
                 else
-                    eval "$___key=false"
+                    eval "$___key=$false"
                 fi
                 ;;
             ^*)
                 if eval [ -z \"\$"${___value#^}"\" ]; then
-                    eval "$___key=true"
+                    eval "$___key=$true"
                 else
-                    eval "$___key=false"
+                    eval "$___key=$false"
                 fi
                 ;;
             *)
                 if eval [ -n \"\$"$___value"\" ]; then
-                    eval "$___key=true"
+                    eval "$___key=$true"
                 else
-                    eval "$___key=false"
+                    eval "$___key=$false"
                 fi
         esac
     done
@@ -418,6 +421,7 @@ ___x_cmd_param_option_to_json()(
     done
 
     while read -r ___option_name; do
+        eval "[ -z \"\$""$___option_name""\" ] && ___to_remove=\"$___to_remove ${___option_name} \""
         if [ "${___to_remove#* "$___option_name" *}" = "$___to_remove" ]; then
             ___code="$___code $___option_name"
         fi
