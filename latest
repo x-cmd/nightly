@@ -3,8 +3,8 @@
 # author:       Li Junhao           l@x-cmd.com
 # license:      GPLv3
 
-___x_cmd_convert(){
-    ___x_cmd_fs_ls_1 "$@" || command ls "$@"
+___x_cmd_sync(){
+    :
 }
 
-xrc setmain ___x_cmd_ls
+xrc setmain ___x_cmd_sync
