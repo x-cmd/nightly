@@ -259,10 +259,7 @@ ___x_cmd_static_build_help(){
 }
 # EndSection
 
-. "$___X_CMD_ROOT/x-cmd/lib/glob"
-. "$___X_CMD_ROOT/x-cmd/lib/con"
-. "$___X_CMD_ROOT/x-cmd/lib/alias"
-. "$___X_CMD_ROOT/x-cmd/lib/args"
+xrc:mod:lib x-cmd glob con alias args rmrf
 
 # Section : varset
 
@@ -531,6 +528,7 @@ ___x_cmd_main(){
         wsroot)                                 ___x_cmd_workspace_root "$@" ;;
         ws)                                     ___x_cmd_ws "$@" ;;
         _ws)                                    ___x_cmd_ws_ "$@" ;;
+        rmrf)                                   ___x_cmd_rmrf "$@" ;;
         test)                                   command -v ___x_cmd_test >/dev/null 2>&1 || xrc:mod x-cmd/lib/test; ___x_cmd_test "$@" ;;
         *)                                      ___x_cmd_main_otherwise "$subcmd" "$@" ;;
 

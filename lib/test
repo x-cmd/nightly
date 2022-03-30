@@ -3,8 +3,21 @@
 
 x log init test
 
+xrc ui
+
+___x_cmd_ui_sep(){
+    local maxw="${2:-$COLUMNS}"
+
+    # TODO: Introducing a much better solution
+    # printf "%s\n" "$(seq -f "\xE2\x80\x95" -s '' "$COLUMNS")"
+    local sep
+    sep="$(seq -f "${1:-—}" -s '' "$maxw")"
+    printf "%s\n" "$sep"
+}
+
+
 ___x_cmd_test(){
-   ___x_cmd_test_main "$@"
+    ___x_cmd_test_main "$@"
 }
 
 ___x_cmd_test_main(){
@@ -16,15 +29,23 @@ ___x_cmd_test_main(){
         test:warn "Expecting to be folder: $target"
         return 1
     fi
+
+    # printf "%s\n" "-------------------"
+    ui sep "━"
     (
-        cd "$target" && NAME="root" INDENT="" ___x_cmd_test_folder "$(pwd)"
+        cd "$target" && NAME="" INDENT="" ___x_cmd_test_folder "$(pwd)"
     )
+    local code="$?"
+    ui sep "━"
+    # printf "%s\n" "-------------------"
+
+    return "$code"
 }
 
 ___x_cmd_test_folder(){
-    # test:info "Test: $(basename "$target") Begin"
-    # printf "%s\n" "${INDENT}================"
+
     local testcase
+    local global_code=0
     local code
     for testcase in *; do
         case "$testcase" in
@@ -33,32 +54,48 @@ ___x_cmd_test_folder(){
 
         ( ___x_cmd_test___folder_exec "$@" )
         code=$?
-        [ $code -ne 0 ] && return "$code"
+
+        if [ -n "$___X_CMD_TEST_ERR_EXIT" ]; then
+            [ $code -ne 0 ] && return "$code"
+        fi
+
+        [ $code -ne 0 ] && global_code=1
     done
-    # printf "%s\n" "${INDENT}================"
+    return "$global_code"
 }
 
 ___x_cmd_test___folder_exec() {
     if [ -f "$testcase" ]; then
-        printf "%s\n" "${INDENT}────────────────────────────────────────"
-        printf "%s\n" "${INDENT}│───> $NAME: $testcase"
+        # printf "\033[36m%s\033[0m" "${INDENT}-[ ] $testcase"
 
         [ -f ./setup ] && . ./setup
-        . "$testcase"
+
+        local err
+        err="$(. "$testcase" 2>/dev/stdout)"
         code="$?"
         [ -f ./teardown ] &&  . ./teardown
+
+        if [ $code -eq 0 ]; then
+            printf "\033[32m%s\033[0m\n" "${INDENT}-[Y] $NAME $testcase"
+        else
+            printf "\033[1;31m%s\033[0m\n" "${INDENT}-[X] $NAME $testcase"
+            printf "\033[2m%s\n" "$(ui sep3 "~") <out+err> "
+            printf "\033[2;33m%s\033[0m\n" "$err"
+            printf "\033[2m%s\033[0m\n" "$(ui sep3 "~") <end>"
+        fi
         return "$code"
 
     elif [ -d "$testcase" ]; then
-        printf "%s\n" "${INDENT}────────────────────────────────────────"
-        printf "%s\n" "${INDENT}+ $NAME: $testcase"
         cd "$testcase" || return 1
 
+        printf "\033[1;34m%s\033[0m\n" "${INDENT}>>> $NAME $testcase"
         [ -f ./setup ] && . ./setup
         NAME="$NAME/$testcase" INDENT="${INDENT}    " \
             ___x_cmd_test_folder "$(pwd)"
         code=$?
         [ -f ./teardown ] &&  . ./teardown
+        s="$(ui sep '─')"
+        printf "\033[34m%s\033[0m\n" "${s}" # "${INDENT}--- ${s#────}"
         return "$code"
     else
         :
