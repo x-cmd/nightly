@@ -146,7 +146,8 @@ ___x_cmd_assert_set(){
     local op="${1:?Must contains an op}"
     shift
     case "$op" in
-        errexit)            ___X_CMD_ASSERT_ERROR_EXIT=1 ;;
+        errexit|+errexit)           ___X_CMD_ASSERT_ERROR_EXIT=1 ;;
+        -errexit)                   ___X_CMD_ASSERT_ERROR_EXIT=  ;;
     esac
 }
 
