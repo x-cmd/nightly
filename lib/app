@@ -1,0 +1,28 @@
+xrc ui/latest
+xrc ui/lib/region
+xrc awk/latest
+
+___x_cmd_theme_app(){
+    ___x_cmd_ui_region_autorefresh_with_keyboard ___x_cmd_theme_app_mainloop_awk
+}
+
+___x_cmd_theme_app_mainloop_awk(){
+    if [ "$(___x_cmd_awk impl)" = "mawk" ]; then
+        ___x_cmd_theme_app_mainloop_awk_exec -W interactive "$@"
+    else
+        ___x_cmd_theme_app_mainloop_awk_exec "$@"
+    fi
+}
+
+___x_cmd_theme_app_mainloop_awk_exec(){
+    command awk "$@" \
+        -f "$___X_CMD_ROOT/awk/lib/default.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/wcwidth.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/str.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/ui.awk" \
+        -f "$___X_CMD_ROOT/ui/lib/theme.awk" \
+        -f "$___X_CMD_ROOT/ui/lib/share.awk" \
+        -f "$___X_CMD_ROOT/theme/lib/app.awk"
+        # -f "./lib/app.awk"
+}
+
