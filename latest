@@ -1,73 +1,40 @@
-# shellcheck shell=sh
-# shellcheck disable=SC2039,3043
+# shellcheck shell=sh #xrc
 
-# author:       Li Junhao           l@x-cmd.com
+# author:       Li Junhao           l@x-cmd.com    edwinjhlee.github.io
+# maintainer:   Li Junhao
 
-xrc param static-build/lib/staticbin os
+___x_cmd_nvm() {
+    if [ -z "$NVM_DIR" ]; then
+        NVM_DIR="$(
+            local _nvm_path
+            _nvm_path="$(xrc which nvm/nvm-sh-v0.38.0/nvm.sh)"
+            chmod +x "$(xrc which nvm/nvm-sh-v0.38.0/nvm-exec)"
 
-___x_cmd_ffmpeg_download(){
-    local arch
-    arch="$(os arch)"
-    local osname
-    osname="$(os name)"
-    local exe
-    case "$osname" in
-        win)    exe=ffmpeg.x64.exe        ;;
-        *)      exe=ffmpeg.${osname}.${arch}  ;;
-    esac
-    ___x_cmd_staticbin_init \
-        ___x_cmd_ffmpeg_download \
-        "$___X_CMD_ROOT/.bin/ffmpeg" \
-        "$exe" \
-        "$(___x_cmd_ffmpeg_bin_download_url "$exe")" \
-        &&(
-            cd "$___X_CMD_ROOT/.bin/ffmpeg" && {
-                chmod +x "$exe"
-            }
-        )&& ___x_cmd_ffmpeg_download "$@"
-}
-
-___x_cmd_ffmpeg_bin_download_url(){
-    local exe="${1:?Provide app name}"
-    if [ -z "$___X_CMD_WHICHNET" ]; then
-        printf "%s/%s" "https://raw.githubusercontent.com/static-build/ffmpeg/main/bin" "$exe.7z"
-    else
-        printf "%s/%s" "https://gitcode.net/x-bash/ffmpeg/-/raw/master/bin" "$exe.7z"
+            dirname "$_nvm_path"
+        )"
+        export NVM_DIR
     fi
+
+    # TODO: --no-use not worked in dash. We should consider environment variable instead.
+    . "$NVM_DIR/nvm.sh" --no-use
+    nvm "$@"
 }
 
-___x_cmd_ffmpeg(){
-    local op
-    op="$1"
-    # file to file
-    case "$op" in
-        show)       ___x_cmd_ffmpeg_show "$@" ;;
-        convert)    ___x_cmd_ffmpeg_convert "$@" ;;
-        play)       ___x_cmd_ffmpeg_play "$@" ;;
-        -*)         ___x_cmd_ffmpeg_origin "$@" ;;
-        *)
-            : detect input and output
-            : then convert the input to output
-            ;;
-    esac
+___x_cmd_nvm1() {
+    if [ -z "$NVM_DIR" ]; then
+        NVM_DIR="$(
+            local _nvm_path
+            _nvm_path="$(xrc which nvm/nvm-sh-v0.38.0/nvm.sh)"
+            chmod +x "$(xrc which nvm/nvm-sh-v0.38.0/nvm-exec)"
 
+            dirname "$_nvm_path"
+        )"
+    fi
+
+    (
+        . "$NVM_DIR/nvm.sh" --no-use
+        nvm "$@"
+    )
 }
 
-___x_cmd_ffmpeg_origin(){
-    command ffmpeg "$@"
-}
-
-___x_cmd_ffmpeg_show(){
-    local op
-    op="$1"
-
-    case "$op" in
-        buildconf)      ___x_cmd_ffmpeg_origin -buildconf ;;
-        formats)        ___x_cmd_ffmpeg_origin -formats ;;
-    esac
-
-}
-
-# EndSection
-
-xrc setmain ___x_cmd_ffmpeg_download
+xrc setmain ___x_cmd_nvm
