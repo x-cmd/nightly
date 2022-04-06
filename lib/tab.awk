@@ -77,7 +77,7 @@ function foreachline( lineno ){
         # print row_start ":\t" row_end "=\t" row_sep
 
         if ( (lineno < row_start) || (lineno >= row_end) )  continue
-        if ( (row_sep != 1) && ( (lineno - row_start) % row_sep == 0 ) )   continue
+        if ( (row_sep != 1) &&  ( (lineno - row_start) % row_sep != 0 ) )   continue
 
         if (coll == 0)      print $0
         else                foreachrow( )
