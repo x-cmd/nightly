@@ -1,0 +1,9 @@
+___x_cmd_repeat(){
+    local IFS="
+"
+    local t="${1:?Provide time}"; shift
+    local j
+    for j in $(seq "$t"); do
+        "$@"
+    done
+}
