@@ -171,8 +171,8 @@ ___x_cmd_log_set_level(){
     else
         eval "$var=$level_code"
         if [ -d "$___X_CMD_ROOT/$logger_name" ]; then
-            ___x_cmd_log_pr "${O:-$logger_name}" warn "Reload the logger by reload the module"
-            xrc:inner "$logger_name/latest"
+            ___x_cmd_log_pr "${O:-$logger_name}" warn "Reload the logger by reload the module: xrc:mod \"$logger_name/latest\""
+            # xrc:mod "$logger_name/latest"
         fi
     fi
 
