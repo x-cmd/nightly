@@ -26,7 +26,16 @@ ___x_cmd_dev_pkg_pull(){
     git subtree pull --prefix="mod/$name" "$position" "$branch" --squash
 }
 
-___x_cmd_dev_pkg_update(){
+___x_cmd_dev_pkg_update_main0(){
+    local mod="$1"
+    if [ -e "mod/$mod" ]; then
+        ___x_cmd_dev_pkg_pull "$mod"
+    else
+        ___x_cmd_dev_pkg_add "$mod"
+    fi
+}
+
+___x_cmd_dev_pkg_update0(){
     param:void
     local IFS
     local mod
@@ -34,11 +43,44 @@ ___x_cmd_dev_pkg_update(){
 
     ___x_cmd_dev_pkg_lsmod "$@" | \
     while read -r mod; do
-        if [ -e "mod/$mod" ]; then
-            ___x_cmd_dev_pkg_pull "$mod"
-        else
-            ___x_cmd_dev_pkg_add "$mod"
-        fi
+        ___x_cmd_dev_pkg_update_main0 "$mod"
+    done
+}
+
+___x_cmd_dev_pkg_update_main(){
+    local mod="$1"
+    if [ -e "mod/$mod" ]; then
+        printf "%s\n" "Pull: $mod"
+        ___x_cmd_dev_pkg_pull "$mod"
+    else
+        printf "%s\n" "Add: $mod"
+        ___x_cmd_dev_pkg_add "$mod"
+    fi 1>"$TMPDIR/$mod.out" 2>&1
+    printf "Write: %s\n" "$TMPDIR/$mod.out"
+}
+
+___x_cmd_dev_pkg_update(){
+    param:void
+    local IFS
+    local mod
+    git prune
+
+    ___x_cmd_dev_pkg_lsmod "$@" | {
+        while read -r mod; do
+            # OUT=/dev/null
+            x job put 7 ___x_cmd_dev_pkg_update_main "$mod"
+            printf "%s\n" "Update: $mod" >&2
+        done
+
+        x job wait
+    } | while read -r line; do
+        printf "%s\n" "$line"
+        case "$line" in
+            Write*)
+                printf "%s\n" "---------------"
+                cat "${line#Write: }"
+                printf "%s\n" "---------------"
+        esac
     done
 }
 
@@ -138,6 +180,12 @@ ___x_cmd_dev_pkg_7z()(
 
 # EndSection
 
+___x_cmd_dev_pkg_pub0(){
+    param:void
+    ___x_cmd_dev_pkg_update0 "$@" && ___x_cmd_dev_pkg_tgz "$@" && git add . && git commit -m ...
+    ___x_cmd_dev_ws_push
+}
+
 ___x_cmd_dev_pkg_pub(){
     param:void
     ___x_cmd_dev_pkg_update "$@" && ___x_cmd_dev_pkg_tgz "$@" && git add . && git commit -m ...
@@ -156,6 +204,7 @@ subcommand:
     install         "install all modules"
 
     update          "update or add module"
+    pub0            "publish the package"
     pub             "publish the package"
     lsmod           "ls module"
     lsfile          ""
