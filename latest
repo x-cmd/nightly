@@ -232,70 +232,8 @@ A
 
 # EndSection
 
-# Section : utilties in static-build
 
-# _x_xrc_static_run(){
-#     local name=$1;  shift
-#     xrc static-build
-#     static_build_xrc "$name"
-#     "_${name}_bin" "$@"
-# }
-
-___x_cmd_static_build_file(){
-    local app="${1:?Provide app name}"
-    local repo="${2:?Provide repo name}"
-    shift 2
-    eval " ___x_cmd_$app(){
-        xrc static-build && static_build_init $app $repo ___x_cmd_$app && ___x_cmd_$app  \"\$@\"
-    }"
-    ___x_cmd_"$app" "$@"
-}
-
-___x_cmd_static_build_help(){
-    if [ "$#" -eq 2 ]; then
-        ___x_cmd_static_build_file "$@" "--help"
-    else
-        ___x_cmd_static_build_file "$@"
-    fi
-}
-# EndSection
-
-xrc:mod:lib x-cmd glob con alias args rmrf qr util
-
-# Section : varset
-
-___x_cmd_varset(){
-    local _______variable_name="${1}"
-    if [ "$#" -eq 1 ]; then
-        eval printf "%s" "\"\$$_______variable_name\""
-        return
-    fi
-
-    local result
-    shift 1
-
-    local ___X_CMD_EVAL_CON_SEPERATOR
-    ___X_CMD_EVAL_CON_SEPERATOR="$(printf "\001")"
-
-    result="$("$@"; printf "${___X_CMD_EVAL_CON_SEPERATOR}")"
-    result="${result%${___X_CMD_EVAL_CON_SEPERATOR}}"
-    eval "$_______variable_name=\"\$result\""
-}
-
-___x_cmd_varset_without_end(){
-    local _______variable_name="${1}"
-    if [ "$#" -eq 1 ]; then
-        eval printf "%s" "\"\$$_______variable_name\""
-        return
-    fi
-
-    local result
-    shift 1
-    result="$("$@")"
-    eval "$_______variable_name=\"\$result\""
-}
-
-# EndSection
+xrc:mod:lib x-cmd glob con alias args rmrf util
 
 # Section : x main function
 
@@ -313,17 +251,7 @@ ___x_cmd_shell_exec(){
     fi
 }
 
-___x_cmd_ls(){
-    case "$1" in
-        @*|*@*/*)
-            ___x_cmd_file_ls "$@"
-            return
-            ;;
-    esac
-    ___x_cmd_static_build_file exa exa   "$@"
-}
-
-___x_cmd_workspace_root(){
+___x_cmd_wsroot(){
     local cur="${1:-.}"
 
     cur="$(cd "$cur" 1>/dev/null 2>&1 && pwd)"
@@ -340,6 +268,11 @@ ___x_cmd_workspace_root(){
 
 ___x_cmd_main_otherwise(){
     local subcmd="$1";  shift
+
+    if [ -d "$subcmd" ]; then
+        [ -d "$subcmd/.vscode" ] && code "$subcmd" && return
+    fi
+
     local code
     ___x_cmd_alias_exec ___x_cmd "$subcmd" "$@"
     code=$?
@@ -396,8 +329,7 @@ ___x_cmd_ws(){
     fi
 }
 
-
-___x_cmd_ws_(){
+___x_cmd__ws(){
     local X_DISABLE_WORKSPACE_EXECUTION_CONFIRMATION=1
 
     local RESOURCE_NAME="$1"; shift
@@ -414,142 +346,52 @@ ___x_cmd_ws_(){
 
 ___x_cmd_alias_init ___x_cmd
 
-___x_cmd_which_panic(){
-    local ___X_CMD_WHICH_ONE_RESULT
-    if ! ___x_cmd_which_one "$p"; then
-        printf "%s\n" "Fail to find path for $p" >&2
-        return 1
-    else
-        printf "%s\n" "$___X_CMD_WHICH_ONE_RESULT"
-    fi
-}
-
+#       7zd)                                    shift;  ( xrc p7zip/v0   &&  p7zd "$@" ) ;;
+#       7z|7za|7zr)                             shift;  ___x_cmd_static_build_file      p7zip 7za               "$@"    ;;
 ___x_cmd_main(){
-    # local IFS=" "
-
-    local subcmd=$1; [ $# -gt 0 ] && shift
+    local subcmd="$1"
     case "$subcmd" in
-        log)                                    ___x_cmd_log "$@" ;;
-        ""|help)                                printf "x     x-bash core function.
-    Uasge:  x <subcommand> [<subcommand>...]
-    Please visit our homepage for more information: https://x-cmd.com
-" >&2;
-                                                ___x_cmd_x_cmd_help
-                                                return 0
-;;
-        \.)                                     command code . ;;
+        log)                                    shift;  ___x_cmd_log "$@" ;;
 
-        alias)                                  ___x_cmd_alias      ___x_cmd "$@"   ;;
-        unalias)                                ___x_cmd_unalias    ___x_cmd "$@"   ;;
+        *:=)                                    shift;  ___x_cmd_varset "${subcmd%:=}" "$@" ;;
+        *=)                                     shift;  ___x_cmd_varset_without_end "${subcmd%=}" "$@" ;;
 
-        conjoin)                                ___x_cmd_eval_concurrent_join "$@" ;;
-        con)                                    ___x_cmd_eval_concurrent_assign "$@" ;;
+        arg1)                                   shift;  ___x_cmd_args 1 "$@"    ;;
+        marg1)                                  shift;  ___x_cmd_margs 1 "$@"   ;;
 
-        *:=)                                    ___x_cmd_varset "${subcmd%:=}" "$@" ;;
-        *=)                                     ___x_cmd_varset_without_end "${subcmd%=}" "$@" ;;
+        js|node)                                shift;  ___x_cmd_node "$@" ;;
+        python|py)                              shift;  ___x_cmd_python "$@" ;;
+        pip|pip3)                               shift;  ___x_cmd_pip3 "$@" ;;
 
-        args)                                   ___x_cmd_args "$@"      ;;
-        arg1)                                   ___x_cmd_args 1 "$@"    ;;
-        margs)                                  ___x_cmd_margs "$@"     ;;
-        marg1)                                  ___x_cmd_margs 1 "$@"   ;;
+        jar|java|npm|npx|ts|    _ws|wsroot|ws|      args|margs|conjoin|con|rmrf|repeat|     which|search_path|_x_cmd_advise_json|       ls|ll   )
+                                                shift;  "___x_cmd_$subcmd" "$@" ;;
 
-        login)                                  xrc hub/latest && ___x_cmd_hub login "$@" ;;
+        sh|bash|zsh|fish|ksh|dash|ash)          shift;  ___x_cmd_shell_exec "$subcmd" "$@" ;;
 
-        update)                                 xrc update "$@"  ;;
-        upgrade)                                xrc upgrade "$@" ;;
-        clear)                                  if ! grep "___x_cmd_http_get()" "$___X_CMD_ROOT/xrc/latest" >/dev/null 2>&1; then
-                                                    x:debug "'$___X_CMD_ROOT/xrc/latest' NOT found. Please manually clear cache folder: $___X_CMD_ROOT"
-                                                    return 1
-                                                fi
-                                                rm -rf "$___X_CMD_ROOT" ;;
-        reinstall)                              x clear && RELOAD=1 x upgrade ;;
+        curl|jq|yq|tmux|git|7z|tesseract|magick|    ps|du|sqlite|cat|bw|    nmap|ncat|nping|traceroute)     # TODO: we will rename ___x_cmd_curl to make room for it
+                                                shift;  ___x_cmd_static_build_file     "$subcmd" "$subcmd"      "$@"    ;;
 
-        z|uz)                                   ( xrc zuz && ___x_cmd_zuz "$subcmd" "$@" ) ;;
-        zl)                                     ( xrc zuz && ___x_cmd_zuz_ls "$@"        ) ;;
+        openssl|ssl)                            shift;  ___x_cmd_static_build_file      openssl openssl         "$@"    ;;
+        run)                                    shift;  ___x_cmd_run_by_file "$@"       ;;
 
-        sh|bash|zsh|fish|ksh|dash|ash)          ___x_cmd_shell_exec "$subcmd" "$@" ;;
+        \.)                                     shift;  command code . ;;      # Test is a inner module.
 
-        jar)                                    xrc java/latest && ___x_cmd_java -jar "$@" ;;
-        java)                                   xrc java/latest && ___x_cmd_java "$@" ;;
+        alias|unalias)                          shift;  "___x_cmd_$subcmd"  ___x_cmd "$@"   ;;
 
-        pip|pip3)                               xrc python/latest && ___x_cmd_pip3 "$@" ;;
-        python|py)                              xrc python/latest && ___x_cmd_python "$@" ;;
+        test)                                   shift;  { command -v ___x_cmd_test >/dev/null 2>&1 || xrc:mod test/latest; } && ___x_cmd_test "$@" ;;
+        login)                                  shift;  xrc hub/latest && ___x_cmd_hub login "$@" ;;
 
-        nvm)                                    xrc nvm/latest  && ___x_cmd_nvm "$@" ;;
-        javascript|js|node)                     xrc node/latest && ___x_cmd_node "$@" ;;
-        npm)                                    xrc node/latest && ___x_cmd_npm "$@" ;;
-        npx)                                    xrc node/latest && ___x_cmd_npx "$@" ;;
-        ts)                                     local arg
-                                                local argstr
-                                                while [ $# -ge 0 ]; do
-                                                    case "$arg" in
-                                                        -*)     argstr="$argstr $arg"   ;;
-                                                        *)      break
-                                                    esac
-                                                done
-                                                local script
-                                                script="$1"
-                                                shift
-                                                x npx @typeshell/exec "$argstr" "$script" "$@"
-                                                ;;
-        # ruby|rb)                                ruby "$(___x_cmd_official_which "$2")" "$@"      ;;
-        lua)            ;;
+        update|upgrade|clear|reinstall)         shift;  "$___X_CMD_ROOT_MOD/xrc/lib/setup/$subcmd" "$@" ;;
 
-        7zd)                                    ( xrc p7zip/v0   &&  p7zd "$@" ) ;;
-        7z|7za|7zr)                             ___x_cmd_static_build_file      p7zip 7za               "$@"    ;;
+        z|uz)                                           ( xrc zuz && ___x_cmd_zuz "$@" ) ;;   # zl)  ( xrc zuz && ___x_cmd_zuz_ls "$@"        ) ;;       # Using ls to replace
+        ""|help)                                        ___x_cmd_x_cmd_help ;;
 
-        ls)                                     ___x_cmd_ls         "$@"        ;;
-        ll)                                     ___x_cmd_static_build_file      exa exa  -l             "$@"    ;;
-        ps)                                     ___x_cmd_static_build_file      procs procs             "$@"    ;;
-        du)                                     ___x_cmd_static_build_file      dust dust               "$@"    ;;
-        sqlite)                                 ___x_cmd_static_build_file      sqlite3 sqlite3         "$@"    ;;
-        cat)                                    ___x_cmd_static_build_help      bat bat                 "$@"    ;;
-        bw)                                     ___x_cmd_static_build_file      bandwhich bandwhich     "$@"    ;;
-        jq)                                     ___x_cmd_static_build_help      jq jq                   "$@"    ;;
-        # TODO: we will rename ___x_cmd_curl to make room for it
-        curl|yq|tmux|git|nmap|tesseract|magick)        ___x_cmd_static_build_file     "$subcmd" "$subcmd"      "$@"    ;;
-        ffmpeg)                                 xrc ffmpeg && ___x_cmd_ffmpeg_download       "$@"    ;;
-        pandoc)                                 xrc pandoc && ___x_cmd_pandoc                "$@"    ;;
-
-        openssl|ssl)                            ___x_cmd_static_build_file      openssl openssl         "$@"    ;;
-        ncat)                                   ___x_cmd_static_build_file      nmap ncat               "$@"    ;;
-        nping)                                  ___x_cmd_static_build_file      nmap nping              "$@"    ;;
-        traceroute)                             ___x_cmd_static_build_file      nmap traceroute         "$@"    ;;
-        run)                                    ___x_cmd_run_by_file "$@"       ;;
-        search_path)                            ___x_cmd_search_path "$@"       ;;
-        which|w)                                local p
-                                                for p in "$@"; do
-                                                    ___x_cmd_which_panic || return 1
-                                                done
-                                                ;;
-        qr)                                     ___x_cmd_qr "$@" ;;
-        _x_cmd_advise_json)                     ___x_cmd_x_cmd_advise_json "$@" ;;
-        wsroot)                                 ___x_cmd_workspace_root "$@" ;;
-        ws)                                     ___x_cmd_ws "$@" ;;
-        _ws)                                    ___x_cmd_ws_ "$@" ;;
-        rmrf)                                   ___x_cmd_rmrf "$@" ;;
-        test)                                   { command -v ___x_cmd_test >/dev/null 2>&1 || xrc:mod test/latest; } && ___x_cmd_test "$@" ;;
-
-        repeat)                                 ___x_cmd_repeat "$@" ;;
-
-        *)                                      ___x_cmd_main_otherwise "$subcmd" "$@" ;;
-
+        *)                                              ___x_cmd_main_otherwise "$@" ;;
     esac
 }
 
 # EndSection
 
-# Section : help and advise.json
-___x_cmd_x_cmd_advise_json(){
-    xrc cat x-cmd/lib/x.json
-    return 126
-}
-
-___x_cmd_x_cmd_help(){
-    xrc advise/lib/advise_get
-    ___x_cmd_advise_get_help "$(xrc which x-cmd/lib/x.json)"
-}
-# EndSection
 
 x(){
     ___x_cmd_main "$@"
