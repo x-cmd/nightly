@@ -15,7 +15,7 @@ ___x_cmd_assert_main(){
     # shellcheck disable=SC2016
     local CHOICE_LIST_MUST_NOT_BE_EMTPY='
         [ "${#@}" -eq 0 ] && {
-            echo "ERROR: Please provide candidate list right after $op" >&2
+            printf "%s\n" "ERROR: Please provide candidate list right after $op" >&2
             return 1
         }
     '
@@ -55,14 +55,6 @@ ___x_cmd_assert_main(){
             return 1
         fi
 
-        if [ "$op" = "=int" ]; then
-            # if [[ ! "$val" =~ ^[\ \t]*[0-9]+[\ \t]*$ ]]; then
-            if ! ___x_cmd_assert_str_regex "$val" "^[\ \t]*[0-9]+[\ \t]*$" ; then
-                >&2 printf "%s\n" "ERROR: '$val' An integer expected."
-                # param.help.show
-                return 1
-            fi
-        fi
 
         [ "${#}" -ne 0 ] && {
             if ! ___x_cmd_assert_within "$val" "$@"; then
@@ -70,7 +62,17 @@ ___x_cmd_assert_main(){
                 # param.help.show
                 return 1
             fi 
-        } ;;
+        }
+
+        if [ "$op" = "=int" ]; then
+            # if [[ ! "$val" =~ ^[\ \t]*[0-9]+[\ \t]*$ ]]; then
+            if ! ___x_cmd_assert_str_regex "$val" "^[ \t]*[+-]?[0-9]+[ \t]*$" ; then
+                >&2 printf "%s\n" "ERROR: '$val' An integer expected."
+                # param.help.show
+                return 1
+            fi
+        fi
+        ;;
     \=\[?\]|\=?)
         eval "$CHOICE_LIST_MUST_NOT_BE_EMTPY"
 
@@ -129,6 +131,9 @@ ___x_cmd_assert_otherwise(){
 
         true)               ___x_cmd_assert_t "$@" ;;
         false)              ___x_cmd_assert_f "$@" ;;
+        
+        func)               ___x_cmd_assert_func "$@" ;;
+
         int)                ___x_cmd_assert_int "$@" ;;
         float)              ___x_cmd_assert_float "$@" ;;
 
@@ -139,6 +144,7 @@ ___x_cmd_assert_otherwise(){
         folder)             ___x_cmd_assert_folder "$@" ;;
 
         stdout)             ___x_cmd_assert_stdout "$@" ;;
+        stderr)             ___x_cmd_assert_stderr "$@" ;;
     esac
 }
 
@@ -146,7 +152,8 @@ ___x_cmd_assert_set(){
     local op="${1:?Must contains an op}"
     shift
     case "$op" in
-        errexit)            ___X_CMD_ASSERT_ERROR_EXIT=1 ;;
+        errexit|+errexit)           ___X_CMD_ASSERT_ERROR_EXIT=1 ;;
+        -errexit)                   ___X_CMD_ASSERT_ERROR_EXIT=  ;;
     esac
 }
 
@@ -168,29 +175,30 @@ A
 # Section: set and regex
 
 : <<'DOCTEST'
-> ___x_cmd_assert_within 1abc 1abc1 1abc2 && echo yes
-> ___x_cmd_assert_within 1abc 1abc1 1abc2 1abc abc3 && echo yes
+> ___x_cmd_assert_within 1abc 1abc1 1abc2 && printf "%s\n" yes
+> ___x_cmd_assert_within 1abc 1abc1 1abc2 1abc abc3 && printf "%s\n" yes
 yes
 DOCTEST
 ___x_cmd_assert_within(){
-    local c value="$1"
+    local c
+    local value="$1"
     shift
     for c in "$@"; do
-        for v in $value; do
-            if [ "$v" = "$c" ]; then
-                return 0
-            fi
-        done
+        # for v in $value; do
+        if [ "$value" = "$c" ]; then
+            return 0
+        fi
+        # done
     done
     return 1
 }
 
 
 : <<'DOCTEST'
-> ___x_cmd_assert_within_regex 1abc 1abc1 1abc2 && echo yes
-> ___x_cmd_assert_within_regex 1abc 1abc1 1abc2 1abc abc3 && echo yes
+> ___x_cmd_assert_within_regex 1abc 1abc1 1abc2 && printf "%s\n" yes
+> ___x_cmd_assert_within_regex 1abc 1abc1 1abc2 1abc abc3 && printf "%s\n" yes
 yes
-> ___x_cmd_assert_within_regex 1abc 1abc1 1abc2 [0-9][a-z]+ abc3 && echo yes
+> ___x_cmd_assert_within_regex 1abc 1abc1 1abc2 [0-9][a-z]+ abc3 && printf "%s\n" yes
 yes
 DOCTEST
 ___x_cmd_assert_within_regex(){
@@ -207,8 +215,8 @@ ___x_cmd_assert_within_regex(){
 }
 
 : <<'DOCTEST'
-> ___x_cmd_assert_eq 1abc 1abc1 1abc2 2>/dev/null && echo yes
-> ___x_cmd_assert_eq 1abc 1abc 1abc && echo yes
+> ___x_cmd_assert_eq 1abc 1abc1 1abc2 2>/dev/null && printf "%s\n" yes
+> ___x_cmd_assert_eq 1abc 1abc 1abc && printf "%s\n" yes
 yes
 DOCTEST
 ___x_cmd_assert_eq(){
@@ -216,7 +224,7 @@ ___x_cmd_assert_eq(){
     while [ $# -gt 1 ]; do
         shift
         if [ "$real" != "$1" ]; then
-            echo "Failed. Expect '$real' equals to '$1'" >&2
+            printf "%s\n" "Failed. Expect '$real' equals to '$1'" >&2
             return 1
         fi
     done
@@ -227,19 +235,19 @@ ___x_cmd_assert_eq(){
 
 # Section: value and grep
 ___x_cmd_assert_stdout(){
-    ___x_cmd_assert_eq "$(cat)" "$("$@")"
+    ___x_cmd_assert_eq "$(cat)" "$(___x_cmd_evex "$@")"
 }
 
 ___x_cmd_assert_stderr(){
-    ___x_cmd_assert_eq "$(cat)" "$("$@" 2>/dev/stdout 1>/dev/null)"
+    ___x_cmd_assert_eq "$(cat)" "$(___x_cmd_evex "$@" 2>/dev/stdout 1>/dev/null)"
 }
 
 # There is two ways to use ___x_cmd_assert_grep
-# > ___x_cmd_assert_grep "doctest" 2>/dev/null <"$(xrc_which std/test)" && echo yes
+# > ___x_cmd_assert_grep "doctest" 2>/dev/null <"$(xrc_which std/test)" && printf "%s\n" yes
 # yes
 
 : <<'DOCTEST'
-> echo "hello hi" | ___x_cmd_assert_grep hi 1>/dev/null && echo yes
+> printf "%s\n" "hello hi" | ___x_cmd_assert_grep hi 1>/dev/null && printf "%s\n" yes
 yes
 DOCTEST
 ___x_cmd_assert_grep(){
@@ -254,14 +262,24 @@ ___x_cmd_assert_grep(){
 
 ___x_cmd_assert_t(){
     if ! "$@"; then
-        echo "${MSG:-"Expect command execution to be true: $*"}" >&2
+        printf "%s\n" "${MSG:-"Expect command execution to be true: $*"}" >&2
         return 1
     fi
 }
 
+___x_cmd_assert_func(){
+    while [ $# -eq 0 ]; do
+        case "${1}" in
+            ^*)     ___x_cmd_assert_f "${1#^}"  ;;
+            *)      ___x_cmd_assert_t "$1" ;; 
+        esac
+        shift
+    done
+}
+
 ___x_cmd_assert_f(){
     if "$@"; then
-        echo "${MSG:-"Expect command execution to be false: $*"}" >&2
+        printf "%s\n" "${MSG:-"Expect command execution to be false: $*"}" >&2
         return 1
     fi
 }
@@ -270,7 +288,7 @@ ___x_cmd_assert_float(){
     while [ $# -gt 0 ]; do
         # [[ "$1" =~ ^[\ \t]?[0-9]+(.[0-9]+)?[\ \t]?$ ]] || {
         ___x_cmd_assert_str_regex "$1" "^[ \t]*[+-]?[0-9]+(.[0-9]+)?[ \t]*$" || {
-            echo "${MSG:-"Expect var to be of float type: $*"}" >&2
+            printf "%s\n" "${MSG:-"Expect var to be of float type: $*"}" >&2
             return 1
         }
         shift
@@ -281,8 +299,8 @@ ___x_cmd_assert_float(){
 ___x_cmd_assert_int(){
     while [ $# -gt 0 ]; do
         # [[ "$1" =~ ^[\ \t]?[0-9]+[\ \t]?$ ]] || {
-        ___x_cmd_assert_str_regex "$1" "^[+-]?[ \t]?[0-9]+[ \t]?$" || {
-            echo "${MSG:-"Expect var to be of int type: $*"}" >&2
+        ___x_cmd_assert_str_regex "$1" "^[ \t]*[+-]?[0-9]+[ \t]*$" || {
+            printf "%s\n" "${MSG:-"Expect var to be of int type: $*"}" >&2
             return 1
         }
         shift
