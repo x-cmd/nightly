@@ -71,7 +71,7 @@ ___x_cmd_zuz_uz_whole_file(){
             cat "${target_file%.*}".* | tar xvf
             ;;
         *.tgz)
-            ___x_cmd_zuz_run gunzip -k -d "$target_file"
+            ___x_cmd_zuz_run tar xzvf "$target_file"
             ;;
         *.xz)
             ___x_cmd_zuz_run xz -k -d "$target_file"
@@ -119,7 +119,7 @@ ___x_cmd_zuz_uz_and_files(){
             cat "${target_file%.*}".* | tar xvf
             ;;
         *.tgz)
-            ___x_cmd_zuz_run gunzip -k -d "$target_file"
+            ___x_cmd_zuz_run tar xzvf "$target_file"
             ;;
         *.xz)
             # TODO: Figure it out
