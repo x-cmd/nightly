@@ -75,11 +75,6 @@ admin:repo_hook
 admin:public_key
 admin:enterprise
 ---
-It's the 1 app descriptor.
-It's the 2 app descriptor.
-
-
-It's the 5 app descriptor.
 ---"
 }
 ____x_cmd_gh_auth_login(){
