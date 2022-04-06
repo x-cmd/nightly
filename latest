@@ -2,6 +2,7 @@
 # shellcheck    shell=sh    disable=SC3043,SC1091
 
 # Section : run by file: get_engine_by_file* and run_by_file*
+___x_cmd_log init x
 
 ___x_cmd_xrc_run(){
     local fp="${1:?filepath}"; shift
@@ -259,10 +260,7 @@ ___x_cmd_static_build_help(){
 }
 # EndSection
 
-. "$___X_CMD_ROOT/x-cmd/lib/glob"
-. "$___X_CMD_ROOT/x-cmd/lib/con"
-. "$___X_CMD_ROOT/x-cmd/lib/alias"
-. "$___X_CMD_ROOT/x-cmd/lib/args"
+xrc:mod:lib x-cmd glob con alias args rmrf qr util
 
 # Section : varset
 
@@ -362,7 +360,7 @@ ___x_cmd_main_otherwise(){
             official)       ___x_cmd_run_by_file    "$p" "$@" ;;
         esac
         code=$?
-        ___xrc_log debug "$p"
+        x:debug "$p"
         return "$code"
     else
         printf "%s" "Error" >&2
@@ -426,10 +424,8 @@ ___x_cmd_which_panic(){
     fi
 }
 
-. "$___X_CMD_ROOT/x-cmd/lib/qr"
-
 ___x_cmd_main(){
-    local IFS=" "
+    # local IFS=" "
 
     local subcmd=$1; [ $# -gt 0 ] && shift
     case "$subcmd" in
@@ -462,7 +458,7 @@ ___x_cmd_main(){
         update)                                 xrc update "$@"  ;;
         upgrade)                                xrc upgrade "$@" ;;
         clear)                                  if ! grep "___x_cmd_http_get()" "$___X_CMD_ROOT/xrc/latest" >/dev/null 2>&1; then
-                                                    ___xrc_log debug "'$___X_CMD_ROOT/xrc/latest' NOT found. Please manually clear cache folder: $___X_CMD_ROOT"
+                                                    x:debug "'$___X_CMD_ROOT/xrc/latest' NOT found. Please manually clear cache folder: $___X_CMD_ROOT"
                                                     return 1
                                                 fi
                                                 rm -rf "$___X_CMD_ROOT" ;;
@@ -531,7 +527,11 @@ ___x_cmd_main(){
         wsroot)                                 ___x_cmd_workspace_root "$@" ;;
         ws)                                     ___x_cmd_ws "$@" ;;
         _ws)                                    ___x_cmd_ws_ "$@" ;;
-        test)                                   command -v ___x_cmd_test >/dev/null 2>&1 || xrc:mod x-cmd/lib/test; ___x_cmd_test "$@" ;;
+        rmrf)                                   ___x_cmd_rmrf "$@" ;;
+        test)                                   { command -v ___x_cmd_test >/dev/null 2>&1 || xrc:mod test/latest; } && ___x_cmd_test "$@" ;;
+
+        repeat)                                 ___x_cmd_repeat "$@" ;;
+
         *)                                      ___x_cmd_main_otherwise "$subcmd" "$@" ;;
 
     esac
@@ -556,9 +556,8 @@ x(){
 }
 
 if ___x_cmd_is_suitable_advise_env; then
-    # if you use xrc that you must have advise
-    # xrc advise/latest
-    advise x
+    command -v ___x_cmd_advise >/dev/null || xrc advise/latest
+    ___x_cmd_advise init x
 fi
 
 # TODO: We should have a better solution for this.
