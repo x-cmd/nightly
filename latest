@@ -181,12 +181,14 @@ ___x_cmd_theme_control_font() {
 
 ___x_cmd_theme_control_app(){
     param:void
-    xrc theme/lib/app
-    local ___X_CMD_THEME_FINAL_COMMAND
-    local ___X_CMD_THEME_APP_FINAL_NAME
-    ___x_cmd_theme_app
-    if [ "$___X_CMD_THEME_FINAL_COMMAND" = "ENTER" ]; then
-        ___x_cmd_theme_control_use "$___X_CMD_THEME_APP_FINAL_NAME"
+    if ___x_cmd_theme___which___filepath index.yml; then
+        xrc theme/lib/app
+        local ___X_CMD_THEME_FINAL_COMMAND
+        local ___X_CMD_THEME_APP_FINAL_NAME
+        ___x_cmd_theme_app
+        if [ "$___X_CMD_THEME_FINAL_COMMAND" = "ENTER" ]; then
+            ___x_cmd_theme_control_use "$___X_CMD_THEME_APP_FINAL_NAME"
+        fi
     fi
 }
 
