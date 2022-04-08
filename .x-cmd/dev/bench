@@ -52,7 +52,7 @@ ___x_cmd_test_bench_run(){
     local display="${name#___x_cmd_test_bench_}"
     printf "%-10s" "${display%_inner}"
     local cycle="$2"
-    time sh -c ". ./bench; $name $cycle " >/dev/null 2>&1 \
+    (time sh -c ". ./bench; $name $cycle ") >/dev/null 2>&1 \
         | awk -v cycle="$cycle" 'NR==2{
             c = $2
             gsub("s$", "", c)

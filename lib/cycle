@@ -1,9 +1,10 @@
 
 ___x_cmd_test_cycle_exec(){
     local target="${1}"
-    if [ -z "$target" ]; then
-        target="$(x wsroot)/.x-cmd/testcase"
-    fi
+    case "$1" in
+        ""|-*|+*)   target="$(x wsroot)/.x-cmd/testcase" ;;
+        *)          target="$1"; shift ;;
+    esac
 
     ___x_cmd_ui_sep "━"
 
@@ -12,13 +13,13 @@ ___x_cmd_test_cycle_exec(){
 
         if [ -f "$target" ]; then
             cd "$(dirname "$target")" || exit 1
-            ___x_cmd_test___cycle_exec_file "$target"
+            ___x_cmd_test___cycle_exec_file "$target" "$@"
             return
         fi
 
         if [ -d "$target" ]; then
             cd "$target" || exit 1
-            NAME="" INDENT="" ___x_cmd_test___cycle_exec_folder
+            NAME="" INDENT="" ___x_cmd_test___cycle_exec_folder "$@"
             return
         fi
 
@@ -33,15 +34,29 @@ ___x_cmd_test_cycle_exec(){
 }
 
 
+# x log init testcase
+
+___x_cmd_test_log_indent(){
+    printf "%s" "      >>>>>>>>  " >&2
+}
+
 # Section: cycle init
 ___x_cmd_test_cycle_init(){
     xrc:mod assert/latest
+    exec 6<>/dev/stderr
+
+    x log +cycle
 
     alias @assert:errexit='___x_cmd_test_errexit on'
     alias @assert:errexit:off='___x_cmd_test_errexit off'
 
     alias @assert='___x_cmd_test_true_or_exit ___x_cmd_assert'
     alias @assert:file:func='___x_cmd_test_true_or_exit ___x_cmd_test_assert_true_for_all_func'
+
+    alias @debug='  2>&6 ___x_cmd_test_log_indent;    2>&6 x log :cycle debug '
+    alias @info='   2>&6 ___x_cmd_test_log_indent;    2>&6 x log :cycle info'
+    alias @warn='   2>&6 ___x_cmd_test_log_indent;    2>&6 x log :cycle warn'
+    alias @error='  2>&6 ___x_cmd_test_log_indent;    2>&6 x log :cycle error'
 }
 
 
@@ -69,10 +84,41 @@ ___x_cmd_test_true_or_exit(){
 
 # EndSection
 
+___x_cmd_test___cycle_pat(){
+    local target="$1"
+    local pattern="$2"
+
+    eval "
+    case \"\$target\" in
+        $pattern)       return 0 ;;
+        *)              return 1 ;;
+    esac 2>/dev/null
+
+    " 2>/dev/null
+}
+
+___x_cmd_test___cycle_exclude(){
+    local target="${1:?Provide target}"; shift
+
+    local pattern
+    for pattern in "$@"; do
+        case "$pattern" in
+            +*)     ___x_cmd_test___cycle_pat "$target" "${pattern#?}" && return 0 ;;
+            -*)     ___x_cmd_test___cycle_pat "$target" "${pattern#?}" && return 1 ;;
+        esac
+    done
+    return 0
+}
+
 # Section: cycle exec file
 ___x_cmd_test___cycle_exec_file(){
 
     local testcase="${1:?Provide testcase}"
+
+    if ! ___x_cmd_test___cycle_exclude "$testcase" "$@"; then
+        printf "\033[2;36m%s\033[0m\n" "${INDENT}-[ ] $NAME $testcase   ---<SKIP>"
+        return 0
+    fi
 
     # printf "\033[36m%s\033[0m" "${INDENT}-[ ] $testcase"
 
@@ -116,10 +162,10 @@ ___x_cmd_test___cycle_exec_folder(){
 
         (
             if [ -f "$testcase" ]; then
-                ___x_cmd_test___cycle_exec_file "$testcase"
+                ___x_cmd_test___cycle_exec_file "$testcase" "$@"
 
             elif [ -d "$testcase" ]; then
-                ___x_cmd_test___cycle_exec_folder_inner "$testcase"
+                ___x_cmd_test___cycle_exec_folder_inner "$testcase" "$@"
             else
                 :
             fi
@@ -138,14 +184,19 @@ ___x_cmd_test___cycle_exec_folder(){
 
 ___x_cmd_test___cycle_exec_folder_inner(){
 
-    local testcase="${1:?Provide testcase}"
+    local testcase="${1:?Provide testcase}"; shift
+
+    if ! ___x_cmd_test___cycle_exclude "$testcase" "$@"; then
+        printf "\033[2;36m%s\033[0m\n" "${INDENT}>>> $NAME $testcase  ---<SKIP>"
+        return 0
+    fi
 
     cd "$testcase" || return 1
 
     printf "\033[1;34m%s\033[0m\n" "${INDENT}>>> $NAME $testcase"
     [ -f ./setup ] && . ./setup
     NAME="$NAME/$testcase" INDENT="${INDENT}    " \
-        ___x_cmd_test___cycle_exec_folder "$(pwd)"
+        ___x_cmd_test___cycle_exec_folder "$@"
     code=$?
     [ -f ./teardown ] &&  . ./teardown
     s="$(___x_cmd_ui_sep '─')"
