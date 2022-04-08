@@ -38,3 +38,7 @@ ___x_cmd_ls(){
 ___x_cmd_ll(){
     ___x_cmd_static_build_file      exa exa  -l             "$@"
 }
+
+___x_cmd_ssl(){
+    ___x_cmd_static_build_file      openssl openssl         "$@"
+}
