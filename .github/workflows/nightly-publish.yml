@@ -35,4 +35,4 @@ jobs:
         run: |
           eval "$(curl https://get.x-cmd.com)" || true
           ___X_CMD_IN_CHINA_NET=
-          x ws pub || true
+          x ws pub0 || true
