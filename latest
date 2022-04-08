@@ -1,277 +1,14 @@
 # Author:       Li Junhao   l@x-cmd.com             # xrc
 # shellcheck    shell=sh    disable=SC3043,SC1091
 
-# Section : run by file: get_engine_by_file* and run_by_file*
 ___x_cmd_log init x
 
-___x_cmd_xrc_run(){
-    local fp="${1:?filepath}"; shift
-
-    local main
-    if ! main="$(___x_cmd_ldict get ___X_CMD_XRC_SET_MAIN_DICT "$fp")"; then
-        ___x_cmd_xrc_source_file "$fp" # xrc
-        local code=$?
-        if ! main="$(___x_cmd_ldict get ___X_CMD_XRC_SET_MAIN_DICT "$fp")"; then
-            return "$code"
-        fi
-    fi
-
-    "$main" "$@"
-}
-
-___x_cmd_source_run(){
-    local ___x_cmd_x_source_run_filepath="${1:?filepath}";        shift
-
-    ___x_cmd_source "$___x_cmd_x_source_run_filepath" "$@"
-
-    # local ___xrc_module_name="${___x_cmd_x_source_run_filepath##*/}"
-
-    # if command -v "___x_cmd_${___xrc_module_name}" >/dev/null; then
-    #     "___x_cmd_${___xrc_module_name}" "$@"
-    # elif command -v "${___xrc_module_name}" >/dev/null; then
-    #     "${___xrc_module_name}" "$@"
-    # else
-#         cat 2>/dev/null <<A
-# File not containing function: $___xrc_module_name
-# Exit without execute: $___xrc_module_name "$@"
-# A
-#         return 1
-    #     :
-    # fi
-}
-
-___x_cmd_xsh_run()(
-    ___x_cmd_source_run "$@"
-)
-
-___x_cmd_run_with_engine(){
-    local engine="${1:?Please provide engine}";
-    local filepath="${2:?Please provide filepath}";        shift 2
-    case "$engine" in
-        source)     ___x_cmd_source_run "$filepath" "$@";;
-        xrc)        ___x_cmd_xrc_run "$filepath" "$@";;
-        xsh)        ___x_cmd_xsh_run "$filepath" "$@";;
-        7z)         ___x_cmd_main 7z x "$filepath" "$@"      ;;
-        *)          ___x_cmd_main "$engine" "$filepath" "$@" ;;
-    esac
-}
-
-___x_cmd_get_engine_by_file_header(){
-    local filepath="${1:?Please provide filepath}"; shift
-    case "$(head -n1 "$filepath")" in
-        *source*)       printf "%s" source          ;;
-        *xrc*)          printf "%s" xrc             ;;
-        *xsh*)          printf "%s" xsh             ;;
-        *python*)       printf "%s" python          ;;
-        *perl*)         printf "%s" perl            ;;
-        *ruby*)         printf "%s" ruby            ;;
-        *node*)         printf "%s" node            ;;
-        *ts*)           printf "%s" ts              ;;
-
-        *bash*)         printf "%s" bash            ;;
-        *zsh*)          printf "%s" zsh             ;;
-        *fish*)         printf "%s" fish            ;;
-        *ksh*)          printf "%s" ksh             ;;
-
-        *sh*)           printf "%s" sh              ;;
-        *)              return 127
-    esac
-}
-
-___x_cmd_run_by_file_header(){
-    local filepath="${1:?filepath}"; shift
-    local engine
-    if engine="$(___x_cmd_get_engine_by_file_header "$filepath")"; then
-        ___x_cmd_run_with_engine "$engine" "$filepath" "$@"
-    fi
-}
-
-___x_cmd_get_engine_by_file_ext(){
-    local filepath="${1:?filepath}"; shift
-    local ext="${filepath##*.}"
-    case "$ext" in
-        "$filepath")    return 126                  ;;
-        py)             printf "%s" python          ;;
-        pl)             printf "%s" perl            ;;
-        rb)             printf "%s" ruby            ;;
-        js)             printf "%s" node            ;;
-        ts)             printf "%s" ts              ;;
-
-        7z)             printf "%s" 7z              ;;
-
-        bash)           printf "%s" bash            ;;
-        zsh)            printf "%s" zsh             ;;
-        fish)           printf "%s" fish            ;;
-        ksh)            printf "%s" ksh             ;;
-        sh)             printf "%s" sh              ;;
-
-        *)              return 126                  ;;
-    esac
-}
-
-___x_cmd_run_by_file_ext(){
-    local filepath="${1:?filepath}"; shift
-    local engine
-    if engine="$(___x_cmd_get_engine_by_file_ext "$filepath")"; then
-        ___x_cmd_run_with_engine "$engine" "$filepath" "$@"
-    fi
-}
-
-___x_cmd_get_engine_by_file(){
-    local filepath="${1:?filepath}"
-    ___x_cmd_get_engine_by_file_ext "$filepath" || ___x_cmd_get_engine_by_file_header "$filepath"
-}
-
-___x_cmd_run_by_file(){
-    local filepath="${1:?filepath}"; shift
-
-    if [ -L "$filepath" ]; then
-        filepath="$(___x_cmd_readlink_recursive "$filepath")"
-        filepath="$(___x_cmd_abspath "$filepath")"
-    fi
-
-    if [ -x "$filepath" ]; then
-        # In bash and dash. The file mount into the docker container using [ -x <path> ]
-        #   does not correctly determine whether the file has execute permissions or not.
-        exec 3>&1
-        local err
-        if err="$("$filepath" "$@" 2>/dev/stdout 1>&3)" || [ "${err%Permission denied}" = "$err" ]; then
-            exec 3<&-
-            printf "%s\n" "$err" >&2
-            return
-        fi
-    fi
-
-    local engine
-    if engine="$(___x_cmd_get_engine_by_file "$filepath")"; then
-        ___x_cmd_run_with_engine "$engine" "$filepath" "$@"
-    else
-        ___x_cmd_run_with_engine source "$filepath" "$@"
-    fi
-}
-
-# EndSection
-
-# Section : Find And Execute at .x-cmd folder
-
-___x_cmd_abspath(){
-    local target_path="${1:-Please provide path}"
-    # $(dirname "$filepath")/
-    if [ "${target_path#/}" = "${target_path}" ]; then
-        printf "%s" "$(cd "$(dirname "$target_path")" && pwd)/$(basename "$target_path")"
-    else
-        printf "%s" "$target_path"
-    fi
-}
-
-___x_cmd_exe_workspace(){
-    local filepath="${1:?filepath}"
-    if [ -L "$filepath" ]; then
-        # local target_path
-        # target_path="$(___x_cmd_readlink_recursive "$filepath")"
-        # target_path="$(___x_cmd_abspath "$target_path")"
-        filepath="$(___x_cmd_readlink_recursive "$filepath")"
-        filepath="$(___x_cmd_abspath "$filepath")"
-    fi
-
-    # TODO: notice. Filepath should be colorized and emphasized.
-    # TODO: Hit enter twise will ignore this. But really, should we add this protection?
-    if [ -z "$X_DISABLE_WORKSPACE_EXECUTION_CONFIRMATION" ]; then
-        while true; do
-            printf "%s" \
-"=> Running file: $filepath ?
-=> Enter or press y to continue, n to abort. default is y: " >&2
-
-            read -r action
-            case $action in
-                n|no|nein|ne)  cat >&2 <<A
-=> You could run the file by yourself:
-\033[32m    x \"$filepath\" \033[;0m
-A
-                    return 1
-                    ;;
-                ""|y)            printf "%s\n" "";     break ;;
-            esac
-        done
-    fi
-
-    shift
-    if [ -x "$filepath" ]; then
-        exec 3>&1
-        local err
-        if err="$("$filepath" "$@" 2>/dev/stdout 1>&3)"; then
-            exec 3<&-
-            printf "%s\n" "$err" >&2
-            return
-        else
-            local code=$?
-            # Bad interpreter
-            if [ $code != 126 ] && [ $code != 127 ] && [ "${err%Permission denied}" = "$err" ]; then
-                ___x_cmd_run_by_file_ext "$filepath" "$@"
-                return
-            fi
-        fi
-    fi
-
-     # workspace
-    ___X_CMD_WSROOT="$filepath"
-    ___X_CMD_WSROOT="$(dirname "$___X_CMD_WSROOT")"
-    ___X_CMD_WSROOT="$(cd "$___X_CMD_WSROOT" && pwd)/"
-    ___X_CMD_WSROOT="${___X_CMD_WSROOT%/.x-cmd/*}"
-
-    export ___X_CMD_WSROOT
-
-    ___x_cmd_run_by_file "$filepath" "$@"
-    if [ $? = 126 ]; then
-        cat >&2 <<A
-Cannot find out how to execute the file: "$filepath". Please specify the execution engine. For more information, consult 'x help'
-A
-    fi
-
-}
-
-# EndSection
-
-
-xrc:mod:lib x-cmd glob con alias args rmrf util
+xrc:mod:lib x-cmd glob con alias args rmrf util lang ws exe
 
 # Section : x main function
 
-___x_cmd_shell_exec(){
-    local shell="${1:?Provide shell}"
-    shift
-    if [ -x "/bin/$shell" ]; then
-        # "/bin/$shell" $X_CMD_SRC_PATH/boot && ___x_cmd_source "$@"
-        "/bin/$shell" "$@"
-    elif [ -x "/usr/bin/$shell" ]; then
-        # "/usr/bin/$shell" $X_CMD_SRC_PATH/boot && ___x_cmd_source "$@"
-        "/usr/bin/$shell" "$@"
-    else
-        command "$shell" "$@"
-    fi
-}
-
-___x_cmd_wsroot(){
-    local cur="${1:-.}"
-
-    cur="$(cd "$cur" 1>/dev/null 2>&1 && pwd)"
-
-    while [ ! "$cur" = "" ]; do
-        if [ -d "$cur/.x-cmd" ]; then
-            printf "%s" "$cur"
-            return 0
-        fi
-        cur=${cur%/*}
-    done
-    return 1
-}
-
 ___x_cmd_main_otherwise(){
     local subcmd="$1";  shift
-
-    if [ -d "$subcmd" ]; then
-        [ -d "$subcmd/.vscode" ] && code "$subcmd" && return
-    fi
 
     local code
     ___x_cmd_alias_exec ___x_cmd "$subcmd" "$@"
@@ -280,20 +17,18 @@ ___x_cmd_main_otherwise(){
         return $?
     fi
 
-    # static build
-    # update the static-build files
+    # static build: update the static-build files
     local ___X_CMD_WHICH_ONE_RESULT
     local ___X_CMD_WHICH_ONE_RESOURCE_TYPE
     if ___x_cmd_which_one "$subcmd"; then
-        local p="$___X_CMD_WHICH_ONE_RESULT"
+        local p="$___X_CMD_WHICH_ONE_RESULT";       x:debug "Executing Resource: [type=$___X_CMD_WHICH_ONE_RESOURCE_TYPE] [file=$p]"
         case "$___X_CMD_WHICH_ONE_RESOURCE_TYPE" in
             workspace)      ___x_cmd_exe_workspace  "$p" "$@" ;;
             local)          ___x_cmd_run_by_file    "$p" "$@" ;;
             hub)            ___x_cmd_run_by_file    "$p" "$@" ;;
             official)       ___x_cmd_run_by_file    "$p" "$@" ;;
         esac
-        code=$?
-        x:debug "$p"
+        code=$?;                                    x:debug "Resource Executed: [type=$___X_CMD_WHICH_ONE_RESOURCE_TYPE] [file=$p]"
         return "$code"
     else
         printf "%s" "Error" >&2
@@ -301,53 +36,9 @@ ___x_cmd_main_otherwise(){
     fi
 }
 
-___x_cmd_ws(){
-    local X_DISABLE_WORKSPACE_EXECUTION_CONFIRMATION=1
-
-    local TGT
-
-    if [ -z "$1" ]; then
-        if TGT="$(___x_cmd_search_path . ".x-cmd/ws")"; then
-            ___x_cmd_exe_workspace "$TGT/.x-cmd/ws"
-            return
-        else
-            printf "%s\n" "Cannot find .x-cmd/ws" >&2
-            return 1
-        fi
-    fi
-
-    local RESOURCE_NAME="$1"; shift
-    if TGT="$(___x_cmd_search_path . ".x-cmd/ws")"; then
-        ___x_cmd_exe_workspace "$TGT/.x-cmd/ws" "$RESOURCE_NAME" "$@"
-        return
-    elif TGT="$(___x_cmd_search_path . ".x-cmd/$RESOURCE_NAME")"; then
-        ___x_cmd_exe_workspace "$TGT/.x-cmd/$RESOURCE_NAME" "$@"
-        return
-    else
-        printf "Workspace Resource Not found: %s\n" "$RESOURCE_NAME" >&2
-        return 1
-    fi
-}
-
-___x_cmd__ws(){
-    local X_DISABLE_WORKSPACE_EXECUTION_CONFIRMATION=1
-
-    local RESOURCE_NAME="$1"; shift
-
-    local TGT
-    if TGT="$(___x_cmd_search_path . ".x-cmd/$RESOURCE_NAME")"; then
-        ___x_cmd_exe_workspace "$TGT/.x-cmd/$RESOURCE_NAME" "$@"
-        return
-    else
-        printf "Workspace Resource Not found: %s\n" "$RESOURCE_NAME" >&2
-        return 1
-    fi
-}
-
 ___x_cmd_alias_init ___x_cmd
 
 #       7zd)                                    shift;  ( xrc p7zip/v0   &&  p7zd "$@" ) ;;
-#       7z|7za|7zr)                             shift;  ___x_cmd_static_build_file      p7zip 7za               "$@"    ;;
 ___x_cmd_main(){
     local subcmd="$1"
     case "$subcmd" in
@@ -363,15 +54,17 @@ ___x_cmd_main(){
         python|py)                              shift;  ___x_cmd_python "$@" ;;
         pip|pip3)                               shift;  ___x_cmd_pip3 "$@" ;;
 
-        jar|java|npm|npx|ts|    _ws|wsroot|ws|      args|margs|conjoin|con|rmrf|repeat|     which|search_path|_x_cmd_advise_json|       ls|ll   )
+        jar|java|npm|npx|ts|    _ws|wsroot|ws|      args|margs|conjoin|con|rmrf|repeat|     which|search_path|_x_cmd_advise_json|       ls|ll   |ssl    | abspath  )
                                                 shift;  "___x_cmd_$subcmd" "$@" ;;
+
+        curl|jq|yq|tmux|git|tesseract|magick|    ps|du|sqlite|cat|bw|    nmap|ncat|nping|traceroute)     # TODO: we will rename ___x_cmd_curl to make room for it
+                                                shift;  ___x_cmd_static_build_file     "$subcmd" "$subcmd"      "$@"    ;;
+
+        7z|7za|7zr)                             shift;  ___x_cmd_static_build_file      p7zip 7za               "$@"    ;;
+
 
         sh|bash|zsh|fish|ksh|dash|ash)          shift;  ___x_cmd_shell_exec "$subcmd" "$@" ;;
 
-        curl|jq|yq|tmux|git|7z|tesseract|magick|    ps|du|sqlite|cat|bw|    nmap|ncat|nping|traceroute)     # TODO: we will rename ___x_cmd_curl to make room for it
-                                                shift;  ___x_cmd_static_build_file     "$subcmd" "$subcmd"      "$@"    ;;
-
-        openssl|ssl)                            shift;  ___x_cmd_static_build_file      openssl openssl         "$@"    ;;
         run)                                    shift;  ___x_cmd_run_by_file "$@"       ;;
 
         \.)                                     shift;  command code . ;;      # Test is a inner module.
@@ -381,7 +74,7 @@ ___x_cmd_main(){
         test)                                   shift;  { command -v ___x_cmd_test >/dev/null 2>&1 || xrc:mod test/latest; } && ___x_cmd_test "$@" ;;
         login)                                  shift;  xrc hub/latest && ___x_cmd_hub login "$@" ;;
 
-        update|upgrade|clear|reinstall)         shift;  "$___X_CMD_ROOT_MOD/xrc/lib/setup/$subcmd" "$@" ;;
+        update|upgrade|clear|reinstall)         shift;  xrc update "$@" ;;
 
         z|uz)                                           ( xrc zuz && ___x_cmd_zuz "$@" ) ;;   # zl)  ( xrc zuz && ___x_cmd_zuz_ls "$@"        ) ;;       # Using ls to replace
         ""|help)                                        ___x_cmd_x_cmd_help ;;

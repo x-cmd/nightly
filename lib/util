@@ -1,3 +1,14 @@
+
+___x_cmd_abspath(){
+    local target_path="${1:-Please provide path}"
+    # $(dirname "$filepath")/
+    if [ "${target_path#/}" = "${target_path}" ]; then
+        printf "%s" "$(cd "$(dirname "$target_path")" && pwd)/$(basename "$target_path")"
+    else
+        printf "%s" "$target_path"
+    fi
+}
+
 ___x_cmd_repeat(){
     local IFS="
 "
@@ -23,6 +34,20 @@ ___x_cmd_which(){
     for p in "$@"; do
         ___x_cmd_which_panic || return 1
     done
+}
+
+___x_cmd_shell_exec(){
+    local shell="${1:?Provide shell}"
+    shift
+    if [ -x "/bin/$shell" ]; then
+        # "/bin/$shell" $X_CMD_SRC_PATH/boot && ___x_cmd_source "$@"
+        "/bin/$shell" "$@"
+    elif [ -x "/usr/bin/$shell" ]; then
+        # "/usr/bin/$shell" $X_CMD_SRC_PATH/boot && ___x_cmd_source "$@"
+        "/usr/bin/$shell" "$@"
+    else
+        command "$shell" "$@"
+    fi
 }
 
 
