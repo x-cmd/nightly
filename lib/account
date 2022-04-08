@@ -92,8 +92,16 @@ ___x_cmd_hub_get_and_save_userinfo_by_token(){
 
     local userid
     local username
-    userid="$(printf "%s" "$res" | x jq -r '.id')"
-    username="$(printf "%s" "$res" | x jq -r '.username')"
+
+    {
+        read -r userid
+        read -r username
+    } <<A
+$res
+A
+
+    userid="${userid#id=}"
+    username="${username#username=}"
     ___x_cmd_hub_token "${userid}/${token}"
     printf "%s\n" "${username} ${userid}"
 }

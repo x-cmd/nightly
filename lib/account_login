@@ -114,13 +114,8 @@ ___x_cmd_hub_login_email(){
     ___x_cmd_hub_login_email_witharg "$email"
 }
 
-# EndSection
-
-# Section: deprecated
-
 ___x_cmd_hub_verify(){
     local email="${1:?email}"
-
     local code
     printf "%s" "Code: "
     read -r code

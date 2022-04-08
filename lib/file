@@ -26,7 +26,10 @@ ___x_cmd_hub_file_ls(){
     fi
     hub_log debug "response: ${res}"
 
-    printf "%s" "$res" | x jq -r ".[]"
+    local code
+    code="$(xrc cat awk/lib/default.awk awk/lib/json.awk awk/lib/jiter.awk )"
+    printf "%s" "$res" | awk "$code"'
+        { jiget_after_tokenize_unquote($0, ".") }'
 }
 
 ___x_cmd_hub_file_which(){
@@ -37,9 +40,9 @@ ___x_cmd_hub_file_which(){
     local CACHE="${___X_CMD_ROOT%/}/${respath#/}"
     mkdir -p "${CACHE%/*}"
     if ___x_cmd_httpget "$___X_CMD_HUB_SERVICE_URL/api/v0/file/cat?token=$(___x_cmd_hub_token)&res=${respath}" >"$CACHE"; then
-        printf "%s" "$CACHE"
+        printf "%s\n" "$CACHE"
     else
-        printf "Failed: %s" "$CACHE" 2>/dev/null
+        hub_log error "Failed: $CACHE, res = $(cat "$CACHE")"
         return 1
     fi
 }
@@ -51,7 +54,7 @@ ___x_cmd_hub_file_normalize_respath(){
             local user
             user=$(___x_cmd_hub_login_user)
             if [ -z "$user" ]; then
-                printf "Cannot not find out login user for resource: %s" "$respath" >&2
+                hub_log error "Cannot not find out login user for resource: %s" "$respath"
                 return 1
             fi
             printf "%s" "$user/${respath#@*/}"
