@@ -44,8 +44,7 @@ A
 # Section: Testcase for generate advise json.
 
 test_advise_json(){
-  assert X_CMD_ADVISE_FUNC_NAME=paramtest
-  @assert stdout paramtest _x_cmd_advise_json<<A
+  @assert stdout "X_CMD_ADVISE_FUNC_NAME=paramtest; paramtest _x_cmd_advise_json"<<A
 {
   "--candi_null": {
     "#1": [ "abc", "cde", "def" ],

@@ -25,27 +25,27 @@ param_default() {
     case "$op" in # yml seemed to be a better
         load)
                     local json_path="${1:?Provide path in function param_default}"
-                        dict @"${O}" load_json "$(cat "$json_path")"
+                        ___x_cmd_dict @"${O}" load_json "$(cat "$json_path")"
                     ;;
         dump)       if [ -n "$object_name" ]; then
-                        dict @"${O}" scope "${object_name}" | ___dict_pjson
+                        ___x_cmd_dict @"${O}" scope "${object_name}" | ______x_cmd_dict_pjson
                     else
-                        dict @"${O}" json
+                        ___x_cmd_dict @"${O}" json
                     fi ;;
         dump_raw)   if [ -n "$object_name" ]; then
-                        dict @"${O}" scope "${object_name}" | dict @"${O}" dump
+                        ___x_cmd_dict @"${O}" scope "${object_name}" | ___x_cmd_dict @"${O}" dump
                     else
-                        dict @"${O}" dump
+                        ___x_cmd_dict @"${O}" dump
                     fi ;;
-        clear)      dict @"${O}" free ;;
-        get)        dict @"${O}" get ${object_name:+"${object_name}"} "${1:?Provide [key] name in function 'param_default get'}" ;;
+        clear)      ___x_cmd_dict @"${O}" free ;;
+        get)        ___x_cmd_dict @"${O}" get ${object_name:+"${object_name}"} "${1:?Provide [key] name in function 'param_default get'}" ;;
         put | set )
-                    dict @"${O}" put ${object_name:+"${object_name}"} "${1:?Provide key name in function param_default}" "${2:?Provide [value] in function 'param_default put'}" ;;
+                    ___x_cmd_dict @"${O}" put ${object_name:+"${object_name}"} "${1:?Provide key name in function param_default}" "${2:?Provide [value] in function 'param_default put'}" ;;
         remove)
                     if [ -n "$object_name" ]; then
-                        dict @"${O}" remove "${object_name:+"${object_name}"}$___X_CMD_PARAM_ARG_SEP${1:?Provide key name in function param_default}"
+                        ___x_cmd_dict @"${O}" remove "${object_name:+"${object_name}"}$___X_CMD_PARAM_ARG_SEP${1:?Provide key name in function param_default}"
                     else
-                        dict @"${O}" remove "${1:?Provide key name in function param_default}"
+                        ___x_cmd_dict @"${O}" remove "${1:?Provide key name in function param_default}"
                     fi ;;
         export)     export "${O?}" ;;
         *)
