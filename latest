@@ -1,0 +1,28 @@
+# Author:       Li Junhao   l@x-cmd.com     # xrc
+# shellcheck    shell=sh    disable=SC2039,SC1090,SC3043,SC2263,SC1091
+
+x log init hub
+xrc param/latest
+
+mkdir -p "$___X_CMD_ROOT/.env/hub"
+
+___X_CMD_HUB_SERVICE_URL="https://hub.x-cmd.com"
+___X_CMD_HUB_WECHAT_AUTHORIZE_URL_PREFIX="https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx9564dec6fe13a20a&redirect_uri=https%3A%2F%2Fhub.x-cmd.com%2F"
+# ___X_CMD_HUB_SERVICE_URL="http://127.0.0.1:3000"
+
+___x_cmd_source_inner_lib hub file account
+
+___x_cmd_hub(){
+    param:dsl <<A
+subcommands:
+    file           "File management"
+    login          "Login to hub service"
+    register       "Register to hub service"
+    token          "User token management"
+A
+    param:run
+    [ -z "${PARAM_SUBCMD}" ] && ___x_cmd_hub help && return
+    "___x_cmd_hub_$PARAM_SUBCMD" "$@"
+}
+
+xrc setmain ___x_cmd_hub
