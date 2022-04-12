@@ -20,7 +20,7 @@ ___x_cmd_env_util_add_path(){
 
     PATH="$dir"
     local cur
-    while [ ! "$tmp" = "" ]; do
+    while [ -n "$tmp" ]; do
         cur=${tmp%%:*}
         tmp=${tmp#*:}
         if [ "$cur" != "$dir" ]; then

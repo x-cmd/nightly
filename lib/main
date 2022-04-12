@@ -7,11 +7,11 @@ node
 java
 go
 scala
+sbt
 maven
 springboot
 kotlin
-gradle
-node"
+gradle"
 
 }
 

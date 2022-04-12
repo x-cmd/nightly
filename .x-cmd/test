@@ -2,7 +2,7 @@
 
 xws install >/dev/null
 ___X_CMD_XRC_MODULE_IMPORTED=
-advise rm ___x_cmd_env_main
+___x_cmd_advise rm ___x_cmd_env_main
 xrc env
 x log init env
 x log env
@@ -15,6 +15,8 @@ cross_env_test() {
 }
 
 case $1 in
+    pi)
+        rsync -acvP --exclude=.git ../env/ pi@192.168.31.45:.x-cmd/env/                             ;;
     centos)
         docker run -it --rm -v "$(pwd):/root/env" xcmd/centos-dev bash -i -c "cd /root/env && bash" ;;
     ubuntu)

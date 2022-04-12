@@ -7,17 +7,17 @@ ___x_cmd_env_deno_get_target(){
     local system
 
     case "$(___x_cmd_os name)" in
-        linux)      system="unknown-linux-gnu"      ;;
-        windows)    system="pc-windows-msvc"        ;;
-        darwin)     system="apple-darwin"           ;;
-        *)          return 1 ;;
+        linux)      system="unknown-linux-gnu"                             ;;
+        windows)    system="pc-windows-msvc"                               ;;
+        darwin)     system="apple-darwin"                                  ;;
+        *)          env_log error "your OS are not supported" ; return 1   ;;
     esac
 
     case "$(___x_cmd_os arch)" in
-        aarch64)    platform=aarch64        ;;
-        x64)        platform=x86_64         ;;
-        arm64)      platform=arm64          ;;
-        *)          return 1 ;;
+        aarch64)    platform=aarch64                                       ;;
+        x64)        platform=x86_64                                        ;;
+        arm64)      platform=arm64                                         ;;
+        *)          env_log error "your arch are not supported" ; return 1 ;;
     esac
 
     target="${platform}-${system}"

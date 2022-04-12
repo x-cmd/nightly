@@ -54,9 +54,6 @@ Kotlin version 1.6.10-release-923 (JRE 19-ea+15-942)
 A
 }
 
-# test_maven(){
-#     :
-# }
 
 test_node(){
     x env install node v17.8.0 2>/dev/null
@@ -82,12 +79,46 @@ A
 #     :
 # }
 
-# test_scala(){
-#     :
-# }
+test_scala(){
+    x env install scala 3.0.2 2>/dev/null
+    @assert stdout x env current scala << A
+3.0.2
+A
+    @assert stdout x env exec scala 3.0.2 "$(x wsroot)/.x-cmd/helloworld/hi.scala" << A
+Hello, world
+A
+}
 
-# test_springboot(){
-#     :
-# }
+test_springboot(){
+    x env install springboot 2.6.6 2>/dev/null
+    @assert stdout x env current springboot << A
+2.6.6
+A
+    @assert stdout x env exec springboot 2.6.6 "$(x wsroot)/.x-cmd/hi.groovy" << A
+Resolving dependencies.............................
 
-@assert:file:func "" "test"
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v2.4.2)*
+A
+}
+
+test_sbt(){
+    x env install sbt 1.6.0 2>/dev/null
+    @assert stdout x env current sbt << A
+1.6.0
+A
+    @assert stdout x env exec sbt 1.6.0 "$(x wsroot)/.x-cmd/helloworld/hi.scala"
+}
+
+test_maven(){
+    x env install maven 3.8.5 2>/dev/null
+    @assert stdout x env current maven << A
+3.8.5
+A
+
+}
