@@ -129,7 +129,7 @@ ___x_cmd_test___cycle_exec_file(){
 
     err="$(
         ___X_CMD_TEST_CURRENT_TESTCASE="$testcase"
-        . "./$testcase" 2>/dev/stdout
+        source "$testcase" 2>/dev/stdout
     )"
 
     code="$?"
