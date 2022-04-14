@@ -2,16 +2,15 @@
 # shellcheck disable=SC2039,3043
 
 ___x_cmd_gh_repo_release(){
-    param:dsl    '
-subcmd:
-    ls              "list repo release"
-    create          "create repo release"
-    update          "update release information"
-    delete          "Remove repo release"
-    latest          "get latest release"
-    info            "Show detailed information of repo"
-    attachment      "Attachment management"
-'
+    param:subcmd ___x_cmd_gh_repo_release           \
+        ls          "list repo release"             \
+        create      "create repo release"           \
+        delete      "Remove repo release"           \
+        latest      "get latest release"            \
+        attachment  "Attachment management"         \
+        update      "update release information"    \
+        info        "Show detailed information of repo"
+    param:subcmd:try
     param:run
 
     if [ -z "$PARAM_SUBCMD" ]; then
@@ -158,12 +157,12 @@ options:
 # Section : attachment
 
 ___x_cmd_gh_repo_release_attachment(){
-    param:dsl    <<A
-subcmd:
-    ls              "list release's attachment"
-    add             "upload attachment"
-    rm              "delete attachment"
-A
+    param:subcmd ___x_cmd_gh_repo_release_attachment    \
+        add         "upload attachment"                 \
+        rm          "delete attachment"                 \
+        ls          "list release's attachment"
+    param:subcmd:try
+    param:run
 
     if [ -n "$PARAM_SUBCMD" ]; then
         gh_log error "Command Not Found. Show help."

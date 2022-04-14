@@ -8,12 +8,11 @@
 
 # gh repo member +el:admin -user-a +user-b
 ___x_cmd_gh_repo_member(){
-    param:dsl       '
-subcmd:
-    ls              "list member"
-    add             "add member"
-    rm              "Remove member"
-'
+    param:subcmd ___x_cmd_gh_repo_member    \
+        ls              "list member"       \
+        add             "add member"        \
+        rm              "Remove member"
+    param:subcmd:try
     param:run
 
     if [ -z "$PARAM_SUBCMD" ]; then

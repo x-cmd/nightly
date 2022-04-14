@@ -1,17 +1,16 @@
 # shellcheck shell=sh
 # shellcheck disable=SC2039,3043
 ___x_cmd_gh_org_member(){
-    param:dsl       '
-subcmd:
-    ls              "list member"
-    info            "get org member user info"
-    add             "add member"
-    rm              "Remove member"
-'
+    param:subcmd ___x_cmd_gh_org_member             \
+        ls              "list member"               \
+        info            "get org member user info"  \
+        add             "add member"                \
+        rm              "Remove member"
+    param:subcmd:try
     param:run
 
     if [ -z "$PARAM_SUBCMD" ]; then
-        echo "subcommand not found. show help." >&2
+        gh_log error "subcommand not found. show help." >&2
         return 0
     fi
 

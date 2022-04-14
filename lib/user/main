@@ -3,15 +3,15 @@
 
 ___x_cmd_gh_user(){
     param:scope     "github/$O"
-    param:dsl       '
-subcmd:
-    info        "Show information"
-    repo        "List all repos"
-    email       "get user email"
-    issue       "List all issues"
-    key         "key management"
-'
+    param:subcmd ___x_cmd_gh_user       \
+        info        "Show information"  \
+        repo        "List all repos"    \
+        email       "get user email"    \
+        issue       "List all issues"   \
+        key         "key management"
+    param:subcmd:try
     param:run
+
     if [ -z "$PARAM_SUBCMD" ]; then
         echo "Command Not Found. Show help." >&2
         return 0
@@ -39,9 +39,10 @@ options:
 
 ___x_cmd_gh_user_repo() {
     param:scope     "github/$O"
+    param:subcmd ___x_cmd_gh_user_repo     \
+        ls          "list user repo"
+    param:subcmd:try
     param:dsl       '
-subcmd:
-    ls          "list user repo"
 options:
     --visibility    "visibility"                                <>:Authority="all"
     --affiliation   "affiliation"                               <>:UserGroup="organization_member"

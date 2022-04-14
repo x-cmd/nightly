@@ -12,17 +12,16 @@ xrc:inner:lib gh utils resource config token repo/main repo/branch/main current 
 x log init gh
 
 ___x_cmd_gh(){
-    param:dsl       '
-subcommand:
-    repo                                    "repo command"
-    current                                 "set current owner, repo"
-    org                                     "manage org"
-    user                                    "user"
-    config                                  "save, load, which"
-    token                                   "set token"
-    release                                 "manage release"
-    auth                                    "Authorize gh"
-'
+    param:subcmd ___x_cmd_gh                    \
+        repo          "repo command"            \
+        current       "set current owner, repo" \
+        org           "manage org"              \
+        user          "user"                    \
+        config        "save, load, which"       \
+        token         "set token"               \
+        release       "manage release"          \
+        auth          "Authorize gh"
+    param:subcmd:try
     param:run
 
     if [ -z "${PARAM_SUBCMD}" ]; then

@@ -3,15 +3,14 @@
 
 ___x_cmd_gh_repo(){
     param:scope     "github/$O"
-    param:dsl       '
-subcmd:
-    create          "create repo"
-    ls              "list repo of owner"
-    info            "Show detailed information of repo"
-    rm              "Remove repo"
-    member          "manage member"
-    pr              "manage pr"
-'
+    param:subcmd ___x_cmd_gh_repo               \
+        create          "create repo"           \
+        rm              "Remove repo"           \
+        pr              "manage pr"             \
+        member          "manage member"         \
+        ls              "list repo of owner"    \
+        info            "Show detailed information of repo"
+    param:subcmd:try
     param:run
 
     if [ -z "$PARAM_SUBCMD" ]; then

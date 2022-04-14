@@ -1,12 +1,12 @@
 # shellcheck shell=sh
 # shellcheck disable=SC2039,3043
 ___x_cmd_gh_org_repo(){
-    param:dsl       '
-subcmd:
-    ls          "list repo"
-    create      "org repo create"
-'
+    param:subcmd ___x_cmd_gh_org_repo   \
+        ls          "list repo"         \
+        create      "org repo create"
+    param:subcmd:try
     param:run
+
     if [ -z "$PARAM_SUBCMD" ]; then
         gh_log error "Command Not Found. Show help."
         return 0

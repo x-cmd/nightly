@@ -3,14 +3,13 @@
 
 ___x_cmd_gh_org(){
     param:scope     "github/$O"
-    param:dsl       '
-subcmd:
-    ls                      "get organizations list"
-    info                    "Show information"
-    repo                    "List all repos"
-    member                  "member management"
-    app                     "Install github app list"
-'
+    param:subcmd ___x_cmd_gh_org                \
+        info        "Show information"          \
+        repo        "List all repos"            \
+        member      "member management"         \
+        ls          "get organizations list"    \
+        app         "Install github app list"
+    param:subcmd:try
     param:run
 
     if [ -z "$PARAM_SUBCMD" ]; then

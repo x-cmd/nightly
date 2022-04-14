@@ -2,14 +2,13 @@
 # shellcheck disable=SC2039,3043
 
 ___x_cmd_gh_repo_pr(){
-    param:dsl       '
-subcmd:
-    ls              "list pull requests"
-    info            "pull request info"
-    add             "create pull request"
-    update          "update pull requests"
-    merge           "merge pull requests"
-'
+    param:subcmd ___x_cmd_gh_repo_pr            \
+        ls              "list pull requests"    \
+        info            "pull request info"     \
+        add             "create pull request"   \
+        update          "update pull requests"  \
+        merge           "merge pull requests"
+    param:subcmd:try
     param:run
 
     if [ -z "$PARAM_SUBCMD" ]; then
@@ -164,13 +163,12 @@ options:
 }
 
 ___x_cmd_gh_repo_pr_comments(){
-    param:dsl       '
-subcmd:
-    ls              "list pull requests comments"
-    info            "pull request comments info"
-    add             "create pull request comments"
-    update          "update pull requests comments"
-'
+    param:subcmd ___x_cmd_gh_repo_pr_comments   \
+        ls      "list pull requests comments"   \
+        info    "pull request comments info"    \
+        add     "create pull request comments"  \
+        update  "update pull requests comments"
+    param:subcmd:try
     param:run
 
     if [ -z "$PARAM_SUBCMD" ]; then

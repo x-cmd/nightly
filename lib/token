@@ -40,13 +40,12 @@ ___x_cmd_gh_token(){
 }
 
 ____x_cmd_gh_auth(){
-    param:dsl       '
-subcommand:
-    login:      "Authenticate with a GitHub host"
-    logout:     "Log out of a GitHub host"
-    setup-git:  "Configure git to use GitHub CLI as a credential helper"
-    status:     "View authentication status"
-'
+    param:subcmd ____x_cmd_gh_auth                      \
+        login:      "Authenticate with a GitHub host"   \
+        logout:     "Log out of a GitHub host"          \
+        status:     "View authentication status"        \
+        setup-git:  "Configure git to use GitHub CLI as a credential helper"
+    param:subcmd:try
     param:run
 
     if [ -z "${PARAM_SUBCMD}" ]; then
