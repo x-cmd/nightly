@@ -76,6 +76,8 @@ function jiter( item,  _res ) {
 
 {
     if ( (kp = jiter( $0 )) == "" ) next
+    K=key
+    V=$0
     _v = ""
     _k = ""
 }

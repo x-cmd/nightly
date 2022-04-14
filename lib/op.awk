@@ -81,9 +81,9 @@ function kpglob( v1, v2, v3, v4, v5, v6, v7, v8, v9 ){
 
 # Section: unquote and quote
 function e(var, val){   printf("%s=%s", var, val); }
-function e_(val){ e(_, val); }
+function e_(val){ e("_", val); }
 function qe(var, val){   printf("%s=%s", var, quote(val)); }
-function qe_(val){ eq(_, val); }
+function qe_(val){ eq("_", val); }
 
 function uq(str){
     if (str !~ /^"/) { # "
