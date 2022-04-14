@@ -10,7 +10,7 @@ ___x_cmd_http_request() {
     local data=${2:-"$D"}
 
     local paths
-    paths="$(___x_cmd_http_cd "$1")"
+    paths="$(___x_cmd_http_cd path "$1")"
     if [ -z "$data" ]; then
         data="$(___x_cmd_http_body dump json "")"
     fi
