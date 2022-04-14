@@ -6,16 +6,15 @@
 
 ___x_cmd_gt_org(){
     param:scope     "gitee/$O"
-    param:dsl       '
-subcmd:
-    ls                      "List all org"
-    info                    "Show org information"
-    create                  "Create org"
-    repo                    "List all repos"
-    quit                    "Quit org"
-    issue                   "List all issues"
-    member                  "org member management"
-'
+    param:subcmd ___x_cmd_gt_org                            \
+        ls                      "List all org"              \
+        info                    "Show org information"      \
+        create                  "Create org"                \
+        repo                    "List all repos"            \
+        quit                    "Quit org"                  \
+        issue                   "List all issues"           \
+        member                  "org member management"
+    param:subcmd:try
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
         gt_log warn "Subcmd Not Found."

@@ -3,18 +3,17 @@
 
 ___x_cmd_gt_repo(){
     param:scope     "gitee/$O"
-    param:dsl       '
-subcmd:
-    create          "Create repo"
-    ls              "List repo of owner"
-    info            "Show detailed information of repo"
-    update          "Setup repo configure"
-    rm              "Remove repo"
-    clear           "Clear repo"
-    review          "Setup review repo configure"
-    issue           "List repo issue or Show the repo issue info"
-    branch          "repo branch management"
-'
+    param:subcmd ___x_cmd_gt_repo                                       \
+        create          "Create repo"                                   \
+        ls              "List repo of owner"                            \
+        info            "Show detailed information of repo"             \
+        update          "Setup repo configure"                          \
+        rm              "Remove repo"                                   \
+        clear           "Clear repo"                                    \
+        review          "Setup review repo configure"                   \
+        issue           "List repo issue or Show the repo issue info"   \
+        branch          "repo branch management"
+    param:subcmd:try
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
         gt_log warn "Subcmd Not Found."

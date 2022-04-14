@@ -2,11 +2,10 @@
 # shellcheck disable=SC2039,3043
 
 ___x_cmd_gt_repo_tag(){
-    param:dsl    '
-subcmd:
-    ls              "List repo tag"
-    add             "Add repo tag"
-'
+    param:subcmd ___x_cmd_gt_repo_tag                   \
+        ls              "List repo tag"                 \
+        add             "Add repo tag"
+    param:subcmd:try
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
         gt_log warn "Subcmd Not Found."

@@ -9,12 +9,11 @@
 # gt repo member +el:admin -user-a +user-b
 # shellcheck disable=SC2154,SC2086
 ___x_cmd_gt_repo_member(){
-    param:dsl       '
-subcmd:
-    ls              "List repo member"
-    add             "Add repo member"
-    rm              "Remove member"
-'
+    param:subcmd ___x_cmd_gt_repo_member                \
+        ls              "List repo member"              \
+        add             "Add repo member"               \
+        rm              "Remove member"
+    param:subcmd:try
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
         gt_log warn "Subcmd Not Found."

@@ -10,15 +10,13 @@
 
 # gt repo member +el:admin -user-a +user-b
 ___x_cmd_gt_org_member(){
-    param:dsl       '
-subcmd:
-    ls              "List member"
-    user            "Show org member user info"
-    add             "Add member"
-    del             "Remove member"
-'
+    param:subcmd ___x_cmd_gt_org_member                     \
+        ls              "List member"                       \
+        user            "Show org member user info"         \
+        add             "Add member"                        \
+        del             "Remove member"
+    param:subcmd:try
     param:run
-
     if [ -z "$PARAM_SUBCMD" ]; then
         gt_log warn "subcmd not found. show help." >&2
         return 1

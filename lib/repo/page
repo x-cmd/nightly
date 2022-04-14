@@ -6,11 +6,10 @@
 ############################
 
 ___x_cmd_gt_repo_page(){
-    param:dsl       '
-subcmd:
-    info        "Show information of page"
-    build       "Build page"
-'
+    param:subcmd ___x_cmd_gt_repo_page                  \
+        info        "Show information of page"          \
+        build       "Build page"
+    param:subcmd:try
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
         gt_log warn "Subcmd Not Found."

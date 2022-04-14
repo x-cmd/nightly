@@ -3,19 +3,18 @@
 
 
 ___x_cmd_gt_repo_pr(){
-    param:dsl       '
-subcmd:
-    ls              "List pull requests"
-    log             "List pull requests log"
-    commit          "List pull requests commit"
-    info            "Show pull request info"
-    view            "open pull request in browser"
-    create          "Create pull request"
-    update          "Update pull requests"
-    merge           "Merge pull requests"
-    assign          "Assign request to somebody"
-    testers         "Designation pull requests testers"
-'
+    param:subcmd ___x_cmd_gt_repo_pr                            \
+        ls              "List pull requests"                    \
+        log             "List pull requests log"                \
+        commit          "List pull requests commit"             \
+        info            "Show pull request info"                \
+        view            "open pull request in browser"          \
+        create          "Create pull request"                   \
+        update          "Update pull requests"                  \
+        merge           "Merge pull requests"                   \
+        assign          "Assign request to somebody"            \
+        testers         "Designation pull requests testers"
+    param:subcmd:try
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
         gt_log warn "Subcmd Not Found."

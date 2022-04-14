@@ -3,14 +3,13 @@
 
 ___x_cmd_gt_repo_pr_testers(){
     param:scope     "gitee/$O"
-    param:dsl       '
-subcmd:
-    add             "Add assignee"
-    del             "Del assignee"
-    reset           "Reset all assignee"
-    test            "test pass"
-'
-
+    param:subcmd ___x_cmd_gt_repo_pr_testers                \
+        add             "Add assignee"                      \
+        del             "Del assignee"                      \
+        reset           "Reset all assignee"                \
+        test            "test pass"
+    param:subcmd:try
+    param:run
     if [ -z "$PARAM_SUBCMD" ]; then
         ___x_cmd_gt_repo_pr_assign help
         return

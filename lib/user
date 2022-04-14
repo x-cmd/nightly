@@ -6,14 +6,13 @@
 
 ___x_cmd_gt_user(){
     param:scope     "gitee/$O"
-    param:dsl       '
-subcmd:
-    info        "Show information"
-    repo        "List all repos"
-    email       "Show user email"
-    issue       "List all issues"
-    key         "user key management"
-'
+    param:subcmd ___x_cmd_gt_user                   \
+        info        "Show information"              \
+        repo        "List all repos"                \
+        email       "Show user email"               \
+        issue       "List all issues"               \
+        key         "user key management"
+    param:subcmd:try
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
         gt_log warn "Subcmd Not Found."
@@ -66,8 +65,6 @@ type:
     Group = owner collaborator organization_member enterprise_member admin
     Sort = created updated pushed full_name
     Direction = desc asc
-subcmd:
-    ls              "list repo of the designated user"
 options:
     --visibility    "visibility"        <>:Authority="all"
     --affiliation   "affiliation"       <>:Group="owner"
@@ -76,6 +73,9 @@ options:
     --page          "page"              <>:number=1
     --per_page      "per_page"          <>:number=20
 '
+    param:subcmd ___x_cmd_gt_user_repo                  \
+        ls      "list repo of the designated user"
+    param:subcmd:try
     param:run
 
     local url
@@ -167,13 +167,12 @@ options:
 # generate a key by openssl, then save it in the x-cmd cloud.
 ___x_cmd_gt_user_key(){
     param:scope     "gitee/$O"
-    param:dsl       '
-subcmd:
-    ls          "List all key"
-    add         "Add key"
-    get         "Get one key"
-    del         "Delete key"
-'
+    param:subcmd ___x_cmd_gt_user_key           \
+        ls          "List all key"              \
+        add         "Add key"                   \
+        get         "Get one key"               \
+        del         "Delete key"
+    param:subcmd:try
     param:run
 
     if [ -z "$PARAM_SUBCMD" ]; then

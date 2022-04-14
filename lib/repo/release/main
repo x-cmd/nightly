@@ -2,16 +2,15 @@
 # shellcheck disable=SC2039,3043
 
 ___x_cmd_gt_repo_release(){
-    param:dsl    <<A
-subcmd:
-    ls              "List repo's release"
-    create          "Create repo release"
-    update          "Update release information"
-    rm              "Remove repo release"
-    latest          "Show latest release"
-    info            "Show detailed information of repo"
-    attachment      "attachment management"
-A
+    param:subcmd ___x_cmd_gt_repo_release                       \
+        ls              "List repo's release"                   \
+        create          "Create repo release"                   \
+        update          "Update release information"            \
+        rm              "Remove repo release"                   \
+        latest          "Show latest release"                   \
+        info            "Show detailed information of repo"     \
+        attachment      "attachment management"
+    param:subcmd:try
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
         gt_log warn "Subcmd Not Found."

@@ -1,14 +1,13 @@
 # shellcheck shell=sh
 # shellcheck disable=SC2039,3043
 ___x_cmd_gt_repo_branch(){
-    param:dsl       '
-subcommand:
-    ls              "List repo branch list"
-    info            "Show the branch info"
-    add             "Add repo branch"
-    default         "Setup repo default branch"
-    protection      "repo protection branch management"
-'
+    param:subcmd ___x_cmd_gt_repo_branch                        \
+        ls              "List repo branch list"                 \
+        info            "Show the branch info"                  \
+        add             "Add repo branch"                       \
+        default         "Setup repo default branch"             \
+        protection      "repo protection branch management"
+    param:subcmd:try
     param:run
 
     if [ -z "$PARAM_SUBCMD" ]; then

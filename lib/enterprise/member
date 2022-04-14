@@ -8,14 +8,13 @@
 
 # gt repo member +el:admin -user-a +user-b
 ___x_cmd_gt_enterprise_member(){
-    param:dsl       '
-subcmd:
-    ls              "List member"
-    user            "Show member user info"
-    add             "Add member"
-    rm              "Remove member"
-    access          "Setup the member access"
-'
+    param:subcmd ___x_cmd_gt_enterprise_member                  \
+        ls              "List member"                           \
+        user            "Show member user info"                 \
+        add             "Add member"                            \
+        rm              "Remove member"                         \
+        access          "Setup the member access"
+    param:subcmd:try
     param:run
 
     if [ -z "$PARAM_SUBCMD" ]; then

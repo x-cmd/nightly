@@ -2,12 +2,11 @@
 # shellcheck disable=SC2039,3043
 
 ___x_cmd_gt_current(){
-    param:dsl       '
-subcmd:
-    repo        "Save the config in memory into file"
-    owner       "Get current owner"
-    type        "Get current owner type"
-'
+    param:subcmd ___x_cmd_gt_current                        \
+        repo        "Save the config in memory into file"   \
+        owner       "Get current owner"                     \
+        type        "Get current owner type"
+    param:subcmd:try
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
         gt_log warn "Subcmd Not Found."

@@ -5,15 +5,14 @@
 
 ___x_cmd_gt_enterprise(){
     param:scope     "gitee/$O"
-    param:dsl       '
-subcmd:
-    ls              "List all enterprise"
-    info            "Show enterprise information"
-    repo            "List all repos"
-    issue           "List all issues"
-    member          "enterprise member management"
-    team            "enterprise team management"
-'
+    param:subcmd ___x_cmd_gt_enterprise                     \
+        ls              "List all enterprise"               \
+        info            "Show enterprise information"       \
+        repo            "List all repos"                    \
+        issue           "List all issues"                   \
+        member          "enterprise member management"      \
+        team            "enterprise team management"
+    param:subcmd:try
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
         gt_log warn "Subcmd Not Found."
@@ -31,7 +30,6 @@ subcmd:
 ___x_cmd_gt_enterprise_ls() {
     param:scope     "gitee/$O"
     param:dsl       '
-
 options:
     --admin      "list only managed enterprise"     <>:bool=false
     --page       "page"                             <>:number=1
@@ -78,11 +76,10 @@ options:
 
 # Section: repo ls & repo create
 ___x_cmd_gt_enterprise_repo(){
-    param:dsl       '
-subcmd:
-    ls          "List enterprise repo"
-    create      "Create enterprise repo"
-'
+    param:subcmd ___x_cmd_gt_enterprise_repo                \
+        ls          "List enterprise repo"                  \
+        create      "Create enterprise repo"
+    param:subcmd:try
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
         gt_log warn "Subcmd Not Found."

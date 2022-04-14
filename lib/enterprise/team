@@ -3,16 +3,15 @@
 # TODO: need to update $O : https://gitee.com/api => https://api.gitee.com
 
 ___x_cmd_gt_enterprise_team(){
-    param:dsl       '
-subcmd:
-    ls              "List enterprise team"
-    create          "Create a team"
-    info            "Show team info"
-    update          "Setup team info"
-    rm              "Remove the team"
-    repo            "List enterprise team repo"
+    param:subcmd ___x_cmd_gt_enterprise_team                    \
+    ls              "List enterprise team"                      \
+    create          "Create a team"                             \
+    info            "Show team info"                            \
+    update          "Setup team info"                           \
+    rm              "Remove the team"                           \
+    repo            "List enterprise team repo"                 \
     member          "enterprise team member management"
-'
+    param:subcmd:try
     param:run
 
     if [ -z "$PARAM_SUBCMD" ]; then
@@ -129,11 +128,10 @@ options:
 
 # Section: member
 ___x_cmd_gt_enterprise_team_member(){
-    param:dsl       '
-subcmd:
-    ls              "List enterprise team member"
+    param:subcmd ___x_cmd_gt_enterprise_team_member             \
+    ls              "List enterprise team member"               \
     rm              "Remove member of team"
-'
+    param:subcmd:try
     param:run
 
     if [ -z "$PARAM_SUBCMD" ]; then

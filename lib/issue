@@ -8,13 +8,12 @@
 
 # gt repo issue +el:admin -user-a +user-b
 ___x_cmd_gt_issue(){
-    param:dsl       '
-subcmd:
-    create          "create issue"
-    update          "update issue"
-    logs            "get issue logs"
-    comment         "comment management"
-'
+    param:subcmd ___x_cmd_gt_issue                  \
+        create          "create issue"              \
+        update          "update issue"              \
+        logs            "get issue logs"            \
+        comment         "comment management"
+    param:subcmd:try
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
         gt_log warn "Subcmd Not Found."
@@ -255,13 +254,12 @@ options:
 
 ___x_cmd_gt_issue_comment(){
     param:scope     "gitee/$O"
-    param:dsl       '
-subcmd:
-    ls              "list all comment"
-    create          "create a comment"
-    update          "update a comment"
-    del             "delete a comment"
-'
+    param:subcmd ___x_cmd_gt_issue_comment          \
+        ls              "list all comment"          \
+        create          "create a comment"          \
+        update          "update a comment"          \
+        del             "delete a comment"
+    param:subcmd:try
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
         gt_log warn "subcmd not found. show help." >&2

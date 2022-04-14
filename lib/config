@@ -2,12 +2,11 @@
 # shellcheck disable=SC2039,3043
 
 ___x_cmd_gt_config(){
-    param:dsl       '
-subcmd:
-    which       "Show current config path"
-    get         "Print the value of a given configuration key"
-    set         "Update configuration with a value for the given key"
-'
+    param:subcmd ___x_cmd_gt_config                                        \
+        which       "Show current config path"                             \
+        get         "Print the value of a given configuration key"         \
+        set         "Update configuration with a value for the given key"
+    param:subcmd:try
     param:run
     if [ -z "$PARAM_SUBCMD" ]; then
         gt_log warn "Subcmd Not Found."
