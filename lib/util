@@ -50,6 +50,10 @@ ___x_cmd_shell_exec(){
     fi
 }
 
+___x_cmd_readeval(){
+    local _
+    read -r _ && eval "$_"      # Notice: If read encountering EOF, return 1
+}
 
 # Section : help and advise.json
 ___x_cmd__x_cmd_advise_json(){

@@ -78,6 +78,8 @@ ___x_cmd_main(){
 
         alias|unalias)                          shift;  "___x_cmd_$subcmd"  ___x_cmd "$@"   ;;
 
+        readeval)                               shift;  ___x_cmd_readeval "$@" ;;
+
         test)                                   shift;  { command -v ___x_cmd_test >/dev/null 2>&1 || xrc:mod test/latest; } && ___x_cmd_test "$@" ;;
         login)                                  shift;  xrc hub/latest && ___x_cmd_hub login "$@" ;;
 
