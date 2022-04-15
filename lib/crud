@@ -44,7 +44,7 @@ ___x_cmd_http_patch() {
         form)   ;;
         text)   ;;
         bin)    ;;
-        *)      X=PATCH ___x_cmd_http_request "$@" ;;
+        *)      X=PATCH ___x_cmd_http_request "$content_op" "$@" ;;
     esac
 }
 
