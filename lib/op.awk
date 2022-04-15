@@ -6,6 +6,7 @@ function kpopt(){
 # EndSection
 
 # Section: utils
+
 function k(){ return _k == "" ? _k = uq( key ): _k; }
 function v(){ return _v == "" ? _v = uq( $0 ): _v; }
 

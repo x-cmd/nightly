@@ -24,6 +24,12 @@ function data_class(){
                 name: Joseph,
                 age: 13,
                 score: 69
+            },
+            {
+                "author": {
+                    "node_id": "MDM6Qm90NDE4OTgyODI=",
+                },
+                "node_id": "aaa"
             }
         ]
 

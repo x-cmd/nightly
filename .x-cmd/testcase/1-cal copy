@@ -8,7 +8,7 @@ k()=="score"{
 END{
     for (i=1; i<=clistl; ++i) {
         c = clist[i]
-        printf("%s: [number=%s] [average=%s]", c, count[c], total[c]/count[c])
+        # printf("%s: [number=%s] [average=%s]", c, count[c], total[c]/count[c])
     }
 }
 
