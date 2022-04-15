@@ -10,12 +10,9 @@ ___x_cmd_gt_repo_branch(){
     param:subcmd:try
     param:run
 
-    if [ -z "$PARAM_SUBCMD" ]; then
-        gt_log error "subcommand not found. show help."
-        return 0
-    fi
-
-    "___x_cmd_gt_repo_branch_$PARAM_SUBCMD" "$@"
+    gt_log error "Subcmd Not Found."
+    ___x_cmd_gt_repo_branch _param_help_doc
+    return 1
 }
 
 # Section:list & info

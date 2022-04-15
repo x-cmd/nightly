@@ -14,15 +14,10 @@ ___x_cmd_gt_enterprise(){
         team            "enterprise team management"
     param:subcmd:try
     param:run
-    if [ -z "$PARAM_SUBCMD" ]; then
-        gt_log warn "Subcmd Not Found."
-        ___x_cmd_gt_enterprise _param_help_doc
-        return 1
-    fi
 
-    # list projects of user
-
-    "___x_cmd_gt_enterprise_${PARAM_SUBCMD}" "$@"
+    gt_log warn "Subcmd Not Found."
+    ___x_cmd_gt_enterprise _param_help_doc
+    return 1
 }
 
 # Section: list & info
@@ -81,13 +76,10 @@ ___x_cmd_gt_enterprise_repo(){
         create      "Create enterprise repo"
     param:subcmd:try
     param:run
-    if [ -z "$PARAM_SUBCMD" ]; then
-        gt_log warn "Subcmd Not Found."
-        ___x_cmd_gt_enterprise_repo _param_help_doc
-        return 1
-    fi
 
-    "___x_cmd_gt_enterprise_repo_${PARAM_SUBCMD}" "$@"
+    gt_log warn "Subcmd Not Found."
+    ___x_cmd_gt_enterprise_repo _param_help_doc
+    return 1
 }
 
 # https://gitee.com/api/v5/swagger#/getV5EnterprisesEnterpriseRepos

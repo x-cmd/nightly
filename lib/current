@@ -5,19 +5,16 @@ ___x_cmd_gt_current(){
     param:subcmd ___x_cmd_gt_current                        \
         repo        "Save the config in memory into file"   \
         owner       "Get current owner"                     \
+    param:subcmd:try
+
+    param:subcmd ___x_cmd_gt_current_owner                  \
         type        "Get current owner type"
     param:subcmd:try
     param:run
-    if [ -z "$PARAM_SUBCMD" ]; then
-        gt_log warn "Subcmd Not Found."
-        ___x_cmd_gt_current _param_help_doc
-        return 1
-    fi
 
-    case "${PARAM_SUBCMD}" in
-        type)       "___x_cmd_gt_current_owner_${PARAM_SUBCMD}"   "$@"     ;;
-        *)          "___x_cmd_gt_current_${PARAM_SUBCMD}"         "$@"     ;;
-    esac
+    gt_log warn "Subcmd Not Found."
+    ___x_cmd_gt_current _param_help_doc
+    return 1
 }
 
 # shellcheck disable=SC2120

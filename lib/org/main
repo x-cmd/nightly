@@ -16,13 +16,10 @@ ___x_cmd_gt_org(){
         member                  "org member management"
     param:subcmd:try
     param:run
-    if [ -z "$PARAM_SUBCMD" ]; then
-        gt_log warn "Subcmd Not Found."
-        ___x_cmd_gt_org _param_help_doc
-        return 1
-    fi
 
-    "___x_cmd_gt_org_${PARAM_SUBCMD}" "$@"
+    gt_log warn "Subcmd Not Found."
+    ___x_cmd_gt_org _param_help_doc
+    return 1
 }
 
 # Section: list & info
@@ -107,11 +104,10 @@ options:
 
 # Section: org repo
 ___x_cmd_gt_org_repo(){
-    param:dsl       '
-subcmd:
-    ls          "list repo"
-    create      "org repo create"
-'
+    param:subcmd ___x_cmd_gt_org_repo           \
+        ls          "list repo"                 \
+        create      "org repo create"
+    param:subcmd:try
     param:run
 
     if [ -z "$PARAM_SUBCMD" ]; then

@@ -14,15 +14,10 @@ ___x_cmd_gt_user(){
         key         "user key management"
     param:subcmd:try
     param:run
-    if [ -z "$PARAM_SUBCMD" ]; then
-        gt_log warn "Subcmd Not Found."
-        ___x_cmd_gt_user _param_help_doc
-        return 1
-    fi
 
-    # list issues of user
-    # list repo of user
-    ___x_cmd_gt_user_"${PARAM_SUBCMD}" "$@"
+    gt_log warn "Subcmd Not Found."
+    ___x_cmd_gt_user _param_help_doc
+    return 1
 }
 
 # Section: info repo email issue
@@ -56,8 +51,19 @@ options:
 }
 
 # https://gitee.com/api/v5/swagger#/getV5UserRepos
-# ___x_cmd_gt_user_repo_list() {
 ___x_cmd_gt_user_repo() {
+    param:scope     "gitee/$O"
+    param:subcmd ___x_cmd_gt_user_repo                  \
+        ls      "list repo of the designated user"
+    param:subcmd:try
+    param:run
+
+    gt_log warn "Subcmd Not Found."
+    ___x_cmd_gt_user_repo _param_help_doc
+    return 1
+}
+
+___x_cmd_gt_user_repo_ls() {
     param:scope     "gitee/$O"
     param:dsl       '
 type:
@@ -73,9 +79,6 @@ options:
     --page          "page"              <>:number=1
     --per_page      "per_page"          <>:number=20
 '
-    param:subcmd ___x_cmd_gt_user_repo                  \
-        ls      "list repo of the designated user"
-    param:subcmd:try
     param:run
 
     local url

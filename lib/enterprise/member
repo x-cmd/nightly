@@ -17,12 +17,9 @@ ___x_cmd_gt_enterprise_member(){
     param:subcmd:try
     param:run
 
-    if [ -z "$PARAM_SUBCMD" ]; then
-        gt_log error "subcmd not found. show help."
-        return 0
-    fi
-
-    "___x_cmd_gt_enterprise_member_$PARAM_SUBCMD" "$@"
+    gt_log error "subcmd not found. show help."
+    ___x_cmd_gt_enterprise_member _param_help_doc
+    return 0
 }
 
 # shellcheck disable=SC2154
@@ -76,6 +73,7 @@ options:
 }
 
 # shellcheck disable=SC2181,SC2086,SC2154
+# FIXME: HAVE HTTP BUG
 ___x_cmd_gt_enterprise_member_add() {
     param:scope     "gitee/$O"
     param:dsl       '
@@ -95,7 +93,7 @@ options:
     local gen_gt_json
     gen_gt_json="$(param:option2json )"
 
-    # TODO:http handle，delete repo return data is null.Status: 204 No Content
+    # TODO: http handle，delete repo return data is null.Status: 204 No Content
     for username in "$@"; do
         if printf "%s" "${gen_gt_json}" | sed s/%%username%%/"${username##%/}"/g | \
             ___x_cmd_gt_http post "/v5/enterprises/${enterprise}/members" - >/dev/null; then
@@ -120,7 +118,7 @@ options:
 
     local username
     for username in "$@"; do
-        # TODO:http handle，delete repo return data is null.Status: 204 No Content
+        # TODO: http handle，delete repo return data is null.Status: 204 No Content
         if ___x_cmd_gt_http delete "/v5/enterprises/${enterprise##*/}/members/${username##*/}" >/dev/null; then
             gt_log info  "Remove user successfully: $username"
         else

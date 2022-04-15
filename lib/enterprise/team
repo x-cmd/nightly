@@ -4,13 +4,13 @@
 
 ___x_cmd_gt_enterprise_team(){
     param:subcmd ___x_cmd_gt_enterprise_team                    \
-    ls              "List enterprise team"                      \
-    create          "Create a team"                             \
-    info            "Show team info"                            \
-    update          "Setup team info"                           \
-    rm              "Remove the team"                           \
-    repo            "List enterprise team repo"                 \
-    member          "enterprise team member management"
+        ls              "List enterprise team"                      \
+        create          "Create a team"                             \
+        info            "Show team info"                            \
+        update          "Setup team info"                           \
+        rm              "Remove the team"                           \
+        repo            "List enterprise team repo"                 \
+        member          "enterprise team member management"
     param:subcmd:try
     param:run
 
@@ -128,9 +128,9 @@ options:
 
 # Section: member
 ___x_cmd_gt_enterprise_team_member(){
-    param:subcmd ___x_cmd_gt_enterprise_team_member             \
-    ls              "List enterprise team member"               \
-    rm              "Remove member of team"
+    param:subcmd ___x_cmd_gt_enterprise_team_member                 \
+        ls              "List enterprise team member"               \
+        rm              "Remove member of team"
     param:subcmd:try
     param:run
 
