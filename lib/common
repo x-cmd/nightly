@@ -189,17 +189,19 @@ ___x_cmd_env_common_uninstall(){
 # Section: which, exec
 ___x_cmd_env_common_which(){
     local candidate="${1:?Provide candidate}"
-    local candidate_path
-    candidate_path="$(command -v "$candidate")"
+    local cmd="${2:?Provide command}"
+    local cmd_path
+    cmd_path="$(command -v "$cmd")"
 
-    if [ "$candidate_path" != "$___X_CMD_ENV_PATH/$candidate/shims/$candidate" ]; then
-        command -v "$candidate"
+    env_log debug "cmd_path: $cmd_path, cmd: $cmd"
+    if [ "$cmd_path" != "$___X_CMD_ENV_PATH/$candidate/shims/$cmd" ]; then
+        command -v "$cmd"
         return 0
     fi
 
     local version
     if version=$(___x_cmd_env_util_shims_which_version "$candidate"); then
-        local exactly_path="$___X_CMD_ENV_PATH/$candidate/versions/$version/bin/$candidate"
+        local exactly_path="$___X_CMD_ENV_PATH/$candidate/versions/$version/bin/$cmd"
         if [ ! -f "$exactly_path" ]; then
             env_log error "No such file: $exactly_path"
             return 1
@@ -210,9 +212,14 @@ ___x_cmd_env_common_which(){
 
 ___x_cmd_env_common_exec(){
     local candidate="${1:?Provide candidate}"
-    local version="${2:?Provide version}"; shift 2
-    ___x_cmd_env_util_is_downloaded "${candidate}" "${version}" 2>/dev/null || return 1
-    PATH="${___X_CMD_ENV_PATH}/${candidate}/versions/${version}/bin:$PATH" "${candidate}" "$@"
+    local cmd="${2:?Provide command}"
+    local version="${3:?Provide version}"; shift 3
+
+    if ! ___x_cmd_env_util_is_downloaded "${candidate}" "${version}" 2>/dev/null ; then
+        env_log error "No such version: $candidate $version"
+        return 1
+    fi
+    PATH="${___X_CMD_ENV_PATH}/${candidate}/versions/${version}/bin:$PATH" "$cmd" "$@"
 }
 # EndSection
 

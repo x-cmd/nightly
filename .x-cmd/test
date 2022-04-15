@@ -5,7 +5,7 @@ ___X_CMD_XRC_MODULE_IMPORTED=
 ___x_cmd_advise rm ___x_cmd_env_main
 xrc env
 x log init env
-x log env
+x log +env
 
 cross_env_test() {
     for i in ubuntu centos ; do

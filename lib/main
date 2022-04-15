@@ -24,10 +24,6 @@ param_type  env  candidates_list - <<A
 $(___x_cmd_env_candidate_all)
 A
 
-# Section: ENV ___X_CMD_ENV_PATH
-
-___X_CMD_ENV_PATH="$___X_CMD_ROOT/.env"
-
 # EndSection
 
 # Section: main
@@ -208,7 +204,7 @@ A
 
     local candidate="${1}"
     if [ -z "$candidate" ]; then
-        xrc env/lib/app/lsenv && ___x_cmd_ui_lsenv
+        xrc:mod:lib env app/lsenv && ___x_cmd_ui_lsenv
         # TODO: how to use shims
         if [ "$___X_CMD_UI_LSENV_FINAL_COMMAND" = "ENTER" ]; then
             candidate="$___X_CMD_UI_LSENV_CURRENT_CANDIDATE"
@@ -294,47 +290,55 @@ A
 ___x_cmd_env_main_which(){
     param:scope "env"
     param:dsl <<A
+advise:
+    #1        xrc env/latest && ___x_cmd_env_advise_ls_cmd
 options:
-    #1        "Environment Candidates" <candidates>:candidates_list
+    #1        "Environment Candidates command you want to find"
 A
     param:run
 
-    local candidate="${1}"
-    if [ -z "$candidate" ]; then
+    local cmd="${1}"
+    if [ -z "$cmd" ]; then
         ___x_cmd_env_main_which help
         return 1
     fi
 
-    # TODO: can which specific versions
-    ___x_cmd_env_run_common_if_notfound which "$candidate" "$@"
-}
+    local candidate
+    candidate="$(___x_cmd_env_util_cmd_to_candidate "$cmd")"
 
+    # TODO: can which specific versions
+    ___x_cmd_env_run_common_if_notfound which "$candidate" "$cmd" "$@"
+}
 
 ___x_cmd_env_main_exec(){
     param:scope "env"
     param:dsl <<A
 advise:
-    #2        xrc env/latest && ___x_cmd_env_advise_ls_local_version
+    #1        xrc env/latest && ___x_cmd_env_advise_ls_cmd
+    #2        xrc env/latest && ___x_cmd_env_advise_cmd_ls_local_version
 options:
-    #1        "Environment Candidates" <candidates>:candidates_list
+    #1        "Environment Candidates command you want to find"
     #2        "Version"                <version>
 A
     param:run
 
-    local candidate="${1}"
-    if [ -z "$candidate" ]; then
+    local cmd="${1}"
+    if [ -z "$cmd" ]; then
         ___x_cmd_env_main_exec help
         return 1
     fi
 
+    local candidate
+    candidate="$(___x_cmd_env_util_cmd_to_candidate "$cmd")"
+
     local version
     if ! version="$(___x_cmd_env_run_common_if_notfound full_version "$candidate" "$2")"; then
-        env_log error "Version of $candidate not found: $version"
+        env_log error "Version of $candidate not found: $2"
         return 1
     fi
     shift 2
 
-    ___x_cmd_env_run_common_if_notfound exec "$candidate" "$version" "$@"
+    ___x_cmd_env_run_common_if_notfound exec "$candidate" "$cmd" "$version" "$@"
 }
 
 # EndSection

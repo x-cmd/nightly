@@ -48,15 +48,6 @@ ___x_cmd_env_springboot_unpack(){
 
 # EndSection
 
-# Section: current
-
-___x_cmd_env_springboot_current(){
-    ___x_cmd_env_common_current spring "$@"
-}
-
-___x_cmd_env_springboot_exec(){
-    ___x_cmd_env_common_exec spring "$@"
-}
 # EndSection
 
 # Section: ui_catsel
