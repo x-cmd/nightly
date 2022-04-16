@@ -56,6 +56,7 @@ ___x_cmd_hub_wechat_login_url(){
 # Section(env): ___x_cmd_hub_user, ___x_cmd_hub_token, ___x_cmd_hub_get_and_save_userinfo_by_token
 
 ___x_cmd_hub_user(){
+    param:void
     ___x_cmd_hub_get_userinfo_by_token "$(___x_cmd_hub_token)"
 }
 

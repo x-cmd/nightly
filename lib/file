@@ -41,6 +41,7 @@ ___x_cmd_hub_file_which(){
     local cache_expiration=1
     mkdir -p "${cache_path%/*}"
     if ___x_cmd_httpget "$___X_CMD_HUB_SERVICE_URL/api/v0/file/cat?token=$(___x_cmd_hub_token)&res=${respath}" "$cache_path" "$cache_expiration"; then
+        chmod +x "$cache_path"
         hub_log debug "Downloaded ${respath} to ${cache_path}"
         printf "%s\n" "$cache_path"
     else
