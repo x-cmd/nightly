@@ -9,6 +9,7 @@ go
 scala
 sbt
 maven
+perl
 springboot
 kotlin
 gradle"
@@ -23,8 +24,6 @@ xrc param
 param_type  env  candidates_list - <<A
 $(___x_cmd_env_candidate_all)
 A
-
-# EndSection
 
 # Section: main
 ___x_cmd_env_main() {
@@ -76,7 +75,7 @@ ___x_cmd_env_run_common_if_notfound(){
     if command -v "$cmd" >/dev/null; then
         "$cmd" "$@"
     else
-        env_log debug "Candidate ${candidate} has no op: $op, use common $op function."
+        env_log debug "Candidate ${candidate} has no op: $cmd, use common $op function."
         "___x_cmd_env_common_${op}" "$candidate" "$@"
     fi
 }

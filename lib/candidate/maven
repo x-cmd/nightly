@@ -49,6 +49,12 @@ ___x_cmd_env_maven_unpack(){
 
 # EndSection
 
+# Section: current
+
+___x_cmd_env_maven_current(){
+    ___x_cmd_env_common_current mvn
+}
+
 # EndSection
 
 # Section: ui_catsel

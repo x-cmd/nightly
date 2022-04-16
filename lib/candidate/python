@@ -117,7 +117,7 @@ ___x_cmd_env_python_unpack(){
     mkdir -p "${versions_path}"
     local archive_path="$___X_CMD_ENV_PATH/python/archive/python-$version.$___X_CMD_ENV_COMPRESSION"
     chmod +x "${archive_path}" && \
-    "${archive_path}" -b -u -p "${versions_path}/${version}" 1>&2
+        "${archive_path}" -b -u -p "${versions_path}/${version}" 1>&2
 }
 
 # EndSection
