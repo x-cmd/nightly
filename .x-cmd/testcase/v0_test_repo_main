@@ -1,0 +1,10 @@
+# shellcheck shell=sh disable=SC2039,SC2142,SC3043
+xrc gh
+x jq
+gh token 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
+test_repo_main(){
+    @assert false "(gh repo create)"
+    @assert stdout "(gh repo create x-cmd-test5 | jq )"
+}
+
+@assert:file:func

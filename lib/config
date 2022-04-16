@@ -9,12 +9,9 @@ ___x_cmd_gh_config(){
     param:subcmd:try
     param:run
 
-    if [ -z "$PARAM_SUBCMD" ]; then
-        echo "Command Not Found. Show help." >&2
-        return 0
-    fi
-
-    "___x_cmd_gh_config_${PARAM_SUBCMD}" "$@"
+    gh_log warn "Subcmd Not Found."
+    ___x_cmd_gh_config _param_help_doc
+    return 1
 }
 
 # Section: try
