@@ -29,7 +29,8 @@ function jiter( item,  _res ) {
         if ( JITER_LAST_KP != "" ) {
             _res = JITER_FA_KEYPATH S JITER_LAST_KP
             key = JITER_LAST_KP
-            # _[ ++l ] = key
+            #  if (JITER_LAST_KP != "}" || JITER_LAST_KP != "]")
+            #  _[ l ] = key
             JITER_LAST_KP = ""
             return _res
         }
@@ -38,7 +39,6 @@ function jiter( item,  _res ) {
             return JITER_FA_KEYPATH S "\"" JITER_CURLEN "\""
         }
         JITER_LAST_KP = item
-        # _[ --l ] = item
         # return JITER_FA_KEYPATH S JITER_CURLEN
     } else if (item ~ /^[\[\{]$/) { # }
         if ( JITER_STATE != "{" ) {
