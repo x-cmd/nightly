@@ -23,7 +23,7 @@ ___x_cmd_gt_repo(){
 
 # Section: create
 # shellcheck disable=SC2154
-# FIXME: HAVE HTTP BUG
+# https://gitee.com/api/v5/swagger#/postV5UserRepos
 ___x_cmd_gt_repo_create() {
     local O="${O:-GITEE_DEFAULT}"
 
@@ -32,7 +32,7 @@ ___x_cmd_gt_repo_create() {
 option:
     #n                      "repo names"                    <>:RepoName
 
-    --path|-p               "repo path"                     <>=""
+    -p|--path               "repo path"                     <>=""
     --description           "description"                   <>=""
     --homepage              "homepage"                      <>=""
     --access                "private,public"                <>:RepoAccess=private
@@ -43,7 +43,6 @@ option:
     --no_comment            "Provide can_comment"
     --no_auto_init          "Not auto init README"
 '
-
     param:run
     [ $# -eq 0 ] && gt_log error "Repo name is empty" && return 1
 
@@ -55,9 +54,10 @@ option:
     local name="%%name%%"
     local gen_gt_json
     gen_gt_json="$(
-        param:option2json +private -access \
+        param:option2json +name +private -access \
             has_issues=^no_issue        has_wiki=^no_wiki \
             can_comment=^no_comment     auto_init=^no_auto_init)"
+
     for name in "$@"; do
         printf "%s" "${gen_gt_json}" | sed s/%%name%%/"${name##%/}"/g | \
             ___x_cmd_gt_http post "/v5/user/repos" - | \
@@ -115,7 +115,7 @@ option:
     local name="%%name%%"
     local gen_gt_json
     gen_gt_json="$(
-        param:option2json +private -access \
+        param:option2json +name +private -access \
             has_issues=^no_issue            has_wiki=^no_wiki \
             can_comment=^no_comment         auto_init=^no_auto_init )"
 
@@ -178,7 +178,7 @@ option:
     local outsourced="${outsourced:-false}"
     local gen_gt_json
     gen_gt_json="$(
-        param:option2json +private -access \
+        param:option2json +name +private -access \
         has_issues=^no_issue            has_wiki=^no_wiki              outsourced=^^outsourced \
         can_comment=^no_comment         auto_init=^no_auto_init)"
 
@@ -227,7 +227,6 @@ ___x_cmd_gt_repo_ls() {
 
 # shellcheck disable=SC2154,SC2034
 # TODO: https://gitee.com/api/v5/swagger#/patchV5ReposOwnerRepo need to design
-# FIXME: HTTP BUG
 ___x_cmd_gt_repo_update() {
     param:scope     "gitee/$O"
     param:dsl       '

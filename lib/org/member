@@ -89,6 +89,7 @@ options:
         return 1
     fi
 
+    local username
     for username in "$@"; do
         # TODO:http handle，delete repo return data is null.Status: 204 No Content
         if ___x_cmd_gt_http put "/v5/orgs/${org##*/}/memberships/${username##*/}" "$gen_gt_json" >/dev/null; then

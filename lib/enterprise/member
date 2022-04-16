@@ -73,7 +73,6 @@ options:
 }
 
 # shellcheck disable=SC2181,SC2086,SC2154
-# FIXME: HAVE HTTP BUG
 ___x_cmd_gt_enterprise_member_add() {
     param:scope     "gitee/$O"
     param:dsl       '
@@ -91,7 +90,7 @@ options:
     [ $# -eq 0 ] && gt_log error "At least one user's spatial address or email is needed" && return 1
     local username="%%username%%"
     local gen_gt_json
-    gen_gt_json="$(param:option2json )"
+    gen_gt_json="$(param:option2json +username)"
 
     # TODO: http handle，delete repo return data is null.Status: 204 No Content
     for username in "$@"; do

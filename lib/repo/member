@@ -62,8 +62,8 @@ options:
         gt_log error "At least one user's spatial address is needed, gt member add <user>"
         return 1
     fi
-    local username
 
+    local username
     for username in "$@"; do
         ___x_cmd_gt_http put json "/v5/repos/$owner_repo/collaborators/${username##*/}" permission | \
         (
