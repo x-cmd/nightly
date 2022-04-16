@@ -1,0 +1,22 @@
+
+# Using list
+# ____x_cmd_jo '1.*' -- [ .abc, .cde, .aaa
+# Using dict
+# ____x_cmd_jo '1.*' -- { .abc, .cde, .aaa
+# Using print
+# ____x_cmd_jo '1.*' -- abc cde aaa
+
+# Using env
+# ____x_cmd_jo env_code '1.*' key score name
+
+____x_cmd_jo_env(){
+    if [ -t 1 ]; then
+        eval "$(____x_cmd_jo_env_code "$@")"
+    else
+        ____x_cmd_jo_env_code "$@"
+    fi
+}
+
+____x_cmd_jo_env_code(){
+    :
+}

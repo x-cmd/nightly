@@ -1,7 +1,44 @@
+
+function handle_argument( argstr ){
+    argsl = split( argstr, args, "\001" )
+}
+
+BEGIN{
+    USING_PATTERN_REGEX = 1
+    USING_PATTERN_ARR = 2
+    USING_PATTERN_ARR_REGEX = 2
+}
+
+# Skip Pattern to accelerate
+function handle_pattern_extraction( pattern ){
+    if (pattern ~ /^./) {
+        pattern = "1" pattern
+    }
+
+    if (pattern ~ /.**./) {
+        mode = USING_PATTERN_REGEX
+    else (pattern ~ /.*./) {
+        mode = USING_PATTERN_ARR_REGEX
+    } else {
+        mode = USING_PATTERN_ARR
+    }
+}
+
+function handle_pattern_map(){
+
+}
+
+
+
 INPUT==0{
     if ($0 == "---") {
+
+        handle_argument( argstr )
+
         INPUT=1
+        next
     }
+    argstr = argstr $0
 }
 
 INPUT==1{
