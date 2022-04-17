@@ -1,4 +1,4 @@
-
+# shellcheck shell=sh disable=SC3043
 # Section 8: param:flag2bool param:option2json
 
 ___x_cmd_param_flag_to_bool(){
