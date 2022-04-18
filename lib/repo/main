@@ -170,7 +170,8 @@ type:
     Access  =   private public
 option:
     --access                    "private,public"                                                        <>:Access=private
-    --owner                     "repo owner"                                                            <>=""
+    --repo                      "Provide owner name and repo name.(default:the current user repo)"      <>:RepName
+    --name                      "repo alias"                                                            <>:RepName=""
     --description               "description"                                                           <>=""
     --homepage                  "homepage"                                                              <>=""
     --team_id                   "the id of the team that will be granted access to this repository"     <>=""
@@ -189,14 +190,8 @@ option:
     --allow_forking             "allow private forks."
     --archived                  "Mark this repository as archived and read-only."
     --is_template               "can be used to generate new repositories"
-    #n                          "repo names"
 '
     param:run
-    if [ $# -eq 0 ];then
-        gh_log error "repo name is null"
-        return 1
-    fi
-
     local private=true
     [ "$access" = "public" ] && private=false
 
@@ -222,22 +217,17 @@ option:
         }"
     )"
 
-    local name="%%name%%"
 
     local gen_gh_json
-    gen_gh_json="$(param:option2json +name -repo +security visibility=access \
+    gen_gh_json="$(param:option2json -repo +security visibility=access \
         has_issues=^no_issues                   has_wiki=^no_wiki                       has_projects=^no_projects \
         allow_rebase_merge=^no_rebase_merge     allow_squash_merge=^no_squash_merge     allow_merge_commit=^no_merge_commit \
         auto_init=^no_auto_init
     )"
 
-    for name in "$@"; do
-        local repo="$name"
-        ___x_cmd_gh_param_init_owner_repo
-        printf "%s" "${gen_gh_json}" | sed s/%%name%%/"${name##%/}"/g | \
-            ___x_cmd_gh_http patch "/repos/${owner_repo}" - | \
-            ___x_cmd_gh_repo_update_json_status_handler
-    done
+    ___x_cmd_gh_param_init_owner_repo
+    printf "%s" "${gen_gh_json}"  | ___x_cmd_gh_http patch "/repos/${owner_repo}" - | \
+        ___x_cmd_gh_repo_update_json_status_handler
 }
 
 ___x_cmd_gh_repo_update_json_status_handler(){
