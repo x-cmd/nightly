@@ -3,6 +3,7 @@
     "files.associations": {
         "*.json": "json",
         "index.html": "shellscript",
+        "**/*.md": "markdown",
         "**/std/**": "shellscript",
         "**/tools/*": "shellscript",
         "**/cloud/*": "shellscript",
@@ -10,7 +11,28 @@
         "**/con/*": "shellscript",
         "**/net/*": "shellscript",
         "**/el/*": "shellscript",
+        "**/*.awk": "awk",
         "*": "shellscript",
-        "*install*": "shellscript"
-    }
+        "*install*": "shellscript",
+        "LICENSE": "text"
+    },
+    "files.trimTrailingWhitespace": true,
+    "editor.detectIndentation": true,
+    "editor.tabSize": 4,
+    "explicitFolding.rules": {
+        "awk": [
+            {
+                "beginRegex": "^\\s*#\\s*Section:?",
+                "endRegex": "^\\s*#\\s*EndSection",
+                "autoFold": true
+            }
+        ],
+        "shellscript": [
+            {
+                "beginRegex": "^\\s*#\\s*Section:?",
+                "endRegex": "^\\s*#\\s*EndSection",
+                "autoFold": true
+            }
+        ]
+    },
 }
