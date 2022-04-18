@@ -1,38 +1,48 @@
-# shellcheck disable=SC1090,SC1091
-# load in need
+# shellcheck    shell=sh    disable=SC3043  # xrc
+# Author:       Li Junhao   l@x-cmd.com
 
-x log init test
-xrc ui/latest
+xrc os/lib/import
+xrc os/lib/release
 
-xrc:mod:lib test    cycle
-
-# TODO: add advise.json
-# TODO: subcmd: ls
-
-# TODO: select specific testcase: x test folder 1-wabc; x test folder ~^[0-9]+-[frame]
-
-___x_cmd_test(){
-    case "$1" in
-        :)          ;;
-        :*)         : other shell ;;
-        bench)      shift; ( . "$___X_CMD_ROOT_MOD/test/lib/bench"; ___x_cmd_test_bench "$@" ) ;;
-        errexit)    shift; ___x_cmd_test_errexit "$@" ;;
-        *)          ___x_cmd_test_cycle_exec "$@" ;;
+___x_cmd_os(){
+    local subcmd="${1:?Provide Sub Command}";   shift
+    case "$subcmd" in
+        name)               ___x_cmd_os_name          "$@"    ;;
+        arch)               ___x_cmd_os_arch          "$@"    ;;
+        release)            ___x_cmd_os_release       "$@"    ;;
+        rname)              ___x_cmd_os_release_name  "$@"    ;;
+        lsname)             ___x_cmd_os_lsname        "$@"    ;;
+        lsarch)             ___x_cmd_os_lsarch        "$@"    ;;
+        *)                  ___x_cmd_os_help          "$@"    ;;
     esac
 }
 
-___X_CMD_TEST_ASSERT_ERREXIT=1
-___x_cmd_test_errexit(){
-    case "$1" in
-        "")
-            if [ -z "$___X_CMD_TEST_ASSERT_ERREXIT" ]; then
-                test:info Error Exit is OFF
-                return 1
-            else
-                test:info Error Exit is ON
-                return 0
-            fi ;;
-        on|enable)          ___X_CMD_TEST_ASSERT_ERREXIT=1  ;;
-        off|disable)        ___X_CMD_TEST_ASSERT_ERREXIT="" ;;
-    esac
+if [ -n "${BASH_VERSION}${ZSH_VERSION}" ] && [ "${-#*i}" != "$-" ]; then
+
+    xrc advise
+    advise os - <<A
+{
+    "name": null,
+    "arch": null,
+    "release": null,
+    "rname": null,
+    "lsname": null,
+    "lsarch": null
 }
+A
+
+fi
+
+___x_cmd_os_import ls
+
+___x_cmd_os_help(){
+    cat <<A
+os
+SUBCOMMANDS:
+    name        "provide name"
+    arch        "provide arch information"
+    release     "provide release"
+A
+}
+
+xrc setmain ___x_cmd_os
