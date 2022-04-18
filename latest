@@ -1,108 +1,217 @@
-# Author:       Li Junhao   l@x-cmd.com             # xrc
-# shellcheck    shell=sh    disable=SC3043,SC1091
+# shellcheck shell=sh disable=SC3043 # xrc
 
-___x_cmd_log init x
+# author:       Li Junhao           l@x-cmd.com
 
-xrc:mod:lib x-cmd glob con alias args rmrf util lang ws exe
+# Section : install
+xrc param/latest
 
-# Section : x main function
+___x_cmd_install(){
+    param:dsl <<A
+subcommands:
+    ls          "list all software"
+    get         "get software installation command"
+    run         "run software installation command"
+    update      "update"
+A
+    param:run
 
-___x_cmd_main_otherwise(){
-    local subcmd="$1";  shift
-
-    local code
-    ___x_cmd_alias_exec ___x_cmd "$subcmd" "$@"
-    code=$?
-    if [ -n "$___X_CMD_ALIAS_EXEC_EXIST" ]; then
-        return $?
+    if [ -z "$PARAM_SUBCMD" ]; then
+        case "$1" in
+            "")     printf "%s\n" "
+SYMPOSIS:
+    x install <software>
+    x install ls
+    x install run <software>
+    x install name"
+                    ___x_cmd_install _param_help_doc ;;
+            *)      ___x_cmd_install run "$@" ;;
+        esac
+        return 0
     fi
 
-    # static build: update the static-build files
-    local ___X_CMD_WHICH_ONE_RESULT
-    local ___X_CMD_WHICH_ONE_RESOURCE_TYPE
-    if ___x_cmd_which_one "$subcmd"; then
-        local p="$___X_CMD_WHICH_ONE_RESULT";       x:debug "Executing Resource: [type=$___X_CMD_WHICH_ONE_RESOURCE_TYPE] [file=$p]"
-        case "$___X_CMD_WHICH_ONE_RESOURCE_TYPE" in
-            workspace)      ___x_cmd_exe_workspace  "$p" "$@" ;;
-            local)          ___x_cmd_run_by_file    "$p" "$@" ;;
-            hub)            ___x_cmd_run_by_file    "$p" "$@" ;;
-            official)       ___x_cmd_run_by_file    "$p" "$@" ;;
-        esac
-        code=$?;                                    x:debug "Resource Executed: [type=$___X_CMD_WHICH_ONE_RESOURCE_TYPE] [file=$p]"
-        return "$code"
+    "___x_cmd_install_$PARAM_SUBCMD" "$@"
+}
+
+___x_cmd_install_run(){
+    param:dsl <<A
+advise:
+    #1          ___x_cmd_install_name
+options:
+    #1          "get software name list"
+A
+    param:run
+
+    local YES=
+    case "$1" in
+        -y|--yes)       YES=1; shift
+    esac
+
+    local target
+    if target="$(___x_cmd_install_get "${1:?Provide target}")"; then
+        printf "Executing command:\n> \e[32;1m%s\e[0m\n\n" "$target" >&2
+        if [ -n "$YES" ]; then
+            eval "$target"
+            return
+        fi
+
+        printf "Do you want to continue? Press y to continue, otherwise will abort: " >&2
+        local ch
+        read -r ch
+        if [ "$ch" = y ]; then
+            eval "$target"
+        else
+            printf "Abort becase received non y\n" >&2
+            return 1
+        fi
+    fi
+    shift
+}
+
+___x_cmd_install_which(){
+    local cache="$___X_CMD_ROOT/.tmp/install/index.yml"
+    if ___x_cmd_curl_gitx x-cmd install main index.yml "$cache" "${___X_CMD_CURL_UPDATE:-1}"; then
+        printf "%s" "$cache"
     else
-        printf "%s" "Error" >&2
         return 1
     fi
 }
 
-___x_cmd_alias_init ___x_cmd
+___x_cmd_install_ls(){
+    param:void
+    local CACHE
 
-___x_cmd_main(){
-    local subcmd="$1"
-    case "$subcmd" in
-        log)                                    shift;  ___x_cmd_log "$@" ;;
+    if ! CACHE="$(___x_cmd_install_which)"; then
+        printf "Cannot download file.\n" >&2
+        return 1
+    fi
 
-        *:=)                                    shift;  ___x_cmd_varset "${subcmd%:=}" "$@" ;;
-        *=)                                     shift;  ___x_cmd_varset_without_end "${subcmd%=}" "$@" ;;
+    awk -v pat="${1:-""}" '
+BEGIN {
+    NAME = ""
+    WIDTH = 12
+    SEP="\001"
+    count = 0
+}
 
-        arg1)                                   shift;  ___x_cmd_args 1 "$@"    ;;
-        marg1)                                  shift;  ___x_cmd_margs 1 "$@"   ;;
+function handle(name){
+    if (pat == "" || match(name, pat)) {
+        printf("\033[33m%-12s\t\033[34;1m%s\033[0m\n",   name,        data[name SEP "desc"])
+        printf("%-12s\t%s\n",   " ",         ">    " data[name SEP "cmd"])
+        printf("%-12s\t%s\033[32;3m%s\033[0m\n",   " ",         "ref: ",  data[name SEP "reference"])
+        count = count + 1
+    }
+}
 
-        js|node)                                shift;  ___x_cmd_node "$@" ;;
-        python|py)                              shift;  ___x_cmd_python "$@" ;;
-        pip|pip3)                               shift;  ___x_cmd_pip3 "$@" ;;
+$0!~/^[ ]*#/{
+    leading_space = match($0, /^[ ]+/)
+    leading_space_len = RLENGTH
 
-        jar|java|npm|npx|ts|    _ws|wsroot|ws|      args|margs|conjoin|con|rmrf|repeat|     which|search_path|_x_cmd_advise_json|       ls|ll   |ssl    | abspath  )
-                                                shift;  "___x_cmd_$subcmd" "$@" ;;
+    if (leading_space_len == -1) {
+        if (NAME != "") {
+            handle(NAME)
+        }
+        NAME = $0
+        gsub(/:$/, "", NAME)
+        gsub(/[ ]+$/, "", NAME)
+        gsub(/^[ ]+/, "", NAME)
+    } else if (leading_space_len == 4) {
+        kw = $1
+        if (kw ~ /:$/) {
+            gsub(/:$/, "", kw)
+        }
 
-        curl|jq|yq|tmux|git|tesseract|magick)     # TODO: we will rename ___x_cmd_curl to make room for it
-                                                shift;  ___x_cmd_static_build_file     "$subcmd" "$subcmd"      "$@"    ;;
-        nmap|ncat|nping|traceroute)
-                                                shift;  ___x_cmd_static_build_file      nmap "$subcmd"          "$@"    ;;
-        ps)                                     shift;  ___x_cmd_static_build_file      procs procs             "$@"    ;;
-        du)                                     shift;  ___x_cmd_static_build_file      dust dust               "$@"    ;;
-        sqlite)                                 shift;  ___x_cmd_static_build_file      sqlite3 sqlite3         "$@"    ;;
-        cat)                                    shift;  ___x_cmd_static_build_help      bat bat                 "$@"    ;;
-        bw)                                     shift;  ___x_cmd_static_build_file      bandwhich bandwhich     "$@"    ;;
-        7z|7za|7zr)                             shift;  ___x_cmd_static_build_file      p7zip 7za               "$@"    ;;
+        $1 = ""
+        s = $0
+        gsub(/[ ]+$/, "", s)
+        gsub(/^[ ]+/, "", s)
+        data[NAME SEP kw] = s
+    }
+}
 
-        7zd)                                    shift;  ( xrc p7zip/v0   &&  p7zd "$@" ) ;;
+end{
+    if (NAME != "") {
+        handle(NAME)
+    }
 
+    if (pat != "") {
+        if (count == 0) exit(1)
+        if (count == 1) exit(0)
+        exit(0) # success
+    }
+}
 
-        sh|bash|zsh|fish|ksh|dash|ash)          shift;  ___x_cmd_shell_exec "$subcmd" "$@" ;;
+' <"$CACHE"
 
-        run)                                    shift;  ___x_cmd_run_by_file "$@"       ;;
+}
 
-        \.)                                     shift;  command code . ;;      # Test is a inner module.
+___x_cmd_install_update(){
+    param:void
+    ___X_CMD_CURL_UPDATE=0 ___x_cmd_install_which 1>/dev/null && printf "Update success.\n" >&2
+}
 
-        alias|unalias)                          shift;  "___x_cmd_$subcmd"  ___x_cmd "$@"   ;;
+___x_cmd_install_name(){
+    local CACHE
+    if ! CACHE="$(___x_cmd_install_which)"; then
+        printf "Cannot download file." >&2
+        return 1
+    fi
+    awk '
+$0!~/^[ +#]/ && NF>0 {
+    print substr($0,1,length($0)-1)
+}
+' <"$CACHE"
+}
 
-        readeval)                               shift;  ___x_cmd_readeval "$@" ;;
+___x_cmd_install_get(){
+    param:dsl <<A
+advise:
+    #1          ___x_cmd_install_name
+options:
+    #1          "get software name list"
+A
+    param:run
 
-        test)                                   shift;  { command -v ___x_cmd_test >/dev/null 2>&1 || xrc:mod test/latest; } && ___x_cmd_test "$@" ;;
-        login)                                  shift;  xrc hub/latest && ___x_cmd_hub login "$@" ;;
+    local CACHE
+    if ! CACHE="$(___x_cmd_install_which)"; then
+        printf "Cannot download file." >&2
+        return 1
+    fi
 
-        update|upgrade|clear|reinstall)         shift;  xrc update "$@" ;;
-
-        z|uz)                                           ( xrc zuz && ___x_cmd_zuz "$@" ) ;;   # zl)  ( xrc zuz && ___x_cmd_zuz_ls "$@"        ) ;;       # Using ls to replace
-        ""|help)                                        ___x_cmd_x_cmd_help ;;
-
-        *)                                              ___x_cmd_main_otherwise "$@" ;;
-    esac
+    local data
+    data="$(___x_cmd_install_ls "^${1:?Provide software name}$")"
+    local cmd
+    if cmd="$(printf "%s\n" "$data" | awk '
+    $1~/^>/{
+        $1="";
+        cmd=$0;
+        count = count + 1;
+    }
+    END{
+        if (count == 1) {
+            gsub(/^[ ]+/, "", cmd)
+            gsub(/[ ]+$/, "", cmd)
+            print cmd
+            exit(0)
+        } else {
+            exit(1)
+        }
+    }
+')";
+    then
+        printf "%s" "$cmd"
+        return 0
+    else
+        printf "%s\n--------\n" "Found multiple commands" >&2
+        printf "%s" "$data" >&2
+        return 1
+    fi
 }
 
 # EndSection
 
-
-x(){
-    ___x_cmd_main "$@"
-}
-
 if ___x_cmd_is_suitable_advise_env; then
-    command -v ___x_cmd_advise >/dev/null || xrc advise/latest
-    ___x_cmd_advise init x
+    xrc advise/latest
+    advise ___x_cmd_install "" install
 fi
 
-# TODO: We should have a better solution for this.
-X_DISABLE_WORKSPACE_EXECUTION_CONFIRMATION=1
+xrc setmain ___x_cmd_install
