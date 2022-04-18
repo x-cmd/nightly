@@ -3,9 +3,8 @@
 # author:       Li Junhao           l@x-cmd.com
 # license:      GPLv3
 
-
-___x_cmd_cp(){
-    cp "$@"
+___x_cmd_op(){
+    open "$@"
 }
 
-xrc setmain ___x_cmd_cp
+xrc setmain ___x_cmd_op
