@@ -282,6 +282,7 @@ options:
 
 # Section: info
 # shellcheck disable=SC2154
+# https://gitee.com/api/v5/swagger#/getV5ReposOwnerRepo
 ___x_cmd_gt_repo_info() {
     param:scope     "gitee/$O"
     param:dsl       '
@@ -304,6 +305,7 @@ options:
         fi
     }
 }
+# EndSection
 
 # Section: del & clear
 # https://gitee.com/api/v5/swagger#/deleteV5ReposOwnerRepo
@@ -331,6 +333,7 @@ options:
 }
 
 # shellcheck disable=SC2181
+# https://gitee.com/api/v5/swagger#/putV5ReposOwnerRepoClear
 ___x_cmd_gt_repo_clear() {
     param:scope     "gitee/$O"
     param:dsl       '
@@ -354,6 +357,7 @@ options:
 # Section: pr review config
 
 # shellcheck disable=SC2154,SC2181
+# https://gitee.com/api/v5/swagger#/putV5ReposOwnerRepoReviewer
 ___x_cmd_gt_repo_review(){
     param:scope     "gitee/$O"
     param:dsl       '

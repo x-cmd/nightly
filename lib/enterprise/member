@@ -23,6 +23,7 @@ ___x_cmd_gt_enterprise_member(){
 }
 
 # shellcheck disable=SC2154
+# https://gitee.com/api/v5/swagger#/getV5EnterprisesEnterpriseMembers
 ___x_cmd_gt_enterprise_member_ls() {
     param:scope     "gitee/$O"
     param:dsl       '
@@ -48,6 +49,7 @@ options:
 }
 
 # shellcheck disable=SC2154
+# https://gitee.com/api/v5/swagger#/getV5EnterprisesEnterpriseMembersUsername
 ___x_cmd_gt_enterprise_member_user() {
     param:scope     "gitee/$O"
     param:dsl       '
@@ -73,6 +75,7 @@ options:
 }
 
 # shellcheck disable=SC2181,SC2086,SC2154
+# https://gitee.com/api/v5/swagger#/postV5EnterprisesEnterpriseMembers
 ___x_cmd_gt_enterprise_member_add() {
     param:scope     "gitee/$O"
     param:dsl       '
@@ -105,6 +108,7 @@ options:
 }
 
 # shellcheck disable=SC2181
+# https://gitee.com/api/v5/swagger#/deleteV5EnterprisesEnterpriseMembersUsername
 ___x_cmd_gt_enterprise_member_rm() {
     param:scope     "gitee/$O"
     param:dsl       '
@@ -128,6 +132,7 @@ options:
 }
 
 # shellcheck disable=SC2181
+# https://gitee.com/api/v5/swagger#/putV5EnterprisesEnterpriseMembersUsername
 ___x_cmd_gt_enterprise_member_access() {
     param:scope     "gitee/$O"
     param:dsl       '

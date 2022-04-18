@@ -31,6 +31,7 @@ ___x_cmd_gt_current_repo() {
 }
 
 # shellcheck disable=SC2120
+# https://gitee.com/api/v5/swagger#/getV5User
 ___x_cmd_gt_current_owner() {
     param:void
     local O="${O:-GITEE_DEFAULT}"

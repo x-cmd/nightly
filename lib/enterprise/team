@@ -48,6 +48,7 @@ options:
 }
 
 # shellcheck disable=SC2154
+# https://gitee.com/api/v8/swagger#/getEnterpriseIdGroupsGroupId
 ___x_cmd_gt_enterprise_team_info() {
     param:scope     "gitee/$O"
     param:dsl       '
@@ -65,6 +66,7 @@ options:
 # EndSection
 
 # Section: create & update & rm
+# https://gitee.com/api/v8/swagger#/postEnterpriseIdGroups
 ___x_cmd_gt_enterprise_team_create() {
     param:scope     "gitee/$O"
     param:dsl       '
@@ -83,6 +85,7 @@ options:
 }
 
 # shellcheck disable=SC2034,SC2154
+# https://gitee.com/api/v8/swagger#/putEnterpriseIdGroupsGroupId
 ___x_cmd_gt_enterprise_team_update() {
     param:scope     "gitee/$O"
     param:dsl       '
@@ -142,6 +145,7 @@ ___x_cmd_gt_enterprise_team_member(){
     "___x_cmd_gt_enterprise_team_member_$PARAM_SUBCMD" "$@"
 }
 
+# https://gitee.com/api/v8/swagger#/getEnterpriseIdGroupsGroupIdMembers
 ___x_cmd_gt_enterprise_team_member_ls() {
     param:scope     "gitee/$O"
     param:dsl       '
@@ -165,7 +169,8 @@ options:
     ___x_cmd_gt_get_multi "/enterprises/${enterprise_id}/groups/${group_id}/members"  qt sort direction search
 }
 
-___x_cmd_gt_enterprise_team_rm() {
+# https://gitee.com/api/v8/swagger#/deleteEnterpriseIdGroupsGroupIdMembers
+___x_cmd_gt_enterprise_team_member_rm() {
     param:scope     "gitee/$O"
     param:dsl       '
 options:

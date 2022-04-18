@@ -21,7 +21,9 @@ ___x_cmd_gt_enterprise(){
 }
 
 # Section: list & info
+
 # shellcheck disable=SC2154
+# https://gitee.com/api/v5/swagger#/getV5UserEnterprises
 ___x_cmd_gt_enterprise_ls() {
     param:scope     "gitee/$O"
     param:dsl       '
@@ -45,8 +47,8 @@ options:
     return 1
 }
 
-# NOTE: ______x_cmd_gt_owner_type_query
 # shellcheck disable=SC2154
+# https://gitee.com/api/v5/swagger#/getV5EnterprisesEnterprise
 ___x_cmd_gt_enterprise_info() {
     param:scope     "gitee/$O"
     param:dsl       '

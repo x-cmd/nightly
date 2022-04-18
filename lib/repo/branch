@@ -17,6 +17,7 @@ ___x_cmd_gt_repo_branch(){
 
 # Section:list & info
 # shellcheck disable=SC2154
+# https://gitee.com/api/v5/swagger#/getV5ReposOwnerRepoBranches
 ___x_cmd_gt_repo_branch_ls() {
     param:scope     "gitee/$O"
     param:dsl       '
@@ -42,6 +43,7 @@ options:
 }
 
 # shellcheck disable=SC2154
+# https://gitee.com/api/v5/swagger#/getV5ReposOwnerRepoBranchesBranch
 ___x_cmd_gt_repo_branch_info() {
     param:scope     "gitee/$O"
     param:dsl       '
@@ -67,6 +69,7 @@ options:
 
 # Section: add & default
 # shellcheck disable=SC2154
+# https://gitee.com/api/v5/swagger#/postV5ReposOwnerRepoBranches
 ___x_cmd_gt_repo_branch_add() {
     param:scope     "gitee/$O"
     param:dsl       '
@@ -116,6 +119,7 @@ subcommand:
     "___x_cmd_gt_repo_branch_protection_$PARAM_SUBCMD" "$@"
 }
 
+# https://gitee.com/api/v5/swagger#/putV5ReposOwnerRepoBranchesBranchProtection
 ___x_cmd_gt_repo_branch_protection_set() {
     param:scope     "gitee/$O"
     param:dsl       '
@@ -138,6 +142,7 @@ options:
     }
 }
 
+# https://gitee.com/api/v5/swagger#/deleteV5ReposOwnerRepoBranchesBranchProtection
 ___x_cmd_gt_repo_branch_protection_unset() {
     param:scope     "gitee/$O"
     param:dsl       '

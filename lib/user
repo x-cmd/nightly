@@ -21,7 +21,9 @@ ___x_cmd_gt_user(){
 }
 
 # Section: info repo email issue
+
 # shellcheck disable=SC2154
+# https://gitee.com/api/v5/swagger#/getV5UsersUsername
 ___x_cmd_gt_user_info() {
     param:scope     "gitee/$O"
     param:dsl       '
@@ -124,6 +126,7 @@ options:
     return 1
 }
 
+# https://gitee.com/api/v5/swagger#/getV5UserIssues
 ___x_cmd_gt_user_issue(){
     param:scope     "gitee/$O"
     param:dsl       '
@@ -190,6 +193,7 @@ ___x_cmd_gt_user_key(){
     "___x_cmd_gt_user_key_${PARAM_SUBCMD}" "$@"
 }
 
+# https://gitee.com/api/v5/swagger#/getV5UserKeys
 ___x_cmd_gt_user_key_ls(){
     param:scope     "gitee/$O"
     param:dsl       '
@@ -213,6 +217,7 @@ options:
 }
 
 # shellcheck disable=SC2154
+# https://gitee.com/api/v5/swagger#/getV5UserKeysId
 ___x_cmd_gt_user_key_get(){
     param:scope     "gitee/$O"
     param:dsl       '
@@ -233,6 +238,7 @@ options:
 }
 
 # shellcheck disable=SC2181
+# https://gitee.com/api/v5/swagger#/deleteV5UserKeysId
 ___x_cmd_gt_user_key_del(){
     param:scope     "gitee/$O"
     param:dsl       '
@@ -251,6 +257,7 @@ options:
 }
 
 # shellcheck disable=SC2154
+# https://gitee.com/api/v5/swagger#/postV5UserKeys
 ___x_cmd_gt_user_key_add(){
     param:scope     "gitee/$O"
     param:dsl       '
@@ -274,4 +281,4 @@ options:
         fi
     }
 }
-
+# EndSection
