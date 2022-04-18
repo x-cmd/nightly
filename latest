@@ -37,7 +37,7 @@ ___x_cmd_env_util_cmd_to_candidate(){
     local cmd="$1"
     local candidate
     find "$___X_CMD_ENV_PATH"/*/versions/*/bin/"$cmd" | while read -r cmd_path; do
-        cmd_path="${cmd_path%/versions/*/bin/$cmd}"
+        cmd_path="${cmd_path%/versions/*/bin/"$cmd"}"
         candidate="${cmd_path##*/}"
         if [ -n "$candidate" ]; then
             printf "%s\n" "$candidate"
