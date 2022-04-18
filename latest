@@ -1,54 +1,11 @@
-# shellcheck shell=sh disable=SC3043,SC2164     # xrc
+# shellcheck shell=sh disable=SC3043 # xrc
 
 # author:       Li Junhao           l@x-cmd.com
-# license:      GPLv3
 
-xrc static-build/lib/staticbin os
-___x_cmd_magick(){
-    local arch
-    arch="$(os arch)"
-    local osname
-    osname="$(os name)"
-    local exe
-    case "$osname" in
-        win)    exe=magick.x64.exe        ;;
-        *)      exe=magick.${osname}.${arch}  ;;
-    esac
-    ___x_cmd_staticbin_init \
-        ___x_cmd_magick_download \
-        "$___X_CMD_ROOT/.bin/magick" \
-        "$exe" \
-        "$(___x_cmd_pandoc_bin_download_url "$exe")" \
-        &&(
-            cd "$___X_CMD_ROOT/.bin/magick" && {
-                chmod +x "$exe"
-            }
-        )&& ___x_cmd_magick_download "$@"
+xrc python/lib/python3
+
+___x_cmd_python(){
+    ___x_cmd_python3 "$@"
 }
 
-# Section: detail
-
-# Reference: https://imagemagick.org/script/download.php
-
-# https://download.imagemagick.org/ImageMagick/download/binaries/magick
-# https://download.imagemagick.org/ImageMagick/download/binaries/ImageMagick-x86_64-apple-darwin20.1.0.tar.gz
-
-# win64
-# https://download.imagemagick.org/ImageMagick/download/binaries/ImageMagick-7.1.0-portable-Q16-HDRI-x64.zip
-
-# China
-
-# https://ftp.acc.umu.se/mirror/imagemagick.org/ftp/binaries/magick
-
-___x_cmd_magick_bin_download_url(){
-    local exe="${1:?Provide app name}"
-    if [ -z "$___X_CMD_WHICHNET" ]; then
-        printf "%s/%s" "https://raw.githubusercontent.com/static-build/magick/main/bin" "$exe.7z"
-    else
-        printf "%s/%s" "https://gitcode.net/x-bash/magick/-/raw/master/bin" "$exe.7z"
-    fi
-}
-
-# EndSection
-
-xrc setmain ___x_cmd_magick
+xrc setmain ___x_cmd_python
