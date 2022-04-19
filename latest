@@ -1,0 +1,108 @@
+# Author:       Li Junhao   l@x-cmd.com             # xrc
+# shellcheck    shell=sh    disable=SC3043,SC1091
+
+___x_cmd_log init x
+
+xrc:mod:lib x-cmd glob con alias args rmrf util lang ws exe
+
+# Section : x main function
+
+___x_cmd_main_otherwise(){
+    local subcmd="$1";  shift
+
+    local code
+    ___x_cmd_alias_exec ___x_cmd "$subcmd" "$@"
+    code=$?
+    if [ -n "$___X_CMD_ALIAS_EXEC_EXIST" ]; then
+        return $?
+    fi
+
+    # static build: update the static-build files
+    local ___X_CMD_WHICH_ONE_RESULT
+    local ___X_CMD_WHICH_ONE_RESOURCE_TYPE
+    if ___x_cmd_which_one "$subcmd"; then
+        local p="$___X_CMD_WHICH_ONE_RESULT";       x:debug "Executing Resource: [type=$___X_CMD_WHICH_ONE_RESOURCE_TYPE] [file=$p]"
+        case "$___X_CMD_WHICH_ONE_RESOURCE_TYPE" in
+            workspace)      ___x_cmd_exe_workspace  "$p" "$@" ;;
+            local)          ___x_cmd_run_by_file    "$p" "$@" ;;
+            hub)            ___x_cmd_run_by_file    "$p" "$@" ;;
+            official)       ___x_cmd_run_by_file    "$p" "$@" ;;
+        esac
+        code=$?;                                    x:debug "Resource Executed: [type=$___X_CMD_WHICH_ONE_RESOURCE_TYPE] [file=$p]"
+        return "$code"
+    else
+        printf "%s" "Error" >&2
+        return 1
+    fi
+}
+
+___x_cmd_alias_init ___x_cmd
+
+___x_cmd_main(){
+    local subcmd="$1"
+    case "$subcmd" in
+        log)                                    shift;  ___x_cmd_log "$@" ;;
+
+        *:=)                                    shift;  ___x_cmd_varset "${subcmd%:=}" "$@" ;;
+        *=)                                     shift;  ___x_cmd_varset_without_end "${subcmd%=}" "$@" ;;
+
+        arg1)                                   shift;  ___x_cmd_args 1 "$@"    ;;
+        marg1)                                  shift;  ___x_cmd_margs 1 "$@"   ;;
+
+        js|node)                                shift;  ___x_cmd_node "$@" ;;
+        python|py)                              shift;  ___x_cmd_python "$@" ;;
+        pip|pip3)                               shift;  ___x_cmd_pip3 "$@" ;;
+
+        jar|java|npm|npx|ts|    _ws|wsroot|ws|      args|margs|conjoin|con|rmrf|repeat|     which|search_path|_x_cmd_advise_json|       ls|ll   |ssl    | abspath  )
+                                                shift;  "___x_cmd_$subcmd" "$@" ;;
+
+        curl|jq|yq|tmux|git|tesseract|magick)     # TODO: we will rename ___x_cmd_curl to make room for it
+                                                shift;  ___x_cmd_static_build_file     "$subcmd" "$subcmd"      "$@"    ;;
+        nmap|ncat|nping|traceroute)
+                                                shift;  ___x_cmd_static_build_file      nmap "$subcmd"          "$@"    ;;
+        ps)                                     shift;  ___x_cmd_static_build_file      procs procs             "$@"    ;;
+        du)                                     shift;  ___x_cmd_static_build_file      dust dust               "$@"    ;;
+        sqlite)                                 shift;  ___x_cmd_static_build_file      sqlite3 sqlite3         "$@"    ;;
+        cat)                                    shift;  ___x_cmd_static_build_help      bat bat                 "$@"    ;;
+        bw)                                     shift;  ___x_cmd_static_build_file      bandwhich bandwhich     "$@"    ;;
+        7z|7za|7zr)                             shift;  ___x_cmd_static_build_file      p7zip 7za               "$@"    ;;
+
+        7zd)                                    shift;  ( xrc p7zip/v0   &&  p7zd "$@" ) ;;
+
+
+        sh|bash|zsh|fish|ksh|dash|ash)          shift;  ___x_cmd_shell_exec "$subcmd" "$@" ;;
+
+        run)                                    shift;  ___x_cmd_run_by_file "$@"       ;;
+
+        \.)                                     shift;  command code . ;;      # Test is a inner module.
+
+        alias|unalias)                          shift;  "___x_cmd_$subcmd"  ___x_cmd "$@"   ;;
+
+        readeval)                               shift;  ___x_cmd_readeval "$@" ;;
+
+        test)                                   shift;  { command -v ___x_cmd_test >/dev/null 2>&1 || xrc:mod test/latest; } && ___x_cmd_test "$@" ;;
+        login)                                  shift;  xrc hub/latest && ___x_cmd_hub login "$@" ;;
+
+        update|upgrade|clear|reinstall)         shift;  xrc update "$@" ;;
+
+        z|uz)                                           ( xrc zuz && ___x_cmd_zuz "$@" ) ;;   # zl)  ( xrc zuz && ___x_cmd_zuz_ls "$@"        ) ;;       # Using ls to replace
+        ""|help)                                        ___x_cmd_x_cmd_help ;;
+
+        *)                                              ___x_cmd_main_otherwise "$@" ;;
+    esac
+}
+
+# EndSection
+
+
+x(){
+    ___x_cmd_main "$@"
+}
+
+if ___x_cmd_is_suitable_advise_env; then
+    command -v ___x_cmd_advise >/dev/null || xrc advise/latest
+    ___x_cmd_advise init x
+fi
+
+# TODO: We should have a better solution for this.
+X_DISABLE_WORKSPACE_EXECUTION_CONFIRMATION=1
