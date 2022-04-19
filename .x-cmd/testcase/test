@@ -1,0 +1,16 @@
+. "$___X_CMMD_ROOT_MOD/assert/latest"
+x assert 1 "=~" "[0-9]?"
+x assert "[100dsadgfap]" "=~" "^\[[0-9a-z]{1,}\]"
+___x_cmd_assert_eq 1abc2 1abc 1abc 1abc abc3 && echo yes
+
+# ___x_cmd_assert_stdout echo "hi" <<A
+# hi
+# A 
+# ___x_cmd_assert_stderr ls hii <<A 
+# 333
+# A 
+
+
+# x assert 1 "=~" 1
+# x assert 1 "=~" 1
+# x assert 1 "=~" 1
