@@ -1,0 +1,77 @@
+# shellcheck shell=sh
+# shellcheck disable=SC2039,3043
+
+# author:       Li Junhao           edwin.jh.lee@gmail.com    edwinjhlee.github.io
+# maintainer:   Li Junhao
+
+# loading dependencies
+xrc http param str ui
+xrc ui/lib/table gh/lib/resource
+
+xrc:inner:lib gt utils config token user current issue enterprise/main enterprise/member enterprise/team org/main org/member \
+    repo/utils repo/main repo/pr/main repo/release/main repo/member repo/tag repo/page repo/branch _type/main
+
+
+x log init gt
+___x_cmd_gt(){
+    param:subcmd ___x_cmd_gt                                        \
+        repo                             "repo command"             \
+        issue                            "issue"                    \
+        current                          "set current owner, repo"  \
+        enterprise                       "manage enterprise"        \
+        org                              "manage org"               \
+        user                             "user"                     \
+        config                           "save, load, which"        \
+        token                            "set token"
+    param:subcmd:try
+
+    param:subcmd ___x_cmd_gt_repo                                        \
+        pr                               "pull request"             \
+        release                          "release management"       \
+        member                           "repo member"              \
+        tag                              "repo tag"
+    param:subcmd:try
+    param:run
+
+    gt_log warn "Subcmd Not Found."
+    ___x_cmd_gt _param_help_doc
+    return 1
+}
+
+
+############################
+# Section 10: Instantiation
+############################
+___x_cmd_gt_make() {
+    param:void
+
+    local O_ORIGINAL="${1:?Provide client name by O environment}"
+    local O="___x_cmd_gt_$O_ORIGINAL"
+
+    http make         'https://gitee.com/api'
+    http header type  "application/json;charset=utf-8"
+
+    local token
+    token="$(O="$O_ORIGINAL" ___x_cmd_gt_config_get "oauth_token")"
+
+    if [ -n "$token" ]; then
+        O="___x_cmd_gt_$O_ORIGINAL" http header put Authorization "token $token"
+        O="$O_ORIGINAL" ___x_cmd_gt_current_owner 1>/dev/null || return 1
+        gt_log info "Hi $___X_CMD_GITEE_DEFAULT_OWNER! You've successfully authenticated."
+        return 0
+    fi
+
+    local info
+    info=$(printf "\n%s %s \n%s" \
+         "$(ui yellow 'You need run command to add token:')" \
+         "$(ui bold cyan "\`gt token <token>\`")" \
+         "$(ui 'https://gitee.com/profile/personal_access_tokens')")
+    gt_log warn "Token is null.${info}"
+}
+
+if [ -z "$DO_NOT_INIT_GITEE_DEFAULT" ]; then
+    ___x_cmd_gt_make "GITEE_DEFAULT" && DO_NOT_INIT_GITEE_DEFAULT="true"
+fi
+
+xrc setmain ___x_cmd_gt
+
