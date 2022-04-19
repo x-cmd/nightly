@@ -1,0 +1,16 @@
+# Author:       Li Junhao      l@x-cmd.com      # xrc
+# shellcheck    shell=sh       disable=SC3043
+
+xrc:mod:lib el  alpine code container git k8s udpn utils wubi alphabet a2
+
++ yanfa
+
++ xdk
+alias xdk=xdk   # xdk="x dk"
+alias l='x ll'
+
+if [ -z "$___X_CMD_THEME_NAME" ]; then
+    x theme try el
+fi
+
+x boot mod ask el
