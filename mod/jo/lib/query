@@ -1,0 +1,46 @@
+
+___x_cmd_jo_query(){
+    ____x_cmd_jo_query_main "$@"
+}
+
+# TODO: for optimization
+____x_cmd_jo_query_main(){
+    case "$1" in
+        *.\*\*.)      : regex ;;
+        *.\*.)        : regex ;;
+        *)            ____x_cmd_jo_query_with_eqarr "$@" ;;
+    esac
+}
+
+____x_cmd_jo_query_with_regexpat(){
+    local IFS="$___X_CMD_UNSEENCHAR_001"
+    {
+        printf "%s" "$*"
+        printf "%s" "---"
+        cat
+    } | awk \
+        -f "$___X_CMD_ROOT_MOD/awk/lib/default.awk" \
+        -f "$___X_CMD_ROOT_MOD/awk/lib/json.awk" \
+        -f "$___X_CMD_ROOT_MOD/awk/lib/jiter.awk"
+}
+
+____x_cmd_jo_query_with_regexarr(){
+    :
+}
+
+____x_cmd_jo_query_with_eqarr(){
+    local IFS="$___X_CMD_UNSEENCHAR_001"
+    {
+        printf "%s" "$*"
+        printf "%s" "---"
+        cat
+    } | {
+        awkpath="$___X_CMD_ROOT_MOD/jo/lib/query_awk/eqarr.awk"
+        [ "$#" -eq 1 ] && awkpath="$___X_CMD_ROOT_MOD/jo/lib/query_awk/eqarr.all.awk"
+        awk \
+            -f "$___X_CMD_ROOT_MOD/awk/lib/default.awk" \
+            -f "$___X_CMD_ROOT_MOD/awk/lib/json.awk" \
+            -f "$___X_CMD_ROOT_MOD/awk/lib/jiter.awk" \
+            -f "$awkpath"
+    }
+}

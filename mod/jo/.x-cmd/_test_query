@@ -1,0 +1,13 @@
+
+cp -r ./* ~/.x-cmd/jo
+. ./lib/query
+
+test_query_eqarr(){
+
+    ___x_cmd_jo_query .files_associations <<A
+cat .vscode/settings.json
+A
+
+}
+
+test_query_eqarr
