@@ -5,7 +5,7 @@ ___x_cmd_jawk_kp(){
     command awk -f "$___X_CMD_ROOT_MOD/awk/lib/default.awk" \
                 -f "$___X_CMD_ROOT_MOD/awk/lib/json.awk" \
                 -f "$___X_CMD_ROOT_MOD/awk/lib/jiter.awk" \
-                -f "$___X_CMD_ROOT_MOD/jawk/lib/kp.awk" | \
+                -f "$___X_CMD_ROOT_MOD/ja/lib/kp.awk" | \
     command awk '
 {
     a = 1 - a
