@@ -4,30 +4,6 @@ local space="$(printf " ")"
 local COLUMNS=115 # This is screen width
 
 test_error_help(){
-    @assert stderr paramtest --not_exist_flag <<A
-error: Option unexpected, or invalid in this context: '--not_exist_flag'
-For more information try --help
-A
-
-    @assert stderr paramtest -acvP <<A
-error: Option unexpected, or invalid in this context: '-a'
-For more information try --help
-A
-
-    @assert stderr paramtest option --not_exist_flag <<A
-error: Option unexpected, or invalid in this context: '--not_exist_flag'
-For more information try --help
-A
-
-    @assert stderr paramtest --not_exist_option ccc <<A
-error: Option unexpected, or invalid in this context: '--not_exist_option'
-For more information try --help
-A
-
-    @assert stderr paramtest option --not_exist_option ccc <<A
-error: Option unexpected, or invalid in this context: '--not_exist_option'
-For more information try --help
-A
 
     @assert stderr paramtest option --mul_line_arg <<A
 error: Option require value, but none was supplied: '--mul_line_arg,-m <mline_arg>'
