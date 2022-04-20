@@ -21,6 +21,7 @@ subcommands:
     register       "Register to hub service"
     token          "User token management"
     user           "get user info"
+    logout         "Logout from hub service"
 A
     param:run
     [ -z "${PARAM_SUBCMD}" ] && ___x_cmd_hub help && return

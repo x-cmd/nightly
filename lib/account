@@ -2,7 +2,7 @@
 
 xrc ui/lib/select http
 
-# Section(utils): ___x_cmd_hub_token_generate, ___x_cmd_hub_get_and_save_userinfo_by_token
+# Section(utils): ___x_cmd_hub_token_generate
 
 if command -v md5sum >/dev/null; then
     # TODO(refactor): to remove " -" from the end of the string
@@ -37,7 +37,7 @@ ___x_cmd_hub_token_generate(){
 
 ___x_cmd_hub_print_qrcode(){
     x qr enc -s 1 -m 3 -t ANSIUTF8 "$1"
-    hub_log debug "QR Code url: $1"
+    hub:debug "QR Code url: $1"
 }
 
 ___x_cmd_hub_wechat_register_url(){
@@ -53,7 +53,7 @@ ___x_cmd_hub_wechat_login_url(){
 
 # EndSection
 
-# Section(env): ___x_cmd_hub_user, ___x_cmd_hub_token, ___x_cmd_hub_get_and_save_userinfo_by_token
+# Section(env): ___x_cmd_hub_user, ___x_cmd_hub_token, ___x_cmd_hub_get_userinfo_by_token
 
 ___x_cmd_hub_user(){
     param:void
@@ -74,14 +74,18 @@ ___x_cmd_hub_token(){
 
 # TODO: We should cache the user info, and update it when the token is expired
 ___x_cmd_hub_get_userinfo_by_token(){
-    local token="${1:?Please provide token}"
+    local token="${1}"
+    if [ -z "$token" ]; then
+        hub:error "Token is empty, please login first"
+        return 1
+    fi
 
     local res
     if ! res="$(___x_cmd_httpget "$___X_CMD_HUB_SERVICE_URL/api/v0/account/user?token=${token}")" ; then
-        hub_log error "Failed to get userinfo by token: $res"
+        hub:error "Failed to get userinfo by token: $res"
         return 1
     fi
-    hub_log debug "Get response: ${res}"
+    hub:debug "Get response: ${res}"
 
     local userid
     local username
