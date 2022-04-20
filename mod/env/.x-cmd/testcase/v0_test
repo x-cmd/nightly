@@ -1,0 +1,113 @@
+shellcheck shell=sh disable=SC1072 #source
+
+test_go(){
+    x env install go 1.9 2>/dev/null
+    @assert stdout x env current go <<A
+1.9
+A
+    @assert stdout x env exec go 1.9 run "$(x wsroot)/.x-cmd/helloworld/hi.go" <<A
+hello world
+A
+}
+
+test_gradle(){
+    x env install gradle 7.4.2 2>/dev/null
+    @assert stdout x env current gradle <<A
+7.4.2
+A
+    @assert true 'x env exec gradle 7.4.2 -version '
+}
+
+test_java(){
+    x env install java 18-open 2>/dev/null
+    @assert stdout x env current java <<A
+18-open
+A
+    @assert true 'x env exec java 18-open --version'
+}
+
+test_kotlin(){
+    x env install kotlin 1.6.10 2>/dev/null
+    @assert stdout x env current kotlin <<A
+1.6.10
+A
+    # @assert true  'cd $(x wsroot)/.x-cmd/helloworld &&  x env exec kotlin 1.6.10 hi.kt '
+}
+
+
+test_node(){
+    x env install node v17.8.0 2>/dev/null
+    @assert stdout x env current node <<A
+v17.8.0
+A
+    @assert stdout x env exec node v17.8.0 "$(x wsroot)/.x-cmd/helloworld/hi.js" <<A
+hello world
+A
+}
+
+test_python(){
+    x env install python py39_4.11.0 2>/dev/null
+    @assert stdout x env current python <<A
+py39_4.11.0
+A
+    @assert stdout x env exec python py39_4.11.0 "$(x wsroot)/.x-cmd/helloworld/hi.py" <<A
+hello world
+A
+}
+
+# test_ruby(){
+#     :
+# }
+
+test_scala(){
+    x env install scala 3.0.2 2>/dev/null
+    @assert stdout x env current scala <<A
+3.0.2
+A
+    @assert stdout x env exec scala 3.0.2 "$(x wsroot)/.x-cmd/helloworld/hi.scala" <<A
+Hello, world
+A
+}
+
+test_springboot(){
+    x env install springboot 2.6.6 2>/dev/null
+    @assert stdout x env current springboot <<A
+2.6.6
+A
+    @assert true 'spring run "$(x wsroot)/.x-cmd/helloworld/hi.groovy" '
+}
+
+test_sbt(){
+    x env install sbt 1.6.0 2>/dev/null
+    @assert stdout x env current sbt <<A
+1.6.0
+A
+    @assert true 'cd "$(x wsroot)/.x-cmd/helloworld" && sbt run' <<A
+Hello, world
+A
+
+}
+
+test_maven(){
+    x env install maven 3.8.5 2>/dev/null
+    @assert stdout x env current maven <<A
+3.8.5
+A
+    #  @assert stdout x env exec maven 3.8.5 "$(x wsroot)/.x-cmd/helloworld/hi_maven"
+
+     @assert true  'cd "$(x wsroot)/.x-cmd/helloworld/hi_maven" && mvn compile'
+
+}
+
+test_perl(){
+    x env install perl 5.26.1.1 2>/dev/null
+    @assert stdout x env current perl <<A
+ 3.8.5
+A
+    @assert stdout x env exec perl 5.26.1.1 "$(x wsroot)/.x-cmd/helloworld/hi.perl" <<A
+hello world
+A
+}
+
+@assert:errexit:off
+@assert:file:func
