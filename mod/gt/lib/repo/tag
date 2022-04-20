@@ -18,7 +18,7 @@ ___x_cmd_gt_repo_tag(){
 
 # shellcheck disable=SC2154,SC2086
 # https://gitee.com/api/v5/swagger#/getV5ReposOwnerRepoTags
-___x_cmd_gt_repo_tag_ls() {
+___x_cmd_gt_repo_tag_ls(){
     param:scope     "gitee/$O"
     param:dsl    '
 options:
@@ -47,7 +47,7 @@ options:
 # #3: tag_message
 # shellcheck disable=SC2154,SC2181
 # https://gitee.com/api/v5/swagger#/postV5ReposOwnerRepoTags
-___x_cmd_gt_repo_tag_add() {
+___x_cmd_gt_repo_tag_add(){
     param:scope     "gitee/$O"
     param:dsl    '
 options:

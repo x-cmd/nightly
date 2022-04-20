@@ -42,7 +42,7 @@ ___x_cmd_gt(){
 ############################
 # Section 10: Instantiation
 ############################
-___x_cmd_gt_make() {
+___x_cmd_gt_make(){
     param:void
 
     local O_ORIGINAL="${1:?Provide client name by O environment}"

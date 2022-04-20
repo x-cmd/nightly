@@ -24,7 +24,7 @@ ___x_cmd_gt_user(){
 
 # shellcheck disable=SC2154
 # https://gitee.com/api/v5/swagger#/getV5UsersUsername
-___x_cmd_gt_user_info() {
+___x_cmd_gt_user_info(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -39,6 +39,8 @@ options:
     else
         data=$(___x_cmd_gt_http get "/v5/users/$1")
     fi
+
+    [ ! -t 1 ] && printf "%s" "$data" && return 0
     printf "%s" "$data" \ |
     {
         ___x_cmd_git_json_query_rename name=.login email=.email html_url=.html_url types=.type
@@ -53,7 +55,7 @@ options:
 }
 
 # https://gitee.com/api/v5/swagger#/getV5UserRepos
-___x_cmd_gt_user_repo() {
+___x_cmd_gt_user_repo(){
     param:scope     "gitee/$O"
     param:subcmd ___x_cmd_gt_user_repo                  \
         ls      "list repo of the designated user"
@@ -65,7 +67,7 @@ ___x_cmd_gt_user_repo() {
     return 1
 }
 
-___x_cmd_gt_user_repo_ls() {
+___x_cmd_gt_user_repo_ls(){
     param:scope     "gitee/$O"
     param:dsl       '
 type:

@@ -23,7 +23,7 @@ ___x_cmd_gt_repo_release(){
 
 # shellcheck disable=SC2086,SC2154
 # https://gitee.com/api/v5/swagger#/getV5ReposOwnerRepoReleases
-___x_cmd_gt_repo_release_ls() {
+___x_cmd_gt_repo_release_ls(){
     param:scope     "gitee/$O"
     param:dsl    '
 type:
@@ -50,7 +50,7 @@ options:
 
 # shellcheck disable=SC2086,SC2154
 # TODO:https://gitee.com/api/v5/swagger#/getV5ReposOwnerRepoReleasesTagsTag
-___x_cmd_gt_repo_get_release_by_tag() {
+___x_cmd_gt_repo_get_release_by_tag(){
     param:scope     "gitee/$O"
     param:dsl    '
 options:
@@ -65,7 +65,7 @@ options:
 
 # shellcheck disable=SC2154,SC2181
 # https://gitee.com/api/v5/swagger#/postV5ReposOwnerRepoReleases
-___x_cmd_gt_repo_release_create() {
+___x_cmd_gt_repo_release_create(){
     local O="${O:-GITEE_DEFAULT}"
 
     param:scope  "gitee/$O"
@@ -106,7 +106,7 @@ alias ______x_cmd_gt_repo_release_init_owner_repo_and_release="
 
 # shellcheck disable=SC2154,SC2181
 # TODO:https://gitee.com/api/v5/swagger#/patchV5ReposOwnerRepoReleasesId
-___x_cmd_gt_repo_release_update() {
+___x_cmd_gt_repo_release_update(){
     local O="${O:-GITEE_DEFAULT}"
     param:scope  "gitee/$O"
     param:dsl    '
@@ -126,7 +126,7 @@ options:
 }
 
 # TODO: https://gitee.com/api/v5/swagger#/deleteV5ReposOwnerRepoReleasesId
-___x_cmd_gt_repo_release_rm() {
+___x_cmd_gt_repo_release_rm(){
     local O="${O:-GITEE_DEFAULT}"
     param:scope  "gitee/$O"
     param:dsl    '
@@ -140,7 +140,7 @@ options:
 }
 
 # TODO: https://gitee.com/api/v5/swagger#/getV5ReposOwnerRepoReleasesLatest
-___x_cmd_gt_repo_release_latest() {
+___x_cmd_gt_repo_release_latest(){
     local O="${O:-GITEE_DEFAULT}"
     param:scope     "gitee/$O"
     param:dsl    '
@@ -154,7 +154,7 @@ options:
 }
 
 # TODO: https://gitee.com/api/v5/swagger#/getV5ReposOwnerRepoReleasesId
-___x_cmd_gt_repo_release_info() {
+___x_cmd_gt_repo_release_info(){
     local O="${O:-GITEE_DEFAULT}"
     param:scope     "gitee/$O"
     param:dsl    '

@@ -19,7 +19,7 @@ ___x_cmd_gt_repo_pr_testers(){
 }
 
 # https://gitee.com/api/v5/swagger#/postV5ReposOwnerRepoPullsNumberTesters
-___x_cmd_gt_repo_pr_testers_add() {
+___x_cmd_gt_repo_pr_testers_add(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -33,7 +33,7 @@ options:
 }
 
 # https://gitee.com/api/v5/swagger#/deleteV5ReposOwnerRepoPullsNumberTesters
-___x_cmd_gt_repo_pr_testers_delete() {
+___x_cmd_gt_repo_pr_testers_delete(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -47,7 +47,7 @@ options:
 }
 
 # https://gitee.com/api/v5/swagger#/patchV5ReposOwnerRepoPullsNumberTesters
-___x_cmd_gt_repo_pr_testers_reset() {
+___x_cmd_gt_repo_pr_testers_reset(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -62,7 +62,7 @@ options:
 }
 
 #
-___x_cmd_gt_repo_pr_testers_test() {
+___x_cmd_gt_repo_pr_testers_test(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:

@@ -18,7 +18,7 @@ ___x_cmd_gt_current(){
 }
 
 # shellcheck disable=SC2120
-___x_cmd_gt_current_repo() {
+___x_cmd_gt_current_repo(){
     param:void
     local O="${O:-GITEE_DEFAULT}"
 
@@ -32,7 +32,7 @@ ___x_cmd_gt_current_repo() {
 
 # shellcheck disable=SC2120
 # https://gitee.com/api/v5/swagger#/getV5User
-___x_cmd_gt_current_owner() {
+___x_cmd_gt_current_owner(){
     param:void
     local O="${O:-GITEE_DEFAULT}"
     if [ -n "$1" ]; then
@@ -59,7 +59,7 @@ ___x_cmd_gt_current_owner() {
 }
 
 # shellcheck disable=SC2120
-___x_cmd_gt_current_owner_type() {
+___x_cmd_gt_current_owner_type(){
     param:void
     local O="${O:-GITEE_DEFAULT}"
     if [ -n "$1" ]; then
@@ -85,7 +85,7 @@ ___x_cmd_gt_current_owner_type() {
     printf "%s" "$data"
 }
 
-______x_cmd_gt_owner_type_query() {
+______x_cmd_gt_owner_type_query(){
     param:void
     local owner="${1:?Provide owner name}"
     for types in "org" "enterprise" "user"

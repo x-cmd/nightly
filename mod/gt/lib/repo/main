@@ -24,7 +24,7 @@ ___x_cmd_gt_repo(){
 # Section: create
 # shellcheck disable=SC2154
 # https://gitee.com/api/v5/swagger#/postV5UserRepos
-___x_cmd_gt_repo_create() {
+___x_cmd_gt_repo_create(){
     local O="${O:-GITEE_DEFAULT}"
 
     param:scope     "gitee/$O"
@@ -66,7 +66,7 @@ option:
 }
 
 # shellcheck disable=SC2154
-___x_cmd_gt_repo_create_status_handler() {
+___x_cmd_gt_repo_create_status_handler(){
     if [ ! -t 1 ] || [ -n "$ENFORCE_JSON" ]; then
         cat
         return
@@ -84,7 +84,7 @@ ___x_cmd_gt_repo_create_status_handler() {
 # ORGANIZATION NAME
 # shellcheck disable=SC2154,SC2034
 # https://gitee.com/api/v5/swagger#/postV5OrgsOrgRepos
-___x_cmd_gt_org_repo_create() {
+___x_cmd_gt_org_repo_create(){
     # TODO: I don't know what does path means for an organization repo
     # path is null default repo name as path
     param:scope     "gitee/$O"
@@ -127,7 +127,7 @@ option:
     done
 }
 
-___x_cmd_gt_org_repo_create_status_handler() {
+___x_cmd_gt_org_repo_create_status_handler(){
     if [ ! -t 1 ] || [ -n "$ENFORCE_JSON" ]; then
         cat
         return
@@ -144,7 +144,7 @@ ___x_cmd_gt_org_repo_create_status_handler() {
 
 # https://gitee.com/api/v5/swagger#/postV5EnterprisesEnterpriseRepos
 # shellcheck disable=SC2154,SC2034
-___x_cmd_gt_enterprise_repo_create() {
+___x_cmd_gt_enterprise_repo_create(){
     param:scope     "gitee/$O"
     param:dsl       '
 type:
@@ -184,13 +184,13 @@ option:
 
     for name in "$@"; do
         printf "%s" "${gen_gt_json}" | sed s/%%name%%/"${name##%/}"/g | \
-            ___x_cmd_gt_http post "/v5/enterprises/${enterprise##*/}/repos" - |
+            ___x_cmd_gt_http post "/v5/enterprises/${enterprise##*/}/repos" - | \
             ___x_cmd_gt_enterprise_repo_create_status_handler
     done
     return 0
 }
 
-___x_cmd_gt_enterprise_repo_create_status_handler() {
+___x_cmd_gt_enterprise_repo_create_status_handler(){
     if [ ! -t 1 ] || [ -n "$ENFORCE_JSON" ]; then
         cat
         return
@@ -208,7 +208,7 @@ ___x_cmd_gt_enterprise_repo_create_status_handler() {
 
 # Section: list
 # shellcheck disable=SC2154,SC2145
-___x_cmd_gt_repo_ls() {
+___x_cmd_gt_repo_ls(){
     param:void
     local owner_type
     if [ $# -eq 0 ];then
@@ -227,7 +227,7 @@ ___x_cmd_gt_repo_ls() {
 
 # shellcheck disable=SC2154,SC2034
 # TODO: https://gitee.com/api/v5/swagger#/patchV5ReposOwnerRepo need to design
-___x_cmd_gt_repo_update() {
+___x_cmd_gt_repo_update(){
     param:scope     "gitee/$O"
     param:dsl       '
 type:
@@ -237,7 +237,7 @@ options:
     --name                  "rename repo"                                                           <>=""
 
     --access                "private,public"                                                        <>:Access=""
-    --path|-p               "repo path"                                                             <>=""
+    -p|--path               "repo path"                                                             <>=""
     --description           "repo description"                                                      <>=""
     --homepage              "homepage"                                                              <>=""
     --default_branch        "repo default branch"                                                   <>=""
@@ -267,23 +267,30 @@ options:
             no_online_edit=^no_online_edit)"
 
     ___x_cmd_gt_param_init_owner_repo
-    ___x_cmd_gt_http patch "/v5/repos/${owner_repo}" "$gen_gt_json" | \
-    {
-        ___x_cmd_git_json_query_rename url=.html_url
-        if [ -n "$url" ]; then
-            ___x_cmd_ui_tf true     "Update $name successfully" "url: $url"
-        else
-            ___x_cmd_ui_tf false    "Update failure: $name."
-            return 1
-        fi
-    }
+    printf "%s" "${gen_gt_json}" | ___x_cmd_gt_http patch "/v5/repos/${owner_repo}" - | \
+        ___x_cmd_gt_repo_update_status_handler
+}
+
+___x_cmd_gt_repo_update_status_handler(){
+    if [ ! -t 1 ] || [ -n "$ENFORCE_JSON" ]; then
+        cat
+        return
+    fi
+
+    ___x_cmd_git_json_query_rename url=.html_url
+    if [ -n "$url" ]; then
+        ___x_cmd_ui_tf true     "Update $name successfully" "url: $url"
+    else
+        ___x_cmd_ui_tf false    "Update failure: $name."
+        return 1
+    fi
 }
 # EndSection
 
 # Section: info
 # shellcheck disable=SC2154
 # https://gitee.com/api/v5/swagger#/getV5ReposOwnerRepo
-___x_cmd_gt_repo_info() {
+___x_cmd_gt_repo_info(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -310,12 +317,12 @@ options:
 # Section: del & clear
 # https://gitee.com/api/v5/swagger#/deleteV5ReposOwnerRepo
 # shellcheck disable=SC2181,SC2154
-___x_cmd_gt_repo_rm() {
+___x_cmd_gt_repo_rm(){
     # TODO: -y force del
     param:scope     "gitee/$O"
     param:dsl       '
 options:
-    #n      "Provide repo list"    <>
+    #n      "Provide repo path list"    <>
 '
     param:run
 
@@ -334,11 +341,11 @@ options:
 
 # shellcheck disable=SC2181
 # https://gitee.com/api/v5/swagger#/putV5ReposOwnerRepoClear
-___x_cmd_gt_repo_clear() {
+___x_cmd_gt_repo_clear(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
-    #1|--repo          "Provide owner name and repo name.(default:the current user repo)"   <>:RepoName
+    #1|--repo          "Provide owner name and repo path.(default:the current user repo)"   <>:RepoName
 '
     param:run
 
