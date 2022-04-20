@@ -25,7 +25,7 @@ ___x_cmd_gt_org(){
 # Section: list & info
 # shellcheck disable=SC2154
 # https://gitee.com/api/v5/swagger#/getV5UserOrgs
-___x_cmd_gt_org_ls() {
+___x_cmd_gt_org_ls(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -50,7 +50,7 @@ options:
 
 # shellcheck disable=SC2154
 # https://gitee.com/api/v5/swagger#/getV5OrgsOrg
-___x_cmd_gt_org_info() {
+___x_cmd_gt_org_info(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -75,7 +75,7 @@ options:
 # It is very rare TODO: batch?
 # shellcheck disable=SC2181
 # https://gitee.com/api/v5/swagger#/postV5UsersOrganization
-___x_cmd_gt_org_create() {
+___x_cmd_gt_org_create(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -122,7 +122,7 @@ ___x_cmd_gt_org_repo(){
 }
 
 # https://gitee.com/api/v5/swagger#/getV5OrgsOrgRepos
-___x_cmd_gt_org_repo_ls() {
+___x_cmd_gt_org_repo_ls(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -153,7 +153,7 @@ options:
 # Section: quit
 # shellcheck disable=SC2181
 # https://gitee.com/api/v5/swagger#/deleteV5UserMembershipsOrgsOrg
-___x_cmd_gt_org_quit() {
+___x_cmd_gt_org_quit(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:

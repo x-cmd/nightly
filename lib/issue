@@ -24,7 +24,7 @@ ___x_cmd_gt_issue(){
 
 # shellcheck disable=SC2154,SC2034
 # https://gitee.com/api/v5/swagger#/postV5ReposOwnerIssues
-___x_cmd_gt_issue_create() {
+___x_cmd_gt_issue_create(){
     param:scope     "gitee/$O"
     param:dsl      '
 options:
@@ -60,7 +60,7 @@ options:
 
 # shellcheck disable=SC2154,SC2034
 # https://gitee.com/api/v5/swagger#/patchV5ReposOwnerIssuesNumber
-___x_cmd_gt_issue_update() {
+___x_cmd_gt_issue_update(){
     param:scope     "gitee/$O"
     param:dsl       '
 type:
@@ -126,7 +126,7 @@ options:
 # shellcheck shell=sh
 # shellcheck disable=SC2039,3043,SC2154
 # https://gitee.com/api/v5/swagger#/getV5ReposOwnerRepoIssuesComments
-___x_cmd_gt_repo_issue() {
+___x_cmd_gt_repo_issue(){
     param:scope     "gitee/$O"
     param:dsl       '
 type:

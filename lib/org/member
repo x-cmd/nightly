@@ -25,7 +25,7 @@ ___x_cmd_gt_org_member(){
 
 # shellcheck disable=SC2154
 # https://gitee.com/api/v5/swagger#/getV5OrgsOrgMembers
-___x_cmd_gt_org_member_ls() {
+___x_cmd_gt_org_member_ls(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
@@ -51,7 +51,7 @@ options:
 
 # shellcheck disable=SC2154
 # https://gitee.com/api/v5/swagger#/getV5OrgsOrgMembershipsUsername
-___x_cmd_gt_org_member_user() {
+___x_cmd_gt_org_member_user(){
     param:scope     "gitee/$O"
     param:dsl      '
 options:
@@ -75,7 +75,7 @@ options:
 
 # shellcheck disable=SC2181
 # https://gitee.com/api/v5/swagger#/putV5OrgsOrgMembershipsUsername
-___x_cmd_gt_org_member_add() {
+___x_cmd_gt_org_member_add(){
     param:scope     "gitee/$O"
     param:dsl       '
 type:
@@ -106,7 +106,7 @@ options:
 
 # shellcheck disable=SC2181
 # https://gitee.com/api/v5/swagger#/deleteV5OrgsOrgMembershipsUsername
-___x_cmd_gt_org_member_rm() {
+___x_cmd_gt_org_member_rm(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:
