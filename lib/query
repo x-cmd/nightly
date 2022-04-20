@@ -31,8 +31,8 @@ ____x_cmd_jo_query_with_regexarr(){
 ____x_cmd_jo_query_with_eqarr(){
     local IFS="$___X_CMD_UNSEENCHAR_001"
     {
-        printf "%s" "$*"
-        printf "%s" "---"
+        printf "%s\n" "$*"
+        printf "%s\n" "---"
         cat
     } | {
         awkpath="$___X_CMD_ROOT_MOD/jo/lib/query_awk/eqarr.awk"
@@ -41,6 +41,7 @@ ____x_cmd_jo_query_with_eqarr(){
             -f "$___X_CMD_ROOT_MOD/awk/lib/default.awk" \
             -f "$___X_CMD_ROOT_MOD/awk/lib/json.awk" \
             -f "$___X_CMD_ROOT_MOD/awk/lib/jiter.awk" \
+            -f "$___X_CMD_ROOT_MOD/jo/lib/query_awk/share.awk" \
             -f "$awkpath"
     }
 }
