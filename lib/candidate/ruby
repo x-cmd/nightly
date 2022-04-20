@@ -41,19 +41,19 @@ ___x_cmd_env_ruby_download_archive(){
     esac
 
     if ___x_cmd_env_util_is_archive_cached ruby "$version" 2>/dev/null; then
-		env_log info  "Archive existed: $version"
+		env:info  "Archive existed: $version"
 		return 0
 	fi
     local archive_path="$___X_CMD_ENV_PATH/ruby/archive/ruby-${version}.${compression}"
     mkdir -p "$(dirname "${archive_path}")"
     local download_url="https://cache.ruby-lang.org/pub/ruby/${t_version}/ruby-${version}.${compression}"
-    env_log info "Downloading ruby ${download_url}"
+    env:info "Downloading ruby ${download_url}"
     echo "${download_url}"
     if ! curl --progress-bar --location --retry-max-time 10 --retry 0 "${download_url}" --output "${archive_path}"; then
-		env_log info "Download failure"
+		env:info "Download failure"
 		return 1
 	fi
-    env_log info "Download completed $download_url"
+    env:info "Download completed $download_url"
 }
 
 # EndSection
@@ -94,7 +94,7 @@ A
     esac
     local code=$?
     rm -rf "${archive_unpack_files}"
-    env_log info "Done unpacking!"
+    env:info "Done unpacking!"
     return $code
 }
 

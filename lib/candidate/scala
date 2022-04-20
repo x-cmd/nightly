@@ -21,7 +21,7 @@ ___x_cmd_env_scala_download_archive(){
 	local version="${1:?Provide a version}"
     local archive_path="$___X_CMD_ENV_PATH/scala/archive/scala-${version}.zip"
     local download_url
-    env_log info "Downloading scala ${version}"
+    env:info "Downloading scala ${version}"
 
     # TODO: optimizable
     case ${version} in
@@ -37,14 +37,14 @@ ___x_cmd_env_scala_download_archive(){
     fi
 
     if ___x_cmd_env_util_is_archive_cached scala "$version" 2>/dev/null; then
-        env_log info "Archive existed: $version"
+        env:info "Archive existed: $version"
         return 0
     fi
 
     mkdir -p "$(dirname "$archive_path")"
-    env_log info "Downloading $download_url"
+    env:info "Downloading $download_url"
     if ! curl --progress-bar --location --retry-max-time 10 --retry 0 "$download_url" --output "$archive_path" ; then
-        env_log error "Download failure from $download_url"
+        env:error "Download failure from $download_url"
         return 1
     fi
 }
@@ -55,7 +55,7 @@ ___x_cmd_env_scala_download_archive(){
 
 ___x_cmd_env_scala_unpack(){
 	local version="${1:?Provide a version}"
-    env_log info "Unpacking: scala ${version}"
+    env:info "Unpacking: scala ${version}"
     local archive_path="$___X_CMD_ENV_PATH/scala/archive/scala-$version.zip"
     x uz "$___X_CMD_ENV_PATH/scala/archive/scala-${version}.zip" "$(dirname "$archive_path")" || return 1
 

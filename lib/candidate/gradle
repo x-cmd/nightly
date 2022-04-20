@@ -23,7 +23,7 @@ ___x_cmd_env_gradle_download_archive(){
     local version="${1:?Provide gradle version}"
 
     if ___x_cmd_env_util_is_archive_cached gradle "$version" 2>/dev/null; then
-        env_log info "Archive existed: $version"
+        env:info "Archive existed: $version"
         return 0
     fi
 
@@ -31,18 +31,18 @@ ___x_cmd_env_gradle_download_archive(){
     mkdir -p "$(dirname "$archive_path")"
     local download_url="https://services.gradle.org/distributions/gradle-$version-all.zip"
 
-    env_log info "Downloading $download_url"
+    env:info "Downloading $download_url"
     if ! curl --progress-bar --location --retry-max-time 10 --retry 0 "$download_url" --output "$archive_path" ; then
-        env_log error "Download failure from $download_url"
+        env:error "Download failure from $download_url"
         return 1
     fi
 
-    env_log info "Download completed $download_url"
+    env:info "Download completed $download_url"
 }
 
 ___x_cmd_env_gradle_unpack(){
 	local version="${1:?Provide a version}"
-    env_log info "Unpacking: gradle ${version}"
+    env:info "Unpacking: gradle ${version}"
 
     local archive_path="$___X_CMD_ENV_PATH/gradle/archive/gradle-$version.zip"
 	x uz "$archive_path" "$(dirname "$archive_path")" || return 1

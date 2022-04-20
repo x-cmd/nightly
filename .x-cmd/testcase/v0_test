@@ -10,117 +10,104 @@ hello world
 A
 }
 
-# test_gradle(){
-#     x env install gradle 7.4.2 2>/dev/null
-#     @assert stdout x env current gradle <<A
-# 7.4.2
-# A
-#     @assert stdout x env exec gradle 7.4.2 -version <<A
-
-# ------------------------------------------------------------
-# Gradle 7.4.2
-# ------------------------------------------------------------
-
-# Build time:   2022-03-31 15:25:29 UTC
-# Revision:     540473b8118064efcc264694cbcaa4b677f61041
-
-# Kotlin:       1.5.31
-# Groovy:       3.0.9
-# Ant:          Apache Ant(TM) version 1.10.11 compiled on July 10 2021
-# JVM:          19-ea (Oracle Corporation 19-ea+15-942)
-# OS:           Linux 5.15.28-1-MANJARO amd64
-# A
-# }
+test_gradle(){
+    x env install gradle 7.4.2 2>/dev/null
+    @assert stdout x env current gradle <<A
+7.4.2
+A
+    @assert true 'x env exec gradle 7.4.2 -version '
+}
 
 test_java(){
     x env install java 18-open 2>/dev/null
     @assert stdout x env current java <<A
 18-open
 A
-    @assert stdout x env exec java 18-open --version <<A
-openjdk 18-ea 2022-09-20
-OpenJDK Runtime Environment (build 18-ea+15-942)
-OpenJDK 64-Bit Server VM (build 18-ea+15-942, mixed mode, sharing)
+    @assert true 'x env exec java 18-open --version'
+}
+
+test_kotlin(){
+    x env install kotlin 1.6.10 2>/dev/null
+    @assert stdout x env current kotlin <<A
+1.6.10
+A
+    # @assert true  'cd $(x wsroot)/.x-cmd/helloworld &&  x env exec kotlin 1.6.10 hi.kt '
+}
+
+
+test_node(){
+    x env install node v17.8.0 2>/dev/null
+    @assert stdout x env current node <<A
+v17.8.0
+A
+    @assert stdout x env exec node v17.8.0 "$(x wsroot)/.x-cmd/helloworld/hi.js" <<A
+hello world
 A
 }
 
-# test_kotlin(){
-#     x env install kotlin 1.6.10 2>/dev/null
-#     @assert stdout x env current kotlin <<A
-# 1.6.10
-# A
-#     @assert stdout x env exec kotlin 1.6.10 -version <<A
-# Kotlin version 1.6.10-release-923 (JRE 19-ea+15-942)
-# A
+test_python(){
+    x env install python py39_4.11.0 2>/dev/null
+    @assert stdout x env current python <<A
+py39_4.11.0
+A
+    @assert stdout x env exec python py39_4.11.0 "$(x wsroot)/.x-cmd/helloworld/hi.py" <<A
+hello world
+A
+}
+
+# test_ruby(){
+#     :
 # }
 
+test_scala(){
+    x env install scala 3.0.2 2>/dev/null
+    @assert stdout x env current scala <<A
+3.0.2
+A
+    @assert stdout x env exec scala 3.0.2 "$(x wsroot)/.x-cmd/helloworld/hi.scala" <<A
+Hello, world
+A
+}
 
-# test_node(){
-#     x env install node v17.8.0 2>/dev/null
-#     @assert stdout x env current node <<A
-# v17.8.0
-# A
-#     @assert stdout x env exec node v17.8.0 "$(x wsroot)/.x-cmd/helloworld/hi.js" <<A
-# hello world
-# A
-# }
+test_springboot(){
+    x env install springboot 2.6.6 2>/dev/null
+    @assert stdout x env current springboot <<A
+2.6.6
+A
+    @assert true 'spring run "$(x wsroot)/.x-cmd/helloworld/hi.groovy" '
+}
 
-# test_python(){
-#     x env install python py39_4.11.0 2>/dev/null
-#     @assert stdout x env current python <<A
-# py39_4.11.0
-# A
-#     @assert stdout x env exec python py39_4.11.0 "$(x wsroot)/.x-cmd/helloworld/hi.py" <<A
-# hello world
-# A
-# }
+test_sbt(){
+    x env install sbt 1.6.0 2>/dev/null
+    @assert stdout x env current sbt <<A
+1.6.0
+A
+    @assert true 'cd "$(x wsroot)/.x-cmd/helloworld" && sbt run' <<A
+Hello, world
+A
 
-# # test_ruby(){
-# #     :
-# # }
+}
 
-# test_scala(){
-#     x env install scala 3.0.2 2>/dev/null
-#     @assert stdout x env current scala <<A
-# 3.0.2
-# A
-#     @assert stdout x env exec scala 3.0.2 "$(x wsroot)/.x-cmd/helloworld/hi.scala" <<A
-# Hello, world
-# A
-# }
+test_maven(){
+    x env install maven 3.8.5 2>/dev/null
+    @assert stdout x env current maven <<A
+3.8.5
+A
+    #  @assert stdout x env exec maven 3.8.5 "$(x wsroot)/.x-cmd/helloworld/hi_maven"
 
-# test_springboot(){
-#     x env install springboot 2.6.6 2>/dev/null
-#     @assert stdout x env current springboot <<A
-# 2.6.6
-# A
-#     @assert stdout x env exec springboot 2.6.6 "$(x wsroot)/.x-cmd/hi.groovy" <<A
-# Resolving dependencies.............................
+     @assert true  'cd "$(x wsroot)/.x-cmd/helloworld/hi_maven" && mvn compile'
 
-#   .   ____          _            __ _ _
-#  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
-# ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
-#  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
-#   '  |____| .__|_| |_|_| |_\__, | / / / /
-#  =========|_|==============|___/=/_/_/_/
-#  :: Spring Boot ::                (v2.4.2)*
-# A
-# }
+}
 
-# test_sbt(){
-#     x env install sbt 1.6.0 2>/dev/null
-#     @assert stdout x env current sbt <<A
-# 1.6.0
-# A
-#     @assert stdout x env exec sbt 1.6.0 "$(x wsroot)/.x-cmd/helloworld/hi.scala"
-# }
+test_perl(){
+    x env install perl 5.26.1.1 2>/dev/null
+    @assert stdout x env current perl <<A
+ 3.8.5
+A
+    @assert stdout x env exec perl 5.26.1.1 "$(x wsroot)/.x-cmd/helloworld/hi.perl" <<A
+hello world
+A
+}
 
-# test_maven(){
-#     x env install maven 3.8.5 2>/dev/null
-#     @assert stdout x env current maven <<A
-# 3.8.5
-# A
-
-# }
 @assert:errexit:off
 @assert:file:func

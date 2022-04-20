@@ -40,7 +40,7 @@ ___x_cmd_env_node_download_archive(){
     local version="${1:?Provide node version}"
 
     if ___x_cmd_env_util_is_archive_cached node "$version" 2>/dev/null; then
-        env_log info "Archive existed: $version"
+        env:info "Archive existed: $version"
         return 0
     fi
 
@@ -60,8 +60,8 @@ A
     # TODO: Consider use config instead of code in the future
     local version_without_v="${version#v}"
     if [ "$platform-$arch" = "darwin-arm64" ] && [ "${version_without_v%%.*.*}" -lt 16 ]; then
-        env_log warn "You are using darwin arm64, but node $version is not available for this platform. (node < 16.x)"
-        env_log warn "Use x86_64 instead."
+        env:warn "You are using darwin arm64, but node $version is not available for this platform. (node < 16.x)"
+        env:warn "Use x86_64 instead."
         arch="x64"
     fi
 
@@ -70,13 +70,13 @@ A
     local download_url="${___X_CMD_ENV_NODE_MIRROR}/${version}/${slug}.${compression}"
     if ! curl -L -C - --progress-bar "${download_url}" -o "${archive_path}"; then
         rm -rf "${archive_path}"
-        env_log error "Download from ${download_url} failed."
+        env:error "Download from ${download_url} failed."
         return 1
     fi
 
     # TODO: checksum
 
-    env_log info "Downloaded ${download_url} to ${archive_path}"
+    env:info "Downloaded ${download_url} to ${archive_path}"
 }
 # EndSection
 
@@ -122,7 +122,7 @@ A
     local code=$?
 
     rm -rf "${archive_unpack_files}"
-    env_log info "Done unpacking!"
+    env:info "Done unpacking!"
     return $code
 }
 
