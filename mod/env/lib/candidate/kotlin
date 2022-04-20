@@ -16,18 +16,18 @@ ___x_cmd_env_kotlin_ls_remote(){
 ___x_cmd_env_kotlin_download_archive(){
 	local version="${1:? Provide a version}"
 	if ___x_cmd_env_util_is_archive_cached kotlin "$version" 2>/dev/null; then
-		env_log info  "Archive existed: $version"
+		env:info  "Archive existed: $version"
 		return 0
 	fi
 	local archive_path="$___X_CMD_ENV_PATH/kotlin/archive/kotlin-${version}.zip"
 	mkdir -p "$(dirname "${archive_path}")"
 	download_url="https://github.com/JetBrains/kotlin/releases/download/v${version}/kotlin-compiler-${version}.zip"
-	env_log info "Downloading kotlin ${version}"
+	env:info "Downloading kotlin ${version}"
 	if ! curl --progress-bar --location --retry-max-time 10 --retry 0 "${download_url}" --output "${archive_path}"; then
-		env_log info "Download failure"
+		env:info "Download failure"
 		return 1
 	fi
-	env_log info "Download completed $download_url"
+	env:info "Download completed $download_url"
 }
 
 # EndSection
@@ -37,7 +37,7 @@ ___x_cmd_env_kotlin_download_archive(){
 ___x_cmd_env_kotlin_unpack(){
 	local version="${1:?Provide a version}"
 	local archive_path="$___X_CMD_ENV_PATH/kotlin/archive/kotlin-${version}.zip"
-	env_log info "unpack beginning kotlin-${version}"
+	env:info "unpack beginning kotlin-${version}"
 	x uz "$archive_path" "$(dirname "${archive_path}")" || return 1
 	local archive_unpack_files
 	local versions_path="$___X_CMD_ENV_PATH/kotlin/versions"

@@ -11,6 +11,7 @@ sbt
 maven
 perl
 springboot
+deno
 kotlin
 gradle"
 
@@ -75,7 +76,7 @@ ___x_cmd_env_run_common_if_notfound(){
     if command -v "$cmd" >/dev/null; then
         "$cmd" "$@"
     else
-        env_log debug "Candidate ${candidate} has no op: $cmd, use common $op function."
+        env:debug "Candidate ${candidate} has no op: $cmd, use common $op function."
         "___x_cmd_env_common_${op}" "$candidate" "$@"
     fi
 }
@@ -95,7 +96,7 @@ A
 
     local candidate="${1}"
     if [ -z "$candidate" ]; then
-        env_log warn "No candidate specified"
+        env:warn "No candidate specified"
         ___x_cmd_env_main_ls --help
         return 1
     fi
@@ -132,7 +133,7 @@ A
     local candidate="${1}"
     local version
     if ! version="$(___x_cmd_env_run_common_if_notfound full_version "$candidate" "$2")"; then
-        env_log error "Version of $candidate not found: $version"
+        env:error "Version of $candidate not found: $version"
         return 1
     fi
     shift 2
@@ -155,7 +156,7 @@ A
     local candidate="${1}"
     local version
     if ! version="$(___x_cmd_env_run_common_if_notfound full_version "$candidate" "$2")"; then
-        env_log error "Version of $candidate not found: $version"
+        env:error "Version of $candidate not found: $version"
         return 1
     fi
     shift 2
@@ -215,7 +216,7 @@ A
 
     local version
     if ! version="$(___x_cmd_env_run_common_if_notfound full_version "$candidate" "$2")"; then
-        env_log error "Version of $candidate not found: $version"
+        env:error "Version of $candidate not found: $version"
         return 1
     fi
     shift 2
@@ -242,7 +243,7 @@ A
 
     local version
     if ! version="$(___x_cmd_env_run_common_if_notfound full_version "$candidate" "$2")"; then
-        env_log error "Version of $candidate not found: $version"
+        env:error "Version of $candidate not found: $version"
         return 1
     fi
     shift 2
@@ -278,7 +279,7 @@ A
 
     local version
     if ! version="$(___x_cmd_env_run_common_if_notfound full_version "$candidate" "$2")"; then
-        env_log error "Version of $candidate not found: $version"
+        env:error "Version of $candidate not found: $version"
         return 1
     fi
     shift 2
@@ -303,7 +304,10 @@ A
     fi
 
     local candidate
-    candidate="$(___x_cmd_env_util_cmd_to_candidate "$cmd")"
+    if ! candidate="$(___x_cmd_env_util_cmd_to_candidate "$cmd")" 2>/dev/null ; then
+        env:error "Command $cmd not found"
+        return 1
+    fi
 
     # TODO: can which specific versions
     ___x_cmd_env_run_common_if_notfound which "$candidate" "$cmd" "$@"
@@ -326,7 +330,10 @@ A
     fi
 
     local candidate
-    candidate="$(___x_cmd_env_util_cmd_to_candidate "$cmd")"
+    if ! candidate="$(___x_cmd_env_util_cmd_to_candidate "$cmd")" 2>/dev/null ; then
+        env:error "Command $cmd not found"
+        return 1
+    fi
 
     local version
     case "$1" in
@@ -334,7 +341,7 @@ A
     esac
 
     if ! version="$(___x_cmd_env_run_common_if_notfound full_version "$candidate" "$version")"; then
-        env_log error "Version of $candidate not found: $2"
+        env:error "Version of $candidate not found: $2"
         return 1
     fi
     shift 1

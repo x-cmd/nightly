@@ -8,7 +8,7 @@ ___x_cmd_env_go_get_system_platform(){
         linux)      platform=linux    ;;
         win)        platform=windows  ;;
         darwin)     platform=darwin   ;;
-        *)          env_log error "your arch:(" "$(___x_cmd_os name)" ") are not supported"
+        *)          env:error "your arch:(" "$(___x_cmd_os name)" ") are not supported"
                     return 1
                     ;;
     esac
@@ -17,7 +17,7 @@ ___x_cmd_env_go_get_system_platform(){
         x64)           arch=amd64      ;;
         arm64)         arch=arm64      ;;
         armv7l|ARMv6)  arch=armv6l     ;;
-        *)  env_log error "your arch:(" "$(___x_cmd_os arch)" ") are not supported"
+        *)  env:error "your arch:(" "$(___x_cmd_os arch)" ") are not supported"
             return 1
             ;;
     esac
@@ -52,22 +52,22 @@ ___x_cmd_env_go_ls_remote(){
 ___x_cmd_env_go_download_archive(){
     local version="${1:?Provide a version}"
     if ___x_cmd_env_util_is_archive_cached go "$version" 2>/dev/null; then
-        env_log info "Archive existed: $version"
+        env:info "Archive existed: $version"
         return 0
     fi
 
     if ___x_cmd_env_go_get_system_platform ; then
         local compression='tar.gz'; [ "${platform}" = 'windows' ] && compression='zip'
         download_url="https://golang.google.cn/dl/go${version}.${platform}-${arch}.${compression}"
-        env_log info "Downloading go ${download_url}"
+        env:info "Downloading go ${download_url}"
     fi
     local archive_path="$___X_CMD_ENV_PATH/go/archive/go-${version}.${compression}"
     mkdir -p "$(dirname "$archive_path")"
     if ! curl --progress-bar --location --retry-max-time 10 --retry 0 "${download_url}" --output "${archive_path}"; then
-	    env_log info "Download failure"
+	    env:info "Download failure"
 	    return 1
 	fi
-   env_log info "Download Done"
+   env:info "Download Done"
 }
 
 # EndSection
@@ -96,7 +96,7 @@ A
     esac
     local code=$?
     rm -rf "${archive_unpack_files}"
-    env_log info "Done unpacking!"
+    env:info "Done unpacking!"
     return $code
 }
 

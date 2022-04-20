@@ -13,7 +13,7 @@ ___x_cmd_env_python_get_platform_arch(){
         linux)      ___X_CMD_ENV_PLATFORM=Linux                     ;;
         windows)    ___X_CMD_ENV_PLATFORM=Windows                   ;;
         darwin)     ___X_CMD_ENV_PLATFORM=MacOSX                    ;;
-        *)          env_log error "your arch:(" "$_platform" ") are not supported"
+        *)          env:error "your arch:(" "$_platform" ") are not supported"
                     return 1
                     ;;
     esac
@@ -21,7 +21,7 @@ ___x_cmd_env_python_get_platform_arch(){
     case "$_arch" in
         aarch64|arm64|armv7l|armv6l)    ___X_CMD_ENV_ARCH="$_arch"   ;;
         x64)                            ___X_CMD_ENV_ARCH=x86_64     ;;
-        *)          env_log error "your arch:(" "$_arch" ") are not supported"
+        *)          env:error "your arch:(" "$_arch" ") are not supported"
                     return 1
                     ;;
     esac
@@ -78,7 +78,7 @@ ___x_cmd_env_python_download_archive(){
     local version="${1:?Provide python version}"
 
     if ___x_cmd_env_util_is_archive_cached python "$version" 2>/dev/null; then
-        env_log info "Archive existed: $version"
+        env:info "Archive existed: $version"
         return 0
     fi
 
@@ -96,13 +96,13 @@ ___x_cmd_env_python_download_archive(){
     fi
 
     local download_url="$url/$miniconda_filename"
-    env_log info "Downloading $download_url"
+    env:info "Downloading $download_url"
     if ! curl --fail --output "$archive_path" "$download_url"; then
-        env_log error "Download failure from $download_url"
+        env:error "Download failure from $download_url"
         return 1
     fi
 
-    env_log info "Download completed $archive_path"
+    env:info "Download completed $archive_path"
 }
 
 ___x_cmd_env_python_unpack(){
@@ -111,7 +111,7 @@ ___x_cmd_env_python_unpack(){
     local ___X_CMD_ENV_COMPRESSION
     ___x_cmd_env_python_get_miniconda_filename_and_compression "$version"
 
-    env_log info "Unpacking python-$version.$___X_CMD_ENV_COMPRESSION"
+    env:info "Unpacking python-$version.$___X_CMD_ENV_COMPRESSION"
 
     local versions_path="$___X_CMD_ENV_PATH/python/versions"
     mkdir -p "${versions_path}"

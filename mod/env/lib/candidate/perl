@@ -8,13 +8,14 @@ ___x_cmd_env_perl_get_system_platform(){
     local _platform
     local _arch
     local _compression
+    local ___X_CMD_ENV_PLATFORM
     _platform="$(x os name)"
     _arch="$(x os arch)"
     case "$_platform" in
         linux)      ___X_CMD_ENV_PLATFORM=linux    ;;
         win)        ___X_CMD_ENV_PLATFORM=windows  ;;
         darwin)     ___X_CMD_ENV_PLATFORM=darwin   ;;
-        *)          env_log error "your arch:(" "$(___x_cmd_os name)" ") are not supported"
+        *)          env:error "your arch:(" "$(___x_cmd_os name)" ") are not supported"
                     return 1
                     ;;
     esac
@@ -22,7 +23,7 @@ ___x_cmd_env_perl_get_system_platform(){
     case "$_arch" in
         x32)        ___X_CMD_ENV_ARCH="64bit"   ;;
         x64)        ___X_CMD_ENV_ARCH="64bit"   ;;
-        *)          env_log error "your arch:(" "$_arch" ") are not supported"
+        *)          env:error "your arch:(" "$_arch" ") are not supported"
                     return 1
                     ;;
     esac
@@ -30,7 +31,7 @@ ___x_cmd_env_perl_get_system_platform(){
     case "$_platform" in
         linux | darwin)     _compression=tar.gz   ;;
         win)                _compression=zip      ;;
-        *)                  env_log error "your arch:(" "$(___x_cmd_os name)" ") are not supported"
+        *)                  env:error "your arch:(" "$(___x_cmd_os name)" ") are not supported"
                             return 1
                             ;;
     esac
@@ -43,13 +44,14 @@ ___x_cmd_env_perl_ls_remote(){
     local cache_expiration="${2:-86400}"
     ___x_cmd_env_perl_get_system_platform
     if [ "$___X_CMD_ENV_PLATFORM" = "linux" ] || [ "$___X_CMD_ENV_PLATFORM" = "darwin" ] ; then
-        ___x_cmd_httpget "https://api.github.com/repos/skaji/relocatable-perl/releases" "$cache_path" "$cache_expiration" && \
+        ___x_cmd_httpget "https://api.github.com/repos/skaji/relocatable-perl/releases" "$cache_path" "$cache_expiration" 2>/dev/null && \
             ja 'k()=="tag_name"{ print v(); }' < "$cache_path"
     fi
     if [ "$___X_CMD_ENV_PLATFORM" = "windows" ] ; then
-        ___x_cmd_httpget "https://strawberryperl.com/releases.html" "$cache_path" "$cache_expiration" && \
+        ___x_cmd_httpget "https://strawberryperl.com/releases.html" "$cache_path" "$cache_expiration" 2>/dev/null && \
             awk ' match($0, /<td><b>[0-9.]+<\/b><\/td>/) { print substr($0,RSTART+7,RLENGTH-16)}' < "$cache_path"
     fi
+
 }
 # EndSection
 
@@ -58,9 +60,9 @@ ___x_cmd_env_perl_download_archive(){
     local version="${1:?Provide a version}"
     local archive_path="$___X_CMD_ENV_PATH/perl/archive/perl-${version}.${_compression}"
     ___x_cmd_env_perl_get_system_platform
-    env_log info "Downloading perl-${version}"
+    env:info "Downloading perl-${version}"
     if ___x_cmd_env_util_is_archive_cached perl "$version" 2>/dev/null; then
-		env_log info  "Archive existed: $version"
+		env:info  "Archive existed: $version"
 		return 0
 	fi
     mkdir -p "$(dirname "${archive_path}")"
@@ -76,10 +78,10 @@ ___x_cmd_env_perl_download_archive(){
         fi
     fi
     if ! curl --progress-bar --location --retry-max-time 10 --retry 0 "$download_url" --output "$archive_path" ; then
-        env_log error "Download failure from $download_url"
+        env:error "Download failure from $download_url"
         return 1
     fi
-        env_log info "Download Successfully"
+        env:info "Download Successfully"
 
 }
 # EndSection
@@ -88,7 +90,7 @@ ___x_cmd_env_perl_download_archive(){
 
 ___x_cmd_env_perl_unpack(){
     local version="${1:?Provide a version}"
-    env_log info "Unpacking: perl ${version}"
+    env:info "Unpacking: perl ${version}"
     local archive_path="$___X_CMD_ENV_PATH/perl/archive/perl-${version}.tar.gz"
     ___x_cmd_env_perl_get_system_platform
     if [ "$___X_CMD_ENV_PLATFORM" = "linux" ] ; then

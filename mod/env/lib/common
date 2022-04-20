@@ -72,7 +72,7 @@ ___x_cmd_env_common_use(){
     ___x_cmd_env_common_init_file_add "$candidate" "$version_path" && \
         # ___x_cmd_modfile_add "$___X_CMD_ROOT/.env/env/use" "$version_path" && \
             printf "%s\n" "$version" > "$___X_CMD_ENV_PATH/$candidate/version" && \
-                env_log info "Using $candidate $version -> $___X_CMD_ENV_PATH/$candidate/version"
+                env:info "Using $candidate $version -> $___X_CMD_ENV_PATH/$candidate/version"
 }
 
 ___x_cmd_env_common_try(){
@@ -82,7 +82,7 @@ ___x_cmd_env_common_try(){
 
     ___x_cmd_env_util_is_downloaded "$candidate" "$version" 2>/dev/null || return 1
     ___x_cmd_env_util_add_path "$version_path" && \
-        env_log info "Setting ${candidate} ${version} in current Shell."
+        env:info "Setting ${candidate} ${version} in current Shell."
 }
 
 # EndSection
@@ -96,7 +96,7 @@ ___x_cmd_env_common_current(){
 
     # No any cmd version
     if [ -z "$cmd_path" ]; then
-        env_log error "No version of $cmd detected, please install it first! "
+        env:error "No version of $cmd detected, please install it first! "
         return 1
 
     # After try and no cmd version in xenv, but has cmd version in current shell.
@@ -114,13 +114,13 @@ ___x_cmd_env_common_current(){
     else
         local version
         if ! version=$(___x_cmd_env_util_shims_which_version "$cmd"); then
-            env_log error "No version of $cmd detected, please download it first! "
+            env:error "No version of $cmd detected, please download it first! "
             return 1
         fi
 
         local exactly_path="$___X_CMD_ENV_PATH/$cmd/versions/$version/bin/$cmd"
         if [ ! -f "$exactly_path" ]; then
-            env_log error "No such file: $exactly_path"
+            env:error "No such file: $exactly_path"
             return 1
         fi
 
@@ -136,17 +136,17 @@ ___x_cmd_env_common_download(){
     local version="${2:?Provide version}"
 
     if ___x_cmd_env_util_is_downloaded "$candidate" "$version" 2>/dev/null ; then
-        env_log info "Already downloaded $candidate $version"
+        env:info "Already downloaded $candidate $version"
         return 0
     fi
 
     if ! ___x_cmd_env_run_common_if_notfound download_archive "$candidate" "$version"; then
-        env_log error "Failed to download $candidate $version"
+        env:error "Failed to download $candidate $version"
         return 1
     fi
 
     if ! ___x_cmd_env_run_common_if_notfound unpack "$candidate" "$version"; then
-		env_log error "Failed to unpack $candidate of version: $version."
+		env:error "Failed to unpack $candidate of version: $version."
 		return 1
 	fi
 }
@@ -159,20 +159,20 @@ ___x_cmd_env_common_install(){
     local version="${2:?Provide version}"
     local use_shims="${3:-""}"
 
-    env_log info "Installing $candidate $version"
+    env:info "Installing $candidate $version"
     if ! ___x_cmd_env_run_common_if_notfound download "$candidate" "$version"; then
-        env_log error "Failed to installed $candidate of version: $version."
+        env:error "Failed to installed $candidate of version: $version."
         return 1
     fi
 
     ___x_cmd_env_common_use "$candidate" "$version" "$use_shims" || return 1
-    env_log info "Successfully installed $candidate $version"
+    env:info "Successfully installed $candidate $version"
 }
 
 ___x_cmd_env_common_uninstall(){
     local candidate="${1:?Provide candidate}"
     local version="${2:?Provide the version}"
-    env_log info "Uninstalling $1 $2"
+    env:info "Uninstalling $1 $2"
 
     local candidate_path="$___X_CMD_ENV_PATH/${candidate}/versions/${version}"
     if [ -d "$candidate_path" ]; then
@@ -193,7 +193,7 @@ ___x_cmd_env_common_which(){
     local cmd_path
     cmd_path="$(command -v "$cmd")"
 
-    env_log debug "cmd_path: $cmd_path, cmd: $cmd"
+    env:debug "cmd_path: $cmd_path, cmd: $cmd"
     if [ "$cmd_path" != "$___X_CMD_ENV_PATH/$candidate/shims/$cmd" ]; then
         command -v "$cmd"
         return 0
@@ -203,7 +203,7 @@ ___x_cmd_env_common_which(){
     if version=$(___x_cmd_env_util_shims_which_version "$candidate"); then
         local exactly_path="$___X_CMD_ENV_PATH/$candidate/versions/$version/bin/$cmd"
         if [ ! -f "$exactly_path" ]; then
-            env_log error "No such file: $exactly_path"
+            env:error "No such file: $exactly_path"
             return 1
         fi
         printf "%s\n" "$exactly_path"
@@ -216,10 +216,10 @@ ___x_cmd_env_common_exec(){
     local version="${3:?Provide version}"; shift 3
 
     if ! ___x_cmd_env_util_is_downloaded "${candidate}" "${version}" 2>/dev/null ; then
-        env_log error "Candidate $candidate No such version: $version"
+        env:error "Candidate $candidate No such version: $version"
         return 1
     fi
-    env_log info "Executing $candidate $version $cmd"
+    env:info "Executing $candidate $version $cmd"
     PATH="${___X_CMD_ENV_PATH}/${candidate}/versions/${version}/bin:$PATH" "$cmd" "$@"
 }
 # EndSection
