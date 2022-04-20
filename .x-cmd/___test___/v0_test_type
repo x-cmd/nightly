@@ -15,10 +15,10 @@ type:
     Access = private "" public
 option:
     --aaa "desc aaa" <>:Access=public
-    --bbb "desc bbb" <>:Access=""
+    --bbb "desc bbb" <>:Access=
 
     --ccc "desc ccc" <>:License=fff
-    --ddd "desc ddd" <>:UserGroup=admin
+    --ddd "desc ddd" <>:UserGroup=
 '
     param:run
 
@@ -31,5 +31,5 @@ option:
 aaa:public
 bbb:
 ccc:fff
-ddd:admin
+ddd:
 A

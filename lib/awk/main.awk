@@ -6,6 +6,10 @@ function exec_help(){
     exit_now(1) # TODO: should I return 0?
 }
 
+BEGIN{
+    HAS_SPE_ARG = false
+}
+
 NR==4 {
     if( arg_arr[1] == "_dryrun" ){
         DRYRUN_FLAG = true
@@ -208,6 +212,7 @@ function handle_arguments(          i, j, arg_name, arg_name_short, arg_val, opt
 
     arg_arr_len = arg_arr[ L ]
     i = 1
+    arr_clone(arg_arr, tmp_arr)
     while (i <= arg_arr_len) {
 
         arg_name = arg_arr[ i ]
@@ -229,15 +234,17 @@ function handle_arguments(          i, j, arg_name, arg_name_short, arg_val, opt
                     option_name     = option_name_get_without_hyphen( option_id )
 
                     if (option_name == "") {
-                        panic_invalid_argument_error(arg_name_short)
+                        HAS_SPE_ARG = true
+                        break
                     }
                     code_append_assignment( option_name, "true" )
                 }
                 continue
             } else if( arg_name ~ /^--?/ ) {
-                panic_invalid_argument_error(arg_name)
+                break
             }
         }
+        if( HAS_SPE_ARG == true )        arr_clone(tmp_arr, arg_arr)
 
         option_arr_assigned[ option_id ] = true
 
@@ -323,7 +330,7 @@ function handle_arguments(          i, j, arg_name, arg_name_short, arg_val, opt
     arg_arr[ L ]=arg_arr[ L ]-i+1
 
     handle_arguments_restargv()
-    if( HAS_PATH == true){
+    if( HAS_PATH == true ){
         code_append( "local path >/dev/null 2>&1" )
         code_append( "path=$___x_cmd_param_path" )
     }
