@@ -8,11 +8,12 @@ on:
 jobs:
   bot:
     runs-on: ubuntu-latest
+    env:
+      ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}
+      git_user: agent-zero
+      git_email: 0@x-cmd.com
     steps:
       - name: main
         uses: x-cmd/action@main
         with:
-          ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}
-          git_user: agent-zero
-          git_email: 0@x-cmd.com
           code: x ws pub0 || true
