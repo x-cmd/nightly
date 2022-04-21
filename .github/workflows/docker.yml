@@ -1,9 +1,9 @@
 name: 'docker build'
 on:
-  workflow_run:
-    workflows: ["publish x-cmd/x-cmd nightly"]
-    types:
-      - completed
+  # workflow_run:
+  #   workflows: ["publish x-cmd/x-cmd nightly"]
+  #   types:
+  #     - completed
   workflow_dispatch:
   
 jobs:
