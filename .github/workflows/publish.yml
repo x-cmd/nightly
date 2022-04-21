@@ -1,4 +1,4 @@
-name: Publish x-cmd/x-cmd nightly
+name: Package and Publish
 on:
   # push:
   workflow_dispatch:

@@ -1,4 +1,4 @@
-name: 'docker build'
+name: Docker Image Build
 on:
   # workflow_run:
   #   workflows: ["publish x-cmd/x-cmd nightly"]
