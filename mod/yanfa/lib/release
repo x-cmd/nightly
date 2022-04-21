@@ -1,0 +1,193 @@
+# shellcheck shell=sh disable=SC3043
+
+___x_cmd_yanfa_release_gitx(){
+    if [ -z "$___X_CMD_IN_CHINA_NET" ]; then
+        printf "%s\n" "github.com"
+    else
+        printf "%s\n" "gitee.com"
+    fi
+}
+
+___X_CMD_YANFA_RELEASE_TMP="${TMPDIR}/release/mod"
+
+
+# Section: module add pull update
+___x_cmd_yanfa_release_add()(
+    local name="${1:?Provide module name}"
+    # local position="${2:-"git@gitee.com/x-bash/$name.git"}"
+    local position="${2:-"https://$(___x_cmd_yanfa_release_gitx)/x-bash/$name.git"}"
+    local branch="${3:-main}"
+    cd "$___X_CMD_YANFA_RELEASE_TMP" && git clone --depth=1 "$position" -b "$branch"
+)
+
+___x_cmd_yanfa_release_update(){
+    param:void
+
+    local IFS
+    local mod
+
+    rm -rf "$___X_CMD_YANFA_RELEASE_TMP" # TODO: x rmrf
+    mkdir -p "$___X_CMD_YANFA_RELEASE_TMP"
+
+    ___x_cmd_yanfa_release_lsmod "$@" | {
+        while read -r mod; do
+            # OUT=/dev/null
+            x job put 7 ___x_cmd_yanfa_release_add "$mod"
+            printf "%s\n" "Cloning: $mod" >&2
+        done
+
+        x job wait
+    } | while read -r line; do
+        printf "%s\n" "$line"
+        case "$line" in
+            Write*)
+                printf "%s\n" "---------------"
+                cat "${line#Write: }"
+                printf "%s\n" "---------------"
+        esac
+    done
+    ___x_cmd_yanfa_release_cpfile
+}
+
+# EndSection
+
+# Section: information
+
+___x_cmd_yanfa_release_lsmod(){
+    param:void
+    ___x_cmd_yanfa_mod_ls "$@"
+}
+
+___x_cmd_yanfa_release_lsfile()(
+    param:void
+    cd "$___X_CMD_YANFA_RELEASE_TMP" || return
+
+    ___x_cmd_yanfa_release_lsmod "$@" | (
+        cd "$___X_CMD_YANFA_RELEASE_TMP" && \
+        while read -r line; do
+            ( cd "$line" && ___x_cmd_yanfa_mod_lsfile | x arg1 printf "%s/%s\n" "$line" )
+        done
+    )
+)
+
+___x_cmd_yanfa_release_cpfile_inner(){
+    if [ -d "$2" ]; then
+        local p="$2/$1"
+        echo "$p"
+        [ -d "${p%/*}" ] || mkdir -p "${p%/*}"
+        cp "$1" "$p"
+    else
+        cp "$1" "$2"
+    fi
+}
+
+___x_cmd_yanfa_release_cpfile()(
+    local tgt
+    tgt="$(x wsroot)/mod"
+    rm -rf "$tgt"
+    mkdir -p "$tgt"
+
+    cd "$___X_CMD_YANFA_RELEASE_TMP" && ___x_cmd_yanfa_release_lsfile | while read -r line; do
+        ___x_cmd_yanfa_release_cpfile_inner "$line" "$tgt"
+    done
+)
+
+___x_cmd_yanfa_release_wc(){
+    param:void
+    cd "$(x wsroot)/mod" &&
+        ___x_cmd_yanfa_release_lsfile "$@" | xargs wc | sort -n -r | less
+}
+
+# EndSection
+
+# Section: tgz tar 7z
+
+___x_cmd_yanfa_release_tgz()(
+    param:void
+    case "${1:-all}" in
+        core)       scope=core ;;
+        all)        scope=all ;;
+        *)          return 1 ;;
+    esac
+
+    WSROOT="$(x wsroot)"
+
+    cd "$WSROOT/mod" &&
+        mkdir -p "$WSROOT/dist" &&
+        tar czvf "$scope.tgz" * &&
+        mv "$scope.tgz" "$WSROOT/dist/$scope.tgz" &&
+        ls -alh "$WSROOT/dist/$scope.tgz"
+)
+
+___x_cmd_yanfa_release_7z()(
+    param:void
+    case "${1:-all}" in
+        core)       scope=core ;;
+        all)        scope=all ;;
+        *)          return 1 ;;
+    esac
+
+    WSROOT="$(x wsroot)"
+
+    cd "$WSROOT/mod" &&
+        mkdir -p "$WSROOT/dist" &&
+        7z a "$scope.7z" * &&
+        mv "$scope.7z" "$WSROOT/dist/$scope.7z" &&
+        ls -alh "$WSROOT/dist/$scope.7z"
+)
+
+# EndSection
+
+___x_cmd_yanfa_release_pub(){
+    param:void
+    ___x_cmd_yanfa_release_update "$@" && ___x_cmd_yanfa_release_tgz "$@" && git add . && git commit -m ...
+    ___x_cmd_yanfa_ws_push
+}
+
+___x_cmd_yanfa_release(){
+
+    if [ -f "$(x wsroot)/.x-cmd/$1" ]; then
+        x _ws "$@"
+        return
+    fi
+
+    param:dsl <<A
+subcommand:
+    install         "install all modules"
+
+    update          "update or add module"
+    pub             "publish the package"
+    lsmod           "ls module"
+    lsfile          ""
+    wc              "count"
+
+    tgz             "compress modules of core/all/<special-release> into <name>.tgz"
+    tar             "compress modules"
+    7z              "compress modules of 7z"
+
+    init            "init"
+
+    pull            "pull"
+    push            "push"
+    name            "get workspace name from git config"
+A
+    param:run
+
+    if [ -z "$PARAM_SUBCMD" ]; then
+        ___x_cmd_yanfa_release help
+        return 1
+    fi
+
+    if command -v "___x_cmd_yanfa_release_${PARAM_SUBCMD}" >/dev/null; then
+        "___x_cmd_yanfa_release_${PARAM_SUBCMD}" "$@"
+    else
+        case "$PARAM_SUBCMD" in
+            pull|push|name)
+                "___x_cmd_yanfa_ws_$PARAM_SUBCMD" "$@"
+                ;;
+            init)
+                "___x_cmd_yanfa_init" "$@"
+        esac
+    fi
+
+}
