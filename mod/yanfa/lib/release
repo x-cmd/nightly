@@ -108,9 +108,9 @@ ___x_cmd_yanfa_release_cpfile()(
 
     cd "$___X_CMD_YANFA_RELEASE_TMP" && ___x_cmd_yanfa_release_lsfile | while read -r line; do
         ___x_cmd_yanfa_release_cpfile_inner "$line" "$tgt"
-        x log :yanfa "<release_cpfile> $line => $tgt: $?"
+        # x log :yanfa "<release_cpfile> $line => $tgt: $?"
     done
-    # TODO: In Github Action, it return 1. Resulting in breaking.
+    # TODO: In Github Action, it return 1. Resulting in breaking. cpfile_inner is OK. The bug might be in while pipe.
     x log :yanfa "<release_cpfile> exit: $?"
 )
 
