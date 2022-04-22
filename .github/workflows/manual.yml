@@ -1,4 +1,4 @@
-name: Publish-Cron
+name: Publish-Manual-Nightly
 on:
   workflow_dispatch:
 
