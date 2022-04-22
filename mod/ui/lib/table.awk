@@ -46,7 +46,7 @@ function view_help(){
     return th_help_text( ctrl_help_get() )
 }
 function view_filter(       data){
-    if (ctrl_sw_get( FILTER_EDIT ) == true) return th_statusline_text( sprintf("FILTER: %s\n", filter[ ctrl_rstate_get( CURRENT_COLUMN ) ]) )
+    if (ctrl_sw_get( FILTER_EDIT ) == true) return th_statusline_text( sprintf("FILTER: %s\n", filter[ ctrl_rstate_get( CURRENT_COLUMN ) ] th(TH_CURSOR, " ")) )
     else return
 }
 
