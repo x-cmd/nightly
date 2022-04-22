@@ -107,9 +107,11 @@ ___x_cmd_yanfa_release_cpfile()(
     mkdir -p "$tgt"
 
     cd "$___X_CMD_YANFA_RELEASE_TMP" && ___x_cmd_yanfa_release_lsfile | while read -r line; do
-        x log :yanfa "<release_cpfile> $line => $tgt"
         ___x_cmd_yanfa_release_cpfile_inner "$line" "$tgt"
+        x log :yanfa "<release_cpfile> $line => $tgt: $?"
     done
+    # TODO: In Github Action, it return 1. Resulting in breaking.
+    x log :yanfa "<release_cpfile> exit: $?"
 )
 
 ___x_cmd_yanfa_release_wc(){
