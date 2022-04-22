@@ -311,7 +311,7 @@ ___x_cmd_assert_returnn(){
     fi
 
     if ___x_cmd_evex "$@"; then
-        printf "%s\n" "${MSG:-"Expect command $*: return $code"}" >&2
+        printf "%s\n" "${MSG:-"Expect command return 0: $*"}" >&2
         return 1
     else
         local errcode=$?

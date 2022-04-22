@@ -76,7 +76,7 @@ ___x_cmd_yanfa_release_lsmod(){
 
 ___x_cmd_yanfa_release_lsfile()(
     param:void
-    cd "$___X_CMD_YANFA_RELEASE_TMP" || return
+    [ -d "$___X_CMD_YANFA_RELEASE_TMP" ] || return 1
 
     ___x_cmd_yanfa_release_lsmod "$@" | (
         cd "$___X_CMD_YANFA_RELEASE_TMP" && \
