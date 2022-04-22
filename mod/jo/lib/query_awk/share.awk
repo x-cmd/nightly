@@ -3,6 +3,7 @@
 # 'a."b.c".d.'"$1"
 
 function selector_normalize_arr( selector, arr,     e, l ){
+    # print "selector:" selector
     if ( selector ~ /^\./ ) selector = "1" selector
     gsub(/\\\\/, "\002", selector)
     gsub(/\\\./, "\003", selector)
@@ -19,7 +20,6 @@ function selector_normalize_arr( selector, arr,     e, l ){
 
 function selector_arr_join( sep, arrl, arr,     i, _ ){
     if (arrl == 0)  return ""
-    # _ = arr[1]
     # "1""LICENSE"
     for (i=1; i<=arrl; ++i) _ = _ sep arr[i]
     return _
