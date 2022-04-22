@@ -14,4 +14,4 @@ jobs:
       - name: main
         uses: x-cmd/action@main
         with:
-          code: CONCURRENCY=6 x ws pub || true
+          code: CONCURRENCY=3 x ws pub || true
