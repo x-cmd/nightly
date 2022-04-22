@@ -18,9 +18,14 @@ ___x_cmd_yanfa_release_add()(
     local position="${2:-"https://$(___x_cmd_yanfa_release_gitx)/x-bash/$name.git"}"
     local branch="${3:-main}"
 
+    x log :yanfa "[$mod/$branch] Cloning from $position"
     cd "$___X_CMD_YANFA_RELEASE_TMP" || exit 1
+
     for ((i=1; i<=3; i=i+1)); do
-        git clone --quiet --depth=1 "$position" -b "$branch" && exit 0
+        if git clone --quiet --depth=1 "$position" -b "$branch"; then
+            x log :yanfa "[$mod/$branch] Cloning success."
+            exit 0
+        fi
         x log :yanfa warn "<release-add> Fail to git clone. Retry it after 5 seconds"
         if ! sleep 5; then
             x log :yanfa warn "<release-add> Sleep interrupted."
@@ -43,7 +48,6 @@ ___x_cmd_yanfa_release_update(){
         while read -r mod; do
             # OUT=/dev/null
             x job put "${1:-7}" ___x_cmd_yanfa_release_add "$mod"
-            # printf "%s\n" "Cloning: $mod" >&2
         done
 
         x job wait
