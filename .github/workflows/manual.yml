@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  publisher:
+  manual:
     runs-on: ubuntu-latest
     env:
       ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}
