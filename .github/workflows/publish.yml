@@ -6,7 +6,7 @@ on:
     - cron: '30 11 * * *'
 
 jobs:
-  publish:
+  publisher:
     runs-on: ubuntu-latest
     env:
       ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}
