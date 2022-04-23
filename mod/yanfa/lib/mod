@@ -123,6 +123,9 @@ ___x_cmd_yanfa_mod_ls_latest(){
     # ___x_cmd_curl_gitx modlist
     curl https://gitee.com/x-cmd/x-cmd/raw/main/modlist 2>/dev/null \
         | ___x_cmd_yanfa_mod_ls_awk_
+    local code=$?
+    yanfa:warn "___x_cmd_yanfa_mod_ls_latest: $code"
+    return $code
 }
 
 ___x_cmd_yanfa_mod_ls_awk_(){
@@ -140,13 +143,14 @@ ___x_cmd_yanfa_mod_ls(){
     param:void
     local fp="${MODLIST:-""}"
     if [ -z "$fp" ]; then
-        fp="$(___x_cmd_yanfa_mod_getfp)" || {
+        if ! fp="$(___x_cmd_yanfa_mod_getfp)"; then
             x log :yanfa "Cannot find file modlist. Using ls_latest, source is https://github.com/x-cmd/x-cmd/raw/main/modlist"
             ___x_cmd_yanfa_mod_ls_latest
             return
-        }
+        fi
     fi
 
+    x log :yanfa "Getting source from local modlist: $fp"
     ___x_cmd_yanfa_mod_ls_awk_ "$@" <"$fp"
 }
 

@@ -222,7 +222,7 @@ function consume_info(){
 }
 
 function consume_item(       l ){
-    if ( $0 == "" ) next
+    if ( $0 == "" ) return
     if ( $0 == "---" ) {
         DATA_MODE = DATA_MODE_INFO
         model_generate()

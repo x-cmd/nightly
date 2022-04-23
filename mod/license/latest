@@ -2,14 +2,19 @@
 # shellcheck    shell=sh        disable=SC3043
 
 xrc param
-
+local license_name_path
+license_name_path="$(xrc which license/lib/license_name.txt)"
+param_type      license     License   -  <<A
+$(cat "$license_name_path")
+A
 ___x_cmd_license(){
+    param:scope     "license"
     param:dsl '
 options:
-    --name              "Provide name"
-    --email             "Provide email"
-    --year              "year"
-    #1                  "license name"           <license>  =   gplv3     apachev2     mplv2
+    --name              "Provide name"           <name>="x-cmder"
+    --email             "Provide email"          <email>="agent@x-cmd.com"
+    --year              "year"                   <year>="2022"
+    #1                  "license name"           <license>:License
 '
 
     param:run
@@ -31,11 +36,10 @@ A
     ___x_cmd_httpget_gitx x-cmd license main \
             "lib/body/$license" \
             "$___X_CMD_ROOT_TMP/license/body/$license"
-
     awk \
-        -v year="${year:-2022}" \
-        -v email="${email:-agent@x-cmd.com}" \
-        -v name="${name:-x-cmder}" \
+        -v year="${year}" \
+        -v email="${email}" \
+        -v name="${name}" \
         -v url="${url:?Provide web url}" \
         -v license_full_name="${license_full_name:?Provide license_full_name}" \
         '
@@ -47,7 +51,7 @@ A
         gsub("<LICENSE-NAME>", license_full_name, $0)
         print $0
     }
-    ' <"$___X_CMD_ROOT_TMP/license/body/$license"
+    ' < "$___X_CMD_ROOT_TMP/license/body/$license"
 }
 
 xrc setmain ___x_cmd_license
