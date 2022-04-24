@@ -6,7 +6,8 @@ ___x_cmd_env_ruby_ls_remote(){
     local cache_expiration="${2:-86400}"
     local cache_path="$___X_CMD_ENV_PATH/ruby/cache/cache_list"
     ___x_cmd_httpget "https://www.ruby-lang.org/en/downloads/releases/" "$cache_path" "$cache_expiration" && \
-     awk '(match($0,/Ruby [.-9]+(-[a-z0-9]+)?/)){ print substr($0,RSTART+5,RLENGTH-5)}' < "$cache_path"
+     awk '(match($0,/Ruby [.-9]+(-[a-z0-9]+)?/)){ print substr($0,RSTART+5,RLENGTH-5)}' < "$cache_path" \
+        | ___x_cmd_env_common_sort_version
 }
 
 # EndSection

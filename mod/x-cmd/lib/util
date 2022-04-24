@@ -54,30 +54,31 @@ ___x_cmd_reval(){
     local _
     while read -r _; do
         eval "$_"      # Notice: If read encountering EOF, return 1
+        [ $# -eq 0 ] || "$@"
     done
-}
-
-___x_cmd_rl_(){
-    ____X_CMD_RL_DISCONTINUE=
-    local i=0
-    for arg in "$@"; do
-        (( i++ ))
-        case "$arg" in
-            --) shift "$i"; ___x_cmd_evex "$@"; return $? ;;
-            *)  read -r "${arg?}" || return 1 ;;
-        esac
-    done
-    ____X_CMD_RL_DISCONTINUE=1
 }
 
 ___x_cmd_rl(){
-    while ___x_cmd_rl_ "$@" && [ -z "$____X_CMD_RL_DISCONTINUE" ]; do
-        :;
+    local code="read -r ${1:?At least provide one argument}"; shift
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+            --)
+                shift
+                break ;;
+            *)
+                code="$code && read -r $1"
+                shift ;;
+        esac
     done
+
+    if [ "$#" -eq 0 ]; then
+        eval "$code"
+    else
+        while eval "$code"; do
+            ___x_cmd_evex "$@"
+        done
+    fi
 }
-
-# x jo .a a b c | x readvar a b c
-
 
 # Section : help and advise.json
 ___x_cmd__x_cmd_advise_json(){

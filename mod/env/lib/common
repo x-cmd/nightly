@@ -1,8 +1,7 @@
 # shellcheck shell=sh disable=SC2039,SC1090,SC3043,SC2263    # xrc
 
-# Section: full_version ls_local ls_remote
+# Section: full_version sort_version simplify_version
 
-# TODO: Not proper implemented
 ___x_cmd_env_common_full_version(){
     local candidate="${1:?Provide candidate}"
     local version="${2}"
@@ -13,6 +12,29 @@ ___x_cmd_env_common_full_version(){
     printf "%s\n" "$version"
 }
 
+___x_cmd_env_common_sort_version(){
+    sort -V
+}
+
+___x_cmd_env_common_simplify_version(){
+    awk '{
+        version = $1
+        match(version, /[0-9]+\.[0-9+]+/)
+        prefix = substr(version,RSTART+0,RLENGTH-0)
+
+        if ( uniq_map[ prefix ] == "" && last != "" ) {
+            print last
+            uniq_map[ prefix ] = 1
+        }
+        last = version
+    }
+    END{
+        if ( last != "" ) { print last ; }
+    }'
+}
+# EndSection
+
+# Section: ls_local ls_remote
 ___x_cmd_env_common_ls_local(){
     local candidate="${1:?Provide candidate}"
     if [ -d "$___X_CMD_ENV_PATH/$candidate/versions" ]; then

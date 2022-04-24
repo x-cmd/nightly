@@ -45,13 +45,13 @@ ___x_cmd_env_perl_ls_remote(){
     ___x_cmd_env_perl_get_system_platform
     if [ "$___X_CMD_ENV_PLATFORM" = "linux" ] || [ "$___X_CMD_ENV_PLATFORM" = "darwin" ] ; then
         ___x_cmd_httpget "https://api.github.com/repos/skaji/relocatable-perl/releases" "$cache_path" "$cache_expiration" 2>/dev/null && \
-            ja 'k()=="tag_name"{ print v(); }' < "$cache_path"
+            ja 'k()=="tag_name"{ print v(); }' < "$cache_path" | ___x_cmd_env_common_sort_version
     fi
     if [ "$___X_CMD_ENV_PLATFORM" = "windows" ] ; then
         ___x_cmd_httpget "https://strawberryperl.com/releases.html" "$cache_path" "$cache_expiration" 2>/dev/null && \
-            awk ' match($0, /<td><b>[0-9.]+<\/b><\/td>/) { print substr($0,RSTART+7,RLENGTH-16)}' < "$cache_path"
+            awk ' match($0, /<td><b>[0-9.]+<\/b><\/td>/) { print substr($0,RSTART+7,RLENGTH-16)}' < "$cache_path" \
+                | ___x_cmd_env_common_sort_version | ___x_cmd_env_common_simplify_version
     fi
-
 }
 # EndSection
 

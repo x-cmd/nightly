@@ -6,7 +6,8 @@ ___x_cmd_env_maven_ls_remote(){
     local cache_path="$___X_CMD_ENV_PATH/maven/cache/version_list"
     local cache_expiration="${2:-86400}"
     ___x_cmd_httpget "https://archive.apache.org/dist/maven/maven-3/" "$cache_path" "$cache_expiration"  && \
-        awk 'match($0, /href="([0-9.]+)\/"/){ print(substr($0,52,5))} ' <"$cache_path"
+        awk 'match($0, /href="([0-9.]+)\/"/){ print(substr($0,52,5))} ' <"$cache_path" \
+            | ___x_cmd_env_common_sort_version | ___x_cmd_env_common_simplify_version
 }
 
 # EndSection

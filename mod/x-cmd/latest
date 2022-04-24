@@ -50,7 +50,7 @@ ___x_cmd_main(){
         marg1)                                  shift;  ___x_cmd_margs 1 "$@"   ;;
 
         rl)                                     shift;  ___x_cmd_rl "$@"   ;;
-        reval)                                  shift;  ___x_cmd_reval "$@"   ;;
+        readeval|reval)                         shift;  ___x_cmd_reval "$@"   ;;
 
         js|node)                                shift;  ___x_cmd_node "$@" ;;
         python|py)                              shift;  ___x_cmd_python "$@" ;;

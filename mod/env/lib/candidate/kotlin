@@ -6,7 +6,8 @@ ___x_cmd_env_kotlin_ls_remote(){
 	local cache_path="$___X_CMD_ENV_PATH/kotlin/cache/version_list"
   	local cache_expiration="${2:-86400}"
 	___x_cmd_httpget "https://api.sdkman.io/2/candidates/kotlin/LINUX64/versions/all" "$cache_path" "$cache_expiration" && \
-	awk 'BEGIN{ RS=","} { print $0 }' < "$cache_path"
+	awk 'BEGIN{ RS=","} { print $0 }' < "$cache_path" | ___x_cmd_env_common_sort_version | ___x_cmd_env_common_simplify_version
+
 }
 
 # EndSection

@@ -8,10 +8,6 @@ ___x_cmd_env_node_full_version(){
     ___x_cmd_env_node_ls_remote "$1" "$2" | awk 'END{ if (NR<=0) { exit(1) } else print $1;}'
 }
 
-___x_cmd_env_node_sort_versions(){
-    sort -t. -u -k 1.2,1n -k 2,2n -k 3,3n
-}
-
 ___x_cmd_env_node_ls_remote(){
     local pattern="${1:-""}"
     local cache_expiration="${2:-86400}"
@@ -28,7 +24,7 @@ ___x_cmd_env_node_ls_remote(){
                 else                                                    print version, codename
             }
             prev_codename=codename
-        }' <"$cache_path" | ___x_cmd_env_node_sort_versions
+        }' <"$cache_path" | ___x_cmd_env_common_sort_version | ___x_cmd_env_common_simplify_version
 }
 
 # EndSection

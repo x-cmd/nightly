@@ -5,7 +5,8 @@ ___x_cmd_env_sbt_ls_remote(){
 	local cache_path="$___X_CMD_ENV_PATH/sbt/cache/version_list"
   	local cache_expiration="${2:-86400}"
 	___x_cmd_httpget "https://www.scala-sbt.org/download.html" "$cache_path" "$cache_expiration" && \
-	    awk ' match($0,/sbt [0-9.]+/) { print substr($0,RSTART+4,RLENGTH-1) }' < "$cache_path"
+	    awk ' match($0,/sbt [0-9.]+/) { print substr($0,RSTART+4,RLENGTH-1) }' < "$cache_path" \
+            | ___x_cmd_env_common_sort_version | ___x_cmd_env_common_simplify_version
 }
 # EndSection
 

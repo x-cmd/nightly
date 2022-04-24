@@ -2,17 +2,14 @@
 
 # Section: gradle ls_remote and la
 
-___x_cmd_env_gradle_sort_versions(){
-	sort -t . -n -k 1,1n -k 2,2n
-}
-
 ___x_cmd_env_gradle_ls_remote(){
     # local pattern="${1:-""}"	# TODO: ls remote filter
     local cache_expiration="${2:-86400}"
     local cache_path="$___X_CMD_ENV_PATH/gradle/cache/version_list"
 
     ___x_cmd_httpget "https://services.gradle.org/distributions/" "$cache_path" "$cache_expiration" && \
-    awk 'match($0, /gradle-([0-9.]+)-all.zip"/){ print substr($0, RSTART+7, RLENGTH-16)}' <"$cache_path" | ___x_cmd_env_gradle_sort_versions | uniq
+    awk 'match($0, /gradle-([0-9.]+)-all.zip"/){ print substr($0, RSTART+7, RLENGTH-16)}' <"$cache_path" \
+            | ___x_cmd_env_common_sort_version | ___x_cmd_env_common_simplify_version
 }
 
 # EndSection

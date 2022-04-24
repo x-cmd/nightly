@@ -70,7 +70,10 @@ if [ -n "${BASH_VERSION}${ZSH_VERSION}${KSH_VERSION}" ]; then
 else
     . "$___X_CMD_ROOT_MOD/jo/lib/list_dict_posix"       # xrc jo/lib/list_dict_posix
 fi
-. "$___X_CMD_ROOT_MOD/jo/lib/query"
+
+xrc:mod jo/lib/query jo/lib/env
 # EndSection
+
+
 
 xrc setmain ___x_cmd_jo

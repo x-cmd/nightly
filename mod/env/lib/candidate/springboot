@@ -6,7 +6,8 @@ ___x_cmd_env_springboot_ls_remote(){
     local cache_path="$___X_CMD_ENV_PATH/springboot/cache/version_list"
     local cache_expiration="${2:-86400}"
     ___x_cmd_httpget "https://repo.spring.io/ui/api/v1/ui/nativeBrowser/release/org/springframework/boot/spring-boot-cli" "$cache_path" "$cache_expiration" &&\
-    awk ' match($0,/"[.-9]+(RELEASE)?[0-9A-Z.]+?/){ print substr($0,RSTART+1, RLENGTH-1)} ' < "$cache_path"
+    awk ' match($0,/"[.-9]+(RELEASE)?[0-9A-Z.]+?/){ print substr($0,RSTART+1, RLENGTH-1)} ' < "$cache_path" \
+        | ___x_cmd_env_common_sort_version | ___x_cmd_env_common_simplify_version
 }
 
 # EndSection

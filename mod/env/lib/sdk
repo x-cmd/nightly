@@ -37,17 +37,13 @@ __sdkman_echo_cyan() {
 
 # Section: sdk ls_remote and la
 
-___x_cmd_env_sdk_sort_versions(){
-	sort -t . -n
-}
-
 ___x_cmd_env_sdk_ls_remote(){
     local candidate="${1:?Provide candidate}"
 	# local pattern="${2:-""}"	# TODO: ls remote filter
 	local cache_expiration="${3:-86400}"
 	local cache_path="$___X_CMD_ENV_PATH/$candidate/cache/version_list"
 	___x_cmd_httpget "https://api.sdkman.io/2/candidates/$candidate/${___X_CMD_ENV_SDK_PLATFORM}/versions/all" "$cache_path" "$cache_expiration" && \
-	awk 'BEGIN{ RS=","} { print $0 }' <"$cache_path" | ___x_cmd_env_sdk_sort_versions | uniq
+	awk 'BEGIN{ RS=","} { print $0 }' <"$cache_path" | ___x_cmd_env_common_sort_version
 }
 
 # EndSection

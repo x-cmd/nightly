@@ -26,10 +26,6 @@ ___x_cmd_env_go_get_system_platform(){
 
 # Section: Go ls_remote
 
-___x_cmd_env_go_sort_versions(){
-	sort -t . -n
-}
-
 ___x_cmd_env_go_ls_remote(){
     local cache_path="$___X_CMD_ENV_PATH/go/cache/version_list"
     local cache_expiration="${2:-86400}"
@@ -42,7 +38,7 @@ ___x_cmd_env_go_ls_remote(){
             awk -v platform="${platform}" -v arch="${arch}" 'match($0, "/dl/go[0-9.]+" platform "-" arch) {
                 match($0, "/dl/go[0-9.]+")
                 print substr($0, RSTART+6, RLENGTH-7)
-            }' < "$cache_path"  | ___x_cmd_env_go_sort_versions
+            }' < "$cache_path"  | ___x_cmd_env_common_sort_version | ___x_cmd_env_common_simplify_version
     fi
 }
 # EndSection
