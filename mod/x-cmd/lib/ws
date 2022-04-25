@@ -16,6 +16,7 @@ ___x_cmd_wsroot(){
 }
 
 ___x_cmd_ws(){
+    x:trace x/ws
     local X_DISABLE_WORKSPACE_EXECUTION_CONFIRMATION=1
 
     local TGT

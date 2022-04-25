@@ -1,7 +1,6 @@
 # shellcheck shell=sh disable=SC2039,SC1090,SC3043,SC2263    # xrc
 
 # Section(util): get_system_platform
-xrc ja
 
 ___x_cmd_env_perl_get_system_platform(){
     xrc os
@@ -40,17 +39,22 @@ ___x_cmd_env_perl_get_system_platform(){
 
 # Section: ls remote
 ___x_cmd_env_perl_ls_remote(){
+    local pattern="${1:-""}"
     local cache_path="$___X_CMD_ENV_PATH/perl/cache/version_list"
     local cache_expiration="${2:-86400}"
     ___x_cmd_env_perl_get_system_platform
     if [ "$___X_CMD_ENV_PLATFORM" = "linux" ] || [ "$___X_CMD_ENV_PLATFORM" = "darwin" ] ; then
         ___x_cmd_httpget "https://api.github.com/repos/skaji/relocatable-perl/releases" "$cache_path" "$cache_expiration" 2>/dev/null && \
-            ja 'k()=="tag_name"{ print v(); }' < "$cache_path" | ___x_cmd_env_common_sort_version
+            ja 'k()=="tag_name" && (("'"$pattern"'" == "") || ( index( v(), "'"$pattern"'" ) > 0)){ print v(); }' < "$cache_path" | ___x_cmd_env_common_sort_version
     fi
     if [ "$___X_CMD_ENV_PLATFORM" = "windows" ] ; then
         ___x_cmd_httpget "https://strawberryperl.com/releases.html" "$cache_path" "$cache_expiration" 2>/dev/null && \
-            awk ' match($0, /<td><b>[0-9.]+<\/b><\/td>/) { print substr($0,RSTART+7,RLENGTH-16)}' < "$cache_path" \
-                | ___x_cmd_env_common_sort_version | ___x_cmd_env_common_simplify_version
+            awk -v pattern="$pattern" ' match($0, /<td><b>[0-9.]+<\/b><\/td>/) {
+                version substr($0,RSTART+7,RLENGTH-16)
+                if (pattern == "" || index(version, pattern) > 0) {
+                    print version
+                }
+            }' < "$cache_path" | ___x_cmd_env_common_sort_version | ___x_cmd_env_common_simplify_version
     fi
 }
 # EndSection
@@ -68,6 +72,7 @@ ___x_cmd_env_perl_download_archive(){
     mkdir -p "$(dirname "${archive_path}")"
     local archive_path="$___X_CMD_ENV_PATH/perl/archive/perl-${version}.tar.gz"
 
+    local download_url
     if ___x_cmd_env_perl_get_system_platform ; then
         if [ "$___X_CMD_ENV_PLATFORM" = "linux" ] ; then
              download_url="https://github.com/skaji/relocatable-perl/releases/download/${version}/perl-x86_64-linux.tar.gz"

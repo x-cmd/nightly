@@ -1,8 +1,6 @@
 # Author:       Li Junhao   l@x-cmd.com             # xrc
 # shellcheck    shell=sh    disable=SC3043,SC1091
 
-___x_cmd_log init x
-
 xrc:mod:lib x-cmd glob con alias args rmrf util lang ws exe tomod
 
 # Section : x main function
@@ -39,6 +37,7 @@ ___x_cmd_main_otherwise(){
 ___x_cmd_alias_init ___x_cmd
 
 ___x_cmd_main(){
+    # x:trace x     # TODO: will effect x log
     local subcmd="$1"
     case "$subcmd" in
         log)                                    shift;  ___x_cmd_log "$@" ;;
@@ -49,8 +48,10 @@ ___x_cmd_main(){
         arg1)                                   shift;  ___x_cmd_args 1 "$@"    ;;
         marg1)                                  shift;  ___x_cmd_margs 1 "$@"   ;;
 
-        rl)                                     shift;  ___x_cmd_rl "$@"   ;;
+        readl|rl)                               shift;  ___x_cmd_readl "$@"   ;;
         readeval|reval)                         shift;  ___x_cmd_reval "$@"   ;;
+        readml)                                 shift;  ___x_cmd_readml "$@"   ;;
+        writeml)                                shift;  ___x_cmd_writeml "$@"   ;;
 
         js|node)                                shift;  ___x_cmd_node "$@" ;;
         python|py)                              shift;  ___x_cmd_python "$@" ;;

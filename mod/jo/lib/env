@@ -12,7 +12,7 @@
 
 ___x_cmd_jo_env(){
     case "$#" in
-        0)      x log :jo error "jo query need at least one argument and first argument"; return 1 ;;
+        0)      x log :jo error "jo query need at least one argument and first argument"; exit 1 ;;
         1)      ____x_cmd_jo_env_main . "$1" ;;
         *)      ____x_cmd_jo_env_main "$@" ;;
     esac
@@ -21,12 +21,12 @@ ___x_cmd_jo_env(){
 # TODO: for optimization
 ____x_cmd_jo_env_main(){
     local pat="$1"
-    local argstr="$1"
+    local argstr="$2"
     shift 2
     while [ $# -gt 0 ]; do
         case "$1" in
             --)     shift; break ;;
-            *)      argstr="${argstr}${___X_CMD_UNSEENCHAR_001}${1};" shift ;;
+            *)      argstr="${argstr}${___X_CMD_UNSEENCHAR_001}${1}"; shift ;;
         esac
     done
 
@@ -35,8 +35,8 @@ ____x_cmd_jo_env_main(){
         eval "$(____x_cmd_jo_query_main "$pat" "$argstr")"
     else
         local ____x_cmd_jo_env_main_line_tmpvar___19491001
-        ____x_cmd_jo_query_main "$pat" "$argstr" | \
-        while read -r ____x_cmd_jo_env_main_line_tmpvar___19491001; do
+        ____x_cmd_jo_query_main "$pat" "$argstr" | ___x_cmd_writeml |\
+        while  ___x_cmd_readml ____x_cmd_jo_env_main_line_tmpvar___19491001; do
             eval "$____x_cmd_jo_env_main_line_tmpvar___19491001"
             ___x_cmd_evex "$@"
         done

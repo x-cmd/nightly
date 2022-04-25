@@ -26,6 +26,8 @@ ___x_cmd_jo(){
         uq)                                         ___x_cmd_jo_unquote "$@" ;;
 
         q)                                          shift 1; ___x_cmd_jo_query "$@" ;;
+        env)                                        shift 1; ___x_cmd_jo_env "$@" ;;
+        _x_cmd_advise_json)                         printf "{}" ; return 126      ;;
         *)                                          ___x_cmd_jo_query "$@" ;;
 
         #   We will add some query functions and modified function here ...

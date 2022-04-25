@@ -22,6 +22,7 @@ ___x_cmd_yanfa_mod_lsfile0()(
 )
 
 ___x_cmd_yanfa_mod_lsfile()(
+    x:trace yanfa/mod/install/tmp
     param:void
     if [ -f "$(x wsroot)/.x-cmd/lsfile" ]; then
         # TODO: using engine to directly run the local file
@@ -40,6 +41,7 @@ ___x_cmd_yanfa_mod_install_tmp(){
 }
 
 ___x_cmd_yanfa_mod_install()(
+    x:trace yanfa/mod/install
     param:void
     local current_folder
     current_folder="$HOME/.x-cmd/$(basename "$(x wsroot)")"
@@ -71,7 +73,7 @@ ___x_cmd_yanfa_mod_install()(
                 esac
                 ___x_cmd_yanfa_mod_install_tmp "$current_folder" "$line"
             done
-            x log :yanfa info "Installed $total files: sh=$sh awk=$awk json=$json txt=$txt"
+            yanfa:info "Installed $total files: sh=$sh awk=$awk json=$json txt=$txt"
         }
 
         # buggy code
@@ -100,6 +102,7 @@ ___x_cmd_yanfa_mod_tgz(){
 # EndSection
 
 ___x_cmd_yanfa_mod_wc(){
+    x:trace yanfa/mod/wc
     param:void
     ___x_cmd_yanfa_mod_lsfile "$@" | xargs wc | sort -n -r | less
 }
@@ -181,7 +184,7 @@ ___x_cmd_yanfa_mod_ls(){
 # EndSection
 
 ___x_cmd_yanfa_mod(){
-
+    x:trace yanfa/mod
     if [ -f "$(x wsroot)/.x-cmd/$1" ]; then
         x _ws "$@"
         return

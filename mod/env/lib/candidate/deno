@@ -1,57 +1,53 @@
 # shellcheck shell=sh disable=SC2039,SC1090,SC3043,SC2263    # xrc
  # Section: utils
-___x_cmd_env_deno_get_system_platform(){
+___x_cmd_env_deno_get_platform(){
     xrc os
     local _platform
     local _arch
-    local _compression
-    local ___X_CMD_ENV_PLATFORM
     _platform="$(x os name)"
     _arch="$(x os arch)"
-    if [  "$_platform" = "win" ] ; then
-        ___X_CMD_ENV_ARCH="x86_64-pc-windows-msvc"
-    fi
-    if [ "$_platform" = "darwin" ] ; then
+
+    case "$_platform" in
+        darwin)
             case "$_arch" in
-                arm64)      ___X_CMD_ENV_ARCH="aarch64-apple-darwin"   ;;
-                x64)        ___X_CMD_ENV_ARCH="x86_64-apple-darwin"    ;;
-                *)          env:error "your arch:(" "$_arch" ") are not supported"
-                            return 1
-                            ;;
+                arm64)      ___X_CMD_ENV_PLATFORM="aarch64-apple-darwin"   ;;
+                x64)        ___X_CMD_ENV_PLATFORM="x86_64-apple-darwin"    ;;
+                *)          env:error "your arch:(" "$_arch" ") are not supported" ; return 1 ;;
             esac
-    fi
-    if [ "$_platform" = "linux" ] ; then
-        ___X_CMD_ENV_ARCH="x86_64-unknown-linux-gnu"
-    fi
-    if [ "$_platform" != "linux" ] && [ "$_platform" != "darwin" ] && [  "$_platform" != "win" ] ; then
-        env:error "your OS:(" "$_platform" ") are not supported"
-    fi
+            ;;
+        linux)  ___X_CMD_ENV_PLATFORM="x86_64-unknown-linux-gnu"       ;;
+        win)    ___X_CMD_ENV_PLATFORM="x86_64-pc-windows-msvc"         ;;
+        *)  env:error "your OS:(" "$_platform" ") are not supported" ; return 1 ;;
+    esac
 }
 # EndSection；
 
 # Section: ls, la
 ___x_cmd_env_deno_ls_remote(){
+    local pattern="${1:-""}"
+    local cache_expiration="${2:-86400}"
     local cache="$___X_CMD_ENV_PATH/deno/cache/version_list"
-    local cache_expiration=${2:-1}
 
     ___x_cmd_httpget "https://api.github.com/repos/denoland/deno/releases" "${cache}" "$cache_expiration" && \
-        x ja 'k()=="tag_name"{ print substr(v(),2); }' <"$cache" \
+        x ja 'k()=="tag_name" && (("'"$pattern"'" == "") || ( index( v(), "'"$pattern"'" ) > 0)) { print substr(v(),2); }' <"$cache" \
         | ___x_cmd_env_common_sort_version | ___x_cmd_env_common_simplify_version
+}
 
 # EndSection
 
 ___x_cmd_env_deno_download_archive(){
-    local version="${1:?""}"
-    local ___X_CMD_ENV_ARCH
-    ___x_cmd_env_deno_get_system_platform
+    local version="${1:?Provide a version}"
+    local ___X_CMD_ENV_PLATFORM
+    ___x_cmd_env_deno_get_platform
     if ___x_cmd_env_util_is_archive_cached deno "$version" 2>/dev/null; then
         env:info "Archive existed: $version"
         return 0
     fi
+    local download_url
     if [ $# -eq 0 ]; then
-        download_url="https://github.com/denoland/deno/releases/latest/download/deno-${___X_CMD_ENV_ARCH}.zip"
+        download_url="https://github.com/denoland/deno/releases/latest/download/deno-${___X_CMD_ENV_PLATFORM}.zip"
     else
-        download_url="https://github.com/denoland/deno/releases/download/v${version}/deno-${___X_CMD_ENV_ARCH}.zip"
+        download_url="https://github.com/denoland/deno/releases/download/v${version}/deno-${___X_CMD_ENV_PLATFORM}.zip"
     fi
     env:info "Downloading deno ${download_url}"
     local archive_path="$___X_CMD_ENV_PATH/deno/archive/deno-${version}.zip"

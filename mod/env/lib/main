@@ -13,7 +13,8 @@ perl
 springboot
 deno
 kotlin
-gradle"
+gradle
+"
 
 }
 
@@ -68,8 +69,6 @@ A
 ___x_cmd_env_run_common_if_notfound(){
     local op="${1:?Provide op}";  shift
     local candidate="${1:?Provide candidate}";  shift
-
-    # TODO: It might be better to have one folder for one language.
     xrc:mod:lib env "candidate/$candidate"
 
     local cmd="___x_cmd_env_${candidate}_${op}"
@@ -94,7 +93,7 @@ options:
 A
     param:run
 
-    local candidate="${1}"
+    local candidate="${1}"; shift
     if [ -z "$candidate" ]; then
         env:warn "No candidate specified"
         ___x_cmd_env_main_ls --help
@@ -104,8 +103,7 @@ A
     # TODO: 增加 本地简写版本对应关系 和 全局简写版本对应关系
     # TODO: V8 -> V8.2   --> (Remote) V8.6
     if [ -n "$remote" ] ; then
-        ___x_cmd_env_run_common_if_notfound ls_remote "$@"
-        # ___x_cmd_env_run_common_if_notfound gen "$candidate" "$@"
+        ___x_cmd_env_run_common_if_notfound ls_remote "$candidate" "$@"
         return
     fi
 
@@ -132,8 +130,8 @@ A
 
     local candidate="${1}"
     local version
-    if ! version="$(___x_cmd_env_run_common_if_notfound full_version "$candidate" "$2")"; then
-        env:error "Version of $candidate not found: $version"
+    if ! version="$(___x_cmd_env_run_common_if_notfound full_version_local "$candidate" "$2")"; then
+        env:error "Version of $candidate local not found: ${version}${2}"
         return 1
     fi
     shift 2
@@ -155,13 +153,12 @@ A
 
     local candidate="${1}"
     local version
-    if ! version="$(___x_cmd_env_run_common_if_notfound full_version "$candidate" "$2")"; then
-        env:error "Version of $candidate not found: $version"
+    if ! version="$(___x_cmd_env_run_common_if_notfound full_version_remote "$candidate" "$2")"; then
+        env:error "Version of $candidate local not found: ${version}${2}"
         return 1
     fi
-    shift 2
 
-    ___x_cmd_env_run_common_if_notfound use "$candidate" "$version" "$use_shims" "$@"
+    ___x_cmd_env_run_common_if_notfound use "$candidate" "$version" "$use_shims"
 }
 
 ___x_cmd_env_main_ws(){
@@ -176,6 +173,16 @@ ___x_cmd_env_main_ws(){
 
 # Section: current
 ___x_cmd_env_main_current(){
+    if [ $# -eq 0 ]; then
+        local version
+        ___x_cmd_env_candidate_all | while read -r candidate; do
+            if version="$(___x_cmd_env_run_common_if_notfound current "$candidate" 2>/dev/null)" ; then
+                printf "%-16s  %s\n" "$candidate" "$version"
+            fi
+        done
+        return
+    fi
+
     param:scope "env"
     param:dsl <<A
 options:
@@ -190,7 +197,6 @@ A
 
 # Section: install, uninstall
 ___x_cmd_env_main_install(){
-    # TODO: You can do more better in #2 advise json
     param:scope "env"
     param:dsl <<A
 advise:
@@ -202,26 +208,18 @@ options:
 A
     param:run
 
-    local candidate="${1}"
+    local candidate="$1"
+    local version="$2"
     if [ -z "$candidate" ]; then
-        xrc:mod:lib env app/lsenv && ___x_cmd_ui_lsenv
-        # TODO: how to use shims
-        if [ "$___X_CMD_UI_LSENV_FINAL_COMMAND" = "ENTER" ]; then
-            candidate="$___X_CMD_UI_LSENV_CURRENT_CANDIDATE"
-            local version="$___X_CMD_UI_LSENV_CURRENT_VERSION"
-            ___x_cmd_env_run_common_if_notfound install "$candidate" "$version" "$@"
-        fi
-        return 0
+        xrc:mod:lib env   app/lsenv && ___x_cmd_ui_lsenv || return 1
     fi
 
-    local version
-    if ! version="$(___x_cmd_env_run_common_if_notfound full_version "$candidate" "$2")"; then
-        env:error "Version of $candidate not found: $version"
+    if ! version="$(___x_cmd_env_run_common_if_notfound full_version_remote "$candidate" "$version")"; then
+        env:error "Version of $candidate not found: ${version}${2}"
         return 1
     fi
-    shift 2
 
-    ___x_cmd_env_run_common_if_notfound install "$candidate" "$version" "$use_shims" "$@"
+    ___x_cmd_env_run_common_if_notfound install "$candidate" "$version" "$use_shims"
 }
 
 ___x_cmd_env_main_uninstall(){
@@ -231,7 +229,7 @@ advise:
     #2        xrc env/latest && ___x_cmd_env_advise_ls_local_version
 options:
     #1        "Environment Candidates" <candidates>:candidates_list
-    #2        "Version"                <version>
+    #2        "Version"
 A
     param:run
 
@@ -242,13 +240,14 @@ A
     fi
 
     local version
-    if ! version="$(___x_cmd_env_run_common_if_notfound full_version "$candidate" "$2")"; then
-        env:error "Version of $candidate not found: $version"
+    version="${2:-"$(___x_cmd_env_run_common_if_notfound current "$candidate")"}"
+    version="$(___x_cmd_env_run_common_if_notfound full_version_local "$candidate" "$version")"
+    if [ -z "$version" ] || [ "$version" = "system" ]; then
+        env:error "Version of $candidate was not installed by xenv: ${version}${2}"
         return 1
     fi
-    shift 2
 
-    ___x_cmd_env_run_common_if_notfound uninstall "$candidate" "$version" "$@"
+    ___x_cmd_env_run_common_if_notfound uninstall "$candidate" "$version"
 }
 # EndSection
 
@@ -265,29 +264,22 @@ options:
 A
     param:run
 
-    local candidate="${1}"
+    local candidate="$1"
+    local version="$2"
     if [ -z "$candidate" ]; then
-        xrc env/lib/app/lsenv && ___x_cmd_ui_lsenv
-        # TODO: how to use shims
-        if [ "$___X_CMD_UI_LSENV_FINAL_COMMAND" = "ENTER" ]; then
-            candidate="$___X_CMD_UI_LSENV_CURRENT_CANDIDATE"
-            local version="$___X_CMD_UI_LSENV_CURRENT_VERSION"
-            ___x_cmd_env_run_common_if_notfound download "$candidate" "$version" "$@"
-        fi
-        return 0
+        xrc:mod:lib env   app/lsenv && ___x_cmd_ui_lsenv || return 1
     fi
 
-    local version
-    if ! version="$(___x_cmd_env_run_common_if_notfound full_version "$candidate" "$2")"; then
+    if ! version="$(___x_cmd_env_run_common_if_notfound full_version_remote "$candidate" "$version")"; then
         env:error "Version of $candidate not found: $version"
         return 1
     fi
-    shift 2
 
     ___x_cmd_env_run_common_if_notfound download "$candidate" "$version" "$@"
 }
 
 ___x_cmd_env_main_which(){
+
     param:scope "env"
     param:dsl <<A
 advise:
@@ -340,7 +332,7 @@ A
         *=*) version="${1#*=}" ;;
     esac
 
-    if ! version="$(___x_cmd_env_run_common_if_notfound full_version "$candidate" "$version")"; then
+    if ! version="$(___x_cmd_env_run_common_if_notfound full_version_remote "$candidate" "$version")"; then
         env:error "Version of $candidate not found: $2"
         return 1
     fi

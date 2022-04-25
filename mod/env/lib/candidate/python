@@ -47,7 +47,7 @@ ___x_cmd_env_python_get_miniconda_filename_and_compression(){
 # Section: ls, la
 
 ___x_cmd_env_python_ls_remote(){
-    # local pattern="${1:-""}"    # TODO: ls remote filter
+    local pattern="${1:-""}"
     local cache_expiration="${2:-86400}"
 	local cache_path="$___X_CMD_ENV_PATH/python/cache/version_list"
 
@@ -56,11 +56,14 @@ ___x_cmd_env_python_ls_remote(){
 
     if ___x_cmd_env_python_get_platform_arch ; then
         ___x_cmd_httpget "https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/" "$cache_path" "$cache_expiration" && \
-        awk -v platform="${___X_CMD_ENV_PLATFORM}" -v arch="$___X_CMD_ENV_ARCH" '
+        awk -v pattern="$pattern" -v platform="${___X_CMD_ENV_PLATFORM}" -v arch="$___X_CMD_ENV_ARCH" '
             BEGIN{RS="<a href=";FS="\""}{
                 if (match($2, "^.*-" platform "-" arch ".sh$")) {
                     split($2, a, /-/)
-                    print a[2]
+                    version = a[2]
+                    if (pattern == "" || index(version, pattern) > 0) {
+                        print version
+                    }
                 }
             }' <"$cache_path" | ___x_cmd_env_common_sort_version | ___x_cmd_env_common_simplify_version
     fi

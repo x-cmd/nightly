@@ -3,11 +3,16 @@
 # Section: Maven ls_remote
 
 ___x_cmd_env_maven_ls_remote(){
-    local cache_path="$___X_CMD_ENV_PATH/maven/cache/version_list"
+    local pattern="${1:-""}"
     local cache_expiration="${2:-86400}"
+    local cache_path="$___X_CMD_ENV_PATH/maven/cache/version_list"
     ___x_cmd_httpget "https://archive.apache.org/dist/maven/maven-3/" "$cache_path" "$cache_expiration"  && \
-        awk 'match($0, /href="([0-9.]+)\/"/){ print(substr($0,52,5))} ' <"$cache_path" \
-            | ___x_cmd_env_common_sort_version | ___x_cmd_env_common_simplify_version
+        awk -v pattern="$pattern" 'match($0, /href="([0-9.]+)\/"/){
+            version = substr($0,52,5)
+            if (pattern == "" || index(version, pattern) > 0) {
+                print version
+            }
+        } ' <"$cache_path" | ___x_cmd_env_common_sort_version | ___x_cmd_env_common_simplify_version
 }
 
 # EndSection
@@ -22,7 +27,7 @@ ___x_cmd_env_maven_download_archive(){
         return 0
     fi
     mkdir -p "$(dirname "${archive_path}")"
-    download_url="https://archive.apache.org/dist/maven/maven-3/${version}/binaries/apache-maven-${version}-bin.zip"
+    local download_url="https://archive.apache.org/dist/maven/maven-3/${version}/binaries/apache-maven-${version}-bin.zip"
     env:info "Downloading $download_url"
     if ! curl --progress-bar --location --retry-max-time 10 --retry 0 "$download_url" --output "$archive_path" ; then
         env:error "Download failure from $download_url"

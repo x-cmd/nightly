@@ -87,6 +87,7 @@ ___X_CMD_YANFA_RELEASE_TMP="${TMPDIR}/release/mod"
 
 
 ___x_cmd_yanfa_release_add()(
+    x:trace yanfa/relesae/add
     local name="${1:?Provide module name}"
     # local position="${2:-"git@gitee.com/x-bash/$name.git"}"
     local position="${2:-"https://$(___x_cmd_yanfa_release_gitx)/x-bash/$name.git"}"
@@ -96,19 +97,20 @@ ___x_cmd_yanfa_release_add()(
 
     for ((i=1; i<=3; i=i+1)); do
         if git clone --quiet --depth=1 "$position" -b "$branch"; then
-            yanfa:debug "<release-add> [$mod/$branch] Cloning success from $position"
+            yanfa:info "[$mod/$branch] Cloning success from $position"
             exit 0
         fi
-        yanfa:info "<release-add> Fail to git clone. Retry it after 5 seconds"
+        yanfa:info "Fail to git clone. Retry it after 5 seconds"
         if ! sleep 5; then
-            yanfa:info "<release-add> Sleep interrupted."
+            yanfa:warn "Sleep interrupted."
         fi
     done
-    yanfa:debug error "<release-add> Fail to git clone after 3 attemps. Mission abort."
+    yanfa:error "Fail to git clone after 3 attemps. Mission abort."
     exit 1
 )
 
 ___x_cmd_yanfa_release_update(){
+    x:trace yanfa/relesae/update
     param:void
 
     local IFS=""
@@ -134,9 +136,9 @@ ___x_cmd_yanfa_release_update(){
         esac
     done
 
-    yanfa:debug "<release-cpfile> Starting"
+    yanfa:debug "Starting CPFILE"
     ___x_cmd_yanfa_release_cpfile
-    yanfa:debug "<release-cpfile> exit: $?"
+    yanfa:debug "FINISIH CPFILE exit: $?"
 }
 
 # EndSection
@@ -145,6 +147,7 @@ ___x_cmd_yanfa_release_update(){
 
 # shellcheck disable=SC2120
 ___x_cmd_yanfa_release_lsmod(){
+    x:trace yanfa/relesae/lsmod
     param:void
     ___x_cmd_yanfa_mod_ls "$@"
     local code=$?
@@ -153,6 +156,7 @@ ___x_cmd_yanfa_release_lsmod(){
 }
 
 ___x_cmd_yanfa_release_lsfile()(
+    x:trace yanfa/relesae/lsfile
     param:void
     [ -d "$___X_CMD_YANFA_RELEASE_TMP" ] || return 1
 
@@ -177,6 +181,7 @@ ___x_cmd_yanfa_release_lsfile()(
 )
 
 ___x_cmd_yanfa_release_cpfile_inner(){
+    # x:trace yanfa/relesae/cpfile/inner        # Use debug
     if [ -d "$2" ]; then
         local p="$2/$1"
         [ -d "${p%/*}" ] || mkdir -p "${p%/*}"
@@ -191,6 +196,8 @@ ___x_cmd_yanfa_release_cpfile_inner(){
 }
 
 ___x_cmd_yanfa_release_cpfile()(
+    x:trace yanfa/relesae/cpfile
+    yanfa:debug "Staring"
     local tgt
     tgt="$(x wsroot)/mod"
     [ -d "$tgt" ] && rm -rf "$tgt"
@@ -204,10 +211,11 @@ ___x_cmd_yanfa_release_cpfile()(
         )
     done
     # TODO: In Github Action, it return 1. Resulting in breaking. cpfile_inner is OK. The bug might be in while pipe.
-    yanfa:debug "<release_cpfile> exit: $?"
+    yanfa:debug "exit: $?"
 )
 
 ___x_cmd_yanfa_release_wc(){
+    x:trace yanfa/relesae/wc
     param:void
     cd "$(x wsroot)/mod" &&
         ___x_cmd_yanfa_release_lsfile "$@" | xargs wc | sort -n -r | less
