@@ -13,7 +13,7 @@ function selector_normalize_generic( selector, arr,     e, l ){
 
         # SPECIAL_LINE_BEGIN
         gsub( /\*\*/, ".*", e)
-        # SPECIAL_LINE_END
+         # SPECIAL_LINE_END
         arr[j] = q( e )    # quote
     }
     return pattern_arr_join( S, l, arr )

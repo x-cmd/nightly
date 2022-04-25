@@ -80,6 +80,11 @@ ___x_cmd_rl(){
     fi
 }
 
+___x_cmd_validenvname(){
+    local IFS=_
+    eval "___x_cmd_validenvname$*___= 2>/dev/null" || return 1
+}
+
 # Section : help and advise.json
 ___x_cmd__x_cmd_advise_json(){
     xrc cat x-cmd/lib/x.json

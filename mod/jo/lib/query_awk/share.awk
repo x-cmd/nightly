@@ -19,7 +19,7 @@ function pattern_split( selector, arr,     e, l ){
         gsub("\002", "\\\\", e)
         gsub("\003", ".", e)
 
-        arr[j] = e    # quote
+        arr[j] =  e     # quote
     }
 
     return l
