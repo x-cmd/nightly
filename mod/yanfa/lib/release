@@ -87,7 +87,7 @@ ___X_CMD_YANFA_RELEASE_TMP="${TMPDIR}/release/mod"
 
 
 ___x_cmd_yanfa_release_add()(
-    x:trace yanfa/relesae/add
+    x:trace yanfa/relesae/add "name=$1" "position=$2" "branch=$branch"
     local name="${1:?Provide module name}"
     # local position="${2:-"git@gitee.com/x-bash/$name.git"}"
     local position="${2:-"https://$(___x_cmd_yanfa_release_gitx)/x-bash/$name.git"}"
@@ -110,7 +110,7 @@ ___x_cmd_yanfa_release_add()(
 )
 
 ___x_cmd_yanfa_release_update(){
-    x:trace yanfa/relesae/update
+    x:trace yanfa/relesae/update "concurrency=$1"
     param:void
 
     local IFS=""
@@ -147,7 +147,7 @@ ___x_cmd_yanfa_release_update(){
 
 # shellcheck disable=SC2120
 ___x_cmd_yanfa_release_lsmod(){
-    x:trace yanfa/relesae/lsmod
+    x:trace yanfa/relesae/lsmod "$@"
     param:void
     ___x_cmd_yanfa_mod_ls "$@"
     local code=$?
