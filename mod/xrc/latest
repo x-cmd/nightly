@@ -185,11 +185,12 @@ ___x_cmd_which_one(){
                     return      # local file
                 fi
 
-                if TGT="$(___x_cmd_search_path . ".x-cmd/$RESOURCE_NAME")"; then
-                    ___X_CMD_WHICH_ONE_RESOURCE_TYPE=workspace
-                    ___X_CMD_WHICH_ONE_RESULT="$TGT/.x-cmd/$RESOURCE_NAME"
-                    return                   # .x-cmd
-                fi
+                # Try to shutdown this facility. In the future, we will introduce the simular features in different modules.
+                # if TGT="$(___x_cmd_search_path . ".x-cmd/$RESOURCE_NAME")"; then
+                #     ___X_CMD_WHICH_ONE_RESOURCE_TYPE=workspace
+                #     ___X_CMD_WHICH_ONE_RESULT="$TGT/.x-cmd/$RESOURCE_NAME"
+                #     return                   # .x-cmd
+                # fi
             fi
 
             ___X_CMD_WHICH_ONE_RESOURCE_TYPE=official

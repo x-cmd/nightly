@@ -155,7 +155,7 @@ ___x_cmd_env_common_current(){
 }
 # EndSection
 
-# Section: download
+# Section: download unpack
 
 ___x_cmd_env_common_download(){
     local candidate="${1:?Provide canddidate}"
@@ -175,6 +175,38 @@ ___x_cmd_env_common_download(){
 		env:error "Failed to unpack $candidate of version: $version."
 		return 1
 	fi
+}
+
+___x_cmd_env_common_unpack(){
+    local candidate="${1:?Provide canddidate}"
+	local version="${2:?Provide a version}"
+    env:info "Unpacking: $candidate $version"
+
+    local compression
+    if ! compression="$(___x_cmd_env_run_if_exist get_compression "$candidate" "$version")"; then
+		env:error "Failed to get compression of $candidate $version."
+		return 1
+	fi
+
+    # TODO: x shall 'compression="" ; printf "${compression:-ooo}"'
+    local archive_path="$___X_CMD_ENV_PATH/$candidate/archive/$candidate-$version.${compression:-zip}"
+	if ! x uz "$archive_path" "${archive_path%/*}" ; then
+        env:error "Failed to unzip $candidate $version"
+        return 1
+    fi
+
+    local unpack_dir="${archive_path%/*}/$candidate-$version"
+    mkdir -p "$unpack_dir"
+
+    if ! ___x_cmd_env_run_if_exist copy_to_unpackdir "$candidate" "$version"; then
+		env:error "Failed to copy $candidate $version to unpack dir."
+		return 1
+	fi
+
+    local versions_path="$___X_CMD_ENV_PATH/$candidate/versions"
+	mkdir -p "$versions_path/$version"
+	mv -f "$unpack_dir/"* "$versions_path/$version"
+	x rmrf "$unpack_dir"
 }
 
 # EndSection

@@ -1,0 +1,17 @@
+# Author:       Li Junhao           l@x-cmd.com     # xrc
+# shellcheck    shell=sh
+
+xrc:mod ws/lib/main ws/lib/hook ws/lib/util
+
+# x ws env set
+___x_cmd_ws(){
+    case "$1" in
+        run)        shift; ___x_cmd_ws_run "$@" ;;
+        root)       ___x_cmd_ws_root ;;
+        env)        shift; ___x_cmd_ws_env "$@" ;;
+        "")         ___x_cmd_ws_help ;;
+        *)          ___x_cmd_ws_run "$@" ;;
+    esac
+}
+
+xrc setmain ___x_cmd_ws

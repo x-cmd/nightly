@@ -32,55 +32,67 @@ ___x_cmd___run_with_engine(){
     esac
 }
 
-___x_cmd___get_engine_by_file_header(){
+___x_cmd___get_engine_by_file_header_(){
     local filepath="${1:?Please provide filepath}"; shift
     case "$(head -n1 "$filepath")" in
-        *source*)       printf "%s" source          ;;
-        *xrc*)          printf "%s" xrc             ;;
-        *xsh*)          printf "%s" xsh             ;;
-        *python*)       printf "%s" python          ;;
-        *perl*)         printf "%s" perl            ;;
-        *ruby*)         printf "%s" ruby            ;;
-        *node*)         printf "%s" node            ;;
-        *ts*)           printf "%s" ts              ;;
+        *source*)       ___X_CMD_GET_ENGINE_RESULT=source          ;;
+        *xrc*)          ___X_CMD_GET_ENGINE_RESULT=xrc             ;;
+        *xsh*)          ___X_CMD_GET_ENGINE_RESULT=xsh             ;;
+        *python*)       ___X_CMD_GET_ENGINE_RESULT=python          ;;
+        *perl*)         ___X_CMD_GET_ENGINE_RESULT=perl            ;;
+        *ruby*)         ___X_CMD_GET_ENGINE_RESULT=ruby            ;;
+        *node*)         ___X_CMD_GET_ENGINE_RESULT=node            ;;
+        *ts*)           ___X_CMD_GET_ENGINE_RESULT=ts              ;;
 
-        *bash*)         printf "%s" bash            ;;
-        *zsh*)          printf "%s" zsh             ;;
-        *fish*)         printf "%s" fish            ;;
-        *ksh*)          printf "%s" ksh             ;;
+        *bash*)         ___X_CMD_GET_ENGINE_RESULT=bash            ;;
+        *zsh*)          ___X_CMD_GET_ENGINE_RESULT=zsh             ;;
+        *fish*)         ___X_CMD_GET_ENGINE_RESULT=fish            ;;
+        *ksh*)          ___X_CMD_GET_ENGINE_RESULT=ksh             ;;
 
-        *sh*)           printf "%s" sh              ;;
+        *sh*)           ___X_CMD_GET_ENGINE_RESULT=sh              ;;
         *)              return 127
     esac
 }
 
-___x_cmd_get_engine_by_file_ext(){
+___x_cmd___get_engine_by_file_header(){
+    ___x_cmd___get_engine_by_file_header_ "$@" && printf "%s\n" "$___X_CMD_GET_ENGINE_RESULT"
+}
+
+___x_cmd_get_engine_by_file_ext_(){
     local filepath="${1:?filepath}"; shift
     local ext="${filepath##*.}"
     case "$ext" in
         "$filepath")    return 126                  ;;
-        py)             printf "%s" python          ;;
-        pl)             printf "%s" perl            ;;
-        rb)             printf "%s" ruby            ;;
-        js)             printf "%s" node            ;;
-        ts)             printf "%s" ts              ;;
+        py)             ___X_CMD_GET_ENGINE_RESULT=python          ;;
+        pl)             ___X_CMD_GET_ENGINE_RESULT=perl            ;;
+        rb)             ___X_CMD_GET_ENGINE_RESULT=ruby            ;;
+        js)             ___X_CMD_GET_ENGINE_RESULT=node            ;;
+        ts)             ___X_CMD_GET_ENGINE_RESULT=ts              ;;
 
-        7z)             printf "%s" 7z              ;;
+        7z)             ___X_CMD_GET_ENGINE_RESULT=7z              ;;
 
-        bash)           printf "%s" bash            ;;
-        zsh)            printf "%s" zsh             ;;
-        fish)           printf "%s" fish            ;;
-        ksh)            printf "%s" ksh             ;;
-        sh)             printf "%s" sh              ;;
+        bash)           ___X_CMD_GET_ENGINE_RESULT=bash            ;;
+        zsh)            ___X_CMD_GET_ENGINE_RESULT=zsh             ;;
+        fish)           ___X_CMD_GET_ENGINE_RESULT=fish            ;;
+        ksh)            ___X_CMD_GET_ENGINE_RESULT=ksh             ;;
+        sh)             ___X_CMD_GET_ENGINE_RESULT=sh              ;;
 
         *)              return 126                  ;;
     esac
 }
 
+___x_cmd_get_engine_by_file_ext(){
+    ___x_cmd_get_engine_by_file_ext_ "$@" && printf "%s\n" "$___X_CMD_GET_ENGINE_RESULT"
+}
+
+
+___x_cmd_get_engine_by_file_(){
+    local filepath="${1:?filepath}"
+    ___x_cmd_get_engine_by_file_ext_ "$filepath" || ___x_cmd___get_engine_by_file_header_ "$filepath"
+}
 
 ___x_cmd_get_engine_by_file(){
-    local filepath="${1:?filepath}"
-    ___x_cmd_get_engine_by_file_ext "$filepath" || ___x_cmd___get_engine_by_file_header "$filepath"
+    ___x_cmd_get_engine_by_file_ "$@" && printf "%s\n" "$___X_CMD_GET_ENGINE_RESULT"
 }
 
 ___x_cmd_run_by_file(){
@@ -103,8 +115,9 @@ ___x_cmd_run_by_file(){
         fi
     fi
 
-    local engine
-    engine="$(___x_cmd_get_engine_by_file "$filepath")" || engine=source
+    local engine=source
+    ___x_cmd_get_engine_by_file_ "$filepath" && engine="$___X_CMD_GET_ENGINE_RESULT"
+
     ___x_cmd___run_with_engine "$engine" "$filepath" "$@"
 }
 

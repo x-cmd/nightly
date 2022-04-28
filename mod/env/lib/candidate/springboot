@@ -40,17 +40,9 @@ ___x_cmd_env_springboot_download_archive(){
 
 # Section: unpack
 
-___x_cmd_env_springboot_unpack(){
-	local version="${1:?Provide a version}"
-    local archive_path="$___X_CMD_ENV_PATH/springboot/archive/springboot-$version.zip"
-    env:info "Unpacking: springboot ${version}"
-    x uz "$___X_CMD_ENV_PATH/springboot/archive/springboot-$version.zip" "$(dirname "$archive_path")" || return 1
-    local archive_unpack_files
-    local versions_path="$___X_CMD_ENV_PATH/springboot/versions"
-    archive_unpack_files="$(dirname "$archive_path")/spring-$version"
-	mkdir -p "${versions_path}/${version}"
-	mv -f "$archive_unpack_files/"* "${versions_path}/${version}"
-	rm -rf "${archive_unpack_files}"
+___x_cmd_env_springboot_copy_to_unpackdir(){
+    local version="${1:?Provide a version}"
+    mv -f "${archive_path%/*}/spring-$version/"* "$unpack_dir"
 }
 
 # EndSection

@@ -3,8 +3,8 @@
 xrc:mod:lib boot mod rc
 
 ___x_cmd_boot(){
-    if [ ! -d "$HOME/.x-cmd/.boot" ] && ! mkdir -p "$HOME/.x-cmd/.boot"; then
-        printf "boot abort for mkdir fails: %s\n" "$HOME/.x-cmd/.boot" >/dev/stderr
+    if [ ! -d "$___X_CMD_ROOT/.boot" ] && ! mkdir -p "$___X_CMD_ROOT/.boot"; then
+        printf "boot abort for mkdir fails: %s\n" "$___X_CMD_ROOT/.boot" >/dev/stderr
         return 1
     fi
 
@@ -13,7 +13,7 @@ ___x_cmd_boot(){
         rc)             shift; ___x_cmd_boot_rc "$@" ;;
         mod)            shift; ___x_cmd_boot_mod "$@" ;;
         *)              xrc advise/lib/advise_get
-                        ___x_cmd_advise_get_help "$(xrc which x-cmd/_v0/x.json)" boot '' ;;
+                        ___x_cmd_advise_get_help "$(xrc which x-cmd/lib/x.json)" boot '' ;;
     esac
 }
 

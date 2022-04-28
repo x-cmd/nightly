@@ -49,7 +49,6 @@ A
     # TODO: la---"list all available environments"
     # TODO: ws---"Set workspace environment"
 
-    #TODO: Should be optimized
     if [ "${1}" = "___x_cmd_ui_catsel" ]; then
         shift
         ___x_cmd_env_ui_catsel "$@"
@@ -73,10 +72,22 @@ ___x_cmd_env_run_common_if_notfound(){
 
     local cmd="___x_cmd_env_${candidate}_${op}"
     if command -v "$cmd" >/dev/null; then
+        env:debug "Candidate $candidate has specific $cmd function."
         "$cmd" "$@"
     else
-        env:debug "Candidate ${candidate} has no op: $cmd, use common $op function."
         "___x_cmd_env_common_${op}" "$candidate" "$@"
+    fi
+}
+
+___x_cmd_env_run_if_exist(){
+    local op="${1:?Provide op}";  shift
+    local candidate="${1:?Provide candidate}";  shift
+    xrc:mod:lib env "candidate/$candidate"
+
+    local cmd="___x_cmd_env_${candidate}_${op}"
+    if command -v "$cmd" >/dev/null; then
+        env:debug "Candidate $candidate has specific $cmd function."
+        "$cmd" "$@"
     fi
 }
 

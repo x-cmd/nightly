@@ -89,7 +89,6 @@ function jiter_eqarr_print( item, arrl, arr, sep1, sep2 ){
     }
     jiter_skip( item )
     printf("%s" sep1, item)
-
     if ( JITER_SKIP_LEVEL > 0 ) return false
     JITER_EQARR_PRINT = 0
     printf(sep2)
@@ -281,7 +280,7 @@ function jiter_target_rmatch( obj, item, keypath_regex ){
 # Section: jiter core and jiter_skip and jileaf
 function jileaf( obj, item, sep1, sep2, _kp ){
     _kp = jiter( item, obj )
-    if ( item !~ /^[\[\{}]]$/ ) {
+    if (( item !~ /^[\[\{]$/ ) && ( item !~ /^[}]]$/ )) {
         printf("%s%s%s%s", _kp, sep1, item, sep2)
     }
 }
@@ -289,7 +288,7 @@ function jileaf( obj, item, sep1, sep2, _kp ){
 function jiter_skip( item ){
     if (item ~ /^[\[\{]$/) {
         JITER_SKIP_LEVEL += 1
-    } else if (item ~ /^[\]\}]$/) {
+    } else if (item ~ /^[]}]$/) {
         JITER_SKIP_LEVEL -= 1
     }
     return JITER_SKIP_LEVEL

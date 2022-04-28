@@ -26,14 +26,13 @@ function handle_jsontext( str ){
     return "'" str "'"
 }
 
-function handle_output(idx, value) {
-    if ( idx == 1) {
-        count += 1
-        if (count > 1)  print "\n"
+BEGIN{
+    if (___X_CMD_JO_ENV_MULTIPLELINE_SEP == "") {
+        ___X_CMD_JO_ENV_MULTIPLELINE_SEP = "\n"
     }
-    print varname[ idx ] "=" handle_jsontext(value) ";"
 }
 
-END{
-    printf "\n"
+function handle_output(value, idx, max_idx) {
+    printf("%s", varname[ idx ] "=" handle_jsontext(value) ";")
+    if (idx == max_idx) printf("%s", ___X_CMD_JO_ENV_MULTIPLELINE_SEP)
 }

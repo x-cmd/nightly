@@ -79,7 +79,7 @@ function jinormal( obj, item ){
         JITER_LEVEL += JITER_LEVEL_STEP
         JITER_STATE = item
         JITER_CURLEN = 0
-    } else if (item ~ /^[\]\}]$/) {
+    } else if (item ~ /^[]}]$/) {
         print item
         JITER_LEVEL -= JITER_LEVEL_STEP
         JITER_CURLEN = obj[ JITER_LEVEL ]

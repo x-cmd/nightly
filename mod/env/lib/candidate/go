@@ -3,8 +3,7 @@
 # Section: get system platform
 
 ___x_cmd_env_go_get_system_platform(){
-    xrc os
-    case "$(___x_cmd_os name)" in
+    case "$(x os name)" in
         linux)      platform=linux    ;;
         win)        platform=windows  ;;
         darwin)     platform=darwin   ;;
@@ -12,7 +11,7 @@ ___x_cmd_env_go_get_system_platform(){
                     return 1
                     ;;
     esac
-    case "$(___x_cmd_os arch)" in
+    case "$(x os arch)" in
         x86)           arch=386        ;;
         x64)           arch=amd64      ;;
         arm64)         arch=arm64      ;;
@@ -75,46 +74,26 @@ ___x_cmd_env_go_download_archive(){
 
 # Section: unpack
 
-___x_cmd_env_go_unpack(){
-    local version="${1:?Provide go version}"
-    local platform
-    local arch
-    {
-        read -r platform
-        read -r arch
-    } <<A
-$(x os name; x os arch)
-A
-
-    local compression='tar.gz'; [ "${platform}" = 'win' ] && compression='zip' # TODO: tar.xz support
-    local archive_path="$___X_CMD_ENV_PATH/go/archive/go-${version}.${compression}"
-    local archive_unpack_files
-    archive_unpack_files="$(dirname "$archive_path")/go-${version}"
-    mkdir -p "$archive_unpack_files"
-    case "$platform" in
-        win)    ___x_cmd_env_go_unpack_win    ;;
-        *)      ___x_cmd_env_go_unpack_other  ;;
+___x_cmd_env_go_get_compression(){
+    case "$(x os name)" in
+        win)        printf 'zip'   ;;
+        *)          printf 'tar.gz';;
     esac
-    local code=$?
-    rm -rf "${archive_unpack_files}"
-    env:info "Done unpacking!"
-    return $code
 }
 
-___x_cmd_env_go_unpack_win(){
-    x uz "$archive_path" "$(dirname "$archive_path")" || return 1
-    local version_path="${___X_CMD_ENV_PATH}/go/versions/${version}/bin"
-    mkdir -p "${version_path}" && (
-        mv "${archive_unpack_files}/"*/* "${version_path}" || return 1
-        cd "${version_path}" && chmod +x go.exe npm npx
-    )
+___x_cmd_env_go_copy_to_unpackdir(){
+    mv -f "${archive_path%/*}/go/"* "$unpack_dir"
 }
 
-___x_cmd_env_go_unpack_other(){
-    local version_path="${___X_CMD_ENV_PATH}/go/versions/${version}"
-    tar -xzf "${archive_path}" -C "${archive_unpack_files}" --strip-components 1 || return 1
-    mkdir -p "${version_path}" && mv "${archive_unpack_files}/"* "${version_path}"
-}
+# TODO: Support windows
+# ___x_cmd_env_go_unpack_win(){
+#     x uz "$archive_path" "$(dirname "$archive_path")" || return 1
+#     local version_path="${___X_CMD_ENV_PATH}/go/versions/${version}/bin"
+#     mkdir -p "${version_path}" && (
+#         mv "${archive_unpack_files}/"*/* "${version_path}" || return 1
+#         cd "${version_path}" && chmod +x go.exe npm npx
+#     )
+# }
 
 # EndSection
 

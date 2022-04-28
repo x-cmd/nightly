@@ -38,7 +38,7 @@ function output(text,
 
     line_arr_len = split(text, line_arr, "\n")
     OUTPUT_LINE_COUNT = 0
-    blank_line = str_rep(" ", KNOWN_WIDTH) "\r"
+    blank_line = "\r" str_rep(" ", KNOWN_WIDTH) "\r"
     for (i=1; i<=line_arr_len; i++) {
         line = line_arr[i]
         return_text = return_text blank_line line "\n"

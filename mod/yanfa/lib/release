@@ -2,6 +2,7 @@
 
 # Section: main
 ___x_cmd_yanfa_release(){
+    x:trace yanfa/relesae "$@"
 
     if [ -f "$(x wsroot)/.x-cmd/$1" ]; then
         x _ws "$@"
@@ -52,23 +53,25 @@ A
 
 # Section: pub
 ___x_cmd_yanfa_release_pub()(
+    x:trace yanfa/relesae/pub
     param:void
     # set -o errexit
     if {
-        yanfa:info "<release-pub> update"
+        yanfa:info "update"
         ___x_cmd_yanfa_release_update "${CONCURRENCY:-7}"
+        # return
     } && {
-        yanfa:info "<release-pub> create tgz"
+        yanfa:info "create tgz"
         ___x_cmd_yanfa_release_tgz "$@"
-        yanfa:info "<release-pub> create tgz exit: $?"
+        yanfa:info "create tgz exit: $?"
     } && {
-        yanfa:info "<release-pub> Add && Commit && Push"
+        yanfa:info "Add && Commit && Push"
         git add . && git commit -m ... && ___x_cmd_yanfa_ws_push
-        yanfa:info "<release-pub> Add && Commit && Push exit: $?"
+        yanfa:info "Add && Commit && Push exit: $?"
     }; then
-        yanfa:info "<release-pub> OK"
+        yanfa:info "OK"
     else
-        yanfa:info "<release-pub> Fail"
+        yanfa:info "Fail"
         return 1
     fi
 )
@@ -87,7 +90,7 @@ ___X_CMD_YANFA_RELEASE_TMP="${TMPDIR}/release/mod"
 
 
 ___x_cmd_yanfa_release_add()(
-    x:trace yanfa/relesae/add "name=$1" "position=$2" "branch=$branch"
+    x:trace yanfa/relesae/add "[name=$1]" "[position=$2]" "[branch=$branch]"
     local name="${1:?Provide module name}"
     # local position="${2:-"git@gitee.com/x-bash/$name.git"}"
     local position="${2:-"https://$(___x_cmd_yanfa_release_gitx)/x-bash/$name.git"}"
@@ -110,7 +113,7 @@ ___x_cmd_yanfa_release_add()(
 )
 
 ___x_cmd_yanfa_release_update(){
-    x:trace yanfa/relesae/update "concurrency=$1"
+    x:trace yanfa/relesae/update "[concurrency=$1]"
     param:void
 
     local IFS=""
@@ -170,13 +173,13 @@ ___x_cmd_yanfa_release_lsfile()(
                 # else
                 #     ___x_cmd_yanfa_mod_lsfile | x arg1 printf "%s/%s\n" "$line"
                 # fi
-                cd "$line" && ___x_cmd_yanfa_mod_lsfile | x arg1 printf "%s/%s\n" "$line"
+                cd "$line" && ___x_cmd_yanfa_mod_lsfile | x arg1 'printf "%s/%s\n" "$line" "$1"'
             )
         done
     )
 
     local code=$?
-    yanfa:info "___x_cmd_yanfa_release_lsfile: $code"
+    yanfa:info "___x_cmd_yanfa_release_lsfile"
     return $code
 )
 
@@ -207,7 +210,7 @@ ___x_cmd_yanfa_release_cpfile()(
         (
             cd "$___X_CMD_YANFA_RELEASE_TMP"
             ___x_cmd_yanfa_release_cpfile_inner "$line" "$tgt"
-            # yanfa:debug "<release_cpfile> $line => $tgt: $?"
+            yanfa:debug "<release_cpfile> $line => $tgt: $?"
         )
     done
     # TODO: In Github Action, it return 1. Resulting in breaking. cpfile_inner is OK. The bug might be in while pipe.

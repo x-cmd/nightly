@@ -77,7 +77,7 @@ ___x_cmd_readl(){
         eval "$code"
     else
         while eval "$code"; do
-            ___x_cmd_evex "$@"
+            ___x_cmd_eval "$@"
         done
     fi
 }
@@ -120,7 +120,7 @@ ___x_cmd_readml(){
         eval "$code"
     else
         while eval "$code"; do
-            ___x_cmd_evex "$@"
+            ___x_cmd_eval "$@"
         done
     fi
 }

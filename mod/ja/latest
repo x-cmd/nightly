@@ -6,18 +6,20 @@
 . "$___X_CMD_ROOT_MOD/ja/lib/kpo"
 
 
-___x_cmd_jawk(){
+___x_cmd_ja(){
     case "$1" in
-        t|tokenized)        shift; ___x_cmd_jawk_tokenized "$@" ;;
-        kp)                 shift; ___x_cmd_jawk_kp "$@" ;;      # just extract keypath, provide jstr
-        kpo)                shift; ___x_cmd_jawk_kpo "$@" ;;      # extract keypath, but also provide utils, provide jstr
-        *)                  ___x_cmd_jawk_kpo "$@" ;;
+        "")                 printf "ja need at least one argument"; return 1;;
+        t|tokenized)        shift; ___x_cmd_ja_tokenized "$@" ;;
+        kp)                 shift; ___x_cmd_ja_kp "$@" ;;      # just extract keypath, provide jstr
+        kpo)                shift; ___x_cmd_ja_kpo "$@" ;;      # extract keypath, but also provide utils, provide jstr
+        _x_cmd_advise_json) printf "{}" ; return 126 ;;
+        *)                  ___x_cmd_ja_kpo "$@" ;;
     esac
 }
 
-___x_cmd_jawk_tokenized(){
+___x_cmd_ja_tokenized(){
     command awk -f "$___X_CMD_ROOT_MOD/awk/lib/json.awk" \
                 -f "$___X_CMD_ROOT_MOD/ja/lib/tokenized_main.awk"
 }
 
-xrc setmain ___x_cmd_jawk
+xrc setmain ___x_cmd_ja

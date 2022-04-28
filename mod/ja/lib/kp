@@ -1,7 +1,7 @@
 
-___x_cmd_jawk_kp(){
+___x_cmd_ja_kp(){
     local IFS=' '
-    ___x_cmd_jawk_tokenized | \
+    ___x_cmd_ja_tokenized | \
     command awk -f "$___X_CMD_ROOT_MOD/awk/lib/default.awk" \
                 -f "$___X_CMD_ROOT_MOD/awk/lib/json.awk" \
                 -f "$___X_CMD_ROOT_MOD/awk/lib/jiter.awk" \

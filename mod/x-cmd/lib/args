@@ -1,77 +1,59 @@
 
-___x_cmd_arg_line(){
-    local every="$1"; shift
-    local IFS
-    IFS="$(printf "\001")"
-    local NW
-    NW="$(printf "\002")"
-
-    {
-        printf "%s" "$*" | tr "\n" "$NW"
-        printf "\n"
-        cat
-    } | awk -v every="$every" -f "$___X_CMD_ROOT_MOD/x-cmd/lib/args.awk" 2>/dev/null
-}
-
-___x_cmd_args_let(){
-    code="$*"
-}
-
-___x_cmd_args_funeach(){
-    if [ -z "$APPEND_ARG" ]; then
-        eval "$code"
-    else
-        eval "$code" \"\$@\"
-    fi
-}
-
 ___x_cmd_args(){
-    local n="$1"; [ $# -gt 0 ] && shift
-    local IFS=" "
+    local n="${1:?Provide N}"; shift
 
-    if [ "$#" -le 0 ]; then
-        # set -- - 'printf' '"%s\n"' '"\$*"'
-        set -- 'echo'
-    fi
+    local i
+    local code_func='___x_cmd_args___run_inner(){ eval '
+    for ((i=1; i<=$#; ++i)); do
+        eval "local _$i; _$i=\"\$$i\""
+        code_func="$code_func \"\$_$i\" "
+    done
+    code_func="$code_func ; }"
+    eval "$code_func"
 
-    local APPEND_ARG=1
-    if [ "$1" = - ]; then
-        APPEND_ARG=
-        shift
-    fi
+    local code_read
+    local code_invoke="___x_cmd_args___run_inner \"\$_a1\" "
+    local code_reset="_a1=;"
+    local _a1
+    for ((i=2; i<=n; ++i)); do
+        eval "local _a$i"
+        code_read="$code_read && read -r _a$i"
+        code_invoke="$code_invoke \"\$_a$i\""
+        code_reset="$code_reset _a$i=;"
+    done
+    code_read="${code_read# && }"
 
-    local code=""
-    ___x_cmd_arg_line "$n" "$@" | while read -r line; do
-        if [ -z "$code" ]; then
-            # code="$line"
-            eval ___x_cmd_args_let "$line"
-            continue
-        fi
-        eval ___x_cmd_args_funeach "$line"
+    # echo "$code_func"
+    # echo "$code_read"
+    # echo "$code_invoke"
+
+    local errcode
+    while read -r _a1; do
+        eval "$code_read"
+        errcode=$?
+        case "$errcode" in
+            0) eval "$code_invoke; $code_reset "; continue ;;
+            1) eval "$code_invoke"; return 0 ;;
+            *) return "$errcode"
+        esac
     done
 }
 
-___x_cmd_margs(){
-    local n="$1"; [ $# -gt 0 ] && shift
-    local IFS=" "
 
-    local APPEND_ARG=1
-    if [ "$1" = - ]; then
-        APPEND_ARG=
-        shift
-    fi
-
-    local code=""
-    eval "$(
-    ___x_cmd_arg_line "$n" "$@" | while read -r line; do
-        if [ -z "$code" ]; then
-            # code="$line"
-            printf "%s %s\n" ___x_cmd_args_let "$line"
-            continue
-        fi
-        printf "%s %s\n" ___x_cmd_args_funeach "$line"
+___x_cmd_arg1(){
+    local i
+    local code_func='___x_cmd_args___run_inner(){ eval '
+    for ((i=1; i<=$#; ++i)); do
+        eval "local _$i; _$i=\"\$$i\""
+        code_func="$code_func \"\$_$i\" "
     done
-    )"
+    code_func="$code_func ; }"
+    eval "$code_func"
 
+    local code_reset="_a1=;"
+    # echo "$code_func"
+
+    while read -r _a1; do
+        ___x_cmd_args___run_inner "$_a1"
+    done
 }
-

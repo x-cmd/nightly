@@ -3,7 +3,7 @@
 # Section: gradle ls_remote and la
 
 ___x_cmd_env_gradle_ls_remote(){
-    local pattern="${1:-""}"	# TODO: ls remote filter
+    local pattern="${1:-""}"
     local cache_expiration="${2:-86400}"
     local cache_path="$___X_CMD_ENV_PATH/gradle/cache/version_list"
 
@@ -18,7 +18,7 @@ ___x_cmd_env_gradle_ls_remote(){
 
 # EndSection
 
-# Section: download, unpack
+# Section: download
 
 ___x_cmd_env_gradle_download_archive(){
     local version="${1:?Provide gradle version}"
@@ -29,7 +29,7 @@ ___x_cmd_env_gradle_download_archive(){
     fi
 
     local archive_path="$___X_CMD_ENV_PATH/gradle/archive/gradle-$version.zip"
-    mkdir -p "$(dirname "$archive_path")"
+    mkdir -p "${archive_path%/*}"
     local download_url="https://services.gradle.org/distributions/gradle-$version-all.zip"
 
     env:info "Downloading $download_url"
@@ -39,22 +39,6 @@ ___x_cmd_env_gradle_download_archive(){
     fi
 
     env:info "Download completed $download_url"
-}
-
-___x_cmd_env_gradle_unpack(){
-	local version="${1:?Provide a version}"
-    env:info "Unpacking: gradle ${version}"
-
-    local archive_path="$___X_CMD_ENV_PATH/gradle/archive/gradle-$version.zip"
-	x uz "$archive_path" "$(dirname "$archive_path")" || return 1
-
-    local archive_unpack_files
-    archive_unpack_files="$(dirname "$archive_path")/gradle-$version"
-
-    local versions_path="$___X_CMD_ENV_PATH/gradle/versions"
-	mkdir -p "$versions_path/${version}"
-	mv -f "$archive_unpack_files/"* "${versions_path}/${version}"
-	rm -rf "$archive_unpack_files"
 }
 
 # EndSection

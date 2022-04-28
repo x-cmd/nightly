@@ -257,23 +257,26 @@ NR>2 {
 
 END {
     if ( exit_is_with_cmd() == true ) {
-        if (SELECT_MULTIPLE_STATE == true) {
-            for (i=1; i<=data_len; ++ i) {
-                if ( IS_SELECTED_ITEM[i] == true ) {
-                    _item_idx = model[i]
-                    _tmp_cur_iter_item_idx = ( _tmp_cur_iter_item_idx == "" ) ? _item_idx : _tmp_cur_iter_item_idx "\003" _item_idx
-                    _tmp_cur_iter_item = ( _tmp_cur_iter_item == "" ) ? data[ _item_idx ] : _tmp_cur_iter_item "\003" data[ _item_idx ]
+        _FINAL_COMMAND = exit_get_cmd()
+        send_env( "___X_CMD_UI_GRIDSELECT_FINAL_COMMAND", _FINAL_COMMAND )
+        if ( _FINAL_COMMAND != "q" ) {
+            if (SELECT_MULTIPLE_STATE == true) {
+                for (i=1; i<=data_len; ++ i) {
+                    if ( IS_SELECTED_ITEM[i] == true ) {
+                        _item_idx = model[i]
+                        _tmp_cur_iter_item_idx = ( _tmp_cur_iter_item_idx == "" ) ? _item_idx : _tmp_cur_iter_item_idx "\003" _item_idx
+                        _tmp_cur_iter_item = ( _tmp_cur_iter_item == "" ) ? data[ _item_idx ] : _tmp_cur_iter_item "\003" data[ _item_idx ]
+                    }
                 }
+            } else {
+                _tmp_cur_iter_item_idx = ctrl_rstate_get( SELECTED_ITEM_IDX )
+                _tmp_cur_iter_item_idx = model[ _tmp_cur_iter_item_idx ]
+                _tmp_cur_iter_item = data[ _tmp_cur_iter_item_idx ]
             }
-        } else {
-            _tmp_cur_iter_item_idx = ctrl_rstate_get( SELECTED_ITEM_IDX )
-            _tmp_cur_iter_item_idx = model[ _tmp_cur_iter_item_idx ]
-            _tmp_cur_iter_item = data[ _tmp_cur_iter_item_idx ]
-        }
 
-        send_env( "___X_CMD_UI_GRIDSELECT_FINAL_COMMAND",           exit_get_cmd() )
-        send_env( "___X_CMD_UI_GRIDSELECT_CURRENT_ITEM_INDEX",      _tmp_cur_iter_item_idx )
-        send_env( "___X_CMD_UI_GRIDSELECT_CURRENT_ITEM",             _tmp_cur_iter_item )
+            send_env( "___X_CMD_UI_GRIDSELECT_CURRENT_ITEM_INDEX",      _tmp_cur_iter_item_idx )
+            send_env( "___X_CMD_UI_GRIDSELECT_CURRENT_ITEM",             _tmp_cur_iter_item )
+        }
     }
 
 }

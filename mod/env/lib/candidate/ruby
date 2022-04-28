@@ -84,7 +84,7 @@ ___x_cmd_env_ruby_unpack(){
     } <<A
 $(x os name; x os arch)
 A
-    local compression='tar.gz'; [ "${platform}" = 'win' ] && compression='zip' # TODO: tar.xz support
+    local compression='tar.gz'; [ "${platform}" = 'win' ] && compression='zip'
     local archive_path="$___X_CMD_ENV_PATH/ruby/archive/ruby-${version}.${compression}"
     local archive_unpack_files
     archive_unpack_files="$(dirname "$archive_path")/ruby-${version}"

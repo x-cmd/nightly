@@ -22,7 +22,7 @@ ___x_cmd_yanfa_mod_lsfile0()(
 )
 
 ___x_cmd_yanfa_mod_lsfile()(
-    x:trace yanfa/mod/install/tmp
+    x:trace yanfa/mod/lsfile
     param:void
     if [ -f "$(x wsroot)/.x-cmd/lsfile" ]; then
         # TODO: using engine to directly run the local file

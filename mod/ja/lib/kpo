@@ -1,7 +1,7 @@
 
-___x_cmd_jawk_kpo(){
+___x_cmd_ja_kpo(){
     local IFS=' '
-    ___x_cmd_jawk_tokenized | \
+    ___x_cmd_ja_tokenized | \
     command awk "$(cat "$___X_CMD_ROOT_MOD/ja/lib/op.awk" "$___X_CMD_ROOT_MOD/ja/lib/kpo.awk")"'
 
 '"

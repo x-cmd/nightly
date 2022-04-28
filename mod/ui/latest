@@ -49,6 +49,7 @@ ___x_cmd_ui(){
         rows)                                                       printf "%s" "$LINES" ;;
 
         style)                                                      ___x_cmd_ui_style "$@" ;;
+        _x_cmd_advise_json)                                         printf "{}" ; return 126 ;;
         *)                                                          ___x_cmd_ui_style "$f" "$@" ;;
     esac
 }

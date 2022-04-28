@@ -1,6 +1,8 @@
 # shellcheck shell=sh
 
-cp "$___X_CMD_ROOT_MOD/boot/lib/setup.sh" "$HOME/.x-cmd/.boot/boot" && \
+mkdir -p "$___X_CMD_ROOT/.boot"
+x:info "[x-cmd]: Coping setup.sh to $___X_CMD_ROOT/.boot/boot"
+cp "$___X_CMD_ROOT_MOD/boot/lib/setup.sh" "$___X_CMD_ROOT/.boot/boot" && \
 (
     if [ "$BASH_VERSION" ]; then
         # The bash login mode will not source the .bashrc file but the .bash_profile file.
@@ -12,14 +14,15 @@ cp "$___X_CMD_ROOT_MOD/boot/lib/setup.sh" "$HOME/.x-cmd/.boot/boot" && \
     else                                CAN="$HOME/.shinit"
     fi
 
+    x:info "Setting startup in $CAN"
     X_STR="[ -f \"\$HOME/.x-cmd/.boot/boot\" ] && . \"\$HOME/.x-cmd/.boot/boot\""
     IFS=" "
     for i in $CAN; do
         if grep -F "$X_STR" "$i" >/dev/null; then
-            printf "%s\n" "[x-cmd]: Already installed in $i" >&2
+            x:info "Already installed in $i"
         else
             printf "\n%s\n" "$X_STR" >> "$i"
-            printf "%s\n" "[x-cmd]: Successfully Installed in: $i" >&2
+            x:info "Successfully Installed in: $i"
         fi
     done
 )

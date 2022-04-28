@@ -1,3 +1,6 @@
 INPUT==1{
-    jiter_print_rmatch( $0, patarrl, "", "")
+    _item_arrl = json_split2tokenarr( _item_arr, $0 )
+    for (_i=1; _i<=_item_arrl; ++_i) {
+        jiter_print_rmatch( _item_arr[_i],  patarrl, "", "")
+    }
 }

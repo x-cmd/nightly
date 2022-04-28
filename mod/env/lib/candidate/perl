@@ -3,7 +3,6 @@
 # Section(util): get_system_platform
 
 ___x_cmd_env_perl_get_system_platform(){
-    xrc os
     local _platform
     local _arch
     local _compression

@@ -8,7 +8,7 @@ ___x_cmd_env_scala_ls_remote(){
 	local cache_path="$___X_CMD_ENV_PATH/scala/cache/cache_list"
 	___x_cmd_httpget "https://www.scala-lang.org/download/all.html" "$cache_path" "$cache_expiration" && \
 	awk -v pattern="$pattern"  'match($0, /\/[0-9.]+.html/) {
-        version substr($0, RSTART+1, RLENGTH-6)
+        version = substr($0, RSTART+1, RLENGTH-6)
         if (pattern == "" || index(version, pattern) > 0) {
             print version
         }
@@ -50,25 +50,13 @@ ___x_cmd_env_scala_download_archive(){
 
 # Section: unpack
 
-___x_cmd_env_scala_unpack(){
-	local version="${1:?Provide a version}"
-    env:info "Unpacking: scala ${version}"
-    local archive_path="$___X_CMD_ENV_PATH/scala/archive/scala-$version.zip"
-    x uz "$___X_CMD_ENV_PATH/scala/archive/scala-${version}.zip" "$(dirname "$archive_path")" || return 1
-
+___x_cmd_env_scala_copy_to_unpackdir(){
+    local version="${1:?Provide a version}"
     local t_version
     case "$version" in
         3*) t_version=3  ;;
     esac
-
-    local archive_unpack_files
-    archive_unpack_files="$(dirname "$archive_path")/scala$t_version-$version"
-
-    local versions_path="$___X_CMD_ENV_PATH/scala/versions"
-	mkdir -p "$versions_path/$version"
-	mv -f "$archive_unpack_files/"* "$versions_path/$version"
-    chmod -R +x "$versions_path/$version/bin"
-	rm -rf "$archive_unpack_files"
+    mv -f "${archive_path%/*}/scala$t_version-$version/"* "$unpack_dir"
 }
 
 # EndSection

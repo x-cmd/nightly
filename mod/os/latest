@@ -13,25 +13,18 @@ ___x_cmd_os(){
         rname)              ___x_cmd_os_release_name  "$@"    ;;
         lsname)             ___x_cmd_os_lsname        "$@"    ;;
         lsarch)             ___x_cmd_os_lsarch        "$@"    ;;
-        *)                  ___x_cmd_os_help          "$@"    ;;
-    esac
-}
-
-if [ -n "${BASH_VERSION}${ZSH_VERSION}" ] && [ "${-#*i}" != "$-" ]; then
-
-    xrc advise
-    advise os - <<A
-{
+        _x_cmd_advise_json) printf '{
     "name": null,
     "arch": null,
     "release": null,
     "rname": null,
     "lsname": null,
     "lsarch": null
+}'
+                            return 126 ;;
+        *)                  ___x_cmd_os_help          "$@"    ;;
+    esac
 }
-A
-
-fi
 
 ___x_cmd_os_import ls
 

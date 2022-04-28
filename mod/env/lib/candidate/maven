@@ -40,17 +40,9 @@ ___x_cmd_env_maven_download_archive(){
 
 # Section: unpack
 
-___x_cmd_env_maven_unpack(){
+___x_cmd_env_maven_copy_to_unpackdir(){
     local version="${1:?Provide a version}"
-    local archive_path="$___X_CMD_ENV_PATH/maven/archive/maven-${version}.zip"
-    env:info "Unpacking: maven ${version}"
-    x uz "$archive_path" "$(dirname "$archive_path")" || return 1
-    local archive_unpack_files
-    local versions_path="$___X_CMD_ENV_PATH/maven/versions"
-    archive_unpack_files="$(dirname "$archive_path")/apache-maven-$version"
-    mkdir -p "$versions_path/${version}"
-    mv -f "$archive_unpack_files/"* "$versions_path/${version}"
-    rm -rf "$archive_unpack_files"
+    mv -f "${archive_path%/*}/apache-maven-$version/"* "$unpack_dir"
 }
 
 # EndSection
