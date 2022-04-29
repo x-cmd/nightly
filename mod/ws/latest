@@ -7,6 +7,7 @@ xrc:mod ws/lib/main ws/lib/hook ws/lib/util
 ___x_cmd_ws(){
     case "$1" in
         run)        shift; ___x_cmd_ws_run "$@" ;;
+        _run)        shift; ___x_cmd_ws__run "$@" ;;
         root)       ___x_cmd_ws_root ;;
         env)        shift; ___x_cmd_ws_env "$@" ;;
         "")         ___x_cmd_ws_help ;;

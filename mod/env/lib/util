@@ -4,8 +4,8 @@ ___x_cmd_env_util_is_downloaded(){
     local candidate="${1:?Provide candidate}"
     local version="${2:?Provide version}"
 
-    if [ ! -d "$___X_CMD_ENV_PATH/${candidate}/versions/${version}" ]; then
-        env:error "${candidate} of ${version} does not exist !"
+    if [ ! -d "$___X_CMD_ENV_PATH/${candidate}/versions/$version" ]; then
+        env:error "${candidate} of $version does not exist !"
         return 1
     fi
     return 0
@@ -16,7 +16,7 @@ ___x_cmd_env_util_is_archive_cached(){
     local version="${2:?Provide version}"
 
     if [ -z "$(find "$___X_CMD_ENV_PATH/$candidate/archive" -name "$candidate-$version.*")" ]; then
-        env:error "The archive of ${candidate} ${version} does not exist !"
+        env:error "The archive of ${candidate} $version does not exist !"
         return 1
     fi
 
@@ -62,7 +62,7 @@ ___x_cmd_env_util_make_shim_dir(){
     rm -rf "${___X_CMD_ENV_PATH}/$candidate/shims"
     mkdir -p "${___X_CMD_ENV_PATH}/$candidate/shims"
 
-    for name in "${versions_path}/${version}/bin/"* ; do
+    for name in "${versions_path}/$version/bin/"* ; do
         printf "%s\n" "$(cat <<A
 #!/usr/bin/env sh
 set -e

@@ -24,11 +24,11 @@ function tokenized( text ){
 }
 
 function quote_key( text ){
-    if (text ~ /^".+"$/) {
+    if (text ~ /^".*"$/) {
         return text
     }
 
-    if (text ~ /^'.+'$/) {
+    if (text ~ /^'.*'$/) {
         text = substr(text, 2, length(text)-2)
         gsub("\\'", "'", text)
         gsub("\"", "\\\"", text)

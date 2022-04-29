@@ -67,25 +67,20 @@ ___x_cmd_env_main_init_file_load
 
 # Section: advise ls_version
 
+# TODO:Here, the previous argument should be obtained through the interface provided by advise
 ___x_cmd_env_advise_ls_remote_version(){
-    local candidate_idx="${1:-2}"
-    [ -n "$ZSH_VERSION" ] && candidate_idx=$((candidate_idx+1))
-    # TODO:Here, the previous argument should be obtained through the interface provided by advise
+    local cmd_idx="${1:-2}"; [ -z "$ZSH_VERSION" ] || cmd_idx=$((cmd_idx+1))
     x env ls -r "${COMP_WORDS[candidate_idx]}"
 }
 
 ___x_cmd_env_advise_ls_local_version(){
-    local candidate_idx="${1:-2}"
-    [ -n "$ZSH_VERSION" ] && candidate_idx=$((candidate_idx+1))
+    local cmd_idx="${1:-2}"; [ -z "$ZSH_VERSION" ] || cmd_idx=$((cmd_idx+1))
     x env ls "${COMP_WORDS[candidate_idx]}"
 }
 
 ___x_cmd_env_advise_cmd_ls_local_version(){
-    local cmd_idx="${1:-2}"
-    [ -n "$ZSH_VERSION" ] && cmd_idx=$((cmd_idx+1))
-    local candidate
-    candidate="$(___x_cmd_env_util_cmd_to_candidate "${COMP_WORDS[cmd_idx]}")"
-    x env ls "$candidate"
+    local cmd_idx="${1:-2}"; [ -z "$ZSH_VERSION" ] || cmd_idx=$((cmd_idx+1))
+    x env ls "$(___x_cmd_env_util_cmd_to_candidate "${COMP_WORDS[cmd_idx]}")"
 }
 
 ___x_cmd_env_advise_ls_cmd(){

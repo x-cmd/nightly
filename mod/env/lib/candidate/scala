@@ -1,62 +1,30 @@
 # shellcheck shell=sh disable=SC2039,SC1090,SC3043,SC2263,SC2120    # xrc
 
-# Section: Scala ls_remote
+# Section(ls_remote): list_url, version_info
 
-___x_cmd_env_scala_ls_remote(){
-    local pattern="${1:-""}"
-	local cache_expiration="${2:-86400}"
-	local cache_path="$___X_CMD_ENV_PATH/scala/cache/cache_list"
-	___x_cmd_httpget "https://www.scala-lang.org/download/all.html" "$cache_path" "$cache_expiration" && \
+___x_cmd_env_scala_list_url(){
+    printf "https://www.scala-lang.org/download/all.html"
+}
+
+___x_cmd_env_scala_version_info(){
 	awk -v pattern="$pattern"  'match($0, /\/[0-9.]+.html/) {
         version = substr($0, RSTART+1, RLENGTH-6)
-        if (pattern == "" || index(version, pattern) > 0) {
-            print version
-        }
-    }' <"$cache_path" \
-        | ___x_cmd_env_common_sort_version | ___x_cmd_env_common_simplify_version
+        if (version ~ pattern) { print version }
+    }'
 }
 
 # EndSection
 
-# Section: download
+# Section(download): download_url
 
-___x_cmd_env_scala_download_archive(){
+___x_cmd_env_scala_download_url(){
 	local version="${1:?Provide a version}"
-    local archive_path="$___X_CMD_ENV_PATH/scala/archive/scala-${version}.zip"
-    local download_url
-    env:info "Downloading scala ${version}"
-
     # TODO: optimizable
-    case ${version} in
-        2.10*|2.13*|2.12*|2.11.11|2.11.12) download_url="https://downloads.lightbend.com/scala/${version}/scala-${version}.zip"     ;;
-        2.11*) download_url="http://downloads.typesafe.com/scala/${version}/scala-${version}.zip"                                   ;;
-        3.* )  download_url="https://github.com/lampepfl/dotty/releases/download/${version}/scala3-${version}.zip"                  ;;
+    case $version in
+        2.10*|2.13*|2.12*|2.11.11|2.11.12) printf "https://downloads.lightbend.com/scala/%s/scala-%s.zip" "$version" $version   ;;
+        2.11*) printf "http://downloads.typesafe.com/scala/%s/scala-%s.zip"  "$version" "$version"                                    ;;
+        3.* )  printf "https://github.com/lampepfl/dotty/releases/download/%s/scala3-%s.zip" "$version" "$version"                    ;;
     esac
-
-    if ___x_cmd_env_util_is_archive_cached scala "$version" 2>/dev/null; then
-        env:info "Archive existed: $version"
-        return 0
-    fi
-
-    mkdir -p "$(dirname "$archive_path")"
-    env:info "Downloading $download_url"
-    if ! curl --progress-bar --location --retry-max-time 10 --retry 0 "$download_url" --output "$archive_path" ; then
-        env:error "Download failure from $download_url"
-        return 1
-    fi
-}
-
-# EndSection
-
-# Section: unpack
-
-___x_cmd_env_scala_copy_to_unpackdir(){
-    local version="${1:?Provide a version}"
-    local t_version
-    case "$version" in
-        3*) t_version=3  ;;
-    esac
-    mv -f "${archive_path%/*}/scala$t_version-$version/"* "$unpack_dir"
 }
 
 # EndSection

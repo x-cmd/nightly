@@ -5,6 +5,7 @@
 ___x_cmd_env_common_full_version_remote(){
     local candidate="${1:?Provide candidate}"
     local pattern="${2}"
+    local cache_expiration="${3}"
     ___x_cmd_env_run_common_if_notfound ls_remote "$candidate" "$pattern" "$3" \
         | awk 'END{ if (NR<=0) { exit(1) } else print $1;}'
 }
@@ -12,7 +13,7 @@ ___x_cmd_env_common_full_version_remote(){
 ___x_cmd_env_common_full_version_local(){
     local candidate="${1:?Provide candidate}"
     local pattern="${2}"
-    ___x_cmd_env_run_common_if_notfound ls_local "$candidate" "$pattern" "$3" \
+    ___x_cmd_env_run_common_if_notfound ls_local "$candidate" "$pattern" \
         | awk 'END{ if (NR<=0) { exit(1) } else print $1;}'
 }
 
@@ -36,7 +37,7 @@ ___x_cmd_env_common_simplify_version(){
 }
 # EndSection
 
-# Section: ls_local
+# Section: ls_local ls_remote
 ___x_cmd_env_common_ls_local(){
     local candidate="${1:?Provide candidate}"
     local pattern="${2}"
@@ -45,6 +46,16 @@ ___x_cmd_env_common_ls_local(){
             printf "%s\n" "${version##*/}"
         done 2>/dev/null | ___x_cmd_env_common_sort_version
     fi
+}
+
+___x_cmd_env_common_ls_remote() {
+    local candidate="${1:?Provide candidate}"
+    local pattern="${2:-""}"
+  	local cache_expiration="${3:-86400}"
+	local cache_path="$___X_CMD_ENV_PATH/$candidate/cache/version_list"
+
+    ___x_cmd_httpget "$("___x_cmd_env_${candidate}_list_url")" "$cache_path" "$cache_expiration" &&
+    < "$cache_path" "___x_cmd_env_${candidate}_version_info" | ___x_cmd_env_common_sort_version | ___x_cmd_env_common_simplify_version
 }
 
 ___x_cmd_env_common_la(){
@@ -91,7 +102,7 @@ ___x_cmd_env_common_use(){
         version_path="${___X_CMD_ENV_PATH}/$candidate/versions/$version/bin"
     else
         version_path="${___X_CMD_ENV_PATH}/$candidate/shims"
-        ___x_cmd_env_util_make_shim_dir "$candidate" "${version}" || return 1
+        ___x_cmd_env_util_make_shim_dir "$candidate" "$version" || return 1
     fi
 
     ___x_cmd_env_util_add_path "$version_path" || return 1
@@ -108,7 +119,7 @@ ___x_cmd_env_common_try(){
 
     ___x_cmd_env_util_is_downloaded "$candidate" "$version" 2>/dev/null || return 1
     ___x_cmd_env_util_add_path "$version_path" && \
-        env:info "Setting ${candidate} ${version} in current Shell."
+        env:info "Setting ${candidate} $version in current Shell."
 }
 
 # EndSection
@@ -158,7 +169,7 @@ ___x_cmd_env_common_current(){
 # Section: download unpack
 
 ___x_cmd_env_common_download(){
-    local candidate="${1:?Provide canddidate}"
+    local candidate="${1:?Provide candidate}"
     local version="${2:?Provide version}"
 
     if ___x_cmd_env_util_is_downloaded "$candidate" "$version" 2>/dev/null ; then
@@ -177,26 +188,57 @@ ___x_cmd_env_common_download(){
 	fi
 }
 
+___x_cmd_env_common_download_archive(){
+    local candidate="${1:?Provide candidate}"
+    local version="${2:?Provide version}"
+
+    if ___x_cmd_env_util_is_archive_cached "$candidate" "$version" 2>/dev/null; then
+        env:info "Archive existed: $version"
+        return 0
+    fi
+
+    if ! compression="$(___x_cmd_env_run_if_exist compression "$candidate" "$version")"; then
+		env:error "Failed to get compression of $candidate $version."
+		return 1
+	fi
+
+    local archive_path="$___X_CMD_ENV_PATH/$candidate/archive/$candidate-$version.${compression:-zip}"
+    mkdir -p "${archive_path%/*}"
+    local download_url
+    if ! download_url="$("___x_cmd_env_${candidate}_download_url" "$version")"; then
+        env:error "Failed to get download url for $candidate $version"
+        return 1
+    fi
+
+    env:info "Downloading $download_url"
+    if ! curl --progress-bar --location --retry-max-time 10 --retry 0 "$download_url" --output "$archive_path" ; then
+        env:error "Download failure from $download_url"
+        return 1
+    fi
+
+    env:info "Download completed $download_url"
+}
+
 ___x_cmd_env_common_unpack(){
-    local candidate="${1:?Provide canddidate}"
+    local candidate="${1:?Provide candidate}"
 	local version="${2:?Provide a version}"
     env:info "Unpacking: $candidate $version"
 
     local compression
-    if ! compression="$(___x_cmd_env_run_if_exist get_compression "$candidate" "$version")"; then
+    if ! compression="$(___x_cmd_env_run_if_exist compression "$candidate" "$version")"; then
 		env:error "Failed to get compression of $candidate $version."
 		return 1
 	fi
 
     # TODO: x shall 'compression="" ; printf "${compression:-ooo}"'
     local archive_path="$___X_CMD_ENV_PATH/$candidate/archive/$candidate-$version.${compression:-zip}"
-	if ! x uz "$archive_path" "${archive_path%/*}" ; then
+    local unpack_dir="${archive_path%/*}/$candidate-$version"
+
+    env:debug "Unpacking $archive_path to $unpack_dir"
+	if ! x uz "$archive_path" "$unpack_dir" ; then
         env:error "Failed to unzip $candidate $version"
         return 1
     fi
-
-    local unpack_dir="${archive_path%/*}/$candidate-$version"
-    mkdir -p "$unpack_dir"
 
     if ! ___x_cmd_env_run_if_exist copy_to_unpackdir "$candidate" "$version"; then
 		env:error "Failed to copy $candidate $version to unpack dir."
@@ -205,7 +247,8 @@ ___x_cmd_env_common_unpack(){
 
     local versions_path="$___X_CMD_ENV_PATH/$candidate/versions"
 	mkdir -p "$versions_path/$version"
-	mv -f "$unpack_dir/"* "$versions_path/$version"
+    env:debug "Moving $unpack_dir to $versions_path/$version"
+	mv -f "$unpack_dir"/*/* "$versions_path/$version"
 	x rmrf "$unpack_dir"
 }
 
@@ -213,7 +256,7 @@ ___x_cmd_env_common_unpack(){
 
 # Section: install, uninstall
 ___x_cmd_env_common_install(){
-    local candidate="${1:?Provide canddidate}"
+    local candidate="${1:?Provide candidate}"
     local version="${2:?Provide version}"
     local use_shims="${3:-""}"
 
@@ -232,11 +275,11 @@ ___x_cmd_env_common_uninstall(){
     local version="${2:?Provide the version}"
     env:info "Uninstalling $1 $2"
 
-    local candidate_path="$___X_CMD_ENV_PATH/${candidate}/versions/${version}"
+    local candidate_path="$___X_CMD_ENV_PATH/${candidate}/versions/$version"
     if [ -d "$candidate_path" ]; then
         rm -rf "${candidate_path}"
     else
-        env_log  warn "This ${candidate} ${version} is no exist."
+        env_log  warn "This ${candidate} $version is no exist."
         return 1
     fi
     ___x_cmd_env_common_init_file_rm "$candidate"
@@ -273,11 +316,11 @@ ___x_cmd_env_common_exec(){
     local cmd="${2:?Provide command}"
     local version="${3:?Provide version}"; shift 3
 
-    if ! ___x_cmd_env_util_is_downloaded "${candidate}" "${version}" 2>/dev/null ; then
+    if ! ___x_cmd_env_util_is_downloaded "${candidate}" "$version" 2>/dev/null ; then
         env:error "Candidate $candidate No such version: $version"
         return 1
     fi
     env:info "Executing $candidate $version $cmd"
-    PATH="${___X_CMD_ENV_PATH}/${candidate}/versions/${version}/bin:$PATH" "$cmd" "$@"
+    PATH="${___X_CMD_ENV_PATH}/${candidate}/versions/$version/bin:$PATH" "$cmd" "$@"
 }
 # EndSection

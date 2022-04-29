@@ -1,48 +1,22 @@
 # shellcheck shell=sh disable=SC2039,SC1090,SC3043,SC2263,SC2120    # xrc
 
-# Section: Kotlin ls_remote
+# Section(ls_remote): list_url, version_info
 
-___x_cmd_env_kotlin_ls_remote(){
-	local pattern="${1:-""}"
-  	local cache_expiration="${2:-86400}"
-	local cache_path="$___X_CMD_ENV_PATH/kotlin/cache/version_list"
-	___x_cmd_httpget "https://api.sdkman.io/2/candidates/kotlin/LINUX64/versions/all" "$cache_path" "$cache_expiration" && \
-	awk -v pattern="$pattern" 'BEGIN{ RS=","} {
-		version = $0
-		if (pattern == "" || index(version, pattern) > 0) {
-			print version
-		}
-	}' < "$cache_path" | ___x_cmd_env_common_sort_version | ___x_cmd_env_common_simplify_version
+___x_cmd_env_kotlin_list_url(){
+	printf "https://api.sdkman.io/2/candidates/kotlin/LINUX64/versions/all"
+}
 
+___x_cmd_env_kotlin_version_info(){
+	awk -v pattern="$pattern" 'BEGIN{ RS=","} ($0 ~ pattern) { print $0 }'
 }
 
 # EndSection
 
-# Section: download
+# Section(download): download_url
 
-___x_cmd_env_kotlin_download_archive(){
-	local version="${1:? Provide a version}"
-	if ___x_cmd_env_util_is_archive_cached kotlin "$version" 2>/dev/null; then
-		env:info  "Archive existed: $version"
-		return 0
-	fi
-	local archive_path="$___X_CMD_ENV_PATH/kotlin/archive/kotlin-${version}.zip"
-	mkdir -p "$(dirname "${archive_path}")"
-	local download_url="https://github.com/JetBrains/kotlin/releases/download/v${version}/kotlin-compiler-${version}.zip"
-	env:info "Downloading kotlin ${version}"
-	if ! curl --progress-bar --location --retry-max-time 10 --retry 0 "${download_url}" --output "${archive_path}"; then
-		env:info "Download failure"
-		return 1
-	fi
-	env:info "Download completed $download_url"
-}
-
-# EndSection
-
-# Section: unpack
-
-___x_cmd_env_kotlin_copy_to_unpackdir(){
-    mv -f "${archive_path%/*}/kotlinc/"* "$unpack_dir"
+___x_cmd_env_kotlin_download_url(){
+	local version="${1:?Provide a version}"
+	printf "https://github.com/JetBrains/kotlin/releases/download/v%s/kotlin-compiler-%s.zip" "$version" "$version"
 }
 
 # EndSection
@@ -59,7 +33,3 @@ ___x_cmd_env_kotlin_ui_catsel(){
 }
 
 # EndSection
-
-___x_cmd_env_kotlin_ws(){
-    :
-}

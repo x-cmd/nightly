@@ -1,48 +1,25 @@
 # shellcheck shell=sh disable=SC2039,SC1090,SC3043,SC2263,SC2120    # xrc
 
-# Section: Maven ls_remote
+# Section(ls_remote): list_url, version_info
 
-___x_cmd_env_maven_ls_remote(){
-    local pattern="${1:-""}"
-    local cache_expiration="${2:-86400}"
-    local cache_path="$___X_CMD_ENV_PATH/maven/cache/version_list"
-    ___x_cmd_httpget "https://archive.apache.org/dist/maven/maven-3/" "$cache_path" "$cache_expiration"  && \
-        awk -v pattern="$pattern" 'match($0, /href="([0-9.]+)\/"/){
-            version = substr($0,52,5)
-            if (pattern == "" || index(version, pattern) > 0) {
-                print version
-            }
-        } ' <"$cache_path" | ___x_cmd_env_common_sort_version | ___x_cmd_env_common_simplify_version
+___x_cmd_env_maven_list_url(){
+    printf "https://archive.apache.org/dist/maven/maven-3/"
+}
+
+___x_cmd_env_maven_version_info(){
+    awk -v pattern="$pattern" 'match($0, /href="([0-9.]+)\/"/){
+        version = substr($0, RSTART+6, RLENGTH-8)
+        if (version ~ pattern) { print version }
+    } '
 }
 
 # EndSection
 
-# Section: download
+# Section(download): download_url
 
-___x_cmd_env_maven_download_archive(){
+___x_cmd_env_maven_download_url(){
     local version="${1:?Provide a version}"
-    local archive_path="$___X_CMD_ENV_PATH/maven/archive/maven-${version}.zip"
-    if ___x_cmd_env_util_is_archive_cached maven "$version" 2>/dev/null; then
-        env_log "Maven-$version have existed,download failed "
-        return 0
-    fi
-    mkdir -p "$(dirname "${archive_path}")"
-    local download_url="https://archive.apache.org/dist/maven/maven-3/${version}/binaries/apache-maven-${version}-bin.zip"
-    env:info "Downloading $download_url"
-    if ! curl --progress-bar --location --retry-max-time 10 --retry 0 "$download_url" --output "$archive_path" ; then
-        env:error "Download failure from $download_url"
-        return 1
-    fi
-    env:info "Download Successfully"
-}
-
-# EndSection
-
-# Section: unpack
-
-___x_cmd_env_maven_copy_to_unpackdir(){
-    local version="${1:?Provide a version}"
-    mv -f "${archive_path%/*}/apache-maven-$version/"* "$unpack_dir"
+    printf "https://archive.apache.org/dist/maven/maven-3/%s/binaries/apache-maven-%s-bin.zip" "$version" "$version"
 }
 
 # EndSection

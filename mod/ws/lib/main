@@ -25,7 +25,7 @@ ___x_cmd_ws_run(){
     fi
 }
 
-___x_cmd__ws(){
+___x_cmd_ws__run(){
     local RESOURCE_NAME="$1"; shift
 
     if ___x_cmd_search_path_ . ".x-cmd/$RESOURCE_NAME"; then

@@ -1,47 +1,30 @@
 # shellcheck shell=sh disable=SC2039,SC1090,SC3043,SC2263,SC2120    # xrc
 
-# Section: sbt ls_remote
-___x_cmd_env_sbt_ls_remote(){
-    local pattern="${1:-""}"
-  	local cache_expiration="${2:-86400}"
-	local cache_path="$___X_CMD_ENV_PATH/sbt/cache/version_list"
-	___x_cmd_httpget "https://www.scala-sbt.org/download.html" "$cache_path" "$cache_expiration" && \
-	    awk -v pattern="$pattern" 'match($0,/sbt [0-9.]+/) {
-            version = substr($0,RSTART+4,RLENGTH-1)
-            if (pattern == "" || index(version, pattern) > 0) {
-                print version
-            }
-        }' < "$cache_path" \
-            | ___x_cmd_env_common_sort_version | ___x_cmd_env_common_simplify_version
-}
-# EndSection
+# Section(util): compression
 
-# Section: sbt download_archive
-___x_cmd_env_sbt_download_archive(){
-    local version="${1:?Provide a version}"
-    if ___x_cmd_env_util_is_archive_cached sbt "$version" 2>/dev/null; then
-		env:info  "Archive existed: $version"
-		return 0
-	fi
-    local archive_path="$___X_CMD_ENV_PATH/sbt/archive/sbt-${version}.tgz"
-    mkdir -p "$(dirname "${archive_path}")"
-    local download_url="https://github.com/sbt/sbt/releases/download/v${version}/sbt-${version}.tgz"
-    env:info "Downloading sbt ${download_url}"
-    if ! curl --progress-bar --location --retry-max-time 10 --retry 0 "${download_url}" --output "${archive_path}"; then
-		env:info "Download failure"
-		return 1
-	fi
-    env:info "Download completed $download_url"
-}
-# EndSection
-
-# Section: sbt unpack
-
-___x_cmd_env_sbt_get_compression(){
+___x_cmd_env_sbt_compression(){
     printf 'tgz'
 }
 
-___x_cmd_env_sbt_copy_to_unpackdir(){
-    mv -f "${archive_path%/*}/sbt/"* "$unpack_dir"
+# EndSection
+
+# Section(ls_remote): list_url, version_info
+___x_cmd_env_sbt_version_info(){
+    awk -v pattern="$pattern" 'match($0,/sbt [0-9.]+/) {
+        version = substr($0,RSTART+4,RLENGTH-1)
+        if (version ~ pattern ) { print version }
+    }'
+}
+
+___x_cmd_env_sbt_list_url(){
+    printf "https://www.scala-sbt.org/download.html"
+}
+
+# EndSection
+
+# Section(download): download_url
+___x_cmd_env_sbt_download_url(){
+    local version="${1:?Provide a version}"
+    printf "https://github.com/sbt/sbt/releases/download/v%s/sbt-%s.tgz" "$version" "$version"
 }
 # EndSection

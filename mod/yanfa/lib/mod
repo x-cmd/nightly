@@ -186,7 +186,7 @@ ___x_cmd_yanfa_mod_ls(){
 ___x_cmd_yanfa_mod(){
     x:trace yanfa/mod
     if [ -f "$(x wsroot)/.x-cmd/$1" ]; then
-        x _ws "$@"
+        x ws _run "$@"
         return
     fi
 

@@ -12,6 +12,7 @@ maven
 perl
 springboot
 deno
+rust
 kotlin
 gradle
 "
@@ -142,7 +143,7 @@ A
     local candidate="${1}"
     local version
     if ! version="$(___x_cmd_env_run_common_if_notfound full_version_local "$candidate" "$2")"; then
-        env:error "Version of $candidate local not found: ${version}${2}"
+        env:error "Version of $candidate local not found: $version${2}"
         return 1
     fi
     shift 2
@@ -165,7 +166,7 @@ A
     local candidate="${1}"
     local version
     if ! version="$(___x_cmd_env_run_common_if_notfound full_version_remote "$candidate" "$2")"; then
-        env:error "Version of $candidate local not found: ${version}${2}"
+        env:error "Version of $candidate local not found: $version${2}"
         return 1
     fi
 
@@ -226,7 +227,7 @@ A
     fi
 
     if ! version="$(___x_cmd_env_run_common_if_notfound full_version_remote "$candidate" "$version")"; then
-        env:error "Version of $candidate not found: ${version}${2}"
+        env:error "Version of $candidate not found: $version${2}"
         return 1
     fi
 
@@ -254,7 +255,7 @@ A
     version="${2:-"$(___x_cmd_env_run_common_if_notfound current "$candidate")"}"
     version="$(___x_cmd_env_run_common_if_notfound full_version_local "$candidate" "$version")"
     if [ -z "$version" ] || [ "$version" = "system" ]; then
-        env:error "Version of $candidate was not installed by xenv: ${version}${2}"
+        env:error "Version of $candidate was not installed by xenv: $version${2}"
         return 1
     fi
 

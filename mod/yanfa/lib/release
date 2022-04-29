@@ -98,7 +98,7 @@ ___x_cmd_yanfa_release_add()(
 
     cd "$___X_CMD_YANFA_RELEASE_TMP" || exit 1
 
-    for ((i=1; i<=3; i=i+1)); do
+    for ((i=1; i<=${RETRY:-3}; i=i+1)); do
         if git clone --quiet --depth=1 "$position" -b "$branch"; then
             yanfa:info "[$mod/$branch] Cloning success from $position"
             exit 0
@@ -167,13 +167,11 @@ ___x_cmd_yanfa_release_lsfile()(
         cd "$___X_CMD_YANFA_RELEASE_TMP" && \
         while read -r line; do
             (
-                # if ! cd "$line"; then
-                #     yanfa:info "___x_cmd_yanfa_release_lsfile while-loop: fail to cd - $line"
-                #     exit 1
-                # else
-                #     ___x_cmd_yanfa_mod_lsfile | x arg1 printf "%s/%s\n" "$line"
-                # fi
-                cd "$line" && ___x_cmd_yanfa_mod_lsfile | x arg1 'printf "%s/%s\n" "$line" "$1"'
+                if ! cd "$line"; then
+                    yanfa:error "___x_cmd_yanfa_release_lsfile while-loop: fail to cd - $line"
+                    exit 1
+                fi
+                ___x_cmd_yanfa_mod_lsfile | x arg1 'printf "%s/%s\n" "$line" "$1"'
             )
         done
     )
