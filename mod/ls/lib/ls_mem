@@ -1,0 +1,15 @@
+case "$(x os name)" in
+    darwin)
+___x_cmd_ls_mem(){
+    ls:info "Using vm_stat command"
+    vm_stat
+}
+    ;;
+
+    *)
+___x_cmd_ls_mem(){
+    ls:info "Using free command"
+    free
+}
+
+esac

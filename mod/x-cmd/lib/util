@@ -1,12 +1,28 @@
 
-___x_cmd_abspath(){
+
+___x_cmd_abspath_(){
     local target_path="${1:-Please provide path}"
-    # $(dirname "$filepath")/
-    if [ "${target_path#/}" = "${target_path}" ]; then
-        printf "%s" "$(cd "$(dirname "$target_path")" && pwd)/$(basename "$target_path")"
+    if [ "${target_path#/}" != "${target_path}" ]; then
+        ___X_CMD_ABSPATH_RESULT="$target_path"
     else
-        printf "%s" "$target_path"
+        local basename="${target_path##*/}"
+        if [ "$basename" = "$target_path" ]; then
+            ___X_CMD_ABSPATH_RESULT="$PWD/$target_path"
+        else
+            cd "${target_path%/*}" && ___X_CMD_ABSPATH_RESULT="$PWD/$basename" && cd "$OLDPWD" || return
+        fi
     fi
+}
+
+___x_cmd_abspath(){
+    ___x_cmd_abspath_ "$@" && printf "%s\n" "$___X_CMD_ABSPATH_RESULT"
+    # local target_path="${1:-Please provide path}"
+    # # $(dirname "$filepath")/
+    # if [ "${target_path#/}" = "${target_path}" ]; then
+    #     printf "%s" "$(cd "$(dirname "$target_path")" && pwd)/$(basename "$target_path")"
+    # else
+    #     printf "%s" "$target_path"
+    # fi
 }
 
 ___x_cmd_repeat(){

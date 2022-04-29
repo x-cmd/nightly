@@ -25,17 +25,6 @@ ___x_cmd_7z(){
     ___x_cmd_static_build_file      p7zip 7za               "$@"
 }
 
-# TODO: Will be replaced by module ls
-___x_cmd_ls(){
-    case "$1" in
-        @*|*@*/*)
-            ___x_cmd_file_ls "$@"
-            return
-            ;;
-    esac
-    ___x_cmd_static_build_file exa exa   "$@"
-}
-
 ___x_cmd_ll(){
     ___x_cmd_static_build_file      exa exa  -l             "$@"
 }
@@ -43,3 +32,16 @@ ___x_cmd_ll(){
 ___x_cmd_ssl(){
     ___x_cmd_static_build_file      openssl openssl         "$@"
 }
+
+___x_cmd_ps(){
+    ___x_cmd_static_build_file      procs procs             "$@"
+}
+
+___x_cmd_sqlite(){
+    ___x_cmd_static_build_file      sqlite3 sqlite3         "$@"
+}
+
+___x_cmd_bw(){
+    ___x_cmd_static_build_file      bandwhich bandwhich     "$@"
+}
+

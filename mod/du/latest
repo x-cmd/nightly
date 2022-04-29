@@ -6,10 +6,14 @@
 # Section: main
 
 ___x_cmd_du(){
-    : refer ncdu
-
-    command du "$@"
+    ___x_cmd_static_build_file      dust dust               "$@"
 }
+
+# ___x_cmd_du(){
+#     : refer ncdu
+
+#     command du "$@"
+# }
 # EndSection
 
 xrc setmain ___x_cmd_du

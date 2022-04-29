@@ -4,6 +4,13 @@
 ___X_CMD_ALIAS_SEP="$___X_CMD_UNSEENCHAR_001"
 ___X_CMD_ALIAS_ITEM_SEP="$___X_CMD_UNSEENCHAR_002"
 
+___x_cmd_a(){
+    ___x_cmd_alias "___x_cmd" "$@"
+}
+
+___x_cmd_ua(){
+    ___x_cmd_unalias "___x_cmd" "$@"
+}
 
 ___x_cmd_alias(){
     case "$#" in

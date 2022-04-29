@@ -8,15 +8,19 @@ xrc  cat/lib/color
 ___x_cmd_cat(){
     while [ $# -gt 0 ]; do
         case "$1" in
-            htt*)       x curl "$1"     ;;
+            https://*|http://*)       x curl "$1"     ;;
             # TODO: add resource for x path
-            *)          ___x_cmd_cat_color "$1"        ;;
+            *)          ___x_cmd_cat_bat "$1"        ;;
             # If json, use json color
             # If source file, use language parser
         esac
 
         shift
     done
+}
+
+___x_cmd_cat_bat(){
+    ___x_cmd_static_build_help      bat bat                 "$@"
 }
 
 xrc setmain ___x_cmd_cat

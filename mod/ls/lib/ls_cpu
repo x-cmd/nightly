@@ -1,0 +1,16 @@
+
+case "$(x os name)" in
+    darwin)
+___x_cmd_ls_cpu(){
+    ls:info "Using sysctl command"
+    sysctl -a | grep machdep\.cpu
+}
+    ;;
+
+    *)
+___x_cmd_ls_cpu(){
+    ls:info "Using free command"
+    cat /cpu/info
+}
+
+esac
