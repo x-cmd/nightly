@@ -1,37 +1,28 @@
 # shellcheck shell=sh disable=SC2039,SC1090,SC3043,SC2263    # xrc
 
 # Section(util): compression, get_system_arch
-
 ___x_cmd_env_rust_compression(){
-    case "$(x os name)" in
-        linux|darwin|win)      printf "tar.gz"    ;;
-        *)          env:error "your system:($(x os name)) are not supported"
-                    return 1           ;;
-    esac
+    printf "tar.gz"
+    # case "$(x os name)" in
+    #     linux|darwin|win)      printf "tar.gz"    ;;
+    #     *)          env:error "your system:($(x os name)) are not supported"
+    #                 return 1           ;;
+    # esac
 }
 
 ___x_cmd_env_rust_get_system_arch(){
-    case "$(x os name)" in
-        linux)      system="unknown-linux-gnu"                ;;
-        win)        system="pc-windows-msvc"                  ;;
-        darwin)     system="apple-darwin"                     ;;
-        *)          env:error "your system:($(x os name)) are not supported"
-                    return 1                                  ;;
-    esac
-    case "$(x os arch)" in
-        arm64)      arch="aarch64"                            ;;
-        x64)        arch="x86_64"                         ;;
-        x86)        arch="x86_64"                         ;;
-        aarch|powerpc64|armv7)      arch="$(x os arch)"         ;;
-        *)          env:error "your arch:($(x os arch)) are not supported"
-                    return 1                              ;;
-    esac
-}
+    x incase_ "$(x os name)" linux:unknown-linux-gnu win:pc-windows-msvc darwin:apple-darwin || \
+        { env:error "your system:($(x os name)) are not supported" && return 1; }
+    system="$___X_CMD_CASE_RESULT"
 
-# EndSection
+    x incase_ "$(x os arch)"    x86:x86_64 x64:x86_64 arm64:aarch64 \
+                                aarch:aarch powerpc64:powerpc64 armv7:armv7 || \
+        { env:error "your arch:($(x os arch)) are not supported" && return 1; }
+    arch="$___X_CMD_CASE_RESULT"
+}
+## EndSection
 
 # Section(ls_remote): list_url, version_info
-
 ___x_cmd_env_rust_list_url(){
     printf "https://api.github.com/repos/rust-lang/rust/releases"
 }
@@ -40,27 +31,23 @@ ___x_cmd_env_rust_version_info(){
     x ja 'k()=="tag_name" && ( v() ~ "'"$pattern"'" ) { print v() } '
 }
 
-# EndSection
+## EndSection
 
 # Section(download): download_url
-
 ___x_cmd_env_rust_download_url(){
     local version="${1:?Provide a version}"
     local system
     local arch
-    ___x_cmd_env_rust_get_system_arch
+    ___x_cmd_env_rust_get_system_arch || return 1
     printf "https://static.rust-lang.org/dist/rust-%s-%s-%s.%s" "$version" "$arch" "$system" "$(___x_cmd_env_rust_compression)"
 }
-
-# EndSection
+## EndSection
 
 # Section(unpack): copy_to_unpackdir
-
 ___x_cmd_env_rust_copy_to_unpackdir()(
     local version="${1:?Provide a version}"
     cd "$unpack_dir"/* || return 1
     ./install.sh --destdir="../tmp" --prefix=/
     x rmrf "$PWD"
 )
-
-# EndSection
+## EndSection

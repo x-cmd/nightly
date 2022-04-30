@@ -1,7 +1,6 @@
 # shellcheck shell=sh disable=SC2039,SC1090,SC3043,SC2263,SC2120    # xrc
 
 # Section(util): get_system_arch, compression, miniconda_filename
-
 ___x_cmd_env_python_get_system_arch(){
     case "$(x os name)" in
         linux)      system=Linux                     ;;
@@ -36,11 +35,9 @@ ___x_cmd_env_python_miniconda_filename(){
     compression="$(___x_cmd_env_python_compression)" || return 1
     printf "Miniconda3-%s-%s-%s.%s" "$version" "$system" "$arch" "$compression"
 }
-
-# EndSection
+## EndSection
 
 # Section(ls_remote): list_url, version_info
-
 ___x_cmd_env_python_list_url(){
     printf "https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/"
 }
@@ -56,11 +53,9 @@ ___x_cmd_env_python_version_info(){
         if (version ~ pattern) { print version }
     }'
 }
-
-# EndSection
+## EndSection
 
 # Section(download): download_url
-
 ___x_cmd_env_python_download_url(){
     local version="${1:?Provide python version}"
     local miniconda_filename
@@ -72,11 +67,9 @@ ___x_cmd_env_python_download_url(){
     fi
     printf "%s/%s" "$url" "$miniconda_filename"
 }
-
-# EndSection
+## EndSection
 
 # Section: unpack
-
 ___x_cmd_env_python_unpack(){
     local version="${1:?Provide python version}"
     local miniconda_filename
@@ -89,17 +82,14 @@ ___x_cmd_env_python_unpack(){
     chmod +x "${archive_path}" && \
         "${archive_path}" -b -u -p "${versions_path}/$version" 1>&2
 }
-
-# EndSection
+## EndSection
 
 # Section: ui_catsel
-
-#TODO: Should be optimized
+# TODO: Should be optimized
 ___x_cmd_env_python_ui_catsel(){
     case "$#" in
         0)  ___x_cmd_env_python_ls_remote | awk '{ split($0,arr,"."); vmap[arr[1]]=1 } END{ for(key in vmap){print key} }'  ;;
         1)  ___x_cmd_env_python_ls_remote | grep ^"$1" | awk '{ print $0 }' ;;
     esac
 }
-
-# EndSection
+## EndSection

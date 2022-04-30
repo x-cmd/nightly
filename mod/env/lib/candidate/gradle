@@ -1,7 +1,6 @@
 # shellcheck shell=sh disable=SC2039,SC1090,SC3043,SC2263,SC2120    # xrc
 
 # Section(ls_remote): list_url, version_info
-
 ___x_cmd_env_gradle_list_url(){
     printf "https://services.gradle.org/distributions/"
 }
@@ -12,26 +11,21 @@ ___x_cmd_env_gradle_version_info(){
         if (version ~ pattern) { print version }
     }'
 }
-
-# EndSection
+## EndSection
 
 # Section(download): download_url
-
 ___x_cmd_env_gradle_download_url(){
     local version="${1:?Provide a version}"
     printf "https://services.gradle.org/distributions/gradle-%s-all.zip" "$version"
 }
-
-# EndSection
+## EndSection
 
 # Section: ui_catsel
-
-#TODO: Should be optimized
+# TODO: Should be optimized
 ___x_cmd_env_gradle_ui_catsel(){
     case "$#" in
         0)  ___x_cmd_env_gradle_ls_remote | awk '{ split($0,arr,"."); vmap[arr[1]]=1 } END{ for(key in vmap){print key} }' ;;
         1)  ___x_cmd_env_gradle_ls_remote | grep ^"$1" | awk '{ print $0 }' ;;
     esac
 }
-
-# EndSection
+## EndSection

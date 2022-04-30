@@ -1,7 +1,6 @@
 # shellcheck shell=sh disable=SC2039,SC1090,SC3043,SC2263,SC2120    # xrc
 
 # Section(util): platform  compression
-
 ___x_cmd_env_java_platform(){
     local system
     system="$(x os name)"
@@ -16,11 +15,9 @@ ___x_cmd_env_java_compression(){
 		printf "tar.gz"
 	fi
 }
-
-# EndSection
+## EndSection
 
 # Section(ls_remote): list_url, version_info
-
 ___x_cmd_env_java_list_url() {
     printf "https://api.sdkman.io/2/candidates/java/%s/versions/all" \
         "$(___x_cmd_env_java_platform)"
@@ -30,20 +27,17 @@ ___x_cmd_env_java_version_info(){
 	#TODO: To add more support not only for openjdk
     awk -v pattern="$pattern" 'BEGIN{ RS=","} ($0 ~ pattern)&&($0 ~ "-open$") { print $0 }'
 }
-
-# EndSection
+## EndSection
 
 # Section(download): download_url
-
 ___x_cmd_env_java_download_url(){
     local version="$1"
     printf "https://api.sdkman.io/2/broker/download/java/%s/%s" \
 		 "$version" "$(___x_cmd_env_java_platform)"
 }
-# EndSection
+## EndSection
 
 # Section(unpack): copy_to_unpackdir
-
 ___x_cmd_env_java_copy_to_unpackdir(){
 	if [ "$(x os name)" = "darwin" ]; then
 		env:debug "Copying " "$unpack_dir"/*/Contents/Home/* " to " "$unpack_dir"/*/
@@ -51,11 +45,9 @@ ___x_cmd_env_java_copy_to_unpackdir(){
 		x rmrf "$unpack_dir"/*/Contents
 	fi
 }
-
-# EndSection
+## EndSection
 
 # Section: ui_catsel
-
 #TODO: Should be optimized
 ___x_cmd_env_java_ui_catsel(){
     case "$#" in
@@ -64,5 +56,4 @@ ___x_cmd_env_java_ui_catsel(){
         2)  ___x_cmd_env_java_ls_remote | grep "$1" | grep ^"$2" | awk '{ print $1 }' ;;
     esac
 }
-
-# EndSection
+## EndSection
