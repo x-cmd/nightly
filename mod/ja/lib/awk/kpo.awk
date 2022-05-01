@@ -8,8 +8,6 @@ BEGIN {
     L = "\003"
 }
 
-
-
 # Section: jiter
 # function jiter_init( keypath_prefix ) {
 BEGIN {
