@@ -16,6 +16,16 @@ ___x_cmd_pkg_post_script(){
     :
 }
 
+___x_cmd_pkg_bin_url(){
+    :
+}
+
+___x_cmd_pkg___awk(){
+    ___x_cmd_pkg___all_info | awk \
+        -f "$___X_CMD_ROOT_MOD/awk/lib/json.awk" \
+        -f "$___X_CMD_ROOT_MOD/awk/lib/jqparse.awk" \
+        -f "$___X_CMD_ROOT_MOD/env/lib/pkg/pkg.json.awk"
+}
 
 # Section: get from env.7z
 ___x_cmd_pkg___which_p7zip(){

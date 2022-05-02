@@ -655,12 +655,12 @@ function json_stringify_format(arr, keypath, indent,       _i, _len,_ret){
 }
 # EndSection
 
-function json_split2tokenarr(obj, text){
+function json_split2tokenarr( obj, text ){
     return split( json_to_machine_friendly(text), obj, "\n" )
 }
 
-function json_split2tokenarr_(text){
-    return json_split2tokenarr(_, text)
+function json_split2tokenarr_( text ){
+    return json_split2tokenarr( _, text )
 }
 
 # Section: still strange: should be global search
