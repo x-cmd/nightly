@@ -35,6 +35,16 @@ function exit_now(code){
     EXIT_CODE = code    # You still need to check EXIT_CODE in end block
     exit code
 }
+
+function exit_msg( code, msg ){
+    if (msg == "") {
+        msg = code
+        code = 1
+    }
+    printf("%s\n", msg)
+    exit( code )
+}
+
 # EndSection
 
 # Section: exit
@@ -48,5 +58,37 @@ function var_quote1(str){
 function var_set(name, value){
     return sprintf("%s=%s", name, var_quote1(value))
 }
+# EndSection
+
+# Section: jqu
+
+
+function juq( str ){
+    if (str !~ /^".*"$/) return str
+
+    str = substr( str, 2, length(str)-2 )
+    gsub( "\\\\", "\001", str )
+    gsub( "\\\"", "\"", str )
+    gsub( "/\\n/", "\n", str )
+    gsub( "/\\t/", "\t", str )
+    gsub( "/\\v/", "\v", str )
+    gsub( "/\\b/", "\b", str )
+    gsub( "/\\r/", "\r", str )
+    gsub( "\001", "\\\\", str )
+    return str
+}
+
+function jqu( str ){
+    if (str ~ /^".*"$/) return str
+
+    gsub( "\"", "\\\"", str )
+    gsub( "\n", "\\n", str )
+    gsub( "\t", "\\t", str )
+    gsub( "\v", "\\v", str )
+    gsub( "\b", "\\b", str )
+    gsub( "\r", "\\r", str )
+    return "\"" str "\""
+}
+
 # EndSection
 

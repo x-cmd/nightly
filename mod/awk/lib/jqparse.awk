@@ -1,3 +1,7 @@
+BEGIN{
+    L = "\003"
+}
+
 function jqparse_str( obj, kp, token_str, sep,     _arr, _arrl ) {
     _arrl = json_split2tokenarr( _arr, token_str )
     # for (i=1; i<=_arrl; ++i) print _arr[i]
