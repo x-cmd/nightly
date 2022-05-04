@@ -17,14 +17,25 @@ function jqparse(obj, kp,      token_arrl, token_arr,                           
     obj[ kp L ] = l
 }
 
-function ___jqparse_value(obj, kp,     token_arrl, token_arr,  idx,                     t ){
-    t = token_arr[ idx ]
-    if (t == "[")       return jqparse_list( obj, kp, token_arrl, token_arr, idx )
-    if (t == "{")       return jqparse_dict( obj, kp, token_arrl, token_arr, idx )
-    obj[ kp ] = t;      return idx + 1
+function jqparse_dict(obj, kp,     token_arrl, token_arr,  idx ){
+    return ___jqparse_dict( obj, kp, token_arrl, token_arr, idx || 1 )
 }
 
-function jqparse_list(obj, kp,     token_arrl, token_arr,  idx,                 l ){
+function jqparse_list(obj, kp,     token_arrl, token_arr,  idx ){
+    return ___jqparse_list( obj, kp, token_arrl, token_arr, idx || 1 )
+}
+
+function ___jqparse_value(obj, kp,     token_arrl, token_arr,  idx,                     t ){
+    t = token_arr[ idx ]
+    if (t == "[")       return ___jqparse_list( obj, kp, token_arrl, token_arr, idx )
+    if (t == "{")       return ___jqparse_dict( obj, kp, token_arrl, token_arr, idx )
+    # obj[ kp ] = t;      return idx + 1
+    obj[ kp ] = t;
+    print ": --- : " kp "\t --- \t" t
+    return idx + 1
+}
+
+function ___jqparse_list(obj, kp,     token_arrl, token_arr,  idx,                 l ){
     obj[ kp ] = "["
     ++ idx
     while ( idx <= token_arrl ) {
@@ -39,7 +50,7 @@ function jqparse_list(obj, kp,     token_arrl, token_arr,  idx,                 
     # return 11111111
 }
 
-function jqparse_dict(obj, kp,     token_arrl, token_arr,  idx,                 l, t){
+function ___jqparse_dict(obj, kp,     token_arrl, token_arr,  idx,                 l, t ){
     obj[ kp ] = "{"
     ++ idx
     while ( idx <= token_arrl ) {
@@ -48,7 +59,8 @@ function jqparse_dict(obj, kp,     token_arrl, token_arr,  idx,                 
             obj[ kp L ] = l
             return idx + 1
         }
-        token_arr[ kp, ++ l ] = t
+
+        obj[ kp, (++ l) ] = t
         idx = ___jqparse_value( obj, kp SUBSEP t, token_arrl, token_arr, idx + 2 )
         if ( token_arr[ idx ] == "," )     idx ++
     }

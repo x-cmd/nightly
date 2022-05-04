@@ -13,18 +13,67 @@ x log init pkg
 
 
 ___x_cmd_pkg_post_script(){
-    :
+    local pkg_name="${1:?Provide pkg name}"
+    local osarch="${2:?osarch as filter}"
+    local version="${3:?rovide version}"
 }
 
-___x_cmd_pkg_bin_url(){
-    :
+
+# _bin_url__
+# _bin_url_cn
+___x_cmd_pkg___bin_url(){
+    local pkg_name="${1:?Provide pkg name}"
+    local osarch="${2:?osarch as filter}"
+    local version="${3:?rovide version}"
+
+    local url_list
+    url_list="$(___x_cmd_pkg___all_info "${pkg_name}" | awk \
+        -f "$___X_CMD_ROOT_MOD/awk/lib/default.awk" \
+        -f "$___X_CMD_ROOT_MOD/awk/lib/jqparse.awk" \
+        -f "pkg.jobj.awk" \
+        -f "pkg.lsversion.awk")"
+
+    local url
+    while read -r url; do
+        :
+    done <<A
+$url_list
+A
+
+}
+
+___x_cmd_pkg___ls_local(){
+    local pkg_name="${1:?Provide pkg name}"
+    local osarch="${2:?osarch as filter}"
+    ___x_cmd_pkg___all_info "${pkg_name}" | awk \
+        -f "$___X_CMD_ROOT_MOD/awk/lib/default.awk" \
+        -f "$___X_CMD_ROOT_MOD/awk/lib/jqparse.awk" \
+        -f "pkg.jobj.awk" \
+        -f "pkg.lsversion.awk"
+}
+
+# Control the lsversion awk for better showing
+___x_cmd_pkg___ls_version(){
+    local pkg_name="${1:?Provide pkg name}"
+    local osarch="${2:?osarch as filter}"
+    ___x_cmd_pkg___all_info "${pkg_name}" | awk \
+        -f "$___X_CMD_ROOT_MOD/awk/lib/default.awk" \
+        -f "$___X_CMD_ROOT_MOD/awk/lib/jqparse.awk" \
+        -f "pkg.jobj.awk" \
+        -f "pkg.lsversion.awk"
 }
 
 ___x_cmd_pkg___awk(){
-    ___x_cmd_pkg___all_info | awk \
+    # ___x_cmd_pkg___all_info "${FP:-nmap}" | awk \
+    #     -f "$___X_CMD_ROOT_MOD/awk/lib/default.awk" \
+    #     -f "$___X_CMD_ROOT_MOD/awk/lib/jqparse.awk" \
+    #     -f "$___X_CMD_ROOT_MOD/env/lib/pkg/pkg.jobj.awk"
+
+    ___x_cmd_pkg___all_info "${FP:-nmap}" | awk \
         -f "$___X_CMD_ROOT_MOD/awk/lib/default.awk" \
         -f "$___X_CMD_ROOT_MOD/awk/lib/jqparse.awk" \
-        -f "$___X_CMD_ROOT_MOD/env/lib/pkg/pkg.jobj.awk"
+        -f "pkg.jobj.awk" \
+        -f "pkg.url.awk"
 }
 
 # Section: get from env.7z
@@ -78,6 +127,7 @@ ___x_cmd_pkg___version_fp(){
 ___x_cmd_pkg___all_info(){
     local s
     s="$___X_CMD_PKG_RAWPATH/$(___x_cmd_pkg_locate "${1:?Provide name}")" || return
+    printf "%s\n" "$1"
     cat "$s/meta.tt.json" "$s/version.tt.json"
 }
 # EndSection
