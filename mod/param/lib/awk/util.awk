@@ -98,6 +98,15 @@ function s_wrap2(str){
     return "\"" str "\""
 }
 
+function str_wrap_by_backslash(str){
+    return "\\\"" str "\\\""
+}
+
+function qoute_to_escapedqoute(str){
+    gsub(/"/, "\\\"", str)
+    return str
+}
+
 function quote_string(str){
     gsub(/"/, "\\\"", str)
     return "\"" str "\""

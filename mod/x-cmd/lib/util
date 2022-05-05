@@ -161,7 +161,6 @@ ___x_cmd_validenvname(){
 # Section : help and advise.json
 ___x_cmd__x_cmd_advise_json(){
     xrc cat x-cmd/lib/x.json
-    return 126
 }
 
 ___x_cmd_x_cmd_help(){
@@ -179,7 +178,6 @@ ___x_cmd_x_cmd_help(){
 # Section: condition
 ___x_cmd_case_(){
     local val="${1:?Provide value}"; shift
-    local ___X_CMD_CASE_RESULT
     local arg
     for arg in "$@"; do
         ___X_CMD_CASE_RESULT="${arg#$val:}"
@@ -256,7 +254,7 @@ ___x_cmd_varset_without_end(){
 
 # _x_xrc_static_run(){
 #     local name=$1;  shift
-#     xrc static-build
+#     xrc pkg
 #     static_build_xrc "$name"
 #     "_${name}_bin" "$@"
 # }
@@ -266,7 +264,7 @@ ___x_cmd_static_build_file(){
     local repo="${2:?Provide repo name}"
     shift 2
     eval " ___x_cmd_$app(){
-        xrc static-build && static_build_init $app $repo ___x_cmd_$app && ___x_cmd_$app  \"\$@\"
+        xrc pkg && static_build_init $app $repo ___x_cmd_$app && ___x_cmd_$app  \"\$@\"
     }"
     ___x_cmd_"$app" "$@"
 }

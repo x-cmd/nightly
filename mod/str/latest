@@ -455,7 +455,6 @@ ___x_cmd_str_replace_n(){
 
 ___x_cmd_str_x_cmd_advise_json(){
     cat "$___X_CMD_ROOT_MOD/str/lib/str.advise.json"
-    return 126
 }
 
 xrc setmain ___x_cmd_str

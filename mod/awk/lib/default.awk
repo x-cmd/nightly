@@ -67,8 +67,8 @@ function juq( str ){
     if (str !~ /^".*"$/) return str
 
     str = substr( str, 2, length(str)-2 )
-    gsub( "\\\\", "\001", str )
-    gsub( "\\\"", "\"", str )
+    gsub( "/\\\\/", "\001", str )
+    gsub( /\\"/, "\"", str )
     gsub( "/\\n/", "\n", str )
     gsub( "/\\t/", "\t", str )
     gsub( "/\\v/", "\v", str )

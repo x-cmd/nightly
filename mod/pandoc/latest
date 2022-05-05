@@ -3,7 +3,7 @@
 # author:       Li Junhao           l@x-cmd.com
 # license:      GPLv3
 
-xrc static-build/lib/staticbin os
+xrc pkg/lib/staticbin os
 
 ___x_cmd_pandoc(){
     ___x_cmd_staticbin_init \

@@ -7,7 +7,7 @@ ___x_cmd_pkg(){
     esac
 }
 
-___X_CMD_PKG_RAWPATH="$___X_CMD_ROOT_TMP/env/raw"
+___X_CMD_PKG_RAWPATH="$___X_CMD_ROOT_TMP/pkg/raw"
 
 x log init pkg
 
@@ -76,23 +76,23 @@ ___x_cmd_pkg___awk(){
         -f "pkg.url.awk"
 }
 
-# Section: get from env.7z
+# Section: get from all.7z
 ___x_cmd_pkg___which_p7zip(){
     ___x_cmd_ensuredir "$___X_CMD_PKG_RAWPATH"
 
-    local p7zip="$___X_CMD_ROOT_TMP/env/env.7z"
-    if ! ___x_cmd_httpget_gitx x-cmd env main "dist/env.7z" "$p7zip" 3600; then # 1-day
+    local p7zip="$___X_CMD_ROOT_TMP/pkg/all.7z"
+    if ! ___x_cmd_httpget_gitx x-cmd pkg main "dist/all.7z" "$p7zip" 3600; then # 1-day
         if [ ! -f "$p7zip" ]; then
-            x:error "Unaviable env.7z. Unable to fetch env.7z."
+            x:error "Unaviable all.7z. Unable to fetch all.7z."
             return 1
         fi
     fi
 
     [ "$___X_CMD_HTTPGET_AGE" != 0 ] || (
-        pkg:info "Deflate the env.7z"
+        pkg:info "Deflate the all.7z"
         x rmrf "$___X_CMD_PKG_RAWPATH"
         ___x_cmd_ensuredir "$___X_CMD_PKG_RAWPATH"
-        cd ${p7zip%/*} && cp env.7z raw/env.7z && cd raw && x uz env.7z 2>/dev/null && rm env.7z
+        cd "${p7zip%/*}" && cp all.7z raw/all.7z && cd raw && x uz all.7z 2>/dev/null && rm all.7z
     )
 }
 
@@ -100,12 +100,12 @@ ___x_cmd_pkg___which_p7zip(){
 ___x_cmd_pkg_ls()(
     ___x_cmd_pkg___which_p7zip || return
 
-    cd "$___X_CMD_PKG_RAWPATH"
+    cd "$___X_CMD_PKG_RAWPATH" || return
     find . -name meta.tt.json | awk  '{ gsub(/\.\//, "", $0); gsub(/\/meta.tt.json$/, "", $0); print $0;  }'
 )
 # EndSection
 
-# Section: get raw text from env.7z
+# Section: get raw text from all.7z
 ___x_cmd_pkg_locate(){
     local tgt="${1:?Provide name}"
     ___x_cmd_pkg_ls | awk -v FS=/ -v tgt="$tgt" '$2==tgt{ print $0; exit 0; }'

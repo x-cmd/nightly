@@ -29,10 +29,7 @@ function ___jqparse_value(obj, kp,     token_arrl, token_arr,  idx,             
     t = token_arr[ idx ]
     if (t == "[")       return ___jqparse_list( obj, kp, token_arrl, token_arr, idx )
     if (t == "{")       return ___jqparse_dict( obj, kp, token_arrl, token_arr, idx )
-    # obj[ kp ] = t;      return idx + 1
-    obj[ kp ] = t;
-    print ": --- : " kp "\t --- \t" t
-    return idx + 1
+    obj[ kp ] = t;      return idx + 1
 }
 
 function ___jqparse_list(obj, kp,     token_arrl, token_arr,  idx,                 l ){

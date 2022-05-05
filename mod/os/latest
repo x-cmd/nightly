@@ -20,8 +20,7 @@ ___x_cmd_os(){
     "rname": null,
     "lsname": null,
     "lsarch": null
-}'
-                            return 126 ;;
+}'  ;;
         *)                  ___x_cmd_os_help          "$@"    ;;
     esac
 }

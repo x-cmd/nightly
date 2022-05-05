@@ -1,7 +1,6 @@
 
 ___x_cmd_dict__x_cmd_advise_json(){
     cat "$___X_CMD_ROOT_MOD/dict/lib/dict.advise.json"
-    return 126
 }
 
 # Section: Life cycle

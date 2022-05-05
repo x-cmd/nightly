@@ -87,7 +87,7 @@ END{
     $code
 }"
             ;;
-        _x_cmd_advise_json) printf "{}" ; return 126 ;;
+        _x_cmd_advise_json) printf "{}" ;;
         *)
             command awk "$@"
             ;;
