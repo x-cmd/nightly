@@ -11,11 +11,11 @@ ___x_cmd_env_rust_compression(){
 }
 
 ___x_cmd_env_rust_get_system_arch(){
-    x incase_ "$(x os name)" linux:unknown-linux-gnu win:pc-windows-msvc darwin:apple-darwin || \
+    x case_ "$(x os name)" linux:unknown-linux-gnu win:pc-windows-msvc darwin:apple-darwin || \
         { env:error "your system:($(x os name)) are not supported" && return 1; }
     system="$___X_CMD_CASE_RESULT"
 
-    x incase_ "$(x os arch)"    x86:x86_64 x64:x86_64 arm64:aarch64 \
+    x case_ "$(x os arch)"    x86:x86_64 x64:x86_64 arm64:aarch64 \
                                 aarch:aarch powerpc64:powerpc64 armv7:armv7 || \
         { env:error "your arch:($(x os arch)) are not supported" && return 1; }
     arch="$___X_CMD_CASE_RESULT"

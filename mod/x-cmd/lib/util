@@ -26,12 +26,9 @@ ___x_cmd_abspath(){
 }
 
 ___x_cmd_repeat(){
-    local IFS="
-"
-    local t="${1:?Provide time}"; shift
-    local j
-    for j in $(seq "$t"); do
-        "$@"
+    local ___X_CMD_REPEAT_TMP="${1:?Provide time}"; shift
+    for ((; ___X_CMD_REPEAT_TMP>0; --___X_CMD_REPEAT_TMP)); do
+        ___x_cmd_eval "$@"
     done
 }
 
@@ -172,46 +169,6 @@ ___x_cmd_x_cmd_help(){
     xrc advise/lib/advise_get
     ___x_cmd_advise_get_help "$(xrc which x-cmd/lib/x.json)"
 }
-# EndSection
-
-
-# Section: condition
-___x_cmd_case_(){
-    local val="${1:?Provide value}"; shift
-    local arg
-    for arg in "$@"; do
-        ___X_CMD_CASE_RESULT="${arg#$val:}"
-        [ "$___X_CMD_CASE_RESULT" == "$arg" ] || return 0
-
-        ___X_CMD_CASE_RESULT="${arg#$val=}"
-        [ "$___X_CMD_CASE_RESULT" == "$arg" ] || { ___X_CMD_CASE_RESULT="$(eval "$___X_CMD_CASE_RESULT")"; return 0; }
-    done
-    return 1
-}
-
-___x_cmd_case(){
-    ___x_cmd_case_ "$@" && printf "%s\n" "$___X_CMD_CASE_RESULT"
-}
-
-___x_cmd_ifelse_(){
-    local condition="${1:?Provide function}";
-    if eval "$condition"; then
-        case "$2" in
-            =*)     ___X_CMD_IFELSE_RESULT="$(eval "${2#=}")" ;;
-            *)      ___X_CMD_IFELSE_RESULT="$2" ;;
-        esac
-    else
-        case "$3" in
-            =*)     ___X_CMD_IFELSE_RESULT="$(eval "${3#=}")" ;;
-            *)      ___X_CMD_IFELSE_RESULT="$3" ;;
-        esac
-    fi
-}
-
-___x_cmd_ifelse(){
-    ___x_cmd_ifelse_ "$@" && printf "%s\n" "$___X_CMD_IFELSE_RESULT"
-}
-
 # EndSection
 
 # Section : varset

@@ -33,7 +33,7 @@ options:
 }
 
 # https://gitee.com/api/v5/swagger#/deleteV5ReposOwnerRepoPullsNumberTesters
-___x_cmd_gt_repo_pr_testers_delete(){
+___x_cmd_gt_repo_pr_testers_del(){
     param:scope     "gitee/$O"
     param:dsl       '
 options:

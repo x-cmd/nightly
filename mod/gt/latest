@@ -9,7 +9,7 @@ xrc http param str ui
 xrc ui/lib/table gh/lib/resource
 
 xrc:inner:lib gt utils config token user current issue enterprise/main enterprise/member enterprise/team org/main org/member \
-    repo/utils repo/main repo/pr/main repo/release/main repo/member repo/tag repo/page repo/branch _type/main
+    repo/utils repo/main repo/pr/main repo/pr/assign repo/pr/tester repo/release/main repo/release/attachment repo/member repo/tag repo/page repo/branch _type/main
 
 
 x log init gt

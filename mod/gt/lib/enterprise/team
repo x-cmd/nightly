@@ -3,7 +3,7 @@
 # TODO: need to update $O : https://gitee.com/api => https://api.gitee.com
 
 ___x_cmd_gt_enterprise_team(){
-    param:subcmd ___x_cmd_gt_enterprise_team                    \
+    param:subcmd ___x_cmd_gt_enterprise_team                        \
         ls              "List enterprise team"                      \
         create          "Create a team"                             \
         info            "Show team info"                            \
@@ -62,6 +62,11 @@ options:
 '
     param:run
     ___x_cmd_gt_http get "/enterprises/${enterprise_id}/groups/${group_id}" qt
+}
+
+___x_cmd_gt_enterprise_team_repo() {
+    param:void
+    :
 }
 # EndSection
 

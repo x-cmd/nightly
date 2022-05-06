@@ -13,7 +13,7 @@ ___x_cmd_env_ruby_ls_remote(){
 # Section: download
 ___x_cmd_env_ruby_download_archive(){
 
-    x incase "$(x os name)" linux:tar.gz darwin:tar.gz win:zip || \
+    x case_ "$(x os name)" linux:tar.gz darwin:tar.gz win:zip || \
         { env:error "your system:($(x os name)) are not supported" && return 1; }
 
     local compression="$___X_CMD_CASE_RESULT"

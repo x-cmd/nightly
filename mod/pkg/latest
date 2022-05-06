@@ -5,3 +5,32 @@ x log init pkg
 
 xrc:mod pkg/lib/sb
 
+xrc:mod:lib pkg     util
+
+___x_cmd_pkg(){
+    local op="$1"
+    case "$op" in
+        ls)             shift; ___x_cmd_pkg_ls "$@" ;;
+        update)         shift; ___x_cmd_pkg_update "$@" ;;
+
+        version)        shift; ___x_cmd_pkg_version "$@" ;;
+
+        # x pkg which node=v12
+        which)          shift; ___x_cmd_pkg_which "$@" ;;
+
+        # x pkg download node=v12
+        download)       shift; ___x_cmd_pkg_download "$@" ;;
+
+        # x pkg use node=v12
+        use)            shift; ___x_cmd_pkg_use "$@" ;;
+
+        # x pkg use node=v12
+        try)            shift; ___x_cmd_pkg_try "$@" ;;
+
+        # x pkg exec python=
+        exec)           shift; ___x_cmd_pkg_exec "$@" ;;
+        *=)             ___x_cmd_pkg_exec "$@" ;;
+    esac
+}
+
+

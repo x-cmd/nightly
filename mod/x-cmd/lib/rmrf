@@ -15,5 +15,5 @@ ___x_cmd_rmrf(){
         return 1
     done
 
-    rm -rf "$@"
+    command rm -rf "$@"
 }

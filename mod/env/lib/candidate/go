@@ -3,11 +3,11 @@
 # Section(util): get_system_arch compression
 
 ___x_cmd_env_go_get_system_arch(){
-    x incase_ "$(x os name)" linux:linux win:windows darwin:darwin || \
+    x case_ "$(x os name)" linux:linux win:windows darwin:darwin || \
         { env:error "your system:($(x os name)) are not supported" && return 1; }
     system="$___X_CMD_CASE_RESULT"
 
-    x incase_ "$(x os arch)" x86:386 x64:amd64 arm64:arm64 armv7l:armv6l ARMv6:armv6l || \
+    x case_ "$(x os arch)" x86:386 x64:amd64 arm64:arm64 armv7l:armv6l ARMv6:armv6l || \
         { env:error "your arch:($(x os arch)) are not supported" && return 1; }
     arch="$___X_CMD_CASE_RESULT"
 }
