@@ -1,5 +1,5 @@
 # Author:       Li Junhao           l@x-cmd.com
-# shellcheck    shell=sh            disable=SC3043 # xrc
+# shellcheck    shell=sh            disable=SC3043      # xrc
 
 x log init pkg
 

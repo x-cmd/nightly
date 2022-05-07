@@ -44,12 +44,12 @@ ___x_cmd_ifelse_(){
     local condition="${1:?Provide function}";
     if eval "$condition"; then
         case "$2" in
-            =*)     ___X_CMD_IFELSE_RESULT="$(eval "${2#=}")" ;;
+            "="*)     ___X_CMD_IFELSE_RESULT="$(eval "${2#=}")" ;;
             *)      ___X_CMD_IFELSE_RESULT="$2" ;;
         esac
     else
         case "$3" in
-            =*)     ___X_CMD_IFELSE_RESULT="$(eval "${3#=}")" ;;
+            "="*)     ___X_CMD_IFELSE_RESULT="$(eval "${3#=}")" ;;
             *)      ___X_CMD_IFELSE_RESULT="$3" ;;
         esac
     fi
