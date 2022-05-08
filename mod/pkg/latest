@@ -10,7 +10,7 @@ xrc:mod:lib pkg     util
 ___x_cmd_pkg(){
     local op="$1"
     case "$op" in
-        ls)             shift; ___x_cmd_pkg_ls "$@" ;;
+        ls)             shift; ___x_cmd_pkg_ls "$@" ;;      # add filter, remote, installed, ...
         update)         shift; ___x_cmd_pkg_update "$@" ;;
 
         version)        shift; ___x_cmd_pkg_version "$@" ;;
