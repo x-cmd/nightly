@@ -7,10 +7,10 @@ ___x_cmd_gh_user(){
         info        "Show information"  \
         email       "get user email"    \
         issue       "List all issues"   \
-        key         "key management"    \
         repo        "List all repos"
     param:subcmd:try
     param:run
+        # key         "key management"    \
 
     gh_log warn "Subcmd Not Found."
     ___x_cmd_gh_user _param_help_doc

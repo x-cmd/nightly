@@ -7,7 +7,7 @@ xrc http param str ui
 xrc ui/lib/table
 
 xrc:inner:lib gh utils resource config token repo/main repo/branch/main current user/main org/main \
-    repo/member/main repo/pr/main _type/main org/member org/repo repo/release/main
+    repo/member/main repo/pr/main _type/main org/member org/repo repo/release/main action/workflows
 
 x log init gh
 
@@ -22,19 +22,15 @@ ___x_cmd_gh(){
         auth          "Authorize gh"
     param:subcmd:try
 
-    param:subcmd ___x_cmd_gh_repo               \
-        release       "manage release"          \
-        member        "Authorize gh"
-    param:subcmd:try
+    # param:subcmd ___x_cmd_gh_repo               \
+    #     release       "manage release"          \
+    #     member        "Authorize gh"
+    # param:subcmd:try
     param:run
 
     gh_log warn "Subcmd Not Found."
     ___x_cmd_gh _param_help_doc
     return 1
-    # case "${PARAM_SUBCMD}" in
-    #     pr|release|member|tag)                                  "___x_cmd_gh_repo_${PARAM_SUBCMD}"   "$@"        ;;
-    #     *)                                                      "___x_cmd_gh_${PARAM_SUBCMD}"  "$@"              ;;
-    # esac
 }
 
 

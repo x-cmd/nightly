@@ -35,6 +35,7 @@ ___x_cmd_http_free() {
 
 
 ___x_cmd_http_browse() {
+    param:void
     local BROWSER=${BROWSER:-$BROWSER}
     local website=${1:?Provide websites}
     if [ -n "$BROWSER" ]; then
@@ -55,6 +56,7 @@ ___x_cmd_http_browse() {
 
 # Section 2: Dict & Path
 ___x_cmd_http_dict() {
+    param:void
     case $# in
         1) O=$O dict get "${1:?Provide dict key}" ;;
         2) O=$O dict put "${1:?Provide dict key}" "${2:?Provide dict value}" ;;
@@ -67,6 +69,7 @@ ___x_cmd_http_dict() {
 
 # TODO: how to cd back
 ___x_cmd_http_cd() {
+    param:void
     if [ $# -eq 0 ]; then
         printf "%s" "$(O=$O dict get url 2>/dev/null)"
         return

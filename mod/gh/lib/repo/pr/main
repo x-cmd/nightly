@@ -5,7 +5,7 @@ ___x_cmd_gh_repo_pr(){
     param:subcmd ___x_cmd_gh_repo_pr            \
         ls              "list pull requests"    \
         info            "pull request info"     \
-        add             "create pull request"   \
+        create             "create pull request"   \
         update          "update pull requests"  \
         merge           "merge pull requests"
     param:subcmd:try

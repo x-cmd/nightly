@@ -13,25 +13,21 @@
 }
 DOCTEST
 ___x_cmd_http_qs() {
-    param:dsl      '
-subcommands:
-    dump                    "get all qs"
-    get                     "get qs"
-    put                     "put qs"
-    remove                  "remove qs"
-    mput                    "set more qs"
-'
+    param:subcmd ______x_cmd_http_qs            \
+        dump                    "get all qs"    \
+        get                     "get qs"        \
+        put                     "put qs"        \
+        remove                  "remove qs"     \
+        mput                    "set more qs"
+    param:subcmd:try
     param:run
 
-    if [ -z "$PARAM_SUBCMD" ]; then
-        ___x_cmd_http_qs dump "$@"
-        return
-    fi
-
-    "______x_cmd_http_qs_${PARAM_SUBCMD}" "$@"
+    ___x_cmd_http_qs _param_help_doc
+    return 1
 }
 
 ______x_cmd_http_qs_dump(){
+    param:void
     case "$1" in
         json)
             O=$O dict scope qs | ___x_cmd_dict_pjson
@@ -49,10 +45,12 @@ ______x_cmd_http_qs_dump(){
 }
 
 ______x_cmd_http_qs_get(){
+    param:void
     O=$O dict get qs "${1:?header key}"
 }
 
 ______x_cmd_http_qs_put(){
+    param:void
     local header_key="${1:?header key}"
     if [ $# -eq 1 ]; then
         eval O=$O dict put qs "\$header_key" "\$${header_key}"
@@ -62,12 +60,14 @@ ______x_cmd_http_qs_put(){
 }
 
 ______x_cmd_http_qs_remove(){
+    param:void
     O=$O dict drop qs "${1:?header key}"
 }
 
 ______x_cmd_http_qs_mput(){
     # Notice 1: `___x_cmd_http_qs_put abc=``  will put the entry { abc: "" }
     # Notice 2: `abc=; ___x_cmd_http_qs_put abc` will NOT put any entry
+    param:void
     local value
     local i
     for i in "$@"; do
@@ -93,25 +93,21 @@ ______x_cmd_http_qs_mput(){
 DOCTEST
 
 ___x_cmd_http_body() {
-    param:dsl      '
-subcommands:
-    dump                "dump the body. "dump json" will dump the body in json form"
-    get                 "get the value by key in body"
-    put                 "put the kv pair in body"
-    remove              "remove the kv pair in body by key"
-    mput                "put multiple kv pair in body"
-'
+    param:subcmd ______x_cmd_http_body               \
+        get      "get the value by key in body"         \
+        put      "put the kv pair in body"              \
+        remove   "remove the kv pair in body by key"    \
+        mput     "put multiple kv pair in body"         \
+        dump     "dump the body. dump json will dump the body in json form"
+    param:subcmd:try
     param:run
 
-    if [ -z "$PARAM_SUBCMD" ]; then
-        ___x_cmd_http_resp body "$@"
-        return
-    fi
-
-    "______x_cmd_http_body_${PARAM_SUBCMD}" "$@"
+    ___x_cmd_http_body _param_help_doc
+    return 1
 }
 
 ______x_cmd_http_body_dump(){
+    param:void
     local O="${O:?Provide Object name}"
     case "$1" in
         json)       O=$O dict scope body | ___x_cmd_dict_pjson        ;;
@@ -120,10 +116,12 @@ ______x_cmd_http_body_dump(){
 }
 
 ______x_cmd_http_body_get(){
+    param:void
     O=$O dict get body "${1:?body key}"
 }
 
 ______x_cmd_http_body_put(){
+    param:void
     local body_key="${1:?body key}"
     if [ $# -eq 1 ]; then
         eval O="$O" dict put body "\$body_key" "\$${body_key}"
@@ -132,12 +130,14 @@ ______x_cmd_http_body_put(){
     fi
 }
 ______x_cmd_http_body_remove(){
+    param:void
     O=$O dict drop body "${1:?body key}"
 }
 
 ______x_cmd_http_body_mput(){
     # Notice 1: `___x_cmd_http_qs_put abc=""`  will put the entry { abc: "" }
     # Notice 2: `abc=; ___x_cmd_http_qs_put abc` will NOT put any entry
+    param:void
     local value
     local i
     for i in "$@"; do

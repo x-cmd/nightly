@@ -1,10 +1,10 @@
 
 ___x_cmd_args(){
     local n="${1:?Provide N}"; shift
-
     local i
     local code_func='___x_cmd_args___run_inner(){ eval '
-    for ((i=1; i<=$#; ++i)); do
+    # for ((i=1; i<=$#; ++i)); do       # for dash
+    for i in $(seq $#); do
         eval "local _$i; _$i=\"\$$i\""
         code_func="$code_func \"\$_$i\" "
     done
@@ -43,7 +43,8 @@ ___x_cmd_args(){
 ___x_cmd_arg1(){
     local i
     local code_func='___x_cmd_args___run_inner(){ eval '
-    for ((i=1; i<=$#; ++i)); do
+    # for ((i=1; i<=$#; ++i)); do
+    for i in $(seq $#); do
         eval "local _$i; _$i=\"\$$i\""
         code_func="$code_func \"\$_$i\" "
     done

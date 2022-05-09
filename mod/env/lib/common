@@ -55,7 +55,7 @@ ___x_cmd_env_common_ls_remote() {
 	local cache_path="$___X_CMD_ENV_PATH/$candidate/cache/version_list"
 
     ___x_cmd_httpget "$("___x_cmd_env_${candidate}_list_url")" "$cache_path" "$cache_expiration" &&
-    < "$cache_path" "___x_cmd_env_${candidate}_version_info" | ___x_cmd_env_common_sort_version | ___x_cmd_env_common_simplify_version
+    < "$cache_path" "___x_cmd_env_${candidate}_version_info" | ___x_cmd_env_common_sort_version #| ___x_cmd_env_common_simplify_version
 }
 
 ___x_cmd_env_common_la(){

@@ -25,7 +25,7 @@ ___x_cmd_env_java_list_url() {
 
 ___x_cmd_env_java_version_info(){
 	#TODO: To add more support not only for openjdk
-    awk -v pattern="$pattern" 'BEGIN{ RS=","} ($0 ~ pattern)&&($0 ~ "-open$") { print $0 }'
+    awk -v pattern="$pattern" 'BEGIN{ RS=","} ($0 ~ pattern) { print $0 }'
 }
 ## EndSection
 

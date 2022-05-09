@@ -4,9 +4,34 @@
 
 # #1: path; #2 data
 # TODO: next time review
+
+___x_cmd_http_download_request(){
+    local IFS=" "
+    local X=${X:-GET}
+    local paths
+    paths="$(___x_cmd_http_cd path "$1")"
+
+    local header_filepath
+    header_filepath="$(___x_cmd_http_resp header_filepath)"
+
+    http_log debug "http request data:$(______x_cmd_http_qs_dump curl)"
+    http_log debug curl -LO -D "$header_filepath" -X "$X" "$(______x_cmd_http_qs_dump curl)" "$(___x_cmd_http_header_dump curl)" "$paths" "$2"
+    eval curl -LO -D "$header_filepath" -X "$X" "$(______x_cmd_http_qs_dump curl)" "$(___x_cmd_http_header_dump curl)" "$paths" "$2" 2>/dev/null
+    local a b c
+    read -r a b c <<A
+    "$(cat "$header_filepath")"
+A
+    if [ -n "$b" ] && [ "$b" -eq 302 ]; then
+        return 0
+    fi
+
+    printf "HttpCode is %s, Code is 1\n" "$b" >&2
+    return 1
+}
+
 ___x_cmd_http_request() {
     local IFS=" "
-    local X=${X:-get}
+    local X=${X:-GET}
     local data=${2:-"$D"}
 
     local paths
@@ -31,13 +56,14 @@ ___x_cmd_http_request() {
     data_filepath="$(___x_cmd_http_resp body_filepath)"
 
     if [ "$X" = GET ] || [ "$X" = DELETE ] || [ "$X" = HEAD ]; then
+        http_log debug "http request data:$(______x_cmd_http_qs_dump curl)"
         http_log debug curl -D "$header_filepath" -X "$X" "$(______x_cmd_http_qs_dump curl)" "$(___x_cmd_http_header_dump curl)" "$paths"
         eval curl -D "$header_filepath" -X "$X" "$(______x_cmd_http_qs_dump curl)" "$(___x_cmd_http_header_dump curl)" "$paths" 1>"$data_filepath" 2>/dev/null #2>(http_log debug)
     else
+        http_log debug "http request data:$(cat "$tmp")"
         http_log debug curl -D "$header_filepath" -X "$X" "$(___x_cmd_http_header_dump curl)" -d "@$tmp" "$paths"
         eval curl -D "$header_filepath" -X "$X" "$(___x_cmd_http_header_dump curl)" -d "@$tmp" "$paths" 1>"$data_filepath" 2>/dev/null #2>(http_log debug)
     fi
-    http_log debug "http request data:$(cat "$tmp")"
     [ "$tmp" != "-" ] && rm "$tmp"
 
     http_log debug "Response Header is: $(cat "$header_filepath")"

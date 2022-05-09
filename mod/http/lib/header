@@ -10,27 +10,25 @@ content-type: application/json
 accept: application/json
 DOCTEST
 ___x_cmd_http_header() {
-    param:dsl      '
-subcommands:
-    dump                "dump header"
-    get                 "get header"
-    put                 "put header"
-    mput                "mput header"
-    remove              "remove header"
-    content-type        "set the content-type"
-    referer             "set the referer"
-    user-agent          "set the user-agent"
-'
+    param:subcmd ___x_cmd_http_header               \
+        dump                "dump header"           \
+        get                 "get header"            \
+        put                 "put header"            \
+        mput                "mput header"           \
+        remove              "remove header"         \
+        referer             "set the referer"
+    param:subcmd:try
     param:run
-    if [ -z "$PARAM_SUBCMD" ]; then
-        ___x_cmd_http_header dump "$@"
-        return
-    fi
-    "___x_cmd_http_header_${PARAM_SUBCMD}" "$@"
+
+    # content-type        "set the content-type"  \
+    # user-agent          "set the user-agent"
+    ___x_cmd_http_header _param_help_doc
+    return 1
 }
 
 # shellcheck disable=SC2120
 ___x_cmd_http_header_dump(){
+    param:void
     case "${1:-""}" in
         json)
             O=$O dict scope header | ___x_cmd_dict_pjson
@@ -47,14 +45,17 @@ ___x_cmd_http_header_dump(){
 }
 
 ___x_cmd_http_header_get(){
+    param:void
     O=$O dict get header "${1:?header key}"
 }
 
 ___x_cmd_http_header_put(){
+    param:void
     O=$O dict put header "${1:?header key}" "${2:?value}"
 }
 
 ___x_cmd_http_header_mput(){
+    param:void
     for i in "$@"; do
         # if [[ "$i" = *=* ]]; then
         if [ "$i" != "${i%%=*}" ]; then
@@ -66,6 +67,7 @@ ___x_cmd_http_header_mput(){
 }
 
 ___x_cmd_http_header_remove(){
+    param:void
     for i in "$@"; do
         O=$O dict drop header "$i"
     done
@@ -77,6 +79,7 @@ ___x_cmd_http_header_type(){
 }
 
 ___x_cmd_http_header_referer(){
+    param:void
     ___x_cmd_http_header_put Referer "${1:?Referer}"
 }
 
