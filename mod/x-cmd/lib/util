@@ -27,8 +27,10 @@ ___x_cmd_abspath(){
 
 ___x_cmd_repeat(){
     local ___X_CMD_REPEAT_TMP="${1:?Provide time}"; shift
-    for ((; ___X_CMD_REPEAT_TMP>0; --___X_CMD_REPEAT_TMP)); do
+    # for ((; ___X_CMD_REPEAT_TMP>0; --___X_CMD_REPEAT_TMP)); do
+    while [ $___X_CMD_REPEAT_TMP -gt 0 ]; do
         ___x_cmd_eval "$@"
+        ___X_CMD_REPEAT_TMP=$((___X_CMD_REPEAT_TMP-1))
     done
 }
 

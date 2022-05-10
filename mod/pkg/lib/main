@@ -40,7 +40,7 @@ ___x_cmd_pkg___ls_local(){
 }
 
 # Control the lsversion awk for better showing
-___x_cmd_pkg___ls_version(){
+___x_cmd_pkg_version(){
     local pkg_name="${1:?Provide pkg name}"
     local osarch="${2:?osarch as filter}"
     ___x_cmd_pkg___all_info "${pkg_name}" | awk \
@@ -48,6 +48,28 @@ ___x_cmd_pkg___ls_version(){
         -f "$___X_CMD_ROOT_MOD/awk/lib/jqparse.awk" \
         -f "awk/pkg.jobj.awk" \
         -f "awk/pkg.lsversion.awk"
+}
+
+
+___x_cmd_pkg_download(){
+    # get bin url
+    # download from url
+    :
+}
+
+___x_cmd_pkg_use(){
+    ___x_cmd_pkg_try "$@"
+    # set in the config
+}
+
+___x_cmd_pkg_try(){
+    :
+}
+
+# default bin
+# What if x pkg exec java=1.8 jconsole -- Only use default bin
+___x_cmd_pkg_exec(){
+    :
 }
 
 ___x_cmd_pkg___awk(){

@@ -102,3 +102,14 @@ ___x_cmd_gh_parse_owner_repo() {
 ___x_cmd_gh_default(){
     param_default "$@" 2>/dev/null || return 1
 }
+
+_____x_cmd_git_repo(){
+    local repo
+    repo="$(git config --get remote.origin.url 2>/dev/null)"
+    repo="${repo##*:}"
+    repo="${repo%.*}"
+    printf "%s" "$repo"
+}
+_____x_cmd_git_branch(){
+    git symbolic-ref -q --short HEAD 2>/dev/null
+}

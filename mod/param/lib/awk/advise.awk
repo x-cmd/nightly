@@ -14,8 +14,8 @@ function generate_advise_json_subcmd(indent, indent_str, indent_str2, indent_str
 
     for (i=1; i <= subcmd_len(); ++i) {
         split(subcmd_id( i ), _name_arr, "|") # get the subcmd name list
-
-        subcmd_funcname = "${X_CMD_ADVISE_FUNC_NAME}_" _name_arr[ 1 ]
+        if( subcmd_map[ _name_arr[ 1 ], SUBCMD_FUNCNAME ] != "" )   subcmd_funcname = subcmd_map[ _name_arr[ 1 ], SUBCMD_FUNCNAME ] "_" _name_arr[ 1 ]
+        else                                                        subcmd_funcname = "${X_CMD_ADVISE_FUNC_NAME}_" _name_arr[ 1 ]
         subcmd_invocation = sprintf(" PARAM_SUBCMD_DEF=''; %s=%s %s _x_cmd_advise_json %d %s;",
             "X_CMD_ADVISE_FUNC_NAME",
             subcmd_funcname,
@@ -72,7 +72,7 @@ function generate_advise_json(      indent, indent_str,
 
     ADVISE_JSON = ADVISE_JSON generate_advise_json_subcmd( indent, indent_str, indent_str2, indent_str4 )
 
-    if (ADVISE_JSON != "{")     ADVISE_JSON = substr(ADVISE_JSON, 1, length(ADVISE_JSON)-1)  # remove extra comma
+    if (ADVISE_JSON != "\nprintf \"%s\" \"{\"")     ADVISE_JSON = substr(ADVISE_JSON, 1, length(ADVISE_JSON)-1)  # remove extra comma
 
     ADVISE_JSON = ADVISE_JSON "\n" printf_intermediate_code( "\"\n" indent_str "}\""  )
     printf( "(set -o errexit;%s)", ADVISE_JSON )

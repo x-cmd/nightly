@@ -98,7 +98,9 @@ ___x_cmd_yanfa_release_add()(
 
     cd "$___X_CMD_YANFA_RELEASE_TMP" || exit 1
 
-    for ((i=1; i<=${RETRY:-3}; i=i+1)); do
+    local i
+    i=1
+    while [ "$i" -le "${RETRY:-3}" ]; do
         if git clone --quiet --depth=1 "$position" -b "$branch"; then
             yanfa:info "[$mod/$branch] Cloning success from $position"
             exit 0
@@ -107,6 +109,7 @@ ___x_cmd_yanfa_release_add()(
         if ! sleep 5; then
             yanfa:warn "Sleep interrupted."
         fi
+        i=$((i+1))
     done
     yanfa:error "Fail to git clone after 3 attemps. Mission abort."
     exit 1

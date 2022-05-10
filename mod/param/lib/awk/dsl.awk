@@ -222,7 +222,7 @@ function parse_param_dsl_for_named_options( line_arr, line, i,            len, n
 }
 
 function parse_param_dsl(line,
-    line_arr, i, state, tmp, line_arr_len) {
+    line_arr, i, state, tmp, line_arr_len, subcmd_funcname) {
 
     state = 0
     STATE_ADVISE        = 1
@@ -239,15 +239,15 @@ function parse_param_dsl(line,
 
         if (line == "") continue
 
-        if (line ~ /^advise:/)                                  state = STATE_ADVISE
-        else if (line ~ /^type:/)                               state = STATE_TYPE
-        else if (line ~ /^options?:/)                           state = STATE_OPTION
-        else if (line ~ /^((subcommand)|(subcmd))s?:/)          state = STATE_SUBCOMMAND
-        else if (line ~ /^arguments?:/)                         state = STATE_ARGUMENT
+        if (line ~ /^advise:/)                                    state = STATE_ADVISE
+        else if (line ~ /^type:/)                                 state = STATE_TYPE
+        else if (line ~ /^options?:/)                             state = STATE_OPTION
+        else if (line ~ /^((subcommand)|(subcmd))s?:/)          { state = STATE_SUBCOMMAND; split(line, tmp, ":"); subcmd_funcname = str_trim( tmp[2] ); }
+        else if (line ~ /^arguments?:/)                           state = STATE_ARGUMENT
         else {
             if (state == STATE_ADVISE)                          advise_add( line )
             else if ( state == STATE_TYPE )                     type_add_line( line )
-            else if ( state == STATE_SUBCOMMAND )               subcmd_add_line( line )
+            else if ( state == STATE_SUBCOMMAND )               subcmd_add_line( line, subcmd_funcname )
             else if (state == STATE_OPTION) {
                 if ( match(line, /^#n[\s]*/ ) )                     parse_param_dsl_for_all_positional_argument( line )         # HANDLE:   option like #n
                 else if ( match( line, /^#[0-9]+[\s]*/ ) )          parse_param_dsl_for_positional_argument( line )             # HANDLE:   option like #1 #2 #3 ...

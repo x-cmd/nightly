@@ -44,7 +44,7 @@ ____x_cmd_gh_make() {
     local O="___x_cmd_gh_$O_ORIGINAL"
 
     http make  'https://api.github.com'
-    http header Accept "application/vnd.github.v3+json"
+    http header put Accept "application/vnd.github.v3+json"
 
     local token
     token="$(O="$O_ORIGINAL" ___x_cmd_gh_config_get "oauth_token")"

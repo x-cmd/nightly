@@ -2,10 +2,9 @@ ___x_cmd_ui_tf(){
     local op="$1"
     local text="$2"
     shift 2
-
     case "$op" in
-        false)           printf "\033[31m%s\033[1m $text\033[0m\n" "X" ;;
-        true)            printf "\033[32m%s\033[0m $text\n" "✔" ;;
+        false|error)     printf "\033[31m%s\033[1m $text\033[0m\n" "X" ;;
+        true|success)    printf "\033[32m%s\033[0m $text\n" "✔" ;;
         *)               printf "\033[32m%s\033[0m $text\n" "?" ;;
     esac
 

@@ -5,7 +5,17 @@ BEGIN {
     ctrl_help_item_put("ENTER", "for enter")
 }
 
+function view_calcuate_geoinfo(){
+    if ( ctrl_help_toggle_state() == true ) {
+        view_body_row_num = max_row_size - 10
+    } else {
+        view_body_row_num = max_row_size - 9
+    }
+}
+
+
 function view(      _component_help, _component_tag, _component_select, _component_preview){
+    view_calcuate_geoinfo()
     _component_help         = view_help()
     _component_tag          = view_tag()
     _component_select       = view_select()
@@ -26,9 +36,9 @@ function view_tag(         i, _tag, _data, _head_line, _foot_line, _head_line_it
         _foot_line_item = ui_str_rep("─", max_tag_len)
         if (ctrl_sw_get( IS_FOCUS_TAG ) == true) _SELECTED_ITEM_STYLE = TH_THEME_PREVIEW_FOCUSE UI_TEXT_REV
         if ( CUR_TAG_IDX == i ) {
-            _head_line_item =  "┌" ui_str_rep("─", max_tag_len) "┐"
-            _foot_line_item =  "┘" ui_str_rep(" ", max_tag_len) "└"
+            _head_line_item = "┌" ui_str_rep("─", max_tag_len)    "┐"
             _tag            = "│" th(_SELECTED_ITEM_STYLE , _tag) "│"
+            _foot_line_item = "┘" ui_str_rep(" ", max_tag_len)    "└"
         }
         _head_line = _head_line _head_line_item
         _foot_line = _foot_line _foot_line_item
@@ -45,16 +55,16 @@ function view_select(        _data, _SELECTED_ITEM_STYLE, page_index, page_begin
         _data = str_pad_left(_data, int(max_col_size/2), int(length(_data)/2))
         return th(TH_DATA_UNFIND, _data)
     }
-    view_page_item_num  = view_body_col_num * 3
+    view_page_item_num  = view_select_col_num * 3
     view_page_num       = int( ( model_len - 1 ) / view_page_item_num ) + 1
     page_index          = int( (CUR_THEME_IDX - 1) / view_page_item_num ) + 1
     page_begin          = int( (page_index - 1) * view_page_item_num)
-    view_body_row_num   = int( ( model_len - 1 ) / view_body_col_num ) + 1
+    view_select_row_num   = int( ( model_len - 1 ) / view_select_col_num ) + 1
 
-    if ( view_body_row_num > 3 ) view_body_row_num = 3
-    for (i=0; i<view_body_row_num; i++) {
-        for (j=1; j<=view_body_col_num; j++) {
-            _iter_item_idx = page_begin + j + ( i * view_body_col_num )
+    if ( view_select_row_num > 3 ) view_select_row_num = 3
+    for (i=0; i<view_select_row_num; i++) {
+        for (j=1; j<=view_select_col_num; j++) {
+            _iter_item_idx = page_begin + j + ( i * view_select_col_num )
             if (_iter_item_idx > model_len) break
             _data_item_text = THEME_TAG_ITEM[ CUR_TAG _iter_item_idx ]
             _item_text = str_pad_right( _data_item_text, max_theme_len )
@@ -68,10 +78,15 @@ function view_select(        _data, _SELECTED_ITEM_STYLE, page_index, page_begin
     return _data
 }
 
-function view_preview(             cur_theme){
+function view_preview(             cur_theme, _linel, _line, _data, i){
     if (model_len == 0) return
     cur_theme = THEME_TAG_ITEM[ CUR_TAG CUR_THEME_IDX ]
-    return PREVIEW[cur_theme]
+    _linel = split(PREVIEW[cur_theme], _line, "\n")
+    if (_linel > view_body_row_num) _linel = view_body_row_num
+    for (i=1; i<=_linel; i++) {
+        _data = ( _data != "" ) ? _data "\n" _line[ i ] : _line[ i ]
+    }
+    return _data
 }
 
 # EndSection
@@ -89,10 +104,10 @@ function ctrl(char_type, char_value,        _selected, _selected_keypath ){
     } else {
         if (char_value == "LEFT")                         return ctrl_rstate_dec( SELECTED_THEME_IDX )
         if (char_value == "RIGHT")                        return ctrl_rstate_inc( SELECTED_THEME_IDX )
-        if (char_value == "DN" )                          return ctrl_rstate_add( SELECTED_THEME_IDX, + view_body_col_num )
+        if (char_value == "DN" )                          return ctrl_rstate_add( SELECTED_THEME_IDX, + view_select_col_num )
         if (char_value == "UP") {
-            if (CUR_THEME_IDX <= view_body_col_num) return ctrl_sw_toggle( IS_FOCUS_TAG )
-            return ctrl_state_add( SELECTED_THEME_IDX, - view_body_col_num )
+            if (CUR_THEME_IDX <= view_select_col_num) return ctrl_sw_toggle( IS_FOCUS_TAG )
+            return ctrl_state_add( SELECTED_THEME_IDX, - view_select_col_num )
         }
         if (char_value == "ENTER" )                       return exit_with_elegant( char_value )
     }
@@ -106,7 +121,7 @@ function model_generate(){
     CUR_TAG     = THEME_TAG[ CUR_TAG_IDX ]
     model_len   = THEME_TAG_ITEM[ CUR_TAG L ]
     ctrl_rstate_init( SELECTED_THEME_IDX, 1, model_len )
-    view_body_col_num = int(max_col_size / (max_theme_len + 4))
+    view_select_col_num = int(max_col_size / (max_theme_len + 4))
 }
 # EndSection
 

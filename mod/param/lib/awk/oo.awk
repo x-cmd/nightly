@@ -54,9 +54,10 @@ function type_rule_by_name( name ){
 BEGIN{
     subcmd_arr[ L ] = 0
     HAS_SUBCMD = false
+    SUBCMD_FUNCNAME = "funcname"
 }
 
-function subcmd_add_line( line_trimed,                 _id, _name_arr, _name_arr_len, i, idx){
+function subcmd_add_line( line_trimed, subcmd_funcname,                 _id, _name_arr, _name_arr_len, i, idx){
     if (! match(line_trimed, /^[A-Za-z0-9_\|-]+/)) {
         panic_param_define_error( "Expect subcommand in the first token, but get:\n" line_trimed )
     }
@@ -69,6 +70,7 @@ function subcmd_add_line( line_trimed,                 _id, _name_arr, _name_arr
     _id = substr( line_trimed, 1, RLENGTH )
     subcmd_arr[ idx ] = _id
     subcmd_map[ _id ] = str_unquote( str_trim( substr( line_trimed, RLENGTH+1 ) ) )
+    subcmd_map[ _id, SUBCMD_FUNCNAME ] = subcmd_funcname
 
     _name_arr_len = split(_id, _name_arr, "|")
     for (i=1; i<=_name_arr_len; i++) {

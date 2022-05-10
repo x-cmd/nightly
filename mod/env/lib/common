@@ -18,7 +18,7 @@ ___x_cmd_env_common_full_version_local(){
 }
 
 ___x_cmd_env_common_sort_version(){
-    sort -V
+    sort -V -u
 }
 
 ___x_cmd_env_common_simplify_version(){

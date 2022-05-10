@@ -37,9 +37,9 @@ ___x_cmd_param_eval_echo(){
 alias param:subcmd='local PARAM_EXEC=""; local ___X_CMD_PARAM_DSL 1>&/dev/null; FIRST_ARG="$1" ___x_cmd_param_define_subcmd'
 ___x_cmd_param_define_subcmd(){
     PARAM_FUNCNAME="${1:?Provide prefix}"; shift
-    if [ -z "$PARAM_SUBCMD_DEF" ]; then
-        PARAM_SUBCMD_DEF="subcommand:"
-    fi
+    PARAM_SUBCMD_DEF="$PARAM_SUBCMD_DEF
+subcommand: $PARAM_FUNCNAME"
+
     local subcmddef
     while [ $# -ge 2 ]; do
         subcmddef="|$1|"

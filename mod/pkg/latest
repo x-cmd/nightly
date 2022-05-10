@@ -5,7 +5,7 @@ x log init pkg
 
 xrc:mod pkg/lib/sb
 
-xrc:mod:lib pkg     util
+xrc:mod:lib pkg     util main
 
 ___x_cmd_pkg(){
     local op="$1"

@@ -20,7 +20,7 @@ subcommands:
     login          "Login to hub service"
     register       "Register to hub service"
     token          "User token management"
-    user           "get user info"
+    user           "get user info '<username> <token>'"
     logout         "Logout from hub service"
 A
     param:run
