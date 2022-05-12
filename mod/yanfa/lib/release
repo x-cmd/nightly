@@ -2,34 +2,39 @@
 
 # Section: main
 ___x_cmd_yanfa_release(){
-    x:trace yanfa/relesae "$@"
 
     if [ -f "$(x wsroot)/.x-cmd/$1" ]; then
         x _ws "$@"
         return
     fi
 
+    param:subcmd ___x_cmd_yanfa                    \
+        init    "init"
+    param:subcmd:try
+
+    param:subcmd ___x_cmd_yanfa_ws                  \
+        pull        "pull"                         \
+        push        "push"                          \
+        name        "get workspace name from git config"
+    param:subcmd:try
+
     param:dsl <<A
 subcommand:
-    install         "install all modules"
-
     update          "update or add module"
     pub             "publish the package"
     lsmod           "ls module"
-    lsfile          ""
+    lsfile          "ls file"
     wc              "count"
 
     tgz             "compress modules of core/all/<special-release> into <name>.tgz"
-    tar             "compress modules"
     7z              "compress modules of 7z"
-
-    init            "init"
-
-    pull            "pull"
-    push            "push"
-    name            "get workspace name from git config"
 A
     param:run
+
+    # tar             "compress modules"
+    # install         "install all modules"
+
+    x:trace yanfa/relesae "$@"
 
     if [ -z "$PARAM_SUBCMD" ]; then
         ___x_cmd_yanfa_release help
@@ -38,14 +43,6 @@ A
 
     if command -v "___x_cmd_yanfa_release_${PARAM_SUBCMD}" >/dev/null; then
         "___x_cmd_yanfa_release_${PARAM_SUBCMD}" "$@"
-    else
-        case "$PARAM_SUBCMD" in
-            pull|push|name)
-                "___x_cmd_yanfa_ws_$PARAM_SUBCMD" "$@"
-                ;;
-            init)
-                "___x_cmd_yanfa_init" "$@"
-        esac
     fi
 
 }
@@ -53,8 +50,8 @@ A
 
 # Section: pub
 ___x_cmd_yanfa_release_pub()(
-    x:trace yanfa/relesae/pub
     param:void
+    x:trace yanfa/relesae/pub
     # set -o errexit
     if {
         yanfa:info "update"
@@ -116,8 +113,8 @@ ___x_cmd_yanfa_release_add()(
 )
 
 ___x_cmd_yanfa_release_update(){
-    x:trace yanfa/relesae/update "[concurrency=$1]"
     param:void
+    x:trace yanfa/relesae/update "[concurrency=$1]"
 
     local IFS=""
     local mod
@@ -153,8 +150,8 @@ ___x_cmd_yanfa_release_update(){
 
 # shellcheck disable=SC2120
 ___x_cmd_yanfa_release_lsmod(){
-    x:trace yanfa/relesae/lsmod "$@"
     param:void
+    x:trace yanfa/relesae/lsmod "$@"
     ___x_cmd_yanfa_mod_ls "$@"
     local code=$?
     yanfa:info "___x_cmd_yanfa_release_lsmod: $code"
@@ -162,8 +159,8 @@ ___x_cmd_yanfa_release_lsmod(){
 }
 
 ___x_cmd_yanfa_release_lsfile()(
-    x:trace yanfa/relesae/lsfile
     param:void
+    x:trace yanfa/relesae/lsfile
     [ -d "$___X_CMD_YANFA_RELEASE_TMP" ] || return 1
 
     ___x_cmd_yanfa_release_lsmod | (
@@ -219,8 +216,8 @@ ___x_cmd_yanfa_release_cpfile()(
 )
 
 ___x_cmd_yanfa_release_wc(){
-    x:trace yanfa/relesae/wc
     param:void
+    x:trace yanfa/relesae/wc
     cd "$(x wsroot)/mod" &&
         ___x_cmd_yanfa_release_lsfile "$@" | xargs wc | sort -n -r | less
 }

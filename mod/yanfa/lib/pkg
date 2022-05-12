@@ -199,6 +199,16 @@ ___x_cmd_yanfa_pkg(){
         return
     fi
 
+    param:subcmd ___x_cmd_yanfa                    \
+        init    "init"
+    param:subcmd:try
+
+    param:subcmd ___x_cmd_yanfa_ws                  \
+        pull        "pull"                         \
+        push        "push"                          \
+        name        "get workspace name from git config"
+    param:subcmd:try
+
     param:dsl <<A
 subcommand:
     install         "install all modules"
@@ -207,18 +217,12 @@ subcommand:
     pub0            "publish the package"
     pub             "publish the package"
     lsmod           "ls module"
-    lsfile          ""
+    lsfile          "lsfile"
     wc              "count"
 
     tgz             "compress modules of core/all/<special-release> into <name>.tgz"
     tar             "compress modules"
     7z              "compress modules of 7z"
-
-    init            "init"
-
-    pull            "pull"
-    push            "push"
-    name            "get workspace name from git config"
 A
     param:run
 
@@ -229,14 +233,6 @@ A
 
     if command -v "___x_cmd_yanfa_pkg_${PARAM_SUBCMD}" >/dev/null; then
         "___x_cmd_yanfa_pkg_${PARAM_SUBCMD}" "$@"
-    else
-        case "$PARAM_SUBCMD" in
-            pull|push|name)
-                "___x_cmd_yanfa_ws_$PARAM_SUBCMD" "$@"
-                ;;
-            init)
-                "___x_cmd_yanfa_init" "$@"
-        esac
     fi
 
 }

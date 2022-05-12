@@ -105,7 +105,7 @@ ___x_cmd_env_common_use(){
         ___x_cmd_env_util_make_shim_dir "$candidate" "$version" || return 1
     fi
 
-    ___x_cmd_env_util_add_path "$version_path" || return 1
+    x path add_existed_folder "$version_path" || return 1
 
     ___x_cmd_env_common_init_file_add "$candidate" "$version_path" && \
             printf "%s\n" "$version" > "$___X_CMD_ENV_PATH/$candidate/version" && \
@@ -118,7 +118,7 @@ ___x_cmd_env_common_try(){
     local version_path="${3:-"$___X_CMD_ENV_PATH/$candidate/versions/$version/bin"}"
 
     ___x_cmd_env_util_is_downloaded "$candidate" "$version" 2>/dev/null || return 1
-    ___x_cmd_env_util_add_path "$version_path" && \
+    x path add_existed_folder "$version_path" && \
         env:info "Setting ${candidate} $version in current Shell."
 }
 

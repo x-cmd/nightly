@@ -157,21 +157,29 @@ ___x_cmd_validenvname(){
     eval "___x_cmd_validenvname$*___= 2>/dev/null" || return 1
 }
 
-___x_cmd_sleep(){
-    local s
-    while [ $# -gt 0 ]; do
+___x_cmd___convert2second_(){
+    _1=0
+    while [ "$#" -gt 0 ]; do
         case "$1" in
-            *s)                             s=$(( s + ${1%s} )) ;;
-            *m)                             s=$(( s + ${1%m} * 60 )) ;;
-            *h)                             s=$(( s + ${1%h} * 3600 )) ;;
-            *d)                             s=$(( s + ${1%d} * 86400 )) ;;
-            1*|2*|3*|4*|5*|6*|7*|8*|9*)     s=$(( s + ${1} )) ;;
-            *)  printf "%s\n" "Expecting arg with optional suffix of (s)econds, (m)inutes, (h)ours, or (d)ays\n" >&2; return 1
+            *s)                             _1=$(( _1 + ${1%s} )) ;;
+            *m)                             _1=$(( _1 + ${1%m} * 60 )) ;;
+            *h)                             _1=$(( _1 + ${1%h} * 3600 )) ;;
+            *d)                             _1=$(( _1 + ${1%d} * 86400 )) ;;
+            1*|2*|3*|4*|5*|6*|7*|8*|9*)     _1=$(( _1 + ${1} )) ;;
+            *)
+                printf "%s\n" "Expecting arg with optional suffix of (s)econds, (m)inutes, (h)ours, or (d)ays\n" >&2
+                return 1
         esac
         shift
     done
-    x:debug "Sleep in seconds: $s"
-    sleep "$s"
+}
+
+___x_cmd_sleep(){
+    local _1
+    if ___x_cmd___convert2second_ "$@"; then
+        x:debug "Sleep in seconds: $_1"
+        sleep "$_1"
+    fi
 }
 
 ___x_cmd_shudo(){
