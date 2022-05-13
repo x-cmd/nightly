@@ -1,6 +1,0 @@
-___x_cmd_ws_help(){
-    printf "%s\n" "
-x ws <subcmd> [...arguments]
-    Provide workspace facility
-"
-}
