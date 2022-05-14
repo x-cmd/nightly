@@ -1,0 +1,53 @@
+# shellcheck shell=sh disable=SC2039,SC1090,SC3043,SC2263    # xrc
+
+# Section(util): get_platform
+___x_cmd_env_deno_platform(){
+    local system
+    local arch
+    system="$(x os name)"
+    arch="$(x os arch)"
+
+    case "$system" in
+        darwin)
+            case "$arch" in
+                arm64)      printf "aarch64-apple-darwin"   ;;
+                x64)        printf "x86_64-apple-darwin"    ;;
+                *)          env:error "your arch:($arch) are not supported" ; return 1 ;;
+            esac ;;
+        linux)  printf "x86_64-unknown-linux-gnu"       ;;
+        win)    printf "x86_64-pc-windows-msvc"         ;;
+        *)  env:error "your system:($system) are not supported" ; return 1 ;;
+    esac
+}
+
+## EndSection；
+
+# Section(ls_remote): list_url, version_info
+___x_cmd_env_deno_list_url(){
+    printf "https://api.github.com/repos/denoland/deno/releases"
+}
+
+___x_cmd_env_deno_version_info(){
+    x ja 'k()=="tag_name" && ( v() ~ "'"$pattern"'" ) { print substr(v(),2); }'
+}
+## EndSection
+
+# Section(download): download_url
+___x_cmd_env_deno_download_url(){
+    local version="${1:?Provide a version}"
+    local platform
+    platform="$(___x_cmd_env_deno_platform)"
+    if [ $# -eq 0 ] ; then
+         printf "https://github.com/denoland/deno/releases/latest/download/deno-%s.zip" "$platform"
+    else printf "https://github.com/denoland/deno/releases/download/v%s/deno-%s.zip" "$version" "$platform"
+    fi
+}
+## EndSection
+
+# Section(unpack): copy_to_unpackdir
+___x_cmd_env_deno_copy_to_unpackdir(){
+    mkdir -p "$unpack_dir/tmp/bin"
+    mv "$unpack_dir/deno" "$unpack_dir/tmp/bin/deno"
+    env:info "Copy to $unpack_dir/tmp/bin/deno"
+}
+## EndSection

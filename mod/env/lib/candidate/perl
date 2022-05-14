@@ -1,0 +1,52 @@
+# shellcheck shell=sh disable=SC2039,SC1090,SC3043,SC2263    # xrc
+
+# Section(util): compression
+___x_cmd_env_perl_compression(){
+    case "$(x os name)" in
+        darwin|linux)  printf "tar.gz" ;;
+    esac
+}
+# EndSection
+
+# Section(ls_remote): list_url, version_info
+
+___x_cmd_env_perl_list_url(){
+    case "$(x os name)" in
+        linux|darwin)      printf "https://api.github.com/repos/skaji/relocatable-perl/releases"   ;;
+        win)               printf "https://strawberryperl.com/releases.html"                       ;;
+        *)                 env:error "your system:($(x os name)) are not supported" ; return 1 ;;
+    esac
+}
+
+___x_cmd_env_perl_version_info(){
+    case "$(x os name)" in
+        linux|darwin)   x ja 'k()=="tag_name" && ( v() ~ "'"$pattern"'" ){ print v(); }' ;;
+        win)            awk -v pattern="$pattern" ' match($0, /<td><b>[0-9.]+<\/b><\/td>/) {
+                            version = substr($0,RSTART+7,RLENGTH-16)
+                            if (version ~ pattern) { print version }
+                        }' ;;
+        *)              env:error "your system:($(x os name)) are not supported" ; return 1 ;;
+    esac
+}
+# EndSection
+
+# Section(download): download_url
+
+___x_cmd_env_perl_download_url(){
+    local version="$version"
+    local SKAI="https://github.com/skaji/relocatable-perl/releases/download"
+    case "$(x os name)" in
+        linux)              printf "%s/%s/perl-x86_64-linux.tar.gz" "$SKAI" "$version"  ;;
+        darwin)             printf "%s/%s/perl-darwin-2level.tar.gz" "$SKAI" "$version" ;;
+        win)
+                            local download_base_url="https://strawberryperl.com/download/${version}/strawberry-perl-${version}"
+                            case "$(x os arch)" in
+                                x32)        printf "%s-32bit.zip" "$download_base_url" ;;
+                                x64)        printf "%s-64bit.zip" "$download_base_url" ;;
+                                *)          env:error "your arch:($(x os arch)) are not supported" return 1 ;;
+                            esac ;;
+        *)                  env:error "your system:($(x os name)) are not supported" return 1 ;;
+    esac
+}
+
+# EndSection

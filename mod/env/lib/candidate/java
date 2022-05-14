@@ -1,0 +1,59 @@
+# shellcheck shell=sh disable=SC2039,SC1090,SC3043,SC2263,SC2120    # xrc
+
+# Section(util): platform  compression
+___x_cmd_env_java_platform(){
+    local system
+    system="$(x os name)"
+    case "$system" in
+        win)    printf "mingw64_nt_10.0" ;;
+        *)      printf "%s%s" "$system" "$(x os arch)" | tr '[:lower:]' '[:upper:]' ;;
+    esac
+}
+
+___x_cmd_env_java_compression(){
+	if ! [ "$(x os name)" = "win" ]; then
+		printf "tar.gz"
+	fi
+}
+## EndSection
+
+# Section(ls_remote): list_url, version_info
+___x_cmd_env_java_list_url() {
+    printf "https://api.sdkman.io/2/candidates/java/%s/versions/all" \
+        "$(___x_cmd_env_java_platform)"
+}
+
+___x_cmd_env_java_version_info(){
+	#TODO: To add more support not only for openjdk
+    awk -v pattern="$pattern" 'BEGIN{ RS=","} ($0 ~ pattern) { print $0 }'
+}
+## EndSection
+
+# Section(download): download_url
+___x_cmd_env_java_download_url(){
+    local version="$1"
+    printf "https://api.sdkman.io/2/broker/download/java/%s/%s" \
+		 "$version" "$(___x_cmd_env_java_platform)"
+}
+## EndSection
+
+# Section(unpack): copy_to_unpackdir
+___x_cmd_env_java_copy_to_unpackdir(){
+	if [ "$(x os name)" = "darwin" ]; then
+		env:debug "Copying " "$unpack_dir"/*/Contents/Home/* " to " "$unpack_dir"/*/
+		mv "$unpack_dir"/*/Contents/Home/* "$unpack_dir"/*/
+		x rmrf "$unpack_dir"/*/Contents
+	fi
+}
+## EndSection
+
+# Section: ui_catsel
+#TODO: Should be optimized
+___x_cmd_env_java_ui_catsel(){
+    case "$#" in
+        0)  ___x_cmd_env_java_ls_remote | awk '{ split($0,arr,"-"); if(arr[2]!=""){ vmap[arr[2]]=1 } } END{ for(key in vmap){print key} }' ;;
+        1)  ___x_cmd_env_java_ls_remote | grep "$1" | awk '{ split($0,arr,"."); vmap[arr[1]]=1 } END{ for(key in vmap){print key} }' ;;
+        2)  ___x_cmd_env_java_ls_remote | grep "$1" | grep ^"$2" | awk '{ print $1 }' ;;
+    esac
+}
+## EndSection

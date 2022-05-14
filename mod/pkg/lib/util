@@ -1,0 +1,61 @@
+
+___X_CMD_PKG_RAWPATH="$___X_CMD_ROOT_TMP/pkg/raw"
+
+# Section: get from all.7z
+___x_cmd_pkg___which_p7zip(){
+    ___x_cmd_ensuredir "$___X_CMD_PKG_RAWPATH"
+
+    local p7zip="$___X_CMD_ROOT_TMP/pkg/all.7z"
+    if ! ___x_cmd_httpget_gitx x-cmd pkg main "dist/all.7z" "$p7zip" 3600; then # 1-day
+        if [ ! -f "$p7zip" ]; then
+            x:error "Unaviable all.7z. Unable to fetch all.7z."
+            return 1
+        fi
+    fi
+
+    [ "$___X_CMD_HTTPGET_AGE" != 0 ] || (
+        pkg:info "Deflate the all.7z"
+        x rmrf "$___X_CMD_PKG_RAWPATH"
+        ___x_cmd_ensuredir "$___X_CMD_PKG_RAWPATH"
+        cd "${p7zip%/*}" && cp all.7z raw/all.7z && cd raw && x uz all.7z 2>/dev/null && rm all.7z
+    )
+}
+
+
+___x_cmd_pkg_ls()(
+    ___x_cmd_pkg___which_p7zip || return
+
+    cd "$___X_CMD_PKG_RAWPATH" || return
+    find . -name meta.tt.json | awk  '{ gsub(/\.\//, "", $0); gsub(/\/meta.tt.json$/, "", $0); print $0;  }'
+)
+# EndSection
+
+
+# Section: get raw text from all.7z
+___x_cmd_pkg_locate(){
+    local tgt="${1:?Provide name}"
+    ___x_cmd_pkg_ls | awk -v FS=/ -v tgt="$tgt" '$2==tgt{ print $0; exit 0; }'
+}
+
+___x_cmd_pkg___meta_fp(){
+    local s
+    s="$(___x_cmd_pkg_locate "${1:?Provide name}")" || return
+    printf "%s/%s/meta.tt.json" "$___X_CMD_PKG_RAWPATH" "$s"
+}
+
+___x_cmd_pkg___version_fp(){
+    local s
+    s="$(___x_cmd_pkg_locate "${1:?Provide name}")" || return
+    printf "%s/%s/version.tt.json" "$___X_CMD_PKG_RAWPATH" "$s"
+}
+
+# Default, China
+___x_cmd_pkg___all_info(){
+    local s
+    s="$___X_CMD_PKG_RAWPATH/$(___x_cmd_pkg_locate "${1:?Provide name}")" || return
+    printf "%s\n" "$1"
+    cat "$s/meta.tt.json" "$s/version.tt.json"
+}
+# EndSection
+
+
