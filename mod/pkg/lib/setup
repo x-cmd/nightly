@@ -1,0 +1,14 @@
+
+___x_cmd_pkg_setup(){
+    # If not installed, setup
+    ___x_cmd_pkg_setup___min "$@"
+}
+
+___x_cmd_pkg_setup___min(){
+    local script_path
+    if script_path="$(___x_cmd_pkg___get_script "$@" setup)"; then
+        . "$script_path"
+    else
+        :
+    fi
+}

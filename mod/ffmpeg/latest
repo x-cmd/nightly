@@ -23,7 +23,7 @@ ___x_cmd_ffmpeg_download(){
 
 ___x_cmd_ffmpeg_bin_download_url(){
     local exe="${1:?Provide app name}"
-    if [ -z "$___X_CMD_WHICHNET" ]; then
+    if [ "$___X_CMD_WHICHNET" != cn ]; then
         printf "%s/%s" "https://raw.githubusercontent.com/static-build/ffmpeg/main/bin" "$exe.7z"
     else
         printf "%s/%s" "https://gitcode.net/x-bash/ffmpeg/-/raw/master/bin" "$exe.7z"

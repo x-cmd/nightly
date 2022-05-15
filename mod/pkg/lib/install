@@ -1,0 +1,30 @@
+
+___x_cmd_pkg_install(){
+    ___x_cmd_pkg_install___download "$@" || return
+    local script_path
+    if script_path="$(___x_cmd_pkg___get_script_path "$@" install)"; then
+        . "$script_path"
+    else
+        ___x_cmd_pkg_install___unzip    "$@" || return
+    fi
+}
+
+___x_cmd_pkg_reinstall(){
+    :
+    # Delete the installation. Re unpack or running the installation script ?
+}
+
+
+# This is default
+___x_cmd_pkg_install___unzip(){
+    local pkg_name="${1:?Provide pkg name}"
+    local version="${2:?rovide version}"
+
+    local ball="$___X_CMD_PKG_DOWNLOAD_PATH/$pkg_name/$version"
+    local tgt="$___X_CMD_PKG_INSTALL_PATH/$pkg_name/$version"
+
+    x uz "$ball" "$tgt" || {
+        pkg:warn "Fail to unzip $ball"
+    }
+}
+

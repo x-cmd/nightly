@@ -1,0 +1,10 @@
+
+# ls app, default app
+___x_cmd_pkg_ls()(
+    ___x_cmd_pkg___which_p7zip || return
+
+    # Read the index file in the future ...
+    cd "$___X_CMD_PKG_RAWPATH" || return
+    find . -name meta.tt.json | awk  '{ gsub(/\.\//, "", $0); gsub(/\/meta.tt.json$/, "", $0); print $0;  }'
+)
+

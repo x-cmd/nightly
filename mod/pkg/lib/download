@@ -1,0 +1,39 @@
+
+# TODO: Multiple thread
+# TODO: Download Manager and more strategy
+# TODO: Maybe using a P2P share connection for mirror downloading.
+
+___x_cmd_pkg_download(){
+    local pkg_name="${1:?Provide pkg name}"
+    local version="${2:?rovide version}"
+
+    local url_list
+    url_list="$(___x_cmd_pkg___bin_url_list "$@")"
+
+    local url
+    local ball="$___X_CMD_PKG_DOWNLOAD_PATH/$pkg_name/$version"
+    while read -r url; do
+        # Check sha256. Whether it is already exists
+        ___x_cmd_httpget "$url" "$ball" || {
+            pkg:warn "Fail to download from $url"
+            continue
+        }
+        # Check sha256. If not. Deleted.
+    done <<A
+$url_list
+A
+
+}
+
+# Get bin list if zero argument
+# Display path if arguments provided
+# _bin_url__
+# _bin_url_cn
+___x_cmd_pkg___bin_url_list(){
+    ___x_cmd_pkg___all_info "$@" | awk \
+        -f "$___X_CMD_ROOT_MOD/awk/lib/default.awk" \
+        -f "$___X_CMD_ROOT_MOD/awk/lib/jqparse.awk" \
+        -f "awk/pkg.jobj.awk" \
+        -f "awk/pkg._.awk" \
+        -f "awk/pkg.urllist.awk"
+}

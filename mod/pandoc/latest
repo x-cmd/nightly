@@ -46,7 +46,7 @@ ___x_cmd_pandoc_bin_download_url(){
             return 1
     esac
 
-    if [ -z "$___X_CMD_WHICHNET" ]; then
+    if [ "$___X_CMD_WHICHNET" != cn ]; then
         printf "%s/%s" "https://github.com/jgm/pandoc/releases/download" "$p"
     else
         printf "%s/%s" "https://download.fastgit.org/jgm/pandoc/releases/download" "$p"

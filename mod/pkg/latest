@@ -1,12 +1,6 @@
 # Author:       Li Junhao           l@x-cmd.com
 # shellcheck    shell=sh            disable=SC3043      # xrc
 
-x log init pkg
-
-xrc:mod pkg/lib/sb
-
-xrc:mod:lib pkg     util main
-
 ___x_cmd_pkg(){
     local op="$1"
     case "$op" in
@@ -14,26 +8,55 @@ ___x_cmd_pkg(){
         update)         shift; ___x_cmd_pkg_update "$@" ;;
 
         version)        shift; ___x_cmd_pkg_version "$@" ;;
+        ll)             shift; ___x_cmd_pkg_info "$@" ;;
 
         # x pkg which node=v12
         which)          shift; ___x_cmd_pkg_which "$@" ;;
 
         # x pkg download node=v12
         download)       shift; ___x_cmd_pkg_download "$@" ;;
+        install)        shift; ___x_cmd_pkg_install "$@" ;;
+        reinstall)      shift; ___x_cmd_pkg_reinstall "$@" ;;
 
-        # x pkg use node=v12
-        use)            shift; ___x_cmd_pkg_use "$@" ;;
-
-        # x pkg try node=v12
-        try)            shift; ___x_cmd_pkg_try "$@" ;;
-
-        # Get bin list if zero argument
-        # Display path if arguments provided
-        bin)            shift; ___x_cmd_pkg_bin "$@" ;;
+        # x pkg setup node=v12
+        setup)          shift; ___x_cmd_pkg_setup "$@" ;;
 
         # x pkg exec python=
         *=)             ___x_cmd_pkg_exec "$@" ;;
     esac
 }
 
+
+x log init pkg
+
+xrc:mod pkg/lib/sb
+xrc:mod:lib pkg     which util ls ls_installed download install
+
+___X_CMD_PKG_RAWPATH="$___X_CMD_ROOT_TMP/pkg/raw"
+___X_CMD_PKG_DOWNLOAD_PATH="$___X_CMD_ROOT_TMP/pkg/download"
+___X_CMD_PKG_INSTALL_PATH="$___X_CMD_ROOT_TMP/pkg/installed"
+
+x ensuredir "$___X_CMD_PKG_RAWPATH" "$___X_CMD_PKG_DOWNLOAD_PATH" "$___X_CMD_PKG_INSTALL_PATH"
+
+# x defineddir \
+#     ___X_CMD_PKG_RAWPATH        "$___X_CMD_ROOT_TMP/pkg/raw" \
+#     ___X_CMD_PKG_DOWNLOAD_PATH  "$___X_CMD_ROOT_TMP/pkg/download" \
+#     ___X_CMD_PKG_INSTALL_PATH   "$___X_CMD_ROOT_TMP/pkg/installed"
+
+
+___x_cmd_pkg_update(){
+    ___x_cmd_pkg___which_p7zip -  # Force Update
+}
+
+# Rely on ll or ls
+# Control the lsversion awk for better showing
+___x_cmd_pkg_version(){
+    local pkg_name="${1:?Provide pkg name}"
+    local osarch="${2:?osarch as filter}"
+    ___x_cmd_pkg___all_info "${pkg_name}" | awk \
+        -f "$___X_CMD_ROOT_MOD/awk/lib/default.awk" \
+        -f "$___X_CMD_ROOT_MOD/awk/lib/jqparse.awk" \
+        -f "awk/pkg.jobj.awk" \
+        -f "awk/pkg.lsversion.awk"
+}
 

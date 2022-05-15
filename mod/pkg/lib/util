@@ -1,34 +1,37 @@
 
-___X_CMD_PKG_RAWPATH="$___X_CMD_ROOT_TMP/pkg/raw"
 
-# Section: get from all.7z
-___x_cmd_pkg___which_p7zip(){
-    ___x_cmd_ensuredir "$___X_CMD_PKG_RAWPATH"
+# Get Script Path
 
-    local p7zip="$___X_CMD_ROOT_TMP/pkg/all.7z"
-    if ! ___x_cmd_httpget_gitx x-cmd pkg main "dist/all.7z" "$p7zip" 3600; then # 1-day
-        if [ ! -f "$p7zip" ]; then
-            x:error "Unaviable all.7z. Unable to fetch all.7z."
-            return 1
-        fi
-    fi
+___x_cmd_pkg___attr(){
+    local QUERY="${4:?Provide sciprt}"
 
-    [ "$___X_CMD_HTTPGET_AGE" != 0 ] || (
-        pkg:info "Deflate the all.7z"
-        x rmrf "$___X_CMD_PKG_RAWPATH"
-        ___x_cmd_ensuredir "$___X_CMD_PKG_RAWPATH"
-        cd "${p7zip%/*}" && cp all.7z raw/all.7z && cd raw && x uz all.7z 2>/dev/null && rm all.7z
-    )
+    ___x_cmd_pkg___all_info "$@" | awk \
+        -v QUERY="$QUERY" \
+        -f "$___X_CMD_ROOT_MOD/awk/lib/default.awk" \
+        -f "$___X_CMD_ROOT_MOD/awk/lib/jqparse.awk" \
+        -f "awk/pkg.jobj.awk" \
+        -f "awk/pkg._.awk" \
+        -f "awk/pkg.attr.awk"
 }
 
+___x_cmd_pkg___get_script_path(){
+    local script="${4:?Provide sciprt}"
 
-___x_cmd_pkg_ls()(
-    ___x_cmd_pkg___which_p7zip || return
+    ___x_cmd_pkg___all_info "$@" | awk \
+        -v script="$script" \
+        -f "$___X_CMD_ROOT_MOD/awk/lib/default.awk" \
+        -f "$___X_CMD_ROOT_MOD/awk/lib/jqparse.awk" \
+        -f "awk/pkg.jobj.awk" \
+        -f "awk/pkg._.awk" \
+        -f "awk/pkg.script.awk"
+}
 
-    cd "$___X_CMD_PKG_RAWPATH" || return
-    find . -name meta.tt.json | awk  '{ gsub(/\.\//, "", $0); gsub(/\/meta.tt.json$/, "", $0); print $0;  }'
-)
-# EndSection
+___x_cmd_pkg_osarch(){
+    if [ -z "$___X_CMD_PKG_OSARCH" ]; then
+        ___X_CMD_PKG_OSARCH="$(os arch)/$(os name)"
+    fi
+    printf "%s\n" "$___X_CMD_PKG_OSARCH"
+}
 
 
 # Section: get raw text from all.7z
@@ -37,25 +40,28 @@ ___x_cmd_pkg_locate(){
     ___x_cmd_pkg_ls | awk -v FS=/ -v tgt="$tgt" '$2==tgt{ print $0; exit 0; }'
 }
 
-___x_cmd_pkg___meta_fp(){
-    local s
-    s="$(___x_cmd_pkg_locate "${1:?Provide name}")" || return
-    printf "%s/%s/meta.tt.json" "$___X_CMD_PKG_RAWPATH" "$s"
-}
+# ___x_cmd_pkg___meta_fp(){
+#     local s
+#     s="$(___x_cmd_pkg_locate "${1:?Provide name}")" || return
+#     printf "%s/%s/meta.tt.json" "$___X_CMD_PKG_RAWPATH" "$s"
+# }
 
-___x_cmd_pkg___version_fp(){
-    local s
-    s="$(___x_cmd_pkg_locate "${1:?Provide name}")" || return
-    printf "%s/%s/version.tt.json" "$___X_CMD_PKG_RAWPATH" "$s"
-}
+# ___x_cmd_pkg___version_fp(){
+#     local s
+#     s="$(___x_cmd_pkg_locate "${1:?Provide name}")" || return
+#     printf "%s/%s/version.tt.json" "$___X_CMD_PKG_RAWPATH" "$s"
+# }
 
 # Default, China
 ___x_cmd_pkg___all_info(){
-    local s
-    s="$___X_CMD_PKG_RAWPATH/$(___x_cmd_pkg_locate "${1:?Provide name}")" || return
-    printf "%s\n" "$1"
-    cat "$s/meta.tt.json" "$s/version.tt.json"
+    local pkg_name="${1:?Provide pkg name}"
+    local version="${2:?rovide version}"
+    local osarch="${3:-${___X_CMD_PKG_OSARCH:-$(___x_cmd_pkg_osarch)}}"
+
+    pkg_name="$(___x_cmd_pkg_locate "${1:?Provide name}")" || return
+
+    printf "%s\n%s\n%s\n%s\n%s\n" "$pkg_name" "$version" "$osarch" "$___X_CMD_PKG_RAWPATH" "$___X_CMD_WHICHNET"
+
+    cat "$___X_CMD_PKG_RAWPATH/$pkg_name/meta.tt.json" "$___X_CMD_PKG_RAWPATH/$pkg_name/version.tt.json"
 }
 # EndSection
-
-
