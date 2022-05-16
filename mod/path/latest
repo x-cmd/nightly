@@ -26,7 +26,7 @@ ___x_cmd_path_uniq(){
     local newpath=:
     local p
     for p in $PATH; do
-        [ "$newpath" != "${newpath#:$p:}" ] || newpath="${newpath}${p}:"
+        [ "$newpath" != "${newpath#*:$p:}" ] || newpath="${newpath}${p}:"
     done
     PATH="${newpath#:}"
     PATH="${PATH%:}"
@@ -46,7 +46,7 @@ ___x_cmd_path_uniq(){
         p="${path_tmp%%:*}"
         [ "$p" != "$path_tmp" ] || break
         path_tmp="${path_tmp#*:}"
-        [ "$newpath" != "${newpath#:$p:}" ] || newpath="${newpath}${p}:"
+        [ "$newpath" != "${newpath#*:$p:}" ] || newpath="${newpath}${p}:"
     done
     PATH="${newpath#:}"
     PATH="${PATH%:}"
@@ -104,6 +104,10 @@ ___x_cmd_path_pop(){
 # Section: rm and op
 ___x_cmd_path_rm_(){
     local dir="${1:?Provide a directory}"
+    if [ -z "$PATH" ] ; then
+        _1=":"
+        return
+    fi
     _1=":$PATH:"
     local p="${_1#*:"$dir":}"
     while [ "$_1" != "$p" ]; do
@@ -132,7 +136,7 @@ ___x_cmd_path_down_or_push(){
 ___x_cmd_path_up_or_unshift(){
     local _1
     ___x_cmd_path_rm_ "$@"
-    _1=${_1#:}
+    # _1=${_1#:}
     _1="${dir}${_1}"
     PATH="${_1%:}"
 }

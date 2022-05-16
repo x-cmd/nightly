@@ -70,7 +70,7 @@ A
         run_id=${___X_CMD_UI_GRIDSELECT_CURRENT_ITEM%%,*}
     fi
 
-    if ___x_cmd_gh_http download "/repos/${owner_repo}/actions/runs/${run_id}/logs" "$___X_CMD_ROOT/.actions/$run_id/log.zip";then
+    if ___x_cmd_gh_http download "/repos/${owner_repo}/actions/runs/${run_id}/logs" "$___X_CMD_ROOT/.actions/$run_id/log.zip"; then
         x uz "$___X_CMD_ROOT/.actions/$run_id/log.zip" "$___X_CMD_ROOT/.actions/$run_id"
         cat "$___X_CMD_ROOT"/.actions/*/* | awk '{
           date=substr($0, 3, 8)
@@ -79,9 +79,39 @@ A
           gsub("-", "/", date)
           print "\033[90m" date "/" time "\033[0m" substr($0, idx)
       }' | less -r
-      rm -rf "$___X_CMD_ROOT/.actions/$run_id"
+        rm -rf "$___X_CMD_ROOT/.actions/$run_id"
     fi
 }
+
+___x_cmd_gh_run_download() {
+    param:scope "github/$O"
+    param:dsl <<A
+options:
+    --repo      "Provide owner name and repo name.(default:the current user repo)"  <>:RepoName="$(_____x_cmd_git_repo)"
+    --per_page  "Results per page (max 100)"                                        <>=""
+    --page      "Page number of the results to fetch."                              <>=""
+A
+    param:run
+
+    ___x_cmd_gh_param_init_owner_repo
+    if [ -t 1 ] && ___ui_table_json Id=.id Name=.name Bytes=.size_in_bytes \
+        -- "___x_cmd_gh_http get "/repos/$owner_repo/actions/artifacts" per_page page | x jo q0 .artifacts"; then
+        if [ "$___X_CMD_UI_TABLE_FINAL_COMMAND" = "ENTER" ];then
+            x ui form nohelp "Make sure you need to download $___X_CMD_UI_TABLE_CUR_LINE ?" if_download 1 = "yes" "no"
+            if [ "$if_download" = "yes" ]; then
+                ___x_cmd_gh_http download "/repos/${owner_repo}/actions/artifacts/${___X_CMD_UI_TABLE_CUR_LINE%%*}/zip" "./${___X_CMD_UI_TABLE_CUR_LINE%%*}.zip"
+            fi
+        elif [ "$___X_CMD_UI_TABLE_FINAL_COMMAND" = "d" ];then
+            x ui form nohelp "sure you need to delete $___X_CMD_UI_TABLE_CUR_LINE?" if_download 1 = "yes" "no"
+            if [ "$if_download" = "yes" ]; then
+                ___x_cmd_gh_http delete "/repos/${owner_repo}/actions/artifacts/${___X_CMD_UI_TABLE_CUR_LINE%%*}"
+            fi
+        fi
+        return 0
+    fi
+    ___x_cmd_gh_http get "/repos/$owner_repo/actions/artifacts" per_page page
+}
+
 _____x_cmd_run_options() {
     printf "%s\n" "Select a workflow run:
 $(___x_cmd_gh_run_ls | (

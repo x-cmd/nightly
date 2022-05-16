@@ -1,6 +1,6 @@
 
 END {
-    result = jobj[ prefix, k, jqu(script) ]
+    result = table[ jqu(PKG_NAME), jqu("hook"), jqu(SCRIPT) ]
     if (result == "") {
         exit(1)
     } else {

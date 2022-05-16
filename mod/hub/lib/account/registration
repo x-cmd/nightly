@@ -1,35 +1,6 @@
-# shellcheck shell=sh disable=SC1072,SC3043
+# shellcheck shell=sh disable=SC3043
 
-___x_cmd_hub_register(){
-    param:void
-    local op="$1"
-    local _SELECT
-    case "$op" in
-        wx|weixin)              ___x_cmd_hub_register_weixin ;;
-        tg|telegram)            ___x_cmd_hub_register_telegram ;;
-        "")
-                ___x_cmd_ui_select "_SELECT" \
-                    "Register Methods:" \
-                        "Open Browser to x-cmd.com" \
-                        "Weixin QR" \
-                        "Email Verification"
-                        # "Telegram Bot"
-
-                # TODO: Should move official site login to the first of the list
-                case "$_SELECT" in
-                    1)          ___x_cmd_hub_register_official_site "$@"  ;;
-                    2)          ___x_cmd_hub_register_weixin        "$@"  ;;
-                    3)          ___x_cmd_hub_register_email         "$@"  ;;
-                    # 4)          ___x_cmd_hub_register_telegram      "$@"  ;;
-                    *)          hub:error "Unknown _SELECT: $_SELECT" ;;
-                esac
-                ;;
-        *)
-                ___x_cmd_hub_register_official_site "$@" ;;
-    esac
-}
-
-# Section: Registration
+# Section: official_site, weixin
 
 ___x_cmd_hub_register_official_site(){
 
@@ -69,7 +40,7 @@ ___x_cmd_hub_register_weixin(){
 
     local token_to_activate
     token_to_activate="$(___x_cmd_hub_token_generate)"
-    ___x_cmd_hub_print_qrcode "$(___x_cmd_hub_wechat_register_url "${token_to_activate}" "$username")"
+    ___x_cmd_hub_qrcode "$(___x_cmd_hub_wechat_register_url "${token_to_activate}" "$username")"
     printf "%s" "Please scan the QR code above, then press [Enter] to continue: "
     read -r _
 
@@ -83,7 +54,7 @@ ___x_cmd_hub_register_weixin(){
 
 # EndSection
 
-# Section: email
+# Section: email(frozen)
 ___x_cmd_hub_register_email_witharg(){
     local email="${1:?Provide email}"
     local username="${2:?Provide username}"
@@ -91,7 +62,7 @@ ___x_cmd_hub_register_email_witharg(){
     token_to_activate="$(___x_cmd_hub_token_generate)"
 
     local res
-    if ! res="$(___x_cmd_httpget "$___X_CMD_HUB_SERVICE_URL/api/v0/account/register/$email?token_to_activate=${token_to_activate}&username=${username}")" ; then
+    if ! res="$(___x_cmd_hub_client_login_by_email "$email" "$token_to_activate" "$username")" ; then
         hub:error "Failed to login with email: $email, res: $res"
         return 1
     fi

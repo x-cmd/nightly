@@ -5,20 +5,30 @@
 
 ___x_cmd_pkg_download(){
     local pkg_name="${1:?Provide pkg name}"
-    local version="${2:?rovide version}"
+    local version="${2:?Provide version}"
 
     local url_list
     url_list="$(___x_cmd_pkg___bin_url_list "$@")"
 
     local url
     local ball="$___X_CMD_PKG_DOWNLOAD_PATH/$pkg_name/$version"
+    if [ -f "$ball" ]; then
+        if [ "$(___x_cmd_sha256 "$ball")" != "$(___x_cmd_pkg___attr sha256)" ] ; then
+            pkg:warn "File corrupted. Download the $ball again."
+            x rmrf "$ball"
+        fi
+    fi
+
     while read -r url; do
-        # Check sha256. Whether it is already exists
         ___x_cmd_httpget "$url" "$ball" || {
             pkg:warn "Fail to download from $url"
             continue
         }
-        # Check sha256. If not. Deleted.
+
+        if [ "$(___x_cmd_sha256 "$ball")" != "$(___x_cmd_pkg___attr sha256)" ] ; then
+            pkg:warn "File corrupted."
+            x rmrf "$ball"
+        fi
     done <<A
 $url_list
 A
@@ -33,7 +43,18 @@ ___x_cmd_pkg___bin_url_list(){
     ___x_cmd_pkg___all_info "$@" | awk \
         -f "$___X_CMD_ROOT_MOD/awk/lib/default.awk" \
         -f "$___X_CMD_ROOT_MOD/awk/lib/jqparse.awk" \
-        -f "awk/pkg.jobj.awk" \
-        -f "awk/pkg._.awk" \
-        -f "awk/pkg.urllist.awk"
+        -f "$___X_CMD_ROOT_MOD/pkg/lib/awk/util.awk" \
+        -f "$___X_CMD_ROOT_MOD/pkg/lib/awk/pkg._.awk" \
+        -f "$___X_CMD_ROOT_MOD/pkg/lib/awk/pkg.urllist.awk"
+}
+
+___x_cmd_sha256(){
+    if command -v shasum 1>/dev/null; then
+        shasum -a 256 "$@" | awk '{ print $1; }'
+    elif command -v sha256sum; then
+        sha256sum "$@" | awk '{ print $1; }'
+    else
+        x:error "shasum/sha256sum command NOT found."
+        return 1
+    fi
 }
