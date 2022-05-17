@@ -2,15 +2,27 @@
 ___x_cmd_pkg_install(){
     ___x_cmd_pkg_download "$@" || return
     local script_path
-    if script_path="$(___x_cmd_pkg___get_script_path "$@" install)"; then
+    if script_path="$(___x_cmd_pkg___get_script_path "$@" "" install)"; then
         . "$script_path"
     else
-        ___x_cmd_pkg_install___unzip    "$@" || return
+        ___x_cmd_pkg_install___unzip "$@" || return
     fi
 }
 
 ___x_cmd_pkg_reinstall(){
-    :
+    local pkg_name="${1:?Provide pkg name}"
+    local version="${2:?Provide version}"
+    local osarch="${3:-${___X_CMD_PKG_OSARCH:-$(___x_cmd_pkg_osarch)}}"
+
+    local file_suffix
+    ___x_cmd_pkg___attr "$@" "$osarch" file_suffix
+    local ball="$___X_CMD_PKG_DOWNLOAD_PATH/$pkg_name/$version.$file_suffix"
+    pkg:debug "ball: $ball"
+    if [ -f "$ball" ]; then
+        pkg:info "Delete $ball and reinstall $*"
+        x rmrf "$ball"
+    fi
+    ___x_cmd_pkg_install "$@"
     # Delete the installation. Re unpack or running the installation script ?
 }
 
@@ -19,10 +31,13 @@ ___x_cmd_pkg_reinstall(){
 ___x_cmd_pkg_install___unzip(){
     local pkg_name="${1:?Provide pkg name}"
     local version="${2:?Provide version}"
+    local osarch="${3:-${___X_CMD_PKG_OSARCH:-$(___x_cmd_pkg_osarch)}}"
 
-    local ball="$___X_CMD_PKG_DOWNLOAD_PATH/$pkg_name/$version"
+    local file_suffix
+    ___x_cmd_pkg___attr "$@" "$osarch" file_suffix
+    local ball="$___X_CMD_PKG_DOWNLOAD_PATH/$pkg_name/$version.$file_suffix"
     local tgt="$___X_CMD_PKG_INSTALL_PATH/$pkg_name/$version"
-
+    pkg:debug "unzip ball: $ball tgt: $tgt"
     x uz "$ball" "$tgt" || {
         pkg:warn "Fail to unzip $ball"
     }

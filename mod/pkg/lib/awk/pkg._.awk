@@ -1,7 +1,7 @@
 NR==1 { PKG_NAME = $0 }
 NR==2 { VERSION_NAME = $0 }
 NR==3 { OSARCH = $0 }
-NR==4 { RAWPATH = $0 }
+NR==4 { PKG_RAWPATH = $0 }
 NR==5 { NET_REGION = $0 }
 
 NR==6 { meta_json = $0 }

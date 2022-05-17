@@ -6,55 +6,69 @@
 ___x_cmd_pkg_download(){
     local pkg_name="${1:?Provide pkg name}"
     local version="${2:?Provide version}"
+    local osarch="${3:-${___X_CMD_PKG_OSARCH:-$(___x_cmd_pkg_osarch)}}"
 
     local url_list
-    url_list="$(___x_cmd_pkg___bin_url_list "$@")"
+    local file_suffix
+    url_list="$(___x_cmd_pkg___list "$@" "url.${___X_CMD_WHICHNET:-_}" )"
+    ___x_cmd_pkg___attr "$@" "$osarch" file_suffix
 
     local url
-    local ball="$___X_CMD_PKG_DOWNLOAD_PATH/$pkg_name/$version"
+    local ball="$___X_CMD_PKG_DOWNLOAD_PATH/$pkg_name/$version.$file_suffix"
+    pkg:debug "url_list: $url_list ball: $ball"
+
+    local md5
+    local sha1
+    local sha256
+    local sha512
+
+    ___x_cmd_pkg___attr "$@" "$osarch" md5 sha1 sha256 sha512
+
     if [ -f "$ball" ]; then
-        if [ "$(___x_cmd_sha256 "$ball")" != "$(___x_cmd_pkg___attr sha256)" ] ; then
-            pkg:warn "File corrupted. Download the $ball again."
-            x rmrf "$ball"
-        fi
+        ! ___x_cmd_pkg_download___check_hashsum "$ball" "$md5" "$sha1" "$sha256" "$sha512" || return 0
+
+        pkg:warn "File corrupted. Download the $ball again."
+        x rmrf "$ball"
     fi
 
     while read -r url; do
-        ___x_cmd_httpget "$url" "$ball" || {
+        # TODO: ___x_cmd_httpget support 302
+        # ___x_cmd_httpget "$url" "$ball" || {
+        curl --progress-bar --location --retry-max-time 10 --retry 0 "$url" --output "$ball" || {
             pkg:warn "Fail to download from $url"
             continue
         }
 
-        if [ "$(___x_cmd_sha256 "$ball")" != "$(___x_cmd_pkg___attr sha256)" ] ; then
-            pkg:warn "File corrupted."
-            x rmrf "$ball"
-        fi
+        ! ___x_cmd_pkg_download___check_hashsum "$ball" "$md5" "$sha1" "$sha256" "$sha512" || return 0
+
+        pkg:warn "File corrupted."
+        x rmrf "$ball"
     done <<A
 $url_list
 A
 
 }
 
-# Get bin list if zero argument
-# Display path if arguments provided
-# _bin_url__
-# _bin_url_cn
-___x_cmd_pkg___bin_url_list(){
-    ___x_cmd_pkg___all_info "$@" | awk \
-        -f "$___X_CMD_ROOT_MOD/awk/lib/default.awk" \
-        -f "$___X_CMD_ROOT_MOD/awk/lib/jqparse.awk" \
-        -f "$___X_CMD_ROOT_MOD/pkg/lib/awk/util.awk" \
-        -f "$___X_CMD_ROOT_MOD/pkg/lib/awk/pkg._.awk" \
-        -f "$___X_CMD_ROOT_MOD/pkg/lib/awk/pkg.urllist.awk"
-}
+___x_cmd_pkg_download___check_hashsum(){
+    local filepath="$1"
 
-___x_cmd_sha256(){
-    if command -v shasum 1>/dev/null; then
-        shasum -a 256 "$@" | awk '{ print $1; }'
-    elif command -v sha256sum; then
-        sha256sum "$@" | awk '{ print $1; }'
+    local md5="$2"
+    local sha1="$3"
+    local sha256="$4"
+    local sha512="$5"
+
+    if [ -n "$sha512" ]; then
+        [ "$(___x_cmd_sha512 "$filepath")" != "$sha512" ]
+    elif [ -n "$sha256" ]; then
+        [ "$(___x_cmd_sha256 "$filepath")" != "$sha256" ]
+    elif [ -n "$sha1" ]; then
+        [ "$(___x_cmd_sha1 "$filepath")" != "$sha1" ]
+    elif [ -n "$md5" ]; then
+        [ "$(___x_cmd_md5 "$filepath")" != "$md5" ]
     else
-        x:error "shasum/sha256sum command NOT found."
-        return 1
+        # In the future, will return 1
+        x:error "No checksum provided."
+        return 0
     fi
+
 }

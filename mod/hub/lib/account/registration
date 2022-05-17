@@ -25,7 +25,8 @@ ___x_cmd_hub_register_official_site(){
 
     local userinfo
     if userinfo="$(___x_cmd_hub_get_userinfo_by_token "${token_to_activate}")" ; then
-        hub:info "Register Successfully, ${userinfo}"
+        ___x_cmd_hub_token "${token_to_activate}"
+        hub:info "Register Successfully, ${userinfo}, save token to ${___X_CMD_HUB_ENV}/.token"
     else
         hub:error "Register Failed"
     fi
@@ -46,7 +47,8 @@ ___x_cmd_hub_register_weixin(){
 
     local userinfo
     if userinfo="$(___x_cmd_hub_get_userinfo_by_token "${token_to_activate}")" ; then
-        hub:info "Register Successfully, ${userinfo}"
+        ___x_cmd_hub_token "${token_to_activate}"
+        hub:info "Register Successfully, ${userinfo}, save token to ${___X_CMD_HUB_ENV}/.token"
     else
         hub:error "Register Failed"
     fi
@@ -72,7 +74,8 @@ ___x_cmd_hub_register_email_witharg(){
 
     local userinfo
     if userinfo="$(___x_cmd_hub_get_userinfo_by_token "${token_to_activate}")" ; then
-        hub:info "Register Successfully, ${userinfo}"
+        ___x_cmd_hub_token "${token_to_activate}"
+        hub:info "Register Successfully, ${userinfo}, save token to ${___X_CMD_HUB_ENV}/.token"
     else
         hub:error "Register Failed"
     fi

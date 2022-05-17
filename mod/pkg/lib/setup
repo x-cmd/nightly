@@ -6,9 +6,18 @@ ___x_cmd_pkg_setup(){
 
 ___x_cmd_pkg_setup___min(){
     local script_path
-    if script_path="$(___x_cmd_pkg___get_script "$@" setup)"; then
-        . "$script_path"
+    pkg:debug "$(___x_cmd_pkg___get_script_path "$@" "" setup)"
+    if script_path="$(___x_cmd_pkg___get_script_path "$@" "" setup)"; then
+        . "${script_path}"
     else
-        :
+        ___x_cmd_pkg_setup___min_default
     fi
+}
+
+___x_cmd_pkg_setup___min_default(){
+    :
+    # binlist
+
+    # binpath
+
 }

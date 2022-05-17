@@ -67,6 +67,11 @@ ___x_cmd_hub_client_file_share(){
     ___x_cmd_httpget "$___X_CMD_HUB_SERVICE_URL/api/v0/file/share/true?token=$(___x_cmd_hub_token)&res=${respath}"
 }
 
+___x_cmd_hub_client_file_share_list(){
+    local respath="${1:?Provide respath}"
+    ___x_cmd_httpget "$___X_CMD_HUB_SERVICE_URL/api/v0/file/share/list?token=$(___x_cmd_hub_token)&res=${respath}"
+}
+
 ___x_cmd_hub_client_file_private(){
     ___x_cmd_httpget "$___X_CMD_HUB_SERVICE_URL/api/v0/file/share/false?token=$(___x_cmd_hub_token)&res=${respath}"
 }

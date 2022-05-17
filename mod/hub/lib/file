@@ -20,6 +20,8 @@ ___x_cmd_hub_file_normalize_respath(){
 
 # EndSection
 
+# Section: CRUD
+
 ___x_cmd_hub_file_ls(){
     local respath="${1:-@me/}"
     respath="$(___x_cmd_hub_file_normalize_respath "$respath")"
@@ -76,6 +78,10 @@ ___x_cmd_hub_file_upload(){
     ___x_cmd_hub_client_file_upload "$localfp" "$respath"
 }
 
+# EndSection
+
+# Section(share): share, share_list, private
+
 ___x_cmd_hub_file_share(){
     local respath="${1:?Please provide path}"
     respath="$(___x_cmd_hub_file_normalize_respath "$respath")"
@@ -86,6 +92,18 @@ ___x_cmd_hub_file_share(){
     fi
 
     hub:info "File shared successfully: $res"
+}
+
+___x_cmd_hub_file_share_list(){
+    local respath="${1}"
+    respath="$(___x_cmd_hub_file_normalize_respath "$respath")"
+
+    if ! res="$(___x_cmd_hub_client_file_share_list "${respath}")" ; then
+        hub:error "Failed to share list file: $res"
+        return 1
+    fi
+
+    printf "%s\n" "$res"
 }
 
 ___x_cmd_hub_file_private(){
@@ -99,3 +117,5 @@ ___x_cmd_hub_file_private(){
 
     hub:info "File private successfully: $res"
 }
+
+# EndSection

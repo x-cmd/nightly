@@ -1,7 +1,7 @@
 # Author:       Li Junhao   l@x-cmd.com             # xrc
 # shellcheck    shell=sh    disable=SC3043,SC1091
 
-xrc:mod:lib x-cmd glob con alias args rmrf cond util lang exe
+xrc:mod:lib x-cmd glob con alias args rmrf cond util lang exe hashsum
 
 # Section : x main function
 ___x_cmd_main_otherwise(){
@@ -35,6 +35,9 @@ ___x_cmd_main_otherwise(){
         x:debug "Resource Executed: [type=$___X_CMD_WHICH_ONE_RESOURCE_TYPE] [file=$___X_CMD_WHICH_ONE_RESULT] [code=$___x_cmd_main_otherwise_code]"
         return "$___x_cmd_main_otherwise_code"
     else
+        # Introduce binmod
+        # x pkg xbin init "$subcmd" && "___x_cmd_$subcmd" "$@"
+
         ___x_cmd_main_otherwise_code=$?
         x:debug "___x_cmd_main_otherwise(): ___x_cmd_which_one fail [code: ${___x_cmd_main_otherwise_code}]"
         return 1
