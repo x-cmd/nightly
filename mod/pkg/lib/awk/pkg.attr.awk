@@ -1,5 +1,5 @@
 
-function handle( qpat,  _arr, _arrl, _pat ){
+function handle( qpat,      varname, _arr, _arrl, i, _pat ){
     varname = qpat
 
     _arrl = split(qpat, _arr, /\./)

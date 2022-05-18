@@ -23,6 +23,10 @@ ___x_cmd_pkg(){
 
         # x pkg exec python=
         *=)             ___x_cmd_pkg_exec "$@" ;;
+
+        xbin)           shift; ___x_cmd_pkg_xbin "$@" ;;
+
+        *)              return 1
     esac
 }
 
@@ -30,7 +34,7 @@ ___x_cmd_pkg(){
 x log init pkg
 
 xrc:mod pkg/lib/sb
-xrc:mod:lib pkg     which util ls ls_installed download install
+xrc:mod:lib pkg     which util ls ls_installed download install xbin
 
 ___X_CMD_PKG_RAWPATH="$___X_CMD_ROOT_TMP/pkg/raw"
 ___X_CMD_PKG_DOWNLOAD_PATH="$___X_CMD_ROOT_TMP/pkg/download"
@@ -59,10 +63,3 @@ ___x_cmd_pkg_version(){
         -f "awk/util.awk" \
         -f "awk/pkg.lsversion.awk"
 }
-
-
-# ___x_cmd_pkg___attr_code java "" "${___X_CMD_PKG_OSARCH:-$(___x_cmd_pkg_osarch)}" hook.setup
-# ___x_cmd_pkg___all_info java "18-open" "${___X_CMD_PKG_OSARCH:-$(___x_cmd_pkg_osarch)}" "install"
-# ___x_cmd_pkg___get_script_path java "18-open" "${___X_CMD_PKG_OSARCH:-$(___x_cmd_pkg_osarch)}" "install"
-# ___x_cmd_pkg___bin_url_list java "18-open" "${___X_CMD_PKG_OSARCH:-$(___x_cmd_pkg_osarch)}"
-# ___x_cmd_pkg___attr java "18-open" "" sha256xws

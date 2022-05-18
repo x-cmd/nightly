@@ -17,7 +17,6 @@ ___x_cmd_param_dsl_set(){               ___X_CMD_PARAM_DSL="${1:-"$(cat)"}";    
 # TODO: there is a better design.
 alias param:run='local IFS; ___x_cmd_param_int "$@" ; local _x_cmd_param_code="$?" ;
     if [ "$_x_cmd_param_code" = 125 ]; then
-        PARAM_SUBCMD_DEF=""
         eval "$(___x_cmd_param_exec_dsl "$@" )"
     else
         return $_x_cmd_param_code

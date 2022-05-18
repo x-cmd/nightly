@@ -3,7 +3,15 @@
 # Section: xbin
 
 ___x_cmd_pkg_xbin(){
+    case "$1" in
+        init)       shift; ___x_cmd_pkg_xbin_init "$@" ;;
+        *)          return 1 ;;
+    esac
+}
+
+___x_cmd_pkg_xbin_init(){
     eval "$(___x_cmd_pkg___all_info "$@" | awk \
+        -v INSTALL_PATH="$___X_CMD_PKG_INSTALL_PATH" \
         -f "$___X_CMD_ROOT_MOD/awk/lib/default.awk" \
         -f "$___X_CMD_ROOT_MOD/awk/lib/jqparse.awk" \
         -f "$___X_CMD_ROOT_MOD/pkg/lib/awk/util.awk" \

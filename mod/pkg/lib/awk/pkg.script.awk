@@ -4,7 +4,7 @@ END {
     if (result == "") {
         exit(1)
     } else {
-        print RAWPATH "/" PKG_NAME "/.x-cmd/" juq(result)
+        print PKG_RAWPATH "/" PKG_NAME "/.x-cmd/" juq(result)
         exit(0)
     }
 }

@@ -10,19 +10,19 @@ ___x_cmd_pkg_download(){
 
     local url_list
     local file_suffix
-    url_list="$(___x_cmd_pkg___list "$@" "url.${___X_CMD_WHICHNET:-_}" )"
+    url_list="$(___x_cmd_pkg___list "$@" "$osarch" "url.${___X_CMD_WHICHNET:-_}" )"
     ___x_cmd_pkg___attr "$@" "$osarch" file_suffix
 
     local url
     local ball="$___X_CMD_PKG_DOWNLOAD_PATH/$pkg_name/$version.$file_suffix"
-    pkg:debug "url_list: $url_list ball: $ball"
+    pkg:debug "Download url_list: $url_list ball: $ball"
 
     local md5
     local sha1
     local sha256
     local sha512
 
-    ___x_cmd_pkg___attr "$@" "$osarch" md5 sha1 sha256 sha512
+    ___x_cmd_pkg___attr "$@" "$osarch" "md5,sha1,sha256,sha512"
 
     if [ -f "$ball" ]; then
         ! ___x_cmd_pkg_download___check_hashsum "$ball" "$md5" "$sha1" "$sha256" "$sha512" || return 0
@@ -67,7 +67,7 @@ ___x_cmd_pkg_download___check_hashsum(){
         [ "$(___x_cmd_md5 "$filepath")" != "$md5" ]
     else
         # In the future, will return 1
-        x:error "No checksum provided."
+        x:warn "No checksum provided."
         return 0
     fi
 

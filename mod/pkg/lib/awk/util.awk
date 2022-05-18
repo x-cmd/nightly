@@ -17,19 +17,7 @@ function pkg_init_table( jobj, table, table_kp,
 
     pkg_copy_table( jobj, jqu(pkg_name) SUBSEP jqu("meta"), table, table_kp )
 
-    version_osarch = table_version_osarch( table, pkg_name ) # May define version or osarch (as default) in the meta file
-
-    _rule_kp = pkg_kp( pkg_name, "meta", "rule" )
-    _rule_l = jobj[ _rule_kp L ]
-    for (i=1; i<=_rule_l; ++i) {
-        k = jobj[ _rule_kp, i ]
-        _kpat = juq( k )
-        gsub("\\*", "[^/]+", _kpat)
-        if (match(version_osarch, "^" _kpat)) {
-            pkg_copy_table( jobj, _rule_kp SUBSEP k, table, table_kp )
-            version_osarch = table_version_osarch( table, pkg_name )
-        }
-    }
+    pkg_modify_table_by_meta_rule( table, pkg_name, table_kp)
 
     _final_version = table_version( table, pkg_name)
     if ( _final_version != "" ) {
@@ -41,25 +29,55 @@ function pkg_init_table( jobj, table, table_kp,
     pkg_add_table( "arch", _os_arch[2], table, table_kp )
 }
 
+function pkg_modify_table_by_meta_rule( table, pkg_name, table_kp,          _version_osarch, _rule_kp, _rule_l, i ,k, _kpat){
+    _version_osarch = table_version_osarch( table, pkg_name ) # May define version or osarch (as default) in the meta file
+
+    _rule_kp = pkg_kp( pkg_name, "meta", "rule" )
+    _rule_l = jobj[ _rule_kp L ]
+    for (i=1; i<=_rule_l; ++i) {
+        k = jobj[ _rule_kp, i ]
+        _kpat = juq( k )
+        gsub("\\*", "[^/]+", _kpat)
+        if ( match( _version_osarch, "^" _kpat ) ) {
+            pkg_copy_table( jobj, _rule_kp SUBSEP k, table, table_kp )
+            _version_osarch = table_version_osarch( table, pkg_name )
+        }
+    }
+}
+
+function pkg_get_version_or_head_version( jobj, table, pkg_name ){
+    _final_version = table_version( table, pkg_name )
+    _final_version = juq(_final_version)
+    if ( _final_version != "" ){
+        print _final_version
+    } else {
+        l = jobj[ juq( pkg_name ), juq("version") L ]
+        if (l <= 0 ) {
+            print "No version found." >"/dev/stderr"
+        } else {
+            print jobj[ juq( pkg_name ), juq("version") 1 ]
+        }
+    }
+}
+
 function pkg_add_table( k, v, table, table_kp,  l ){
     k = jqu(k)
     if ( table[ table_kp, k ] == "" ) {
         table[ table_kp L ] = ( l = table[ table_kp L ] + 1 )
         table[ table_kp, l ] = k
     }
-    # print table_kp SUBSEP k "---" v
     table[ table_kp, k ] = jqu(v)
 }
 # EndSection
 
 # Section: copy
 function pkg_copy_table(src_obj, src_kp, table, table_kp){
+    table[ table_kp ] = src_obj[ src_kp ]
     if (src_obj[ src_kp ] == "{") return pkg_copy_table___dict(src_obj, src_kp, table, table_kp)
     if (src_obj[ src_kp ] == "[") return pkg_copy_table___list(src_obj, src_kp, table, table_kp)
-    table[ table_kp ] = src_obj[ src_kp ]
 }
 
-function pkg_copy_table___dict( src_obj, src_kp, table, table_kp,       l, i, _l ){
+function pkg_copy_table___dict( src_obj, src_kp, table, table_kp,       l, i, k, _l ){
     l = src_obj[ src_kp L ]
 
     for (i=1; i<=l; ++i) {

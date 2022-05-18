@@ -1,5 +1,5 @@
 
-function handle( qpat,  _arr, _arrl, _pat ){
+function handle( qpat,  _arr, _arrl, i, _pat ){
     _arrl = split(qpat, _arr, /\./)
     for (i=1; i<=_arrl; ++i) {
         _pat = (_pat == "") ? jqu(_arr[i]) : ( _pat SUBSEP jqu(_arr[i]))

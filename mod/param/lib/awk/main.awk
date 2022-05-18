@@ -251,7 +251,7 @@ function handle_arguments(          i, j, arg_name, arg_name_short, arg_val, opt
 
         option_argc     = option_argc_get( option_id )
         option_m        = option_multarg_get( option_id )
-        option_name     = option_name_get_without_hyphen( option_id )
+        option_name     = ( option_alias_2_option_id[  option_id SPECIAL_OPTION_ID ] != "" ? option_alias_2_option_id[  option_id SPECIAL_OPTION_ID ] : option_name_get_without_hyphen( option_id ) )
 
         # If option_argc == 0, op
         if ( option_multarg_is_enable( option_id ) ) {

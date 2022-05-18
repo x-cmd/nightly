@@ -160,9 +160,9 @@ function generate_subcommand_help(        _res, _cmd_name) {
 # EndSection
 
 function print_helpdoc(){
-    if (0 != namedopt_len())                printf("%s", generate_option_help())
-    if (0 != restopt_len())                 printf("%s", generate_rest_argument_help())
-    if (0 != subcmd_len())                  printf("%s", generate_subcommand_help())
+    if (0 != namedopt_len() || 0 != flag_len() )                printf("%s", generate_option_help())
+    if (0 != restopt_len())                                     printf("%s", generate_rest_argument_help())
+    if (0 != subcmd_len())                                      printf("%s", generate_subcommand_help())
     printf("\n")
 }
 
