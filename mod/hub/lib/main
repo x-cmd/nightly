@@ -19,6 +19,7 @@ ___x_cmd_hub_main(){
         file           "File management"
     param:subcmd:try
     param:run
+    hub:error "subcommand required"
     ___x_cmd_hub_main help
 }
 
@@ -107,13 +108,15 @@ ___x_cmd_hub_main_user(){
 ___x_cmd_hub_main_file(){
     param:subcmd ___x_cmd_hub_main_file     \
         ls          "List files in hub"     \
+        la          "List all files use ui table in hub"     \
         rm          "Remove file from hub"  \
         which       "Find file in hub"      \
-        upload      "Update file to hub"    \
+        upload      "Upload file to hub"    \
         share       "Set file to public"    \
         private     "Set file to private"
     param:subcmd:try
     param:run
+    hub:error "subcommand required"
     ___x_cmd_hub_main_file help
 }
 
@@ -126,6 +129,17 @@ option:
 A
     param:run
     ___x_cmd_hub_file_ls "$@"
+}
+
+___x_cmd_hub_main_file_la(){
+    param:dsl<<A
+advise:
+    #1    xrc hub/latest && ___x_cmd_hub_advise_ls_remote
+option:
+    #1    "Resourse path"
+A
+    param:run
+    ___x_cmd_hub_file_la "$@"
 }
 
 ___x_cmd_hub_main_file_rm(){
@@ -165,12 +179,7 @@ A
 
 ___x_cmd_hub_main_file_share(){
     param:void
-
-    if [ -z "$1" ]; then
-        ___x_cmd_hub_file_share_list
-    else
-        ___x_cmd_hub_file_share "$@"
-    fi
+    ___x_cmd_hub_file_share "$@"
 }
 
 ___x_cmd_hub_main_file_private(){

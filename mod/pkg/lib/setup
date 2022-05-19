@@ -8,6 +8,7 @@ ___x_cmd_pkg_setup___min(){
     local script_path
     pkg:debug "$(___x_cmd_pkg___get_script_path "$@" "" setup)"
     if script_path="$(___x_cmd_pkg___get_script_path "$@" "" setup)"; then
+        pkg:debug "Setup running $script_path"
         . "${script_path}"
     else
         ___x_cmd_pkg_setup___min_default

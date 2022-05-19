@@ -20,7 +20,7 @@ ___x_cmd_hub_file_normalize_respath(){
 
 # EndSection
 
-# Section: CRUD
+# Section(list): ls、 la
 
 ___x_cmd_hub_file_ls(){
     local respath="${1:-@me/}"
@@ -40,6 +40,28 @@ ___x_cmd_hub_file_ls(){
         { jiget_after_tokenize_unquote($0, ".") }'
 }
 
+___x_cmd_hub_file_la(){
+    local respath="${1:-@me/}"
+    respath="$(___x_cmd_hub_file_normalize_respath "$respath")"
+
+    local res
+    if ! res="$(___x_cmd_hub_client_file_la "$respath")" ; then
+        hub:error "Failed to ls file: $res"
+        return 1
+    fi
+
+    if [ -t 1 ]; then
+        x ui table json PATH=.path IS_PUBLIC=.isPublic \
+            -- 'printf "%s" "$res"'
+    else
+        printf "%s" "$res" #| x ja '(k() ~ "_id|filePath|userId|isPublic") { print v(); }'
+    fi
+}
+
+# EndSection
+
+# Section: rm
+
 ___x_cmd_hub_file_rm(){
     local respath="${1:-@me/}"
     local recursive="${2:-false}"
@@ -52,6 +74,10 @@ ___x_cmd_hub_file_rm(){
     fi
     hub:debug "response: ${res}"
 }
+
+# EndSection
+
+# Section: which upload
 
 ___x_cmd_hub_file_which(){
     local respath="${1:?Provide respath}"
@@ -80,7 +106,7 @@ ___x_cmd_hub_file_upload(){
 
 # EndSection
 
-# Section(share): share, share_list, private
+# Section(share): share, private
 
 ___x_cmd_hub_file_share(){
     local respath="${1:?Please provide path}"
@@ -92,18 +118,6 @@ ___x_cmd_hub_file_share(){
     fi
 
     hub:info "File shared successfully: $res"
-}
-
-___x_cmd_hub_file_share_list(){
-    local respath="${1}"
-    respath="$(___x_cmd_hub_file_normalize_respath "$respath")"
-
-    if ! res="$(___x_cmd_hub_client_file_share_list "${respath}")" ; then
-        hub:error "Failed to share list file: $res"
-        return 1
-    fi
-
-    printf "%s\n" "$res"
 }
 
 ___x_cmd_hub_file_private(){

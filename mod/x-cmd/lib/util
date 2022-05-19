@@ -246,7 +246,6 @@ ___x_cmd_varset_without_end(){
 
 # EndSection
 
-
 # Section : utilties in static-build
 
 # _x_xrc_static_run(){
@@ -274,3 +273,48 @@ ___x_cmd_static_build_help(){
     fi
 }
 # EndSection
+
+# Section: until
+# x until 3/12 [ -e "file" ]
+
+___x_cmd_until_is_int(){
+    if [ "$1" -gt 0 ] || [ "$1" -le 0 ]; then
+        return 0
+    fi 2>/dev/null
+    return 1
+}
+
+___x_cmd_until(){
+    local ___x_cmd_until___local_interval=1
+    local ___x_cmd_until___local_timeout=1000000
+    if ___x_cmd_until_is_int "$1" 2>/dev/null; then
+        ___x_cmd_until___local_interval="$1"
+        shift
+    else
+        case "$1" in
+            */*)
+                local ___x_cmd_until___local_a="${1%%/*}"
+                local ___x_cmd_until___local_b="${1#*/}"
+                if ___x_cmd_until_is_int "$___x_cmd_until___local_a" && ___x_cmd_until_is_int "$___x_cmd_until___local_b"; then
+                    ___x_cmd_until___local_interval="$___x_cmd_until___local_a"
+                    ___x_cmd_until___local_timeout="$___x_cmd_until___local_b"
+                fi
+                shift
+        esac
+    fi
+
+    local ___x_cmd_until___local_time="$(( ___x_cmd_until___local_timeout / ___x_cmd_until___local_interval ))"
+    local ___x_cmd_until___local_rest="$(( ___x_cmd_until___local_timeout - ___x_cmd_until___local_time * ___x_cmd_until___local_interval ))"
+    local ___x_cmd_until___local_i
+    for ((___x_cmd_until___local_i=1; ___x_cmd_until___local_i<=___x_cmd_until___local_time; ++___x_cmd_until___local_i)); do
+        sleep "$___x_cmd_until___local_interval" || return
+        ! "$@" || return 0
+    done
+    if [ "$___x_cmd_until___local_rest" -gt 0 ]; then
+        sleep "$___x_cmd_until___local_rest" || return
+        ! "$@" || return 0
+    fi
+    return 1
+}
+# EndSection
+

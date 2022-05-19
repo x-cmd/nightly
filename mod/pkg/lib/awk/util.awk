@@ -2,12 +2,16 @@
 # Section: init table
 function pkg_init_table( jobj, table, table_kp,
     pkg_name, version, osarch,
-    _rule_kp, _rule_l, i, k, _kpat, _os_arch, _final_version ){
+    _rule_kp, _rule_l, i, k, _kpat, _os_arch, _final_version, _idx ){
 
     # Predefined env variables
     pkg_add_table( "sb_branch", "main", table, table_kp )
 
     pkg_add_table( "osarch", osarch, table, table_kp )
+    _idx = index( osarch, "/" )
+    pkg_add_table( "os", substr( osarch, 1, _idx-1 ), table, table_kp )
+    pkg_add_table( "arch", substr( osarch, _idx+1 ), table, table_kp )
+
     pkg_add_table( "version", version, table, table_kp )
 
     pkg_add_table( "sb_repo", pkg_name, table, table_kp )
@@ -31,7 +35,6 @@ function pkg_init_table( jobj, table, table_kp,
 
 function pkg_modify_table_by_meta_rule( table, pkg_name, table_kp,          _version_osarch, _rule_kp, _rule_l, i ,k, _kpat){
     _version_osarch = table_version_osarch( table, pkg_name ) # May define version or osarch (as default) in the meta file
-
     _rule_kp = pkg_kp( pkg_name, "meta", "rule" )
     _rule_l = jobj[ _rule_kp L ]
     for (i=1; i<=_rule_l; ++i) {
@@ -45,17 +48,17 @@ function pkg_modify_table_by_meta_rule( table, pkg_name, table_kp,          _ver
     }
 }
 
-function pkg_get_version_or_head_version( jobj, table, pkg_name ){
+function pkg_get_version_or_head_version( jobj, table, pkg_name,            _final_version, l ){
     _final_version = table_version( table, pkg_name )
     _final_version = juq(_final_version)
     if ( _final_version != "" ){
         print _final_version
     } else {
-        l = jobj[ juq( pkg_name ), juq("version") L ]
+        l = jobj[ jqu(pkg_name), jqu("version") L ]
         if (l <= 0 ) {
             print "No version found." >"/dev/stderr"
         } else {
-            print jobj[ juq( pkg_name ), juq("version") 1 ]
+            print juq(jobj[ jqu( pkg_name ), jqu("version"), 1 ])
         }
     }
 }
@@ -130,7 +133,7 @@ function pkg_eval_str( str, table, pkg_name,            _attempt, t, p, _newstr 
         if ( ++_attempt > 100 ) exit_msg( sprintf( "Exit because replacement attempts more than 100[%s]: %s", _attempt, str ) )
         p = substr( str, RSTART+2, RLENGTH-3 )
         t = table[ pkg_name SUBSEP jqu(p) ]
-        if ( t == "" )  exit_msg( sprintf("Unknown pattern[%s] from str: %s", (pkg_name SUBSEP jqu(p)), str) )
+        # if ( t == "" ) exit_msg( sprintf("Unknown pattern[%s] from str: %s", (pkg_name SUBSEP jqu(p)), str) )
         _newstr = substr( str, 1, RSTART-1 ) juq(t) substr( str, RSTART + RLENGTH )
         if (_newstr == str)  exit_msg( sprintf("Logic error. Target not changed: %s", str) )
         str = _newstr

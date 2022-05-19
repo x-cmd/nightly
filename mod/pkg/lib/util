@@ -1,28 +1,16 @@
 
-
-# Section: xbin
-
-___x_cmd_pkg_xbin(){
-    case "$1" in
-        init)       shift; ___x_cmd_pkg_xbin_init "$@" ;;
-        *)          return 1 ;;
-    esac
+# Section: attr
+___x_cmd_pkg___static_build_attr(){
+    eval "$(___x_cmd_pkg___static_build_attr_code "$@")"
 }
-
-___x_cmd_pkg_xbin_init(){
-    eval "$(___x_cmd_pkg___all_info "$@" | awk \
-        -v INSTALL_PATH="$___X_CMD_PKG_INSTALL_PATH" \
+___x_cmd_pkg___static_build_attr_code(){
+    ___x_cmd_pkg___all_info "$@" | awk \
         -f "$___X_CMD_ROOT_MOD/awk/lib/default.awk" \
         -f "$___X_CMD_ROOT_MOD/awk/lib/jqparse.awk" \
         -f "$___X_CMD_ROOT_MOD/pkg/lib/awk/util.awk" \
         -f "$___X_CMD_ROOT_MOD/pkg/lib/awk/pkg._.awk" \
-        -f "$___X_CMD_ROOT_MOD/pkg/lib/awk/pkg.xbin.awk"
-    )"
+        -f "$___X_CMD_ROOT_MOD/pkg/lib/awk/pkg.static_build.awk"
 }
-
-# EndSection
-
-# Section: attr
 # ___x_cmd_pkg___attr   hook.install,hook.setup
 ___x_cmd_pkg___attr(){
     eval "$(___x_cmd_pkg___attr_code "$@")"
@@ -58,7 +46,7 @@ ___x_cmd_pkg___get_script_path(){
 # Section: osarch
 ___x_cmd_pkg_osarch(){
     if [ -z "$___X_CMD_PKG_OSARCH" ]; then
-        ___X_CMD_PKG_OSARCH="$(os name)-$(os arch)"
+        ___X_CMD_PKG_OSARCH="$(os name)/$(os arch)"
     fi
     printf "%s\n" "$___X_CMD_PKG_OSARCH"
 }
@@ -90,7 +78,7 @@ ___x_cmd_pkg___all_info(){
 
     pkg_name="$(___x_cmd_pkg_locate "$pkg_name")" || return
 
-    pkg:debug "pkg_name: $pkg_name version: $version osarch: $osarch ___X_CMD_PKG_RAWPATH: $___X_CMD_PKG_RAWPATH ___X_CMD_WHICHNET: $___X_CMD_WHICHNET"
+    pkg:debug "Function ___x_cmd_pkg___all_info(). pkg_name: $pkg_name version: $version osarch: $osarch ___X_CMD_PKG_RAWPATH: $___X_CMD_PKG_RAWPATH ___X_CMD_WHICHNET: $___X_CMD_WHICHNET"
     printf "%s\n%s\n%s\n%s\n%s\n" "$pkg_name" "$version" "$osarch" "$___X_CMD_PKG_RAWPATH" "$___X_CMD_WHICHNET"
 
     cat "$___X_CMD_PKG_RAWPATH/$pkg_name/meta.tt.json"
