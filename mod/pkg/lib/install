@@ -1,19 +1,23 @@
 
 ___x_cmd_pkg_install(){
-    ___x_cmd_pkg_download "$@" || return
+    local pkg_name="${1:?Provide pkg name}"
+    local version="${2:-$(___x_cmd_pkg___default_version "$pkg_name")}"
+    local osarch="${3:-${___X_CMD_PKG_OSARCH:-$(___x_cmd_pkg_osarch)}}"
+
+    ___x_cmd_pkg_download "$pkg_name" "$version" "$osarch" || return
     local script_path
-    if script_path="$(___x_cmd_pkg___get_script_path "$@" "" install)"; then
+    if script_path="$(___x_cmd_pkg___get_script_path "$pkg_name" "$version" "$osarch" install)"; then
         pkg:info "Running $script_path after download package"
         . "$script_path"
+    else
+        local sb_repo
+        local sb_app
+        ___x_cmd_pkg___static_build_attr "$pkg_name" "$version" "$osarch"
+        if [ -n "$sb_repo" ] && [ -n "$sb_app" ]; then
+            return
+        fi
+        ___x_cmd_pkg_install___unzip "$pkg_name" "$version" "$osarch" || return
     fi
-
-    local sb_repo
-    local sb_app
-    ___x_cmd_pkg___static_build_attr "$@" "$osarch"
-    if [ -n "$sb_repo" ] && [ -n "$sb_app" ]; then
-        return
-    fi
-    ___x_cmd_pkg_install___unzip "$@" || return
 }
 
 ___x_cmd_pkg_reinstall(){
@@ -41,22 +45,23 @@ ___x_cmd_pkg_install___unzip(){
     local osarch="${3:-${___X_CMD_PKG_OSARCH:-$(___x_cmd_pkg_osarch)}}"
 
     local file_suffix
-    ___x_cmd_pkg___attr "$@" "$osarch" file_suffix
+    ___x_cmd_pkg___attr "$pkg_name" "$version" "$osarch" file_suffix
     local ball="$___X_CMD_PKG_DOWNLOAD_PATH/$pkg_name/$version.$file_suffix"
-    local unpack_dir="$___X_CMD_PKG_DOWNLOAD_PATH/$pkg_name/$version"
+    local unpack_dir="$___X_CMD_PKG_DOWNLOAD_PATH/$pkg_name/$version/tmp"
     local tgt="$___X_CMD_PKG_INSTALL_PATH/$pkg_name/$version"
+
     local bin_path
-    bin_path="$(___x_cmd_pkg_xbin_path "$@")"
+    bin_path="$(___x_cmd_pkg_xbin_path "$pkg_name" "$version")"
     if [ -x "$bin_path" ]; then
         return 0
     fi
     pkg:debug "bin_path: $bin_path"
-    pkg:info "Unpack: $ball to $unpack_dir"
 
+    pkg:info "Unpack: $ball to $unpack_dir"
     x uz "$ball" "$unpack_dir" || {
         pkg:warn "Fail to unzip $ball"
     }
-    mkdir -p "$tgt"
+    x rmrf "$tgt" && mkdir -p "$tgt"
     pkg:debug "Moving $unpack_dir to $tgt"
     mv -f "$unpack_dir"/*/* "$tgt"
     x rmrf "$unpack_dir"

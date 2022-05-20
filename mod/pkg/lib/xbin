@@ -11,17 +11,11 @@ ___x_cmd_pkg_xbin(){
 ___x_cmd_pkg_xbin_path(){
     local pkg_name="${1:?Provide pkg name}"
     local version="${2:?Provide version}"
-    pkg:debug "xbin: $*"
-    local sb_repo
-    local sb_app
-    local INSTALL_PATH="$___X_CMD_PKG_INSTALL_PATH/$pkg_name"
-    ___x_cmd_pkg___static_build_attr "$@"
-    if [ -n "$sb_repo" ] && [ -n "$sb_app" ]; then
-        INSTALL_PATH="$HOME/.x-cmd/.bin/$sb_app"
-    fi
-    pkg:debug "xbin INSTALL_PATH: $INSTALL_PATH"
-    ___x_cmd_pkg___all_info "$pkg_name" "${version}" | awk \
-        -v INSTALL_PATH="$INSTALL_PATH" \
+
+    pkg:debug "INSTALL_PATH: $___X_CMD_PKG_INSTALL_PATH/$pkg_name/$version"
+
+    ___x_cmd_pkg___all_info "$pkg_name" "$version" | awk \
+        -v INSTALL_PATH="$___X_CMD_PKG_INSTALL_PATH/$pkg_name/$version" \
         -v BIN_MOD_NAME="${bin_mod_name:-$pkg_name}" \
         -f "$___X_CMD_ROOT_MOD/awk/lib/default.awk" \
         -f "$___X_CMD_ROOT_MOD/awk/lib/jqparse.awk" \
@@ -31,6 +25,7 @@ ___x_cmd_pkg_xbin_path(){
 }
 ___x_cmd_pkg_xbin_init(){
     local bin_mod_name="${1:?Provide bin mod name}"
+    ___x_cmd_pkg___which_p7zip || return
     if [ -z "$___X_CMD_PKG_BINMOD_MAP" ]; then
         ___X_CMD_PKG_BINMOD_MAP="$(cat $___X_CMD_PKG_RAWPATH/binmod.txt)"
     fi
@@ -44,21 +39,14 @@ ___x_cmd_pkg_xbin_init(){
     pkg_name="${pkg_name%%
 *}"
 
-    local version
-    eval "version=\"\$(___x_cmd_pkg___default_version ${pkg_name})\""
-    pkg:debug "xbin_init. bin_mod_name: $bin_mod_name pkg_name:$pkg_name version: $version"
-
-    # ___x_cmd_pkg_download
-    local bin_path
-    bin_path=$(___x_cmd_pkg_xbin_path "$pkg_name" "$version")
-    pkg:debug "bin_path: $bin_path"
+    local version="${version:-$(___x_cmd_pkg___default_version ${pkg_name})}"
+    local bin_path="${bin_path:-$(___x_cmd_pkg_xbin_path "$pkg_name" "$version")}"
+    pkg:debug "xbin_init. bin_mod_name: $bin_mod_name pkg_name:$pkg_name version: $version binpath: $bin_path"
 
     if ! [ -f "$bin_path" ]; then
         ___x_cmd_pkg_install "$pkg_name" "$version"
     fi
-    if ! [ -x "$bin_path" ]; then
-        return 1
-    fi
+    if ! [ -x "$bin_path" ]; then  return 1; fi
     eval "
         ___x_cmd_$bin_mod_name(){
             $bin_path \"\$@\"

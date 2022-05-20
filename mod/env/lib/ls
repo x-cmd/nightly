@@ -1,0 +1,4 @@
+
+___x_cmd_env_ls(){
+    printf "%s\n" "$___X_CMD_ENV_VERSION_CONFIG" | tr "=" "\t"
+}

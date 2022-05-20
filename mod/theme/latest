@@ -80,7 +80,7 @@ xrc:mod:lib theme   lib   style
 ___x_cmd_theme_control_use(){
     param:dsl <<A
 advise:
-    #1          awk '{ print \\\$2; }' <\\\$___X_CMD_ROOT/.tmp/theme/index.yml
+    #1          xrc theme/latest && ___x_cmd_theme_control_ls
 options:
     #1          "return theme list name"
 A
@@ -108,7 +108,7 @@ ___x_cmd_theme_control_unset(){
 ___x_cmd_theme_control_try(){
     param:dsl <<A
 advise:
-    #1          awk '{ print \\\$2; }' <\\\$___X_CMD_ROOT/.tmp/theme/index.yml
+    #1          xrc theme/latest && ___x_cmd_theme_control_ls
 options:
     #1          "return theme list name"
 A

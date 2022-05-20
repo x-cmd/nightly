@@ -1,0 +1,19 @@
+
+___X_CMD_ENV_VERSION_CONFIG_PATH="$___X_CMD_ROOT/.boot/env"
+
+
+___x_cmd_env_config_load(){
+    if ! ___X_CMD_ENV_VERSION_CONFIG="$(cat)"; then
+        pkg:error "Config file not found."
+    fi
+    ___x_cmd_env_try "$@"
+}
+
+___x_cmd_env_config_save(){
+    local tgt="${1:-"$___X_CMD_ENV_VERSION_CONFIG_PATH"}"
+    if ! x ensuredir "${tgt%/*}"; then
+        pkg:error "Couldn't create folder: ${tgt%/*}"
+        return 1
+    fi
+    printf "%s" "$___X_CMD_ENV_VERSION_CONFIG" >"${1:?Provide config file}"
+}

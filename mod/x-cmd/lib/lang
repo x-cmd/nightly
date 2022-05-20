@@ -22,26 +22,26 @@ ___x_cmd_definelazyloader ___x_cmd_ts           node/latest
 
 
 ___x_cmd_7z(){
-    ___x_cmd_static_build_file      p7zip 7za               "$@"
+    x pkg xbin init 7za               "$@"
 }
 
 ___x_cmd_ll(){
-    ___x_cmd_static_build_file      exa exa  -l             "$@"
+    x pkg xbin init exa  -l             "$@"
 }
 
 ___x_cmd_ssl(){
-    ___x_cmd_static_build_file      openssl openssl         "$@"
+    x pkg xbin init openssl         "$@"
 }
 
 ___x_cmd_ps(){
-    ___x_cmd_static_build_file      procs procs             "$@"
+    x pkg xbin init procs             "$@"
 }
 
 ___x_cmd_sqlite(){
-    ___x_cmd_static_build_file      sqlite3 sqlite3         "$@"
+    x pkg xbin init sqlite3         "$@"
 }
 
 ___x_cmd_bw(){
-    ___x_cmd_static_build_file      bandwhich bandwhich     "$@"
+    _x pkg xbin init bandwhich     "$@"
 }
 

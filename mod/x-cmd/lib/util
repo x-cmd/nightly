@@ -255,23 +255,6 @@ ___x_cmd_varset_without_end(){
 #     "_${name}_bin" "$@"
 # }
 
-___x_cmd_static_build_file(){
-    local app="${1:?Provide app name}"
-    local repo="${2:?Provide repo name}"
-    shift 2
-    eval " ___x_cmd_$app(){
-        xrc pkg && static_build_init $app $repo ___x_cmd_$app && ___x_cmd_$app  \"\$@\"
-    }"
-    ___x_cmd_"$app" "$@"
-}
-
-___x_cmd_static_build_help(){
-    if [ "$#" -eq 2 ]; then
-        ___x_cmd_static_build_file "$@" "--help"
-    else
-        ___x_cmd_static_build_file "$@"
-    fi
-}
 # EndSection
 
 # Section: until

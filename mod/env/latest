@@ -1,51 +1,42 @@
 # Author:       Li Junhao           l@x-cmd.com     # xrc
 # shellcheck    shell=sh            disable=SC3043,SC2164,SC3000-SC4000
+# License:      GPLv3
 
-# license:      GPLv3
+xrc:mod:lib env     util config main    advise
 
-xrc:mod env/lib/advise
-
-# Section: ENV ___X_CMD_ENV_PATH
-
-___X_CMD_ENV_PATH="$___X_CMD_ROOT/.env"
-
-# EndSection
-
-# Inject the environment.
 ___x_cmd_env_main() {
-    xrc env/lib/main
-    ___x_cmd_env_main "$@"
-}
+    param:scope     "env"
+    param:dsl <<A
+subcommands:
+    ls                      "list all installed environments"
+    download                "Download environment"
+    install                 "Install environment"
+    uninstall               "Remove environment"
+    try                     "Set environment version in this shell session"
+    use                     "Set global environment version"
 
+    current                 "Show current environment"
+    which                   "Display path of environment installed"
 
-___x_cmd_env_util_cmd_to_candidate(){
-    local cmd="$1"
-    local candidate
-    find "$___X_CMD_ENV_PATH"/*/versions/*/bin/"$cmd" | while read -r cmd_path; do
-        cmd_path="${cmd_path%/versions/*/bin/"$cmd"}"
-        candidate="${cmd_path##*/}"
-        if [ -n "$candidate" ]; then
-            printf "%s\n" "$candidate"
-            return 0
-        fi
-    done
+    exec                    "Run an executable with the selected candidates version"
+A
+    param:run
 
-    return 1
-}
+    # TODO: la---"list all available environments"
+    # TODO: ws---"Set workspace environment"
 
-___x_cmd_env_main_init_file_load(){
-    [ ! -d "$___X_CMD_ROOT/.env/env" ] && mkdir -p "$___X_CMD_ROOT/.env/env"
-    if [ ! -f "$___X_CMD_ROOT/.env/env/use" ]; then
+    if [ "${1}" = "___x_cmd_ui_catsel" ]; then
+        shift
+        ___x_cmd_env_ui_catsel "$@"
         return
     fi
 
-    local line
-    while read -r line; do
-        [ -z "$line" ] && continue
-        x path add_existed_folder "$line"
-    done <"$___X_CMD_ROOT/.env/env/use"
-}
+    if [ -z "$PARAM_SUBCMD" ]; then
+        ___x_cmd_env_main help
+        return 1
+    fi
 
-___x_cmd_env_main_init_file_load
+    "___x_cmd_env_main_$PARAM_SUBCMD" "$@"
+}
 
 xrc setmain ___x_cmd_env_main

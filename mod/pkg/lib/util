@@ -81,9 +81,9 @@ ___x_cmd_pkg___all_info(){
     pkg:debug "Function ___x_cmd_pkg___all_info(). pkg_name: $pkg_name version: $version osarch: $osarch ___X_CMD_PKG_RAWPATH: $___X_CMD_PKG_RAWPATH ___X_CMD_WHICHNET: $___X_CMD_WHICHNET"
     printf "%s\n%s\n%s\n%s\n%s\n" "$pkg_name" "$version" "$osarch" "$___X_CMD_PKG_RAWPATH" "$___X_CMD_WHICHNET"
 
-    cat "$___X_CMD_PKG_RAWPATH/$pkg_name/meta.tt.json"
+    cat "$___X_CMD_PKG_RAWPATH/$pkg_name/meta.tt.json" || return
     printf "\n"
-    cat "$___X_CMD_PKG_RAWPATH/$pkg_name/version.tt.json"
+    cat "$___X_CMD_PKG_RAWPATH/$pkg_name/version.tt.json" || return
 }
 # EndSection
 
