@@ -7,8 +7,10 @@
 
 ___x_cmd_env_prepare(){
     local i
+    env:info "env prepare: $*"
+
     for i in "$@"; do
-        if x pkg install "${i%=*}" "${i#*=}"; then
+        if ! x pkg install "${i%=*}" "${i#*=}"; then
             env:error "Cannot install package: $i"
             return 1;
         fi
@@ -16,12 +18,15 @@ ___x_cmd_env_prepare(){
 }
 
 ___x_cmd_env_try(){
-    ___x_cmd_env_prepare "$@" || return
+    param:void
 
+    ___x_cmd_env_prepare "$@" || return
     ___x_cmd_env___var_add "$@"
 }
 
 ___x_cmd_env_use(){
+    param:void
+
     ___x_cmd_env_try "$@"
 
     local backup="$___X_CMD_ENV_VERSION_CONFIG"
@@ -38,6 +43,8 @@ ___x_cmd_env_use(){
 }
 
 ___x_cmd_env_exec()(
+    param:void
+
     local arg
     local s
     for arg in "$@"; do

@@ -38,7 +38,7 @@ ___x_cmd_env___var_add(){
         done
         ___X_CMD_ENV_VERSION_CONFIG="$___X_CMD_ENV_VERSION_CONFIG
 $i"
-        [ -z "$___X_CMD_ENV___VAR_ADD_NO_SETUP" ] || x pkg setup "$pkg" "${i#*=}"
+        [ -z "$___X_CMD_ENV___VAR_ADD_NO_SETUP" ] || x pkg setup "${1%=*}" "${i#*=}"
     done
 
     ___X_CMD_ENV_VERSION_CONFIG="${___X_CMD_ENV_VERSION_CONFIG#

@@ -24,6 +24,7 @@ ___x_cmd_pkg_xbin_path(){
         -f "$___X_CMD_ROOT_MOD/pkg/lib/awk/pkg.xbin.awk"
 }
 ___x_cmd_pkg_xbin_init(){
+    x:trace x/pkg
     local bin_mod_name="${1:?Provide bin mod name}"
     ___x_cmd_pkg___which_p7zip || return
     if [ -z "$___X_CMD_PKG_BINMOD_MAP" ]; then

@@ -1,0 +1,17 @@
+
+___x_cmd_ws___exe_default_main(){
+    local RESOURCE_NAME="$1"; shift
+    local ___X_CMD_WS___EXE_DEFAULT_TMP=
+    case "$RESOURCE_NAME" in
+        t|test)     x test "$@" ;;
+        i)          ___x_cmd_ws___exe_default install       "$@" ;;
+        b)          ___x_cmd_ws___exe_default build         "$@" ;;
+        p)          ___x_cmd_ws___exe_default package       "$@" ;;
+        build|install|package|prod)
+                    . "$___X_CMD_ROOT_MOD/ws/lib/default/go/$RESOURCE_NAME" "$@" ;;
+        *)
+                    ws:error "Resource Not Found: $RESOURCE_NAME";  return 1
+    esac
+}
+
+___x_cmd_ws___exe_default_main "$@"

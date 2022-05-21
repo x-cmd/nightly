@@ -1,15 +1,21 @@
 # Author:       Li Junhao           l@x-cmd.com     # xrc
 # shellcheck    shell=sh
 
-xrc:mod ws/lib/main ws/lib/hook ws/lib/util
+xrc:mod ws/lib/main ws/lib/hook ws/lib/util ws/lib/run
 
 # x ws env set
+
+# install: all packages
+# default
+# prepare
+# build
+
 ___x_cmd_ws(){
     case "$1" in
         run)        shift; ___x_cmd_ws_run "$@" ;;
-        _run)        shift; ___x_cmd_ws__run "$@" ;;
-        root)       ___x_cmd_ws_root ;;
+        exec)       shift; ___x_cmd_ws_exec "$@" ;;
         env)        shift; ___x_cmd_ws_env "$@" ;;
+        root)       ___x_cmd_ws_root ;;
         "")         ___x_cmd_ws_help ;;
         *)          ___x_cmd_ws_run "$@" ;;
     esac

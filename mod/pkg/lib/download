@@ -66,7 +66,7 @@ ___x_cmd_pkg_download_file___from_static_build_and_deflate(){
 
     pkg:debug "Download static-build. repo: $repo app: $app"
 
-    local target="$___X_CMD_PKG_INSTALL_PATH/$app/$version"
+    local target="$___X_CMD_PKG_INSTALL_PATH/$repo/$version"
     mkdir -p "$target"
 
     local arch
@@ -81,7 +81,7 @@ ___x_cmd_pkg_download_file___from_static_build_and_deflate(){
     esac
     # Rely
     if [ ! -f "$target/$exe" ]; then
-        pkg:info "Downloading: $repo/$app/$version/$exe.7z"
+        pkg:info "Downloading: $repo/$app/$version/$exe.7z to $target"
         if ! ___x_cmd_curl_gitx static-build "${repo}" main "$app/$version/$exe.7z" "$target/$exe.7z"; then
             pkg:warn "Download failure: $repo/main $app/$version/$exe.7z"
             pkg:warn "File Not Found. Perhaps the platform is NOT supported: $exe"

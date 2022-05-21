@@ -1,0 +1,64 @@
+
+if [ -f "$(___x_cmd_ws_root)/setup.py" ]; then
+    ___X_CMD_WS___EXE_DEFAULT_TMP=python
+elif [ -f "$(___x_cmd_ws_root)/tsconfig.json" ]; then
+    ___X_CMD_WS___EXE_DEFAULT_TMP=typescript
+elif [ -f "$(___x_cmd_ws_root)/package.json" ]; then
+    ___X_CMD_WS___EXE_DEFAULT_TMP=node
+elif [ -f "$(___x_cmd_ws_root)/gosum" ]; then
+    ___X_CMD_WS___EXE_DEFAULT_TMP=go
+elif [ -f "$(___x_cmd_ws_root)/pom.xml" ]; then
+    ___X_CMD_WS___EXE_DEFAULT_TMP=java/maven
+elif [ -f "$(___x_cmd_ws_root)/build.gradle" ]; then
+    ___X_CMD_WS___EXE_DEFAULT_TMP=java/gradle
+elif [ -f "$(___x_cmd_ws_root)/build.kt" ]; then
+    ___X_CMD_WS___EXE_DEFAULT_TMP=java/gradle/kotlin
+else
+    ws:error "No default script found in this environment."
+fi
+
+[ -z "$___X_CMD_WS___EXE_DEFAULT_TMP" ] || . "$___X_CMD_ROOT_MOD/ws/lib/default/$___X_CMD_WS___EXE_DEFAULT_TMP/_" "$@"
+
+
+___x_cmd_ws___exe_default(){
+    case "$1" in
+        push)       shift; ___x_cmd_ws___exe_default_push "$@" ;;
+        pull)       shift; ___x_cmd_ws___exe_default_pull "$@" ;;
+        sync)       shift; ___x_cmd_ws___exe_default_sync "$@" ;;
+        *)          ___x_cmd_ws___exe_default_main "$@" ;;
+    esac
+}
+
+# ___x_cmd_ws___exe_default(){
+#     local RESOURCE_NAME="$1"; shift
+#     local ___X_CMD_WS___EXE_DEFAULT_TMP=
+#     case "$RESOURCE_NAME" in
+#         t|test)
+#             x test "$@"
+#             ;;
+
+#         i)  ___x_cmd_ws___exe_default install       "$@" ;;
+#         b)  ___x_cmd_ws___exe_default build         "$@" ;;
+#         p)  ___x_cmd_ws___exe_default package       "$@" ;;
+
+#         build|install|package)
+#             if [ -f "$(___x_cmd_ws_root)/setup.py" ]; then
+#                 ___X_CMD_WS___EXE_DEFAULT_TMP=python
+#             elif [ -f "$(___x_cmd_ws_root)/tsconfig.json" ]; then
+#                 ___X_CMD_WS___EXE_DEFAULT_TMP=typescript
+#             elif [ -f "$(___x_cmd_ws_root)/package.json" ]; then
+#                 ___X_CMD_WS___EXE_DEFAULT_TMP=node
+#             elif [ -f "$(___x_cmd_ws_root)/gosum" ]; then
+#                 ___X_CMD_WS___EXE_DEFAULT_TMP=go
+#             else
+#                 ws:error "No default script found in this environment."
+#                 return 1
+#             fi
+#             . "$___X_CMD_ROOT_MOD/ws/lib/default/$___X_CMD_WS___EXE_DEFAULT_TMP/$RESOURCE_NAME" "$@"
+#             ;;
+#         *)
+#             ws:error "Resource Not Found: $RESOURCE_NAME";  return 1
+#     esac
+# }
+
+

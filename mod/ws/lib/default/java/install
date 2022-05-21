@@ -1,0 +1,8 @@
+
+# TODO: Maybe we could provide a simple jar dependency facility.
+
+___x_cmd_ws___install(){
+    :
+}
+
+___x_cmd_ws___install "$@"

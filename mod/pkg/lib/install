@@ -9,12 +9,13 @@ ___x_cmd_pkg_install(){
     if script_path="$(___x_cmd_pkg___get_script_path "$pkg_name" "$version" "$osarch" install)"; then
         pkg:info "Running $script_path after download package"
         . "$script_path"
+        return 0
     else
         local sb_repo
         local sb_app
         ___x_cmd_pkg___static_build_attr "$pkg_name" "$version" "$osarch"
         if [ -n "$sb_repo" ] && [ -n "$sb_app" ]; then
-            return
+            return 0
         fi
         ___x_cmd_pkg_install___unzip "$pkg_name" "$version" "$osarch" || return
     fi

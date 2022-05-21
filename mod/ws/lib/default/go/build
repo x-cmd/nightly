@@ -1,0 +1,5 @@
+___x_cmd_ws___build(){
+    go build
+}
+
+___x_cmd_ws___build "$@"

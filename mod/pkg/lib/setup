@@ -1,6 +1,7 @@
 
 ___x_cmd_pkg_setup(){
     # If not installed, setup
+    pkg:info "$*"
     ___x_cmd_pkg_setup___min "$@"
 }
 
