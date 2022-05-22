@@ -1,6 +1,7 @@
 # Section: xbin
 
 ___x_cmd_pkg_xbin(){
+    x:trace pkg/xbin
     case "$1" in
         init)       shift; ___x_cmd_pkg_xbin_init "$@" ;;
         path)       shift; ___x_cmd_pkg_xbin_path "$@" ;;
@@ -24,7 +25,6 @@ ___x_cmd_pkg_xbin_path(){
         -f "$___X_CMD_ROOT_MOD/pkg/lib/awk/pkg.xbin.awk"
 }
 ___x_cmd_pkg_xbin_init(){
-    x:trace x/pkg
     local bin_mod_name="${1:?Provide bin mod name}"
     ___x_cmd_pkg___which_p7zip || return
     if [ -z "$___X_CMD_PKG_BINMOD_MAP" ]; then
@@ -40,9 +40,9 @@ ___x_cmd_pkg_xbin_init(){
     pkg_name="${pkg_name%%
 *}"
 
-    local version="${version:-$(___x_cmd_pkg___default_version ${pkg_name})}"
+    local version="${2:-$(___x_cmd_pkg___default_version ${pkg_name})}"
     local bin_path="${bin_path:-$(___x_cmd_pkg_xbin_path "$pkg_name" "$version")}"
-    pkg:debug "xbin_init. bin_mod_name: $bin_mod_name pkg_name:$pkg_name version: $version binpath: $bin_path"
+    pkg:debug "xbin_init. bin_mod_name: $bin_mod_name package: $pkg_name $version binpath: $bin_path"
 
     if ! [ -f "$bin_path" ]; then
         ___x_cmd_pkg_install "$pkg_name" "$version"

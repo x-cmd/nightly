@@ -1,10 +1,8 @@
 # Author:       Li Junhao           l@x-cmd.com     # xrc
 # shellcheck    shell=sh            disable=SC3043,SC2164,SC3000-SC4000
 # License:      GPLv3
-xrc param/latest
-xrc:mod:lib env     util config main advise ls
-x log init env
 
+xrc param/latest
 ___x_cmd_env() {
     param:scope     "env"
     param:dsl <<A
@@ -12,12 +10,11 @@ subcommands:
     ls                      "list all installed environments"
     try                     "Set environment version in this shell session"
     use                     "Set global environment version"
-
+    unuse                   "Remove environment"
     exec                    "Run an executable with the selected candidates version"
+    which                   "Display path of environment installed"
 A
-# which                   "Display path of environment installed"
 # current                 "Show current environment"
-# uninstall               "Remove environment"
 # install                 "Install environment"
 # download                "Download environment"
     param:run
@@ -40,6 +37,8 @@ A
 }
 
 
+x log init  pkg
+xrc:mod:lib env     util config main advise ls
 
 
 

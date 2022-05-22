@@ -1,5 +1,31 @@
+# shellcheck shell=sh disable=SC2039,SC1090,SC3043,SC2263    # xrc
+
+___X_CMD_PKG_INSTALL_PATH="$___X_CMD_ROOT_TMP/pkg/installed"
+___X_CMD_PKG_RAWPATH="$___X_CMD_ROOT_TMP/pkg/raw"
+
 
 ___x_cmd_env_ls(){
     param:void
-    printf "%s\n" "$___X_CMD_ENV_VERSION_CONFIG" | tr "=" "\t"
+    case "$1" in
+        -r|remote) shift; ___x_cmd_env_ls_remote "$@" ;;
+        -c|cache) shift;___x_cmd_env_ls_cache "$@" ;;
+        *) ___x_cmd_env_ls_cache "$@" ;;
+    esac
 }
+
+___x_cmd_env_ls_cache()(
+    if ! [ -d "$___X_CMD_PKG_INSTALL_PATH" ]; then return 0; fi
+    cd "$___X_CMD_PKG_INSTALL_PATH/$1"
+    pkg:debug "dir $___X_CMD_PKG_INSTALL_PATH/$1"
+    for i in *; do
+        printf "%s\n" "$i"
+    done
+    cd - 1>/dev/null
+    # printf "%s\n" "$___X_CMD_ENV_VERSION_CONFIG" | awk '$0!=""{gsub("=", "\t", $0); print $0}'
+)
+
+___x_cmd_env_ls_remote()(
+    if ! [ -d "$___X_CMD_PKG_RAWPATH" ]; then return 0; fi
+    pkg_name="${1:?Provide package name}"
+    cat "$___X_CMD_PKG_RAWPATH"/*/"$pkg_name/version.tt.json" | x ja 'V=="{"&&_[1]==K&&_[1]!=1{print _[1]}'
+)

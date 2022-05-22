@@ -4,14 +4,23 @@
 # python=1.3
 # "
 
+___x_cmd_env_get_version(){
+    local pkg_name="${1%=*}"
+    local version="${1#*=}"
+    if [ "$version" != "$pkg_name" ]; then
+        printf "%s\n" "$version"
+    else
+        x pkg default_version "$pkg_name"
+    fi
+}
+
 
 ___x_cmd_env_prepare(){
     local i
-    env:info "env prepare: $*"
-
     for i in "$@"; do
-        if ! x pkg install "${i%=*}" "${i#*=}"; then
-            env:error "Cannot install package: $i"
+        pkg:info "Prepare ${i%=*} $(___x_cmd_env_get_version "$i")"
+        if ! x pkg install "${i%=*}" "$(___x_cmd_env_get_version "$i")"; then
+            pkg:error "Cannot install package: $i"
             return 1;
         fi
     done
@@ -19,15 +28,15 @@ ___x_cmd_env_prepare(){
 
 ___x_cmd_env_try(){
     param:void
-
+    x:trace env/try
     ___x_cmd_env_prepare "$@" || return
-    ___x_cmd_env___var_add "$@"
+    ___X_CMD_ENV___VAR_ADD_NO_SETUP="" ___x_cmd_env___var_add "$@"
 }
 
 ___x_cmd_env_use(){
     param:void
-
-    ___x_cmd_env_try "$@"
+    x:trace env/use
+    ___x_cmd_env_prepare "$@" || return
 
     local backup="$___X_CMD_ENV_VERSION_CONFIG"
     if [ -f "$___X_CMD_ENV_VERSION_CONFIG_PATH" ]; then
@@ -42,16 +51,45 @@ ___x_cmd_env_use(){
     ___X_CMD_ENV_VERSION_CONFIG="$backup"
 }
 
-___x_cmd_env_exec()(
-    param:void
-
-    local arg
-    local s
-    for arg in "$@"; do
-        case "$arg" in
-            *=*)        s="$s $arg" ;;
-            *)          break
-        esac
+___x_cmd_env_unuse(){
+    local i
+    local pkg_name
+    local version
+    for i in "$@"; do
+        pkg_name="${i%=*}"
+        version="$(___x_cmd_env_get_version "$i")"
+        pkg:info "Remove $pkg_name $version path: $___X_CMD_PKG_INSTALL_PATH/$pkg_name/$version/bin"
+        x pkg uninstall "$pkg_name" "$version"
+        x path rm "$___X_CMD_PKG_INSTALL_PATH/$pkg_name/$version/bin"
     done
-    eval ___x_cmd_env_use "$s" && "$@"
+}
+
+___x_cmd_env_exec()(
+    # local arg
+    # local s
+    # for arg in "$@"; do
+    #     case "$arg" in
+    #         *=*)        s="$s $arg" ;;
+    #         *)          break
+    #     esac
+    # done
+    # eval ___x_cmd_env_use "$s" && "$@"
+    param:void
+    x:trace env/exec
+
+    local candidate="${1:?Provide package}"
+    local pkg_name="${candidate%=*}"
+    local version
+    version="$(___x_cmd_env_get_version "$candidate")"
+    shift
+    pkg:info "Execute $pkg_name $version: $*"
+    x pkg xbin init "$pkg_name" "$version"
+    "___x_cmd_${pkg_name}" "$@"
 )
+
+___x_cmd_env_which(){
+    local i
+    for i in "$@"; do
+        x pkg xbin path "${i%=*}" "$(___x_cmd_env_get_version "$i")"
+    done
+}

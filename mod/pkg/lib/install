@@ -1,5 +1,6 @@
 
 ___x_cmd_pkg_install(){
+    x:trace pkg/install
     local pkg_name="${1:?Provide pkg name}"
     local version="${2:-$(___x_cmd_pkg___default_version "$pkg_name")}"
     local osarch="${3:-${___X_CMD_PKG_OSARCH:-$(___x_cmd_pkg_osarch)}}"
@@ -7,7 +8,17 @@ ___x_cmd_pkg_install(){
     ___x_cmd_pkg_download "$pkg_name" "$version" "$osarch" || return
     local script_path
     if script_path="$(___x_cmd_pkg___get_script_path "$pkg_name" "$version" "$osarch" install)"; then
-        pkg:info "Running $script_path after download package"
+        local bin_path
+        bin_path="$(___x_cmd_pkg_xbin_path "$pkg_name" "$version")"
+        if [ -x "$bin_path" ]; then
+            return 0
+        fi
+
+        local file_suffix
+        ___x_cmd_pkg___attr "$pkg_name" "$version" "$osarch" file_suffix
+        local ball="$___X_CMD_PKG_DOWNLOAD_PATH/$pkg_name/$version.$file_suffix"
+        pkg:info "Running $script_path after download $pkg_name $version"
+        pkg:debug "pkg_name: $pkg_name version: $version osarch: $osarch file_suffix: $file_suffix ball: $ball bin_path: $bin_path"
         . "$script_path"
         return 0
     else
@@ -21,7 +32,30 @@ ___x_cmd_pkg_install(){
     fi
 }
 
+ ___x_cmd_pkg_uninstall(){
+    x:trace pkg/uninstall
+    local pkg_name="${1:?Provide pkg name}"
+    local version="${2:-$(___x_cmd_pkg___default_version "$pkg_name")}"
+
+    local install_path="$___X_CMD_PKG_INSTALL_PATH/$pkg_name/$version"
+    local file_suffix
+    ___x_cmd_pkg___attr "$pkg_name" "$version" "" file_suffix
+    local ball="$___X_CMD_PKG_DOWNLOAD_PATH/$pkg_name/$version.$file_suffix"
+
+    if [ -e "$ball" ]; then
+        pkg:info "Remove $ball"
+        x rmrf "$ball"
+    fi
+    if ! [ -d "$install_path" ];then
+        pkg:warn "This $pkg_name $version is no exist."
+    else
+        pkg:info "Uninstalling $pkg_name $version"
+        x rmrf "$install_path"
+    fi
+ }
+
 ___x_cmd_pkg_reinstall(){
+    x:trace pkg/reinstall
     local pkg_name="${1:?Provide pkg name}"
     local version="${2:?Provide version}"
     local osarch="${3:-${___X_CMD_PKG_OSARCH:-$(___x_cmd_pkg_osarch)}}"
@@ -31,7 +65,7 @@ ___x_cmd_pkg_reinstall(){
     local ball="$___X_CMD_PKG_DOWNLOAD_PATH/$pkg_name/$version.$file_suffix"
     pkg:debug "ball: $ball"
     if [ -f "$ball" ]; then
-        pkg:info "Delete $ball and reinstall $*"
+        pkg:info "Delete $ball and reinstall $pkg_name $version"
         x rmrf "$ball"
     fi
     ___x_cmd_pkg_install "$@"
@@ -45,18 +79,18 @@ ___x_cmd_pkg_install___unzip(){
     local version="${2:?Provide version}"
     local osarch="${3:-${___X_CMD_PKG_OSARCH:-$(___x_cmd_pkg_osarch)}}"
 
-    local file_suffix
-    ___x_cmd_pkg___attr "$pkg_name" "$version" "$osarch" file_suffix
-    local ball="$___X_CMD_PKG_DOWNLOAD_PATH/$pkg_name/$version.$file_suffix"
-    local unpack_dir="$___X_CMD_PKG_DOWNLOAD_PATH/$pkg_name/$version/tmp"
-    local tgt="$___X_CMD_PKG_INSTALL_PATH/$pkg_name/$version"
-
     local bin_path
     bin_path="$(___x_cmd_pkg_xbin_path "$pkg_name" "$version")"
     if [ -x "$bin_path" ]; then
         return 0
     fi
     pkg:debug "bin_path: $bin_path"
+
+    local file_suffix
+    ___x_cmd_pkg___attr "$pkg_name" "$version" "$osarch" file_suffix
+    local ball="$___X_CMD_PKG_DOWNLOAD_PATH/$pkg_name/$version.$file_suffix"
+    local unpack_dir="$___X_CMD_PKG_DOWNLOAD_PATH/$pkg_name/$version"
+    local tgt="$___X_CMD_PKG_INSTALL_PATH/$pkg_name/$version"
 
     pkg:info "Unpack: $ball to $unpack_dir"
     x uz "$ball" "$unpack_dir" || {

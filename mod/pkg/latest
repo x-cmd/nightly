@@ -8,6 +8,7 @@ ___x_cmd_pkg(){
         update)         shift; ___x_cmd_pkg_update "$@" ;;
 
         version)        shift; ___x_cmd_pkg_version "$@" ;;
+        default_version) shift; ___x_cmd_pkg___default_version "$@" ;;
         ll)             shift; ___x_cmd_pkg_info "$@" ;;
 
         # x pkg which node=v12
@@ -16,6 +17,7 @@ ___x_cmd_pkg(){
         # x pkg download node=v12
         download)       shift; ___x_cmd_pkg_download "$@" ;;
         install)        shift; ___x_cmd_pkg_install "$@" ;;
+        uninstall)      shift; ___x_cmd_pkg_uninstall "$@" ;;
         reinstall)      shift; ___x_cmd_pkg_reinstall "$@" ;;
 
         # x pkg setup node=v12
