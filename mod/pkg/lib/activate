@@ -1,0 +1,28 @@
+
+___x_cmd_pkg_activate(){
+    ___x_cmd_pkg_activate___min "$@"
+}
+
+___x_cmd_pkg_activate___min(){
+    local pkg_name="${1:?Provide pkg name}"
+    local version="${2:-$(___x_cmd_pkg___default_version "$pkg_name")}"
+    local osarch="${3:-${___X_CMD_PKG_OSARCH:-$(___x_cmd_pkg_osarch)}}"
+
+    local script_path
+    if script_path="$(___x_cmd_pkg___get_script_path "$pkg_name" "$version" "$osarch" activate)"; then
+        pkg:debug "Activate running $script_path for $pkg_name $version"
+        . "${script_path}"
+    else
+        ___x_cmd_pkg_activate___min_default "$pkg_name" "$version"
+    fi
+
+    ___X_CMD_PKG_ACTIVATE___LIST="$___X_CMD_PKG_ACTIVATE___LIST
+$pkg_name=$version
+"
+}
+
+___x_cmd_pkg_activate___min_default(){
+    local pkg_name="${1:?Provide pkg name}"
+    local version="${2:?Provide version}"
+    x path add_existed_folder "$___X_CMD_PKG_INSTALL_PATH/$pkg_name/$version/bin" || return 1
+}

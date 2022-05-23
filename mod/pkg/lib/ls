@@ -1,10 +1,58 @@
+# shellcheck shell=sh disable=SC2039,SC1090,SC3043,SC2263    # xrc
 
 # ls app, default app
-___x_cmd_pkg_ls()(
-    ___x_cmd_pkg___which_p7zip || return
+___x_cmd_pkg_ls(){
+    case "$1" in
+        i|installed)      shift;  ___x_cmd_env_ls_installed "$@" ;;
+        a|activated)      shift;  ___x_cmd_env_ls_activated "$@" ;;
+        A|all)            shift;  ___x_cmd_env_ls_all "$@" ;;
+        *)                ___x_cmd_env_ls_all "$@" ;;
+    esac
+}
 
-    # Read the index file in the future ...
-    cd "$___X_CMD_PKG_RAWPATH" || return
-    find . -name meta.tt.json | awk  '{ gsub(/\.\//, "", $0); gsub(/\/meta.tt.json$/, "", $0); print $0;  }'
+
+# Invoked pkg ls installed
+___x_cmd_env_ls_installed()(
+    if ! [ -d "$___X_CMD_PKG_INSTALL_PATH" ]; then return 0; fi
+    cd "$___X_CMD_PKG_INSTALL_PATH/"
+    pkg:debug "dir $___X_CMD_PKG_INSTALL_PATH/"
+    (
+        if [ -n "$1" ]; then
+            default_version="$(___x_cmd_pkg___default_version "$1")"
+            for i in "$1"/*; do
+                printf "%s\n" "$i/$default_version"
+            done
+        else
+            for i in */*; do
+                printf "%s\n" "$i/$(___x_cmd_pkg___default_version "${i%/*}")"
+            done
+        fi
+    ) | awk -v FS="/" '{
+        if ($2 == $3) print $1 "\t" $2 " (default)"
+        else print $1 "\t" $2
+    }'
 )
+
+# Invoked pkg ls activated: check environment variable...
+___x_cmd_env_ls_activated(){
+    [ -n "$___X_CMD_PKG_ACTIVATE___LIST" ] || return
+    local _line
+    printf "%s\n" "$___X_CMD_PKG_ACTIVATE___LIST" | while read -r _line; do
+        [ -n "$_line" ] || continue
+        printf "%s\n" "$_line=$(___x_cmd_pkg___default_version "${_line%=*}")" | awk -v FS="=" '{
+            if ($2 == $3) print $1 "\t" $2 " (default)"
+            else print $1 "\t" $2
+        }'
+    done
+    # if ! [ -d "$___X_CMD_PKG_RAWPATH" ]; then return 0; fi
+    # pkg_name="${1:?Provide package name}"
+    # cat "$___X_CMD_PKG_RAWPATH"/*/"$pkg_name/version.tt.json" | x ja 'V=="{"&&_[1]==K&&_[1]!=1{print _[1]}'
+}
+
+___x_cmd_env_ls_all(){
+    if ! [ -d "$___X_CMD_PKG_RAWPATH" ]; then return 0; fi
+    pkg_name="${1:?Provide package name}"
+    cat "$___X_CMD_PKG_RAWPATH"/*/"$pkg_name/version.tt.json" | x ja 'V=="{"&&_[1]==K&&_[1]!=1{print uq(_[1])}'
+}
+
 

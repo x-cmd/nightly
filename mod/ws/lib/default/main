@@ -1,7 +1,7 @@
 # shellcheck shell=sh   disable=SC3043,SC1090,SC1091
 xrc:mod:lib ws      default/util
 
-___x_cmd_ws___exe_default___(){
+___x_cmd_ws___exe_default___bylang(){
     local type="$1"
     if [ -n "$type" ]; then
         if [ -f "$___X_CMD_ROOT_MOD/ws/lib/default/$type/_" ]; then
@@ -12,7 +12,7 @@ ___x_cmd_ws___exe_default___(){
     fi
 }
 
-___x_cmd_ws___exe_default___ "$___X_CMD_WS___EXE_DEFAULT_TMP" "$@"
+___x_cmd_ws___exe_default___bylang "$___X_CMD_WS___EXE_DEFAULT_TMP" "$@"
 
 ___x_cmd_ws___exe_default(){
     case "$1" in

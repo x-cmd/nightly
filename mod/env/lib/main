@@ -14,29 +14,32 @@ ___x_cmd_env_get_version(){
     fi
 }
 
+# try = install + activate
+___x_cmd_env_try(){
+    param:void
+    x:trace env/try
 
-___x_cmd_env_prepare(){
     local i
     for i in "$@"; do
         pkg:info "Prepare ${i%=*} $(___x_cmd_env_get_version "$i")"
         if ! x pkg install "${i%=*}" "$(___x_cmd_env_get_version "$i")"; then
             pkg:error "Cannot install package: $i"
-            return 1;
+            return 1
         fi
     done
-}
 
-___x_cmd_env_try(){
-    param:void
-    x:trace env/try
-    ___x_cmd_env_prepare "$@" || return
+    for i in "$@"; do
+        x pkg activate "$i"
+    done
+
     ___X_CMD_ENV___VAR_ADD_NO_SETUP="" ___x_cmd_env___var_add "$@"
 }
 
+# use = try + save-config
 ___x_cmd_env_use(){
     param:void
     x:trace env/use
-    ___x_cmd_env_prepare "$@" || return
+    ___x_cmd_env_try "$@" || return
 
     local backup="$___X_CMD_ENV_VERSION_CONFIG"
     if [ -f "$___X_CMD_ENV_VERSION_CONFIG_PATH" ]; then
@@ -57,10 +60,9 @@ ___x_cmd_env_unuse(){
     local version
     for i in "$@"; do
         pkg_name="${i%=*}"
-        version="$(___x_cmd_env_get_version "$i")"
-        pkg:info "Remove $pkg_name $version path: $___X_CMD_PKG_INSTALL_PATH/$pkg_name/$version/bin"
-        x pkg uninstall "$pkg_name" "$version"
-        x path rm "$___X_CMD_PKG_INSTALL_PATH/$pkg_name/$version/bin"
+        x pkg deactivate "$pkg_name"
+        # 1. remove config
+        # 2. remove env
     done
 }
 

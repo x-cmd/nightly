@@ -9,7 +9,7 @@ ___x_cmd_pkg(){
 
         version)        shift; ___x_cmd_pkg_version "$@" ;;
         default_version) shift; ___x_cmd_pkg___default_version "$@" ;;
-        ll)             shift; ___x_cmd_pkg_info "$@" ;;
+        ll)             shift; ___x_cmd_pkg_ll "$@" ;;
 
         # x pkg which node=v12
         which)          shift; ___x_cmd_pkg_which "$@" ;;
@@ -20,8 +20,9 @@ ___x_cmd_pkg(){
         uninstall)      shift; ___x_cmd_pkg_uninstall "$@" ;;
         reinstall)      shift; ___x_cmd_pkg_reinstall "$@" ;;
 
-        # x pkg setup node=v12
-        setup)          shift; ___x_cmd_pkg_setup "$@" ;;
+        # x pkg activate/deactivate  node=v12
+        activate)       shift; ___x_cmd_pkg_activate "$@" ;;
+        deactivate)     shift; ___x_cmd_pkg_deactivate "$@" ;;
 
         # x pkg exec python=
         *=)             ___x_cmd_pkg_exec "$@" ;;
@@ -37,7 +38,7 @@ ___x_cmd_pkg(){
 x log init pkg
 
 xrc:mod pkg/lib/sb
-xrc:mod:lib pkg     which util ls ls_installed download install xbin setup
+xrc:mod:lib pkg     which util ls ll ls_installed download install xbin activate deactivate
 
 ___X_CMD_PKG_RAWPATH="$___X_CMD_ROOT_TMP/pkg/raw"
 ___X_CMD_PKG_DOWNLOAD_PATH="$___X_CMD_ROOT_TMP/pkg/download"
