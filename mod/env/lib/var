@@ -6,10 +6,13 @@
 # deactivate: x env var recoverall
 
 ___x_cmd_env_var(){
+    param:void
+    local option="$1"
     case "$1" in
-        backup|get_backup_|\
-        clear|\
-        recover|recoverall)   eval "\$___x_cmd_env_var_${1} \"\$@\"" ;;
+        backup|get_backup|\
+        clear|ls|\
+        recover|recoverall)  shift && ___x_cmd_env_var_$option $@ ;;
+        # recover|recoverall)  shift && eval "\$(___x_cmd_env_var_$option \"\$@\")" ;;
     esac
 }
 
@@ -28,8 +31,9 @@ ___x_cmd_env_var_backup(){
 
 ___x_cmd_env_var_backup___one(){
     local varname_bak="___X_CMD_ENV_VAR___BACKUP_${1:?Provide varname}"
+
     if ___x_cmd_env_var_isunset "$varname_bak"; then
-        if eval ___x_cmd_env_var_isunset "$1"; then
+        if ___x_cmd_env_var_isunset "$1"; then
             ___X_CMD_ENV_VAR_LIST="${___X_CMD_ENV_VAR_LIST}
 $1=
 "
@@ -38,7 +42,7 @@ $1=
 $1
 "
         fi
-        eval "$varname_bak=\"\${1}\""
+        eval "$varname_bak=\"\$${1}\""
     fi
 }
 
@@ -66,10 +70,10 @@ ___x_cmd_env_var_recover(){
 
 ___x_cmd_env_var_recover___all(){
     local var
-    while read -r var; do
+    ___x_cmd_env_var_ls | while read -r var; do
         case "$var" in
             "")     ;;
-            *=)     eval unset "${var}" ;;
+            *=)     eval unset "${var%=*}" ;;
             *)      eval "${var}=\"\$___X_CMD_ENV_VAR___BACKUP_${var}\"" ;;
         esac
     done
@@ -86,7 +90,7 @@ ___x_cmd_env_var_recover___multiple(){
 ___x_cmd_env_var_recover___one(){
     local varname_bak="___X_CMD_ENV_VAR___BACKUP_${1:?Provide varname}"
     if ___x_cmd_env_var_recover___rm "${1}"; then
-        eval "$1=\"\${varname_bak}\""
+        eval "$1=\"\$${varname_bak}\""
     elif ___x_cmd_env_var_recover___rm "$1="; then
         eval "unset $1"
     else
@@ -100,7 +104,7 @@ ___x_cmd_env_var_recover___rm(){
     local tmp="${___X_CMD_ENV_VAR_LIST#*
 "${1:?Provide varname}"
 }"
-    if [ "$tmp" = "$___X_CMD_ENV_VAR_LIST" ]; then
+    if [ "$tmp" != "$___X_CMD_ENV_VAR_LIST" ]; then
         ___X_CMD_ENV_VAR_LIST="${___X_CMD_ENV_VAR_LIST%%
 "$1"
 *}

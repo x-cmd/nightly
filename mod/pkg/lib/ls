@@ -6,19 +6,18 @@ ___x_cmd_pkg_ls(){
         i|installed)      shift;  ___x_cmd_env_ls_installed "$@" ;;
         a|activated)      shift;  ___x_cmd_env_ls_activated "$@" ;;
         A|all)            shift;  ___x_cmd_env_ls_all "$@" ;;
-        *)                ___x_cmd_env_ls_all "$@" ;;
+        *)                ___x_cmd_env_ls_installed "$@" ;;
     esac
 }
 
 
 # Invoked pkg ls installed
 ___x_cmd_env_ls_installed()(
-    if ! [ -d "$___X_CMD_PKG_INSTALL_PATH" ]; then return 0; fi
-    cd "$___X_CMD_PKG_INSTALL_PATH/"
-    pkg:debug "dir $___X_CMD_PKG_INSTALL_PATH/"
+    [ -d "$___X_CMD_PKG_INSTALL_PATH" ] || return 0
+    cd "$___X_CMD_PKG_INSTALL_PATH" || exit
     (
         if [ -n "$1" ]; then
-            default_version="$(___x_cmd_pkg___default_version "$1")"
+            default_version="$(___x_cmd_pkg___default_version "$1")" || return
             for i in "$1"/*; do
                 printf "%s\n" "$i/$default_version"
             done
@@ -27,8 +26,9 @@ ___x_cmd_env_ls_installed()(
                 printf "%s\n" "$i/$(___x_cmd_pkg___default_version "${i%/*}")"
             done
         fi
-    ) | awk -v FS="/" '{
-        if ($2 == $3) print $1 "\t" $2 " (default)"
+    ) | awk -v FS="/" \
+            -v TH_THEME_COLOR="\\033[${___X_CMD_THEME_COLOR_CODE}m" '{
+        if ($2 == $3) print $1 "\t" $2 TH_THEME_COLOR " (default)\033[0m"
         else print $1 "\t" $2
     }'
 )
@@ -39,14 +39,12 @@ ___x_cmd_env_ls_activated(){
     local _line
     printf "%s\n" "$___X_CMD_PKG_ACTIVATE___LIST" | while read -r _line; do
         [ -n "$_line" ] || continue
-        printf "%s\n" "$_line=$(___x_cmd_pkg___default_version "${_line%=*}")" | awk -v FS="=" '{
-            if ($2 == $3) print $1 "\t" $2 " (default)"
+        printf "%s\n" "$_line=$(___x_cmd_pkg___default_version "${_line%=*}")" | awk -v FS="=" \
+        -v TH_THEME_COLOR="\\033[${___X_CMD_THEME_COLOR_CODE}m" '{
+            if ($2 == $3) print $1 "\t" $2 TH_THEME_COLOR " (default)\033[0m"
             else print $1 "\t" $2
         }'
     done
-    # if ! [ -d "$___X_CMD_PKG_RAWPATH" ]; then return 0; fi
-    # pkg_name="${1:?Provide package name}"
-    # cat "$___X_CMD_PKG_RAWPATH"/*/"$pkg_name/version.tt.json" | x ja 'V=="{"&&_[1]==K&&_[1]!=1{print _[1]}'
 }
 
 ___x_cmd_env_ls_all(){

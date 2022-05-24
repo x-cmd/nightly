@@ -106,13 +106,14 @@ ___x_cmd_hub_main_user(){
 # Section(file): ls, which, upload, share, private
 
 ___x_cmd_hub_main_file(){
-    param:subcmd ___x_cmd_hub_main_file     \
-        ls          "List files in hub"     \
+    param:subcmd ___x_cmd_hub_main_file         \
+        ls          "List files in hub"         \
         la          "List all files use ui table in hub"     \
-        rm          "Remove file from hub"  \
-        which       "Find file in hub"      \
-        upload      "Upload file to hub"    \
-        share       "Set file to public"    \
+        rm          "Remove file from hub"      \
+        which       "Find file in hub"          \
+        upload      "Upload file to hub"        \
+        upload_dist "Upload dist file to hub"   \
+        share       "Set file to public"        \
         private     "Set file to private"
     param:subcmd:try
     param:run
@@ -175,6 +176,18 @@ option:
 A
     param:run
     ___x_cmd_hub_file_upload "$@"
+}
+
+___x_cmd_hub_main_file_upload_dist(){
+    param:dsl<<A
+advise:
+    #1    ___advise_ls
+option:
+    #1    "local  path"
+    #2    "remote path"
+A
+    param:run
+    ___x_cmd_hub_file_upload_dist "$@"
 }
 
 ___x_cmd_hub_main_file_share(){

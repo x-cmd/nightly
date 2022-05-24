@@ -4,6 +4,7 @@ ___x_cmd_pkg_install(){
     local pkg_name="${1:?Provide pkg name}"
     local version="${2:-$(___x_cmd_pkg___default_version "$pkg_name")}"
     local osarch="${3:-${___X_CMD_PKG_OSARCH:-$(___x_cmd_pkg_osarch)}}"
+    [ -n "$version" ] || return
 
     ___x_cmd_pkg_download "$pkg_name" "$version" "$osarch" || return
     local script_path
@@ -36,6 +37,7 @@ ___x_cmd_pkg_install(){
     x:trace pkg/uninstall
     local pkg_name="${1:?Provide pkg name}"
     local version="${2:-$(___x_cmd_pkg___default_version "$pkg_name")}"
+    [ -n "$version" ] || return
 
     local install_path="$___X_CMD_PKG_INSTALL_PATH/$pkg_name/$version"
     local file_suffix
@@ -59,6 +61,7 @@ ___x_cmd_pkg_reinstall(){
     local pkg_name="${1:?Provide pkg name}"
     local version="${2:?Provide version}"
     local osarch="${3:-${___X_CMD_PKG_OSARCH:-$(___x_cmd_pkg_osarch)}}"
+    [ -n "$version" ] || return
 
     local file_suffix
     ___x_cmd_pkg___attr "$@" "$osarch" file_suffix

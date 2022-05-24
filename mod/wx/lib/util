@@ -1,7 +1,12 @@
 # shellcheck shell=sh disable=SC3043
 
 ___x_cmd_wx_run(){
-    local wxfile="${1:-.}"; shift
+    local wxfile="${1:-.}"; [ "$#" -eq 0 ] || shift
+
+    case "$wxfile" in
+        @me/*|@i/*|@/*|@*/*) wxfile="$(x hub file which script/demo.wx)" || return 1 ;;
+    esac
+
     local ___X_CMD_WX_UNPKG_
     if [ -d "$wxfile" ]; then
         ___X_CMD_WX_UNPKG_="$wxfile"
@@ -16,7 +21,8 @@ ___x_cmd_wx_run(){
         return 1
     fi
 
-    x ws run "$@"
+    # TODO: To use no shift at ws module.
+    x ws run run "$@"
 
     # if [ -f ".x-cmd/run-dist" ]; then
     #     x ws run-dist "$@"
@@ -52,8 +58,6 @@ ___x_cmd_wx_pkg(){
     fi
 
     local target="${2:-${PWD##*/}.wx}"
-    # https://stackoverflow.com/questions/984204/shell-command-to-tar-directory-excluding-certain-files-folders
-    # https://unix.stackexchange.com/questions/59243/tar-removing-leading-from-member-names
     local cmd="tar --exclude=$target -czf $target $workspace"
     eval "$cmd"
     x:debug "Created tar: $cmd"
@@ -80,7 +84,8 @@ ___x_cmd_wx_unpkg_(){
         return 1
     fi
 
-    if ! tar xf "$wxfile" "$___X_CMD_WX_UNPKG_"; then
+    mkdir -p "$___X_CMD_WX_UNPKG_"
+    if ! tar xf "$wxfile"  --directory="$___X_CMD_WX_UNPKG_"; then
         x:error "Exit=1 for failure on delation: $wxfile"
         ___X_CMD_WX_UNPKG_=
         return 1

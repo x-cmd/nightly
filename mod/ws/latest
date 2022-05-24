@@ -1,7 +1,7 @@
 # Author:       Li Junhao           l@x-cmd.com     # xrc
 # shellcheck    shell=sh
 
-xrc:mod:lib     ws      main hook util default/_ run
+xrc:mod:lib     ws      hook util default/_ run
 
 # x ws env set
 
@@ -12,12 +12,12 @@ xrc:mod:lib     ws      main hook util default/_ run
 
 ___x_cmd_ws(){
     case "$1" in
-        run)        shift; ___x_cmd_ws_run "$@" ;;
-        exec)       shift; ___x_cmd_ws_exec "$@" ;;
-        env)        shift; ___x_cmd_ws_env "$@" ;;
-        root)       ___x_cmd_ws_root ;;
-        "")         ___x_cmd_ws_help ;;
-        *)          ___x_cmd_ws_run "$@" ;;
+        "")                 ___x_cmd_ws_help            ;;                 # default behavior
+
+        exec)       shift;  ___x_cmd_ws_exec "$@"       ;;
+        execfile)   shift;  ___x_cmd_ws_execfile "$@"   ;;
+        env)        shift;  ___x_cmd_ws_env "$@"        ;;
+        *)                  ___x_cmd_ws_exec "$@"       ;;
     esac
 }
 

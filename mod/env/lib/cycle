@@ -31,22 +31,39 @@
 #         x pkg activate "$i"
 #     done
 # }
+___x_cmd_pkg_activated_version_(){
+    local _line
+    printf "%s\n" "$___X_CMD_PKG_ACTIVATE___LIST" | while read -r _line; do
+        [ -n "$_line" ] || continue
+        ___X_CMD_PKG_ACTIVATED_VERSION_="${_line#*${1}=}"
+        if [ $___X_CMD_PKG_ACTIVATED_VERSION_ != $_line ]; then return 0; fi
+    done
+    ___X_CMD_PKG_ACTIVATED_VERSION_=
+    return 1
+}
 
 ___x_cmd_env_pkg_activate(){
+    local ___X_CMD_PKG_ACTIVATED_VERSION_
+    local pkg_name
+    local version
     while [ $# -gt 0 ]; do
-        local pkg_name="${1%=*}"
+        pkg_name="${1%=*}"
+        version="$(___x_cmd_env_get_version "$1")"
         ! ___x_cmd_pkg_activated_version_ "$pkg_name" || x llist push "$___X_CMD_ENV_PKG_STACK_${pkg_name}" "$___X_CMD_PKG_ACTIVATED_VERSION_"
-        ___x_cmd_pkg_activate "$pkg_name"
+        ___x_cmd_pkg_activate "$pkg_name" "$version"
         shift
     done
 }
 
 ___x_cmd_env_pkg_deactivate(){
+    local pkg_name
+    local version
     while [ $# -gt 0 ]; do
-        local pkg_name="${1%=*}"
-        ___x_cmd_env_deactivate "$1"
+        pkg_name="${1%=*}"
+        version="$(___x_cmd_env_get_version "$1")"
+        ___x_cmd_pkg_deactivate "$pkg_name" "$version"
         x llist pop_ "$___X_CMD_ENV_PKG_STACK_${pkg_name}"
-        [ -z "$___X_CMD_LIST_POP_" ] || ___x_cmd_pkg_activate "${pkg_name}=$___X_CMD_LIST_POP_"
+        [ -z "$___X_CMD_LIST_POP_" ] || ___x_cmd_pkg_activate "${pkg_name}" "$___X_CMD_LIST_POP_"
         shift
     done
 }

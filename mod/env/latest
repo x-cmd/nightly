@@ -13,6 +13,7 @@ subcommands:
     unuse                   "Remove environment"
     exec                    "Run an executable with the selected candidates version"
     which                   "Display path of environment installed"
+    var                     "backup or recover environment"
 A
 # current                 "Show current environment"
 # install                 "Install environment"
@@ -38,7 +39,7 @@ A
 
 
 x log init  pkg
-xrc:mod:lib env     util config main advise ls
+xrc:mod:lib env     util config main advise ls var
 
 
 

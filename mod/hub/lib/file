@@ -104,6 +104,20 @@ ___x_cmd_hub_file_upload(){
     ___x_cmd_hub_client_file_upload "$localfp" "$respath"
 }
 
+___x_cmd_hub_file_upload_dist(){
+    local localfp="${1:?Provide local file}"
+    local respath="${2:?provide respath}"
+
+    x wx pkg "$localfp" ___x_cmd_hub_tmp.wx || {
+        hub:error "Failed to wx pkg: $localfp"
+        return 1
+    }
+
+    respath="$(___x_cmd_hub_file_normalize_respath "$respath")"
+    ___x_cmd_hub_client_file_upload ___x_cmd_hub_tmp.wx "$respath"
+    rm -rf ___x_cmd_hub_tmp.wx
+}
+
 # EndSection
 
 # Section(share): share, private

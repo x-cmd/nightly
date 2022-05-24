@@ -1,6 +1,6 @@
 ___x_cmd_ws_help(){
-    printf "%s\n" "
-x ws <subcmd> [...arguments]
-    Provide workspace facility
-"
+    cat "$___X_CMD_ROOT_MOD/ws/lib/help.txt"
 }
+
+
+

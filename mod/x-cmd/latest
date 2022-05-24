@@ -76,7 +76,7 @@ ___x_cmd_main(){        # x:trace x     # TODO: will effect x log
         login)                                  shift;  xrc hub/latest && ___x_cmd_hub login "$@" ;;
 
         z|uz)                                           ( xrc zuz && ___x_cmd_zuz "$@" ) ;;   # zl)  ( xrc zuz && ___x_cmd_zuz_ls "$@"        ) ;;       # Using ls to replace
-        wsroot)                                         x ws root ;;
+        wsroot)                                 shift;  ___x_cmd_ws___get_root "$@" ;;
 
         update|upgrade|clear|reinstall)         shift;  xrc update "$@" ;;
         ""|help|-H|--help|-h)                           ___x_cmd_x_cmd_help ;;
@@ -84,6 +84,23 @@ ___x_cmd_main(){        # x:trace x     # TODO: will effect x log
         *.wx)                                           x wx run "$@" ;;
         *)                                              ___x_cmd_main_otherwise "$@" ;;
     esac
+}
+
+___x_cmd_ws___get_root(){
+    if [ "${1:-.}" = . ]; then
+        local cur="$PWD"
+    else
+        cd "${1:-.}" 2>&1 && local cur="${PWD}" && cd "$OLDPWD" || return
+    fi
+
+    while [ ! "$cur" = "" ]; do
+        if [ -d "$cur/.x-cmd" ]; then
+            printf "%s\n" "$cur"
+            return 0
+        fi
+        cur=${cur%/*}
+    done
+    return 1
 }
 
 # EndSection

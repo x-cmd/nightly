@@ -5,7 +5,7 @@ ___x_cmd_ws___exe_default_(){
         build|install|package|jar|fatjar)
             . "$___X_CMD_ROOT_MOD/ws/lib/default/java/maven/$RESOURCE_NAME" "$@" ;;
         *)
-            ___x_cmd_ws___exe_default_ ;;
+            ___x_cmd_ws___exe_default  ;;
     esac
 }
 
