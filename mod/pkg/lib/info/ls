@@ -3,16 +3,16 @@
 # ls app, default app
 ___x_cmd_pkg_ls(){
     case "$1" in
-        i|installed)      shift;  ___x_cmd_env_ls_installed "$@" ;;
-        a|activated)      shift;  ___x_cmd_env_ls_activated "$@" ;;
-        A|all)            shift;  ___x_cmd_env_ls_all "$@" ;;
-        *)                ___x_cmd_env_ls_installed "$@" ;;
+        i|installed)      shift;  ___x_cmd_pkg_ls_installed "$@" ;;
+        a|activated)      shift;  ___x_cmd_pkg_ls_activated "$@" ;;
+        A|all)            shift;  ___x_cmd_pkg_ls_all "$@" ;;
+        *)                ___x_cmd_pkg_ls_installed "$@" ;;
     esac
 }
 
 
 # Invoked pkg ls installed
-___x_cmd_env_ls_installed()(
+___x_cmd_pkg_ls_installed()(
     [ -d "$___X_CMD_PKG_INSTALL_PATH" ] || return 0
     cd "$___X_CMD_PKG_INSTALL_PATH" || exit
     (
@@ -34,7 +34,7 @@ ___x_cmd_env_ls_installed()(
 )
 
 # Invoked pkg ls activated: check environment variable...
-___x_cmd_env_ls_activated(){
+___x_cmd_pkg_ls_activated(){
     [ -n "$___X_CMD_PKG_ACTIVATE___LIST" ] || return
     local _line
     printf "%s\n" "$___X_CMD_PKG_ACTIVATE___LIST" | while read -r _line; do
@@ -47,7 +47,7 @@ ___x_cmd_env_ls_activated(){
     done
 }
 
-___x_cmd_env_ls_all(){
+___x_cmd_pkg_ls_all(){
     if ! [ -d "$___X_CMD_PKG_RAWPATH" ]; then return 0; fi
     pkg_name="${1:?Provide package name}"
     cat "$___X_CMD_PKG_RAWPATH"/*/"$pkg_name/version.tt.json" | x ja 'V=="{"&&_[1]==K&&_[1]!=1{print uq(_[1])}'

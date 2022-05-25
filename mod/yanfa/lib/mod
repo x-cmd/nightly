@@ -185,7 +185,7 @@ ___x_cmd_yanfa_mod_ls(){
 
 ___x_cmd_yanfa_mod(){
     if [ -f "$(x wsroot)/.x-cmd/$1" ]; then
-        x ws exec "$@"
+        x ws execfile "$@"
         return
     fi
 
