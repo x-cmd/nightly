@@ -40,19 +40,24 @@ ___x_cmd___env_exec_set_and_run_and_unset(){
                 shift; "$@"; break ;;
             -*)
                 ___x_cmd___env_exec_set_and_run_and_unset_recover "${1#-}"
-                ___x_cmd_env untry "${1#-}"
+                ___x_cmd_pkg deactivate "${1#-}"
                 ;;
             *=)
                 ___x_cmd___env_exec_set_and_run_and_unset_recover "${1%=}"
-                ___x_cmd_env untry "${1%=}"
+                ___x_cmd_pkg deactivate "${1%=}"
                 ;;
             *=-)
                 ___x_cmd___env_exec_set_and_run_and_unset_recover "${1%=}"
-                ___x_cmd_env retore "${1%=-}" ;;
+                local ___X_CMD_ENV_PREV_
+                ___x_cmd_env prev_ "$pkg"
+                ___x_cmd_pkg activate "${1%=-}=$___X_CMD_ENV_PREV_"
+                ;;
             *=*)
                 ___x_cmd___env_exec_set_and_run_and_unset_recover "${1%=}"
-                ___x_cmd_env try "$1" ;;
+                ___x_cmd_pkg activate "$1"
+                ;;
         esac
+        [ -z "$___X_CMD_ENV_RECOVER_CODE" ] || eval "$___X_CMD_ENV_RECOVER_CODE"
 
     done
 }
@@ -62,6 +67,7 @@ ___x_cmd___env_exec_set_and_run_and_unset_recover(){
     local pkg="$1"
     ___x_cmd_env current_ "$pkg"
     if [ -n "$___X_CMD_ENV_CURRENT_" ]; then
+        ___x_cmd_pkg deactivate "$pkg=$___X_CMD_ENV_CURRENT_"
         ___X_CMD_ENV_RECOVER_CODE="$___X_CMD_ENV_RECOVER_CODE
 ___x_cmd_pkg deactivate $pkg
 ___x_cmd_pkg activate $pkg=$___X_CMD_ENV_CURRENT_"
