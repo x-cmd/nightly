@@ -246,16 +246,6 @@ ___x_cmd_varset_without_end(){
 
 # EndSection
 
-# Section : utilties in static-build
-
-# _x_xrc_static_run(){
-#     local name=$1;  shift
-#     xrc pkg
-#     static_build_xrc "$name"
-#     "_${name}_bin" "$@"
-# }
-
-# EndSection
 
 # Section: until
 # x until 3/12 [ -e "file" ]

@@ -1,51 +1,48 @@
 # Author:       Li Junhao           l@x-cmd.com
 # shellcheck    shell=sh            disable=SC3043      # xrc
 
+x log init pkg
+xrc os
 ___x_cmd_pkg(){
     local op="$1"
     case "$op" in
-        ls)             shift; ___x_cmd_pkg_ls "$@" ;;      # add filter, remote, installed, ...
-        update)         shift; ___x_cmd_pkg_update "$@" ;;
+        ls)                     shift; ___x_cmd_pkg_ls "$@" ;;      # add filter, remote, installed, ...
+        update)                 shift; ___x_cmd_pkg_update "$@" ;;
 
-        version)        shift; ___x_cmd_pkg_version "$@" ;;
-        default_version) shift; ___x_cmd_pkg___default_version "$@" ;;
-        ll)             shift; ___x_cmd_pkg_ll "$@" ;;
+        version)                shift; ___x_cmd_pkg_version "$@" ;;
+        default_version)        shift; ___x_cmd_pkg_default_version "$@" ;;
+        ll)                     shift; ___x_cmd_pkg_ll "$@" ;;
 
         # x pkg which node=v12
-        which)          shift; ___x_cmd_pkg_which "$@" ;;
+        which)                  shift; ___x_cmd_pkg_which "$@" ;;
 
-        # x pkg download node=v12
-        download)       shift; ___x_cmd_pkg_download "$@" ;;
-        install)        shift; ___x_cmd_pkg_install "$@" ;;
-        uninstall)      shift; ___x_cmd_pkg_uninstall "$@" ;;
-        reinstall)      shift; ___x_cmd_pkg_reinstall "$@" ;;
+        # x pkg download         node=v12
+        download)               shift; ___x_cmd_pkg_download "$@" ;;
+        install)                shift; ___x_cmd_pkg_install "$@" ;;
+        uninstall)              shift; ___x_cmd_pkg_uninstall "$@" ;;
+        reinstall)              shift; ___x_cmd_pkg_reinstall "$@" ;;
 
         # x pkg activate/deactivate  node=v12
-        activate)       shift; ___x_cmd_pkg_activate "$@" ;;
-        deactivate)     shift; ___x_cmd_pkg_deactivate "$@" ;;
+        activate)               shift; ___x_cmd_pkg_activate "$@" ;;
+        deactivate)             shift; ___x_cmd_pkg_deactivate "$@" ;;
 
-        # x pkg exec python=
-        *=)             ___x_cmd_pkg_exec "$@" ;;
-
-        xbin)           shift; ___x_cmd_pkg_xbin "$@" ;;
-        _x_cmd_advise_json) printf "{}";;
+        xbin)                   shift; ___x_cmd_pkg_xbin "$@" ;;
+        _x_cmd_advise_json)     printf "{}";;
 
         *)              return 1
     esac
 }
 
-
-x log init pkg
-
-xrc:mod pkg/lib/sb
-xrc:mod:lib pkg     which util ls ll ls_installed download install xbin activate deactivate
+xrc:mod:lib     pkg \
+    util                xbin                main \
+    info/ls             info/ll             info/ls_installed   \
+    mutate/download     mutate/install      mutate/activate     mutate/deactivate
 
 ___X_CMD_PKG_RAWPATH="$___X_CMD_ROOT_TMP/pkg/raw"
 ___X_CMD_PKG_DOWNLOAD_PATH="$___X_CMD_ROOT_TMP/pkg/download"
 ___X_CMD_PKG_INSTALL_PATH="$___X_CMD_ROOT_TMP/pkg/installed"
 
 x ensuredir "$___X_CMD_PKG_RAWPATH" "$___X_CMD_PKG_DOWNLOAD_PATH" "$___X_CMD_PKG_INSTALL_PATH"
-
 # x defineddir \
 #     ___X_CMD_PKG_RAWPATH        "$___X_CMD_ROOT_TMP/pkg/raw" \
 #     ___X_CMD_PKG_DOWNLOAD_PATH  "$___X_CMD_ROOT_TMP/pkg/download" \
@@ -53,7 +50,7 @@ x ensuredir "$___X_CMD_PKG_RAWPATH" "$___X_CMD_PKG_DOWNLOAD_PATH" "$___X_CMD_PKG
 
 
 ___x_cmd_pkg_update(){
-    ___x_cmd_pkg___which_p7zip -  # Force Update
+    ___x_cmd_pkg___which_p7zip || return # Force Update
 }
 
 # Rely on ll or ls

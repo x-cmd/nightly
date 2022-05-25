@@ -6,7 +6,6 @@
 # deactivate: x env var recoverall
 
 ___x_cmd_env_var(){
-    param:void
     local option="$1"
     case "$1" in
         backup|get_backup|\

@@ -52,7 +52,7 @@ function pkg_get_version_or_head_version( jobj, table, pkg_name,            _fin
     } else {
         l = jobj[ jqu(pkg_name), jqu("version") L ]
         if (l <= 0 ) {
-            print "No version found." >"/dev/stderr"
+            print "Not found version." >"/dev/stderr"
         } else {
             print juq(jobj[ jqu( pkg_name ), jqu("version"), 1 ])
         }

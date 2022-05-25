@@ -11,9 +11,39 @@ ___x_cmd_env_config_load(){
 
 ___x_cmd_env_config_save(){
     local tgt="${1:-"$___X_CMD_ENV_VERSION_CONFIG_PATH"}"
+    if [ "$tgt" = - ]; then
+        tgt="$___X_CMD_ENV_VERSION_CONFIG_PATH"
+    fi
+
     if ! x ensuredir "${tgt%/*}"; then
         env:error "Couldn't create folder: ${tgt%/*}"
         return 1
     fi
-    printf "%s" "$___X_CMD_ENV_VERSION_CONFIG" >"$tgt"
+
+    local str="${2:-"$___X_CMD_ENV_VERSION_CONFIG"}"
+    printf "%s" "$str" >"${1:?Provide config file}"
 }
+
+# set
+___x_cmd_env_config_set(){
+    local str
+    if [ -f "$___X_CMD_ENV_VERSION_CONFIG_PATH" ]; then
+        str="$(cat "$___X_CMD_ENV_VERSION_CONFIG_PATH")"
+    fi
+
+    local ___X_CMD_ENV___CONFIGSTR_SET_
+    ___x_cmd_env___configstr_set_ "$str" "$@"
+    ___x_cmd_env_config_save - "$___X_CMD_ENV___CONFIGSTR_SET_"
+}
+
+___x_cmd_env___configstr_set_(){
+    ___X_CMD_ENV___CONFIGSTR_SET_="${1:?Provide str}"
+    shift
+
+    local i
+    for i in "$@"; do
+        ___x_cmd_ldict_put ___X_CMD_ENV___CONFIGSTR_SET_ "${i%=*}" "${i#*=}"
+    done
+
+}
+

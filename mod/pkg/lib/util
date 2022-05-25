@@ -3,6 +3,7 @@
 ___x_cmd_pkg___static_build_attr(){
     eval "$(___x_cmd_pkg___static_build_attr_code "$@")"
 }
+
 ___x_cmd_pkg___static_build_attr_code(){
     ___x_cmd_pkg___all_info "$@" | awk \
         -f "$___X_CMD_ROOT_MOD/awk/lib/default.awk" \
@@ -11,6 +12,7 @@ ___x_cmd_pkg___static_build_attr_code(){
         -f "$___X_CMD_ROOT_MOD/pkg/lib/awk/pkg._.awk" \
         -f "$___X_CMD_ROOT_MOD/pkg/lib/awk/pkg.static_build.awk"
 }
+
 # ___x_cmd_pkg___attr   hook.install,hook.setup
 ___x_cmd_pkg___attr(){
     eval "$(___x_cmd_pkg___attr_code "$@")"
@@ -57,17 +59,6 @@ ___x_cmd_pkg_locate(){
     local tgt="${1:?Provide name}"
     ___x_cmd_pkg_ll | awk -v FS=/ -v tgt="$tgt" '$2==tgt{ TGT=1; print $0 }END{ if(TGT>0){exit(0);}else{exit(1)}}'
 }
-# ___x_cmd_pkg___meta_fp(){
-#     local s
-#     s="$(___x_cmd_pkg_locate "${1:?Provide name}")" || return
-#     printf "%s/%s/meta.tt.json" "$___X_CMD_PKG_RAWPATH" "$s"
-# }
-
-# ___x_cmd_pkg___version_fp(){
-#     local s
-#     s="$(___x_cmd_pkg_locate "${1:?Provide name}")" || return
-#     printf "%s/%s/version.tt.json" "$___X_CMD_PKG_RAWPATH" "$s"
-# }
 
 # Default, China
 ___x_cmd_pkg___all_info(){
@@ -99,7 +90,7 @@ ___x_cmd_pkg___list(){
 }
 
 
-___x_cmd_pkg___default_version(){
+___x_cmd_pkg_default_version(){
 
     ___x_cmd_pkg___all_info "$@" | awk \
         -f "$___X_CMD_ROOT_MOD/awk/lib/default.awk" \

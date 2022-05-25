@@ -1,52 +1,33 @@
 
-# ___X_CMD_ENV_VERSION_CONFIG="
-# python=3.5
-# java=17
-# perl=7
-# "
-
-___x_cmd_env___var_apply_by_var(){
-    local line
-    local pkg
-    local version
-    while read -r line; do
-        if [ -n "$line" ]; then
-            pkg="${line%=*}"
-            version="${line#*=}"
-            x pkg setup "$pkg" "$version"
-        fi
-    done <<A
-$___X_CMD_ENV_VERSION_CONFIG
-A
-
+___x_cmd_env_current(){
+    local ___X_CMD_ENV_CURRENT_
+    ___x_cmd_env_current_ "$@"
+    printf "%s\n" "$___X_CMD_ENV_CURRENT_"
 }
 
-___x_cmd_env___var_add(){
-    local pkg
-    local version
-    local tmp
-    local i
-    ___X_CMD_ENV_VERSION_CONFIG="
-$___X_CMD_ENV_VERSION_CONFIG
-"
-    for i in "$@"; do
-        pkg="${i%=*}="
-        version="$(___x_cmd_env_get_version "$i")"
-        tmp="${___X_CMD_ENV_VERSION_CONFIG#*"$pkg"*
-}"
-        while [ "$tmp" != "$___X_CMD_ENV_VERSION_CONFIG" ]; do
-            ___X_CMD_ENV_VERSION_CONFIG="${___X_CMD_ENV_VERSION_CONFIG%%"$pkg"*
-*}${tmp}"
-            tmp="${___X_CMD_ENV_VERSION_CONFIG#*"$pkg"*
-}"
-        done
-        ___X_CMD_ENV_VERSION_CONFIG="$___X_CMD_ENV_VERSION_CONFIG$pkg$version
-"
-        [ -z "$___X_CMD_ENV___VAR_ADD_NO_SETUP" ] || x pkg setup "${i%=*}" "$version"
-    done
 
-    ___X_CMD_ENV_VERSION_CONFIG="${___X_CMD_ENV_VERSION_CONFIG#
-}"
-
+___x_cmd_env_current_(){
+    ___x_cmd_ldict_get_ ___X_CMD_ENV_VERSION_CONFIG "${1:?Provide pkg name}"
+    ___X_CMD_ENV_CURRENT_="$___X_CMD_LDICT_GET_"
 }
 
+___x_cmd___env_store_current(){
+    ___x_cmd_ldict_put ___X_CMD_ENV_VERSION_CONFIG "${1:?Provide pkg name}" "${2:?Provide version}"
+}
+
+___x_cmd_env_prev(){
+    local ___X_CMD_ENV_CURRENT_
+    printf "%s\n" "$___X_CMD_ENV_PREV"
+}
+
+___x_cmd_env_prev_(){
+    local pkg="${1:?Provide pkg name}"
+    eval ___X_CMD_ENV_PREV="\"\$___X_CMD_ENV_PREV_$pkg\""
+}
+
+___x_cmd___env_store_prev(){
+    local pkg="${1:?Provide pkg name}"
+    local ___X_CMD_ENV_CURRENT_
+    ___x_cmd_env_current_ "$pkg"
+    eval "___X_CMD_ENV_PREV_$pkg=\"\$___X_CMD_ENV_CURRENT_\""
+}

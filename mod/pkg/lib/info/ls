@@ -17,13 +17,13 @@ ___x_cmd_env_ls_installed()(
     cd "$___X_CMD_PKG_INSTALL_PATH" || exit
     (
         if [ -n "$1" ]; then
-            default_version="$(___x_cmd_pkg___default_version "$1")" || return
+            default_version="$(___x_cmd_pkg_default_version "$1")" || return
             for i in "$1"/*; do
                 printf "%s\n" "$i/$default_version"
             done
         else
             for i in */*; do
-                printf "%s\n" "$i/$(___x_cmd_pkg___default_version "${i%/*}")"
+                printf "%s\n" "$i/$(___x_cmd_pkg_default_version "${i%/*}")"
             done
         fi
     ) | awk -v FS="/" \
@@ -39,7 +39,7 @@ ___x_cmd_env_ls_activated(){
     local _line
     printf "%s\n" "$___X_CMD_PKG_ACTIVATE___LIST" | while read -r _line; do
         [ -n "$_line" ] || continue
-        printf "%s\n" "$_line=$(___x_cmd_pkg___default_version "${_line%=*}")" | awk -v FS="=" \
+        printf "%s\n" "$_line=$(___x_cmd_pkg_default_version "${_line%=*}")" | awk -v FS="=" \
         -v TH_THEME_COLOR="\\033[${___X_CMD_THEME_COLOR_CODE}m" '{
             if ($2 == $3) print $1 "\t" $2 TH_THEME_COLOR " (default)\033[0m"
             else print $1 "\t" $2

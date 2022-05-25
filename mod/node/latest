@@ -1,6 +1,5 @@
-# shellcheck shell=sh disable=SC3043 # xrc
-
-# author:       Li Junhao           l@x-cmd.com
+# Author:       Li Junhao           l@x-cmd.com
+# shellcheck    shell=sh            disable=SC3043      # xrc
 
 xrc:mod:lib node  node
 

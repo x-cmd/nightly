@@ -7,7 +7,7 @@ ___x_cmd_pkg_download(){
     x:trace pkg/download
 
     local pkg_name="${1:?Provide pkg name}"
-    local version="${2:-$(___x_cmd_pkg___default_version "$pkg_name")}"
+    local version="${2:-$(___x_cmd_pkg_default_version "$pkg_name")}"
     local osarch="${3:-${___X_CMD_PKG_OSARCH:-$(___x_cmd_pkg_osarch)}}"
     [ -n "$version" ] || return
 
@@ -49,6 +49,7 @@ ___x_cmd_pkg_download(){
         # TODO: ___x_cmd_httpget support 302
         # ___x_cmd_httpget "$url" "$ball" || {
         pkg:info "Download $pkg_name $version from $url to $ball"
+        # TODO: x curl
         curl --progress-bar --location --retry-max-time 10 --retry 0 "$url" --output "$ball" || {
             pkg:warn "Fail to download from $url"
             continue
@@ -66,7 +67,7 @@ A
 
 ___x_cmd_pkg_download_file___from_static_build_and_deflate(){
     local IFS='
-    '
+'
     local repo="${1:?Provide repo name, like p7zip}"
     local app="${2:-${repo}}"
     local version="${3:?Provide version}"
@@ -74,18 +75,19 @@ ___x_cmd_pkg_download_file___from_static_build_and_deflate(){
     pkg:debug "Download static-build. repo: $repo app: $app"
 
     local target="$___X_CMD_PKG_INSTALL_PATH/$repo/$version"
-    mkdir -p "$target"
+    x ensuredir "$target" || return 1
 
-    local arch
-    arch="$(os arch)"
-    local osname
-    osname="$(os name)"
+    local osarch
+    osarch="${___X_CMD_PKG_OSARCH:-$(___x_cmd_pkg_osarch)}"
+    local arch="${osarch#*/}"
+    local osname="${osarch%/*}"
 
     local exe
     case "$osname" in
-        win)    exe=$app.${osname}.${arch}.exe        ;;
-        *)      exe=$app.${osname}.${arch}  ;;
+        win)        exe=$app.${osname}.${arch}.exe          ;;
+        *)          exe=$app.${osname}.${arch}              ;;
     esac
+
     # Rely
     if [ ! -f "$target/$exe" ]; then
         pkg:info "Downloading: $repo/$app/$version/$exe.7z to $target"
@@ -111,7 +113,7 @@ ___x_cmd_pkg_download_file___from_static_build_and_deflate(){
                     local i
                     local suffix
 
-                    # TODO: using job for concurrency.
+                    # TODO: using curl shared-connection facility.
                     for i in $(seq "$size"); do
                         # suffix="$(printf "%03s" "$i")" # Not work in gnu bash
                         suffix="$(printf "%3s" "$i" | tr " " 0)"
@@ -134,25 +136,12 @@ ___x_cmd_pkg_download_file___from_static_build_and_deflate(){
 
 
 ___x_cmd_pkg_download___check_hashsum(){
-    local filepath="$1"
+    local filepath="${1:?Please priovide filepath}"
 
-    local md5="$2"
-    local sha1="$3"
-    local sha256="$4"
-    local sha512="$5"
+    [ -z "$2" ]  ||  [ "$(___x_cmd_md5       "$filepath")" = "$2" ]     ||      return 1
+    [ -z "$3" ]  ||  [ "$(___x_cmd_sha1      "$filepath")" = "$3" ]     ||      return 1
+    [ -z "$4" ]  ||  [ "$(___x_cmd_sha256    "$filepath")" = "$4" ]     ||      return 1
+    [ -z "$5" ]  ||  [ "$(___x_cmd_sha512    "$filepath")" = "$5" ]     ||      return 1
 
-    if [ -n "$sha512" ]; then
-        [ "$(___x_cmd_sha512 "$filepath")" != "$sha512" ]
-    elif [ -n "$sha256" ]; then
-        [ "$(___x_cmd_sha256 "$filepath")" != "$sha256" ]
-    elif [ -n "$sha1" ]; then
-        [ "$(___x_cmd_sha1 "$filepath")" != "$sha1" ]
-    elif [ -n "$md5" ]; then
-        [ "$(___x_cmd_md5 "$filepath")" != "$md5" ]
-    else
-        # In the future, will return 1
-        x:warn "No checksum provided."
-        return 0
-    fi
-
+    return 0
 }

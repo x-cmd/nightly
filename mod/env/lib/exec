@@ -1,0 +1,70 @@
+
+___x_cmd_env_exec(){
+    if ___x_cmd___env_exec_execuatable "$@"; then
+        ___x_cmd___env_exec_set_and_run_and_unset "$@"
+    else
+        ___x_cmd___env_exec_set "$@"
+    fi
+}
+
+___x_cmd___env_exec_execuatable(){
+    local arg
+    for arg in "$@"; do
+        case "$arg" in
+            --)     return 0
+        esac
+    done
+    return 1
+}
+
+___x_cmd___env_exec_set(){
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --)     break ;;
+            -*)     ___x_cmd_env untry "${1#-}" ;;
+            *=)     ___x_cmd_env untry "${1%=}" ;;
+            *=-)
+                    local ___X_CMD_ENV_PREV_
+                    ___x_cmd_env_prev_ "${1%=-}"
+                    ___x_cmd_env try "${1%=-}=${___X_CMD_ENV_PREV_}" ;;
+            *=*)    ___x_cmd_env try "$1" ;;
+        esac
+    done
+}
+
+___x_cmd___env_exec_set_and_run_and_unset(){
+    local ___X_CMD_ENV_RECOVER_CODE=
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --)
+                shift; "$@"; break ;;
+            -*)
+                ___x_cmd___env_exec_set_and_run_and_unset_recover "${1#-}"
+                ___x_cmd_env untry "${1#-}"
+                ;;
+            *=)
+                ___x_cmd___env_exec_set_and_run_and_unset_recover "${1%=}"
+                ___x_cmd_env untry "${1%=}"
+                ;;
+            *=-)
+                ___x_cmd___env_exec_set_and_run_and_unset_recover "${1%=}"
+                ___x_cmd_env retore "${1%=-}" ;;
+            *=*)
+                ___x_cmd___env_exec_set_and_run_and_unset_recover "${1%=}"
+                ___x_cmd_env try "$1" ;;
+        esac
+
+    done
+}
+
+___x_cmd___env_exec_set_and_run_and_unset_recover(){
+    local ___X_CMD_ENV_CURRENT_
+    local pkg="$1"
+    ___x_cmd_env current_ "$pkg"
+    if [ -n "$___X_CMD_ENV_CURRENT_" ]; then
+        ___X_CMD_ENV_RECOVER_CODE="$___X_CMD_ENV_RECOVER_CODE
+___x_cmd_pkg deactivate $pkg
+___x_cmd_pkg activate $pkg=$___X_CMD_ENV_CURRENT_"
+    fi
+}
+

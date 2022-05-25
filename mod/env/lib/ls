@@ -4,7 +4,6 @@ ___X_CMD_PKG_INSTALL_PATH="$___X_CMD_ROOT_TMP/pkg/installed"
 ___X_CMD_PKG_RAWPATH="$___X_CMD_ROOT_TMP/pkg/raw"
 
 ___x_cmd_env_ls(){
-    param:void
     case "$1" in
         i|installed)      shift;  ___x_cmd_env_ls_installed "$@" ;;
         a|activated)      shift;  ___x_cmd_env_ls_activated "$@" ;;
@@ -16,12 +15,20 @@ ___x_cmd_env_ls(){
 # Invoked pkg ls installed
 ___x_cmd_env_ls_installed()(
     if ! [ -d "$___X_CMD_PKG_INSTALL_PATH" ]; then return 0; fi
-    cd "$___X_CMD_PKG_INSTALL_PATH/$1"
+    if ! cd "$___X_CMD_PKG_INSTALL_PATH/$1"; then
+        pkg:debug "No pkg found."
+        return 0
+    fi
+
     pkg:debug "dir $___X_CMD_PKG_INSTALL_PATH/$1"
     for i in *; do
         printf "%s\n" "$i"
     done
-    cd - 1>/dev/null
+
+    if ! cd "$OLD_PWD"; then
+        pkg:warn "Cannot go back $OLD_PWD"
+        return 0
+    fi
     # printf "%s\n" "$___X_CMD_ENV_VERSION_CONFIG" | awk '$0!=""{gsub("=", "\t", $0); print $0}'
 )
 

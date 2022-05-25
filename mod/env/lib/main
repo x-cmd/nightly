@@ -1,8 +1,3 @@
-# ___X_CMD_ENV_VERSION_CONFIG="
-# java=1.1
-# node=1.2
-# python=1.3
-# "
 
 ___x_cmd_env_get_version(){
     local pkg_name="${1%=*}"
@@ -14,9 +9,25 @@ ___x_cmd_env_get_version(){
     fi
 }
 
+___x_cmd___env_pasre__pkg__version(){
+    case "$1" in
+        *=-)
+            ___X_CMD___ENV_PARSE_PKG="${1%=-}"
+            ___x_cmd_env_prev_ "${1%=-}"
+            ___X_CMD___ENV_PARSE_VERSION="$___X_CMD_ENV_PREV_"
+            ;;
+        *=*)
+            ___X_CMD___ENV_PARSE_PKG="${1%=*}"
+            ___X_CMD___ENV_PARSE_VERSION="${1#*=}"
+            ;;
+        *)
+            ___X_CMD___ENV_PARSE_PKG="${1}"
+            ___X_CMD___ENV_PARSE_VERSION="$(x pkg default_version "$1")"
+    esac
+}
+
 # try = install + activate
 ___x_cmd_env_try(){
-    param:void
     x:trace env/try
 
     local i
@@ -28,66 +39,44 @@ ___x_cmd_env_try(){
         fi
     done
 
+    local ___X_CMD___ENV_PARSE_PKG
+    local ___X_CMD___ENV_PARSE_VERSION
     for i in "$@"; do
-        x pkg activate "$i"
+        ___x_cmd___env_store_prev "$i"
+        x pkg activate "$___X_CMD___ENV_PARSE_PKG" "$___X_CMD___ENV_PARSE_VERSION"
+        ___x_cmd___env_store_current "$___X_CMD___ENV_PARSE_PKG" "$___X_CMD___ENV_PARSE_VERSION"
     done
 
-    ___X_CMD_ENV___VAR_ADD_NO_SETUP="" ___x_cmd_env___var_add "$@"
+    local ___X_CMD_ENV___CONFIGSTR_SET_
+    ___x_cmd_env___configstr_set_ "$___X_CMD_ENV___CONFIGSTR_SET_" "$@"
+    ___X_CMD_ENV_VERSION_CONFIG="$___X_CMD_ENV___CONFIGSTR_SET_"
 }
 
 # use = try + save-config
 ___x_cmd_env_use(){
-    param:void
     x:trace env/use
     ___x_cmd_env_try "$@" || return
 
-    local backup="$___X_CMD_ENV_VERSION_CONFIG"
-    if [ -f "$___X_CMD_ENV_VERSION_CONFIG_PATH" ]; then
-        ___X_CMD_ENV_VERSION_CONFIG="$(cat "$___X_CMD_ENV_VERSION_CONFIG_PATH")"
-    else
-        ___X_CMD_ENV_VERSION_CONFIG=""
-    fi
-
-    ___X_CMD_ENV___VAR_ADD_NO_SETUP=1 ___x_cmd_env___var_add "$@"
-    ___x_cmd_env_config_save
-
-    ___X_CMD_ENV_VERSION_CONFIG="$backup"
+    ___x_cmd_env_configfile_set "$@"
 }
 
+# TODO
 ___x_cmd_env_unuse(){
     local i
     local pkg_name
     local version
+
+    local code=___x_cmd_env_config_set
     for i in "$@"; do
         pkg_name="${i%=*}"
         x pkg deactivate "$pkg_name"
-        # 1. remove config
-        # 2. remove env
+        ___x_cmd___env_store_prev "$pkg_name"
+        ___x_cmd___env_store_current "$pkg_name"
+        code="$code $pkg_name="
     done
+
+    eval "$code"        # Remove config in file
 }
-
-___x_cmd_env_exec()(
-    # local arg
-    # local s
-    # for arg in "$@"; do
-    #     case "$arg" in
-    #         *=*)        s="$s $arg" ;;
-    #         *)          break
-    #     esac
-    # done
-    # eval ___x_cmd_env_use "$s" && "$@"
-    param:void
-    x:trace env/exec
-
-    local candidate="${1:?Provide package}"
-    local pkg_name="${candidate%=*}"
-    local version
-    version="$(___x_cmd_env_get_version "$candidate")"
-    shift
-    pkg:info "Execute $pkg_name $version: $*"
-    x pkg xbin init "$pkg_name" "$version"
-    "___x_cmd_${pkg_name}" "$@"
-)
 
 ___x_cmd_env_which(){
     local i

@@ -9,7 +9,7 @@
 
 if [ -z "$ZSH_VERSION" ]; then
     ___x_cmd_ll_bin(){ command ls -l "$@"; }
-elle
+else
     ___x_cmd_ll_bin(){ builtin ls -l "$@"; }
 fi
 
@@ -20,10 +20,11 @@ ___x_cmd_ll(){
             :cpu)                                       x os cpu ;;
             :mem)                                       x os mem ;;
             :proc|:ps)                                  x os ps ;;
-            :path)                                      ;;
             *)                                          ___x_cmd_ll_otherwise "$@" ;;
         esac
+        return
     fi
+    ___x_cmd_ll_otherwise "$@"
 }
 
 ___x_cmd_ll_otherwise(){

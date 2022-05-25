@@ -2,46 +2,59 @@
 # shellcheck    shell=sh            disable=SC3043,SC2164,SC3000-SC4000
 # License:      GPLv3
 
-xrc param/latest
-___x_cmd_env() {
-    param:scope     "env"
-    param:dsl <<A
-subcommands:
-    ls                      "list all installed environments"
-    try                     "Set environment version in this shell session"
-    use                     "Set global environment version"
-    unuse                   "Remove environment"
-    exec                    "Run an executable with the selected candidates version"
-    which                   "Display path of environment installed"
-    var                     "backup or recover environment"
-A
-# current                 "Show current environment"
-# install                 "Install environment"
-# download                "Download environment"
-    param:run
+xrc:mod:lib env     util exec config main advise ls var
 
-    # TODO: la---"list all available environments"
-    # TODO: ws---"Set workspace environment"
 
-    if [ "${1}" = "___x_cmd_ui_catsel" ]; then
-        shift
-        ___x_cmd_env_ui_catsel "$@"
-        return
-    fi
+___x_cmd_env(){
+    case "$1" in
+        ls)             ___x_cmd_env_ls "$@" ;;
+        try)            ___x_cmd_env_try "$@" ;;
+        untry)          ___x_cmd_env_untry "$@" ;;
+        use)            ___x_cmd_env_use "$@" ;;
+        unuse)          ___x_cmd_env_unuse "$@" ;;
+        exec)           ___x_cmd_env_exec "$@" ;;
 
-    if [ -z "$PARAM_SUBCMD" ]; then
-        ___x_cmd_env help
-        return 1
-    fi
+        which)          ___x_cmd_env_which "$@" ;;
+        var)            ___x_cmd_env_var "$@" ;;
 
-    "___x_cmd_env_$PARAM_SUBCMD" "$@"
+        prev)           ___x_cmd_env_prev "$@" ;;
+        current)        ___x_cmd_env_current "$@" ;;
+    esac
 }
 
+# xrc param/latest
+# ___x_cmd_env() {
+#     param:scope     "env"
+#     param:dsl <<A
+# subcommands:
+#     ls                      "list all installed environments"
+#     try                     "Set environment version in this shell session"
+#     use                     "Set global environment version"
+#     unuse                   "Remove environment"
+#     exec                    "Run an executable with the selected candidates version"
+#     which                   "Display path of environment installed"
+#     var                     "backup or recover environment"
+# A
+# # current                 "Show current environment"
+# # install                 "Install environment"
+# # download                "Download environment"
+#     param:run
 
-x log init  pkg
-xrc:mod:lib env     util config main advise ls var
+#     # TODO: la---"list all available environments"
+#     # TODO: ws---"Set workspace environment"
 
+#     if [ "${1}" = "___x_cmd_ui_catsel" ]; then
+#         shift
+#         ___x_cmd_env_ui_catsel "$@"
+#         return
+#     fi
 
+#     if [ -z "$PARAM_SUBCMD" ]; then
+#         ___x_cmd_env help
+#         return 1
+#     fi
 
+#     "___x_cmd_env_$PARAM_SUBCMD" "$@"
+# }
 
 xrc setmain ___x_cmd_env

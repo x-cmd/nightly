@@ -127,6 +127,7 @@ ___x_cmd_assert_otherwise(){
     shift
     local IFS=" "
     case "$op" in
+        eq)                 ___x_cmd_assert_eq "$@" ;;
         set)                ___x_cmd_assert_set "$@" ;;
 
         true)               ___x_cmd_assert_t "$@" ;;
@@ -311,7 +312,7 @@ ___x_cmd_assert_returnn(){
     fi
 
     if ___x_cmd_evex "$@"; then
-        printf "%s\n" "${MSG:-"Expect command return 0: $*"}" >&2
+        printf "%s\n" "${MSG:-"Expect command $*: return $code"}" >&2
         return 1
     else
         local errcode=$?
