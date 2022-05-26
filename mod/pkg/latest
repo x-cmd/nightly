@@ -4,6 +4,7 @@
 x log init pkg
 xrc os
 ___x_cmd_pkg(){
+    ___x_cmd_pkg___which_p7zip || return
     local op="$1"
     case "$op" in
         ls)                     shift; ___x_cmd_pkg_ls "$@" ;;      # add filter, remote, installed, ...
@@ -35,7 +36,7 @@ ___x_cmd_pkg(){
 
 xrc:mod:lib     pkg \
     util                xbin                main \
-    info/ls             info/ll             info/ls_installed   \
+    info/ls             info/ll               \
     mutate/download     mutate/install      mutate/activate     mutate/deactivate
 
 ___X_CMD_PKG_RAWPATH="$___X_CMD_ROOT_TMP/pkg/raw"

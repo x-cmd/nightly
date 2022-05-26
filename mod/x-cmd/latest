@@ -54,7 +54,7 @@ ___x_cmd_main(){        # x:trace x     # TODO: will effect x log
 
         *:=)                                    shift;  ___x_cmd_varset "${subcmd%:=}" "$@" ;;
         *=)                                     shift;  ___x_cmd_varset_without_end "${subcmd%=}" "$@" ;;
-        *=if)                                   ___x_cmd_eq_ifelse "$@" ;;
+        *=if)                                   ___x_cmd_eqifelse "$@" ;;
         *=case)                                 ___x_cmd_eqcase "$@" ;;
 
         readl|rl)                               shift;  ___x_cmd_readl "$@"     ;;

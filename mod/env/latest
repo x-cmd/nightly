@@ -2,59 +2,31 @@
 # shellcheck    shell=sh            disable=SC3043,SC2164,SC3000-SC4000
 # License:      GPLv3
 
+x log init env
 xrc:mod:lib env     util exec config main advise ls var
-
+xrc pkg
 
 ___x_cmd_env(){
-    case "$1" in
-        ls)             ___x_cmd_env_ls "$@" ;;
-        try)            ___x_cmd_env_try "$@" ;;
-        untry)          ___x_cmd_env_untry "$@" ;;
-        use)            ___x_cmd_env_use "$@" ;;
-        unuse)          ___x_cmd_env_unuse "$@" ;;
-        exec)           ___x_cmd_env_exec "$@" ;;
+    local op="$1"
+    case "$op" in
+        ls)             shift;  ___x_cmd_env_ls         "$@" ;;
+        try)            shift;  ___x_cmd_env_try        "$@" ;;
+        untry)          shift;  ___x_cmd_env_untry      "$@" ;;
+        use)            shift;  ___x_cmd_env_use        "$@" ;;
+        unuse)          shift;  ___x_cmd_env_unuse      "$@" ;;
+        exec)           shift;  ___x_cmd_env_exec       "$@" ;;
 
-        which)          ___x_cmd_env_which "$@" ;;
-        var)            ___x_cmd_env_var "$@" ;;
+        which)          shift; ___x_cmd_env_which       "$@" ;;
+        var)            shift; ___x_cmd_env_var         "$@" ;;
 
-        prev)           ___x_cmd_env_prev "$@" ;;
-        current)        ___x_cmd_env_current "$@" ;;
+        prev)           shift; ___x_cmd_env_prev        "$@" ;;
+        current)        shift; ___x_cmd_env_current     "$@" ;;
+        current_)       shift; ___x_cmd_env_current_    "$@" ;;
+        ""|help)             cat "$___X_CMD_ROOT_MOD/env/lib/help.txt" >&2; return 1 ;;
+        _x_cmd_advise_json ) cat "$___X_CMD_ROOT_MOD/env/lib/env.advise.json"        ;;
     esac
 }
 
-# xrc param/latest
-# ___x_cmd_env() {
-#     param:scope     "env"
-#     param:dsl <<A
-# subcommands:
-#     ls                      "list all installed environments"
-#     try                     "Set environment version in this shell session"
-#     use                     "Set global environment version"
-#     unuse                   "Remove environment"
-#     exec                    "Run an executable with the selected candidates version"
-#     which                   "Display path of environment installed"
-#     var                     "backup or recover environment"
-# A
-# # current                 "Show current environment"
-# # install                 "Install environment"
-# # download                "Download environment"
-#     param:run
-
-#     # TODO: la---"list all available environments"
-#     # TODO: ws---"Set workspace environment"
-
-#     if [ "${1}" = "___x_cmd_ui_catsel" ]; then
-#         shift
-#         ___x_cmd_env_ui_catsel "$@"
-#         return
-#     fi
-
-#     if [ -z "$PARAM_SUBCMD" ]; then
-#         ___x_cmd_env help
-#         return 1
-#     fi
-
-#     "___x_cmd_env_$PARAM_SUBCMD" "$@"
-# }
+___x_cmd_env_config_load
 
 xrc setmain ___x_cmd_env

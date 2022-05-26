@@ -1,35 +1,6 @@
 # Author:       Li Junhao       l@x-cmd.com                 # xrc
 # shellcheck    shell=sh        disable=SC2039,3043
 
-xrc param pkg/lib/staticbin os
-
-___x_cmd_ffmpeg_download(){
-    local arch
-    arch="$(os arch)"
-    local osname
-    osname="$(os name)"
-    local exe
-    case "$osname" in
-        win)    exe=ffmpeg.x64.exe        ;;
-        *)      exe=ffmpeg.${osname}.${arch}  ;;
-    esac
-    ___x_cmd_staticbin_init \
-        ___x_cmd_ffmpeg_download \
-            "$___X_CMD_ROOT/.bin/ffmpeg" "$exe" "$(___x_cmd_ffmpeg_bin_download_url "$exe")" \
-        && (
-            cd "$___X_CMD_ROOT/.bin/ffmpeg" && chmod +x "$exe"
-        )&& ___x_cmd_ffmpeg_download "$@"
-}
-
-___x_cmd_ffmpeg_bin_download_url(){
-    local exe="${1:?Provide app name}"
-    if [ "$___X_CMD_WHICHNET" != cn ]; then
-        printf "%s/%s" "https://raw.githubusercontent.com/static-build/ffmpeg/main/bin" "$exe.7z"
-    else
-        printf "%s/%s" "https://gitcode.net/x-bash/ffmpeg/-/raw/master/bin" "$exe.7z"
-    fi
-}
-
 ___x_cmd_ffmpeg(){
     local op="$1"
 
@@ -37,14 +8,17 @@ ___x_cmd_ffmpeg(){
         show)       shift; ___x_cmd_ffmpeg_show "$@" ;;
         convert)    shift; ___x_cmd_ffmpeg_convert "$@" ;;
         play)       shift; ___x_cmd_ffmpeg_play "$@" ;;
-        -*)         shift; ___x_cmd_ffmpeg_origin "$@" ;;
-        *)          ___x_cmd_ffmpeg_download "$@" ;;
+        *)          shift; ___x_cmd_ffmpeg_origin "$@" ;;
     esac
 
 }
 
 ___x_cmd_ffmpeg_origin(){
-    command ffmpeg "$@"
+    if ! ___x_cmd_pkg_xbin_init ffmpeg ___x_cmd_ffmpeg_origin; then
+        x:error "Fail to pkg_xbin_init ffmpeg"
+        return 1
+    fi
+    ___x_cmd_ffmpeg_origin "$@"
 }
 
 ___x_cmd_ffmpeg_show(){

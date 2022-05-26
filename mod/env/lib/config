@@ -3,7 +3,7 @@ ___X_CMD_ENV_VERSION_CONFIG_PATH="$___X_CMD_ROOT/.boot/env"
 
 
 ___x_cmd_env_config_load(){
-    if ! ___X_CMD_ENV_VERSION_CONFIG="$(cat)"; then
+    if ! ___X_CMD_ENV_VERSION_CONFIG="$(cat "$___X_CMD_ENV_VERSION_CONFIG_PATH")"; then
         env:error "Config file not found."
     fi
     ___x_cmd_env_try "$@"
@@ -11,38 +11,36 @@ ___x_cmd_env_config_load(){
 
 ___x_cmd_env_config_save(){
     local tgt="${1:-"$___X_CMD_ENV_VERSION_CONFIG_PATH"}"
-    if [ "$tgt" = - ]; then
-        tgt="$___X_CMD_ENV_VERSION_CONFIG_PATH"
-    fi
 
     if ! x ensuredir "${tgt%/*}"; then
         env:error "Couldn't create folder: ${tgt%/*}"
         return 1
     fi
 
-    local str="${2:-"$___X_CMD_ENV_VERSION_CONFIG"}"
-    printf "%s" "$str" >"${1:?Provide config file}"
+    ___x_cmd_ldict_print ___X_CMD_ENV___CONFIGSTR_SET_ > "$tgt"
 }
 
 # set
 ___x_cmd_env_config_set(){
-    local str
-    if [ -f "$___X_CMD_ENV_VERSION_CONFIG_PATH" ]; then
-        str="$(cat "$___X_CMD_ENV_VERSION_CONFIG_PATH")"
-    fi
-
-    local ___X_CMD_ENV___CONFIGSTR_SET_
-    ___x_cmd_env___configstr_set_ "$str" "$@"
-    ___x_cmd_env_config_save - "$___X_CMD_ENV___CONFIGSTR_SET_"
+    ___x_cmd_env___configstr_set_ "$___X_CMD_ENV_VERSION_CONFIG_PATH" "$@"
+    ___x_cmd_env_config_save "$___X_CMD_ENV_VERSION_CONFIG_PATH"
 }
 
 ___x_cmd_env___configstr_set_(){
-    ___X_CMD_ENV___CONFIGSTR_SET_="${1:?Provide str}"
+    local file="${1:-Provide file}"
+    ___x_cmd_ldict_load ___X_CMD_ENV___CONFIGSTR_SET_ "$file"
     shift
-
     local i
+    local pkg_name
+    local version
     for i in "$@"; do
-        ___x_cmd_ldict_put ___X_CMD_ENV___CONFIGSTR_SET_ "${i%=*}" "${i#*=}"
+        pkg_name="${i%=*}"
+        version="${i#*=}"
+        if [ -n "$version" ]; then
+            ___x_cmd_ldict_put ___X_CMD_ENV___CONFIGSTR_SET_ "$pkg_name" "$(___x_cmd_env_get_version "$i")"
+        else
+            ___x_cmd_ldict_rm ___X_CMD_ENV___CONFIGSTR_SET_ "$pkg_name"
+        fi
     done
 
 }

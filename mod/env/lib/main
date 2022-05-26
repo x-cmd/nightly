@@ -5,7 +5,7 @@ ___x_cmd_env_get_version(){
     if [ "$version" != "$pkg_name" ]; then
         printf "%s\n" "$version"
     else
-        x pkg default_version "$pkg_name"
+        ___x_cmd_pkg default_version "$pkg_name"
     fi
 }
 
@@ -14,7 +14,7 @@ ___x_cmd___env_pasre__pkg__version(){
         *=-)
             ___X_CMD___ENV_PARSE_PKG="${1%=-}"
             ___x_cmd_env_prev_ "${1%=-}"
-            ___X_CMD___ENV_PARSE_VERSION="$___X_CMD_ENV_PREV_"
+            ___X_CMD___ENV_PARSE_VERSION="$___X_CMD_ENV_PREV"
             ;;
         *=*)
             ___X_CMD___ENV_PARSE_PKG="${1%=*}"
@@ -22,7 +22,7 @@ ___x_cmd___env_pasre__pkg__version(){
             ;;
         *)
             ___X_CMD___ENV_PARSE_PKG="${1}"
-            ___X_CMD___ENV_PARSE_VERSION="$(x pkg default_version "$1")"
+            ___X_CMD___ENV_PARSE_VERSION="$(___x_cmd_pkg default_version "$1")"
     esac
 }
 
@@ -32,9 +32,10 @@ ___x_cmd_env_try(){
 
     local i
     for i in "$@"; do
-        pkg:info "Prepare ${i%=*} $(___x_cmd_env_get_version "$i")"
-        if ! x pkg install "${i%=*}" "$(___x_cmd_env_get_version "$i")"; then
-            pkg:error "Cannot install package: $i"
+        ___x_cmd___env_pasre__pkg__version "$i"
+        env:info "Prepare $___X_CMD___ENV_PARSE_PKG $___X_CMD___ENV_PARSE_VERSION"
+        if ! ___x_cmd_pkg install "$___X_CMD___ENV_PARSE_PKG" "$___X_CMD___ENV_PARSE_VERSION"; then
+            env:error "Cannot install package: $___X_CMD___ENV_PARSE_PKG $___X_CMD___ENV_PARSE_VERSION"
             return 1
         fi
     done
@@ -42,14 +43,17 @@ ___x_cmd_env_try(){
     local ___X_CMD___ENV_PARSE_PKG
     local ___X_CMD___ENV_PARSE_VERSION
     for i in "$@"; do
-        ___x_cmd___env_store_prev "$i"
-        x pkg activate "$___X_CMD___ENV_PARSE_PKG" "$___X_CMD___ENV_PARSE_VERSION"
+        ___x_cmd___env_pasre__pkg__version "$i"
+        ___x_cmd___env_store_prev "$___X_CMD___ENV_PARSE_PKG"
+        env:debug "Try $___X_CMD___ENV_PARSE_PKG $___X_CMD___ENV_PARSE_VERSION"
+        ___x_cmd_pkg deactivate "$___X_CMD___ENV_PARSE_PKG" 2>/dev/null
+        [ -n "$___X_CMD___ENV_PARSE_VERSION" ] || return 0
+        ___x_cmd_pkg activate "$___X_CMD___ENV_PARSE_PKG" "$___X_CMD___ENV_PARSE_VERSION"
         ___x_cmd___env_store_current "$___X_CMD___ENV_PARSE_PKG" "$___X_CMD___ENV_PARSE_VERSION"
     done
 
-    local ___X_CMD_ENV___CONFIGSTR_SET_
-    ___x_cmd_env___configstr_set_ "$___X_CMD_ENV___CONFIGSTR_SET_" "$@"
-    ___X_CMD_ENV_VERSION_CONFIG="$___X_CMD_ENV___CONFIGSTR_SET_"
+    ___x_cmd_env___configstr_set_ "$___X_CMD_ENV_VERSION_CONFIG_PATH" "$@"
+    ___X_CMD_ENV_VERSION_CONFIG="$(___x_cmd_ldict_print ___X_CMD_ENV___CONFIGSTR_SET_)"
 }
 
 # use = try + save-config
@@ -57,30 +61,39 @@ ___x_cmd_env_use(){
     x:trace env/use
     ___x_cmd_env_try "$@" || return
 
-    ___x_cmd_env_configfile_set "$@"
+    ___x_cmd_env_config_set "$@"
 }
 
 # TODO
-___x_cmd_env_unuse(){
+___x_cmd_env_untry(){
     local i
     local pkg_name
     local version
+    local ___X_CMD_ENV_PREV
 
-    local code=___x_cmd_env_config_set
+    local code=___x_cmd_env___configstr_set_
     for i in "$@"; do
         pkg_name="${i%=*}"
-        x pkg deactivate "$pkg_name"
-        ___x_cmd___env_store_prev "$pkg_name"
-        ___x_cmd___env_store_current "$pkg_name"
+        ___x_cmd_pkg deactivate "$pkg_name"
+        ___x_cmd_env_prev_ "$pkg_name"
+        env:debug "untry $pkg_name recover $___X_CMD_ENV_PREV"
+        [ -z "$___X_CMD_ENV_PREV" ] || ___x_cmd___env_store_current "$pkg_name" "$___X_CMD_ENV_PREV"
         code="$code $pkg_name="
     done
 
-    eval "$code"        # Remove config in file
+    eval "$code"
 }
+___x_cmd_env_unuse(){
+    x:trace env/unuse
+    ___x_cmd_env_untry "$@" || return
+    ___x_cmd_env_config_save "$___X_CMD_ENV_VERSION_CONFIG_PATH"
+}
+
+
 
 ___x_cmd_env_which(){
     local i
     for i in "$@"; do
-        x pkg xbin path "${i%=*}" "$(___x_cmd_env_get_version "$i")"
+        ___x_cmd_pkg xbin path "${i%=*}" "$(___x_cmd_env_get_version "$i")"
     done
 }

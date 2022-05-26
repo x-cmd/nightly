@@ -16,7 +16,8 @@ ___x_cmd___env_store_current(){
 }
 
 ___x_cmd_env_prev(){
-    local ___X_CMD_ENV_CURRENT_
+    local ___X_CMD_ENV_PREV
+    ___x_cmd_env_prev_ "$@"
     printf "%s\n" "$___X_CMD_ENV_PREV"
 }
 

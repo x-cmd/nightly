@@ -19,7 +19,7 @@ ___x_cmd_args(){
     local _a1
     # for ((i=2; i<=n; ++i)); do
     i=2
-    while [ $i -le $n ];do
+    while [ $i -le "$n" ];do
         eval "local _a$i"
         code_read="$code_read && read -r _a$i"
         code_invoke="$code_invoke \"\$_a$i\""

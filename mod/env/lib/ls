@@ -16,17 +16,17 @@ ___x_cmd_env_ls(){
 ___x_cmd_env_ls_installed()(
     if ! [ -d "$___X_CMD_PKG_INSTALL_PATH" ]; then return 0; fi
     if ! cd "$___X_CMD_PKG_INSTALL_PATH/$1"; then
-        pkg:debug "No pkg found."
+        env:debug "No pkg found."
         return 0
     fi
 
-    pkg:debug "dir $___X_CMD_PKG_INSTALL_PATH/$1"
+    env:debug "dir $___X_CMD_PKG_INSTALL_PATH/$1"
     for i in *; do
         printf "%s\n" "$i"
     done
 
     if ! cd "$OLD_PWD"; then
-        pkg:warn "Cannot go back $OLD_PWD"
+        env:warn "Cannot go back $OLD_PWD"
         return 0
     fi
     # printf "%s\n" "$___X_CMD_ENV_VERSION_CONFIG" | awk '$0!=""{gsub("=", "\t", $0); print $0}'

@@ -2,7 +2,7 @@
 # ls app, default app
 # Those folder without _tmp is success
 # Not sure what to do ...
-___x_cmd_pkg_ls_installed()(
+___x_cmd_pkg_ls_installed_ui()(
     local pkg
     local version
 
