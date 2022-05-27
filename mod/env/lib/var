@@ -10,7 +10,7 @@ ___x_cmd_env_var(){
     case "$1" in
         backup|get_backup|\
         clear|ls|\
-        recover|recoverall)  shift && ___x_cmd_env_var_$option $@ ;;
+        recover|recoverall)  shift && "___x_cmd_env_var_$option" "$@" ;;
         # recover|recoverall)  shift && eval "\$(___x_cmd_env_var_$option \"\$@\")" ;;
     esac
 }

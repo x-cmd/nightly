@@ -1,18 +1,27 @@
+# shellcheck    shell=sh            disable=SC3043      # xrc
 
 ___X_CMD_ENV_VERSION_CONFIG_PATH="$___X_CMD_ROOT/.boot/env"
 
-
 ___x_cmd_env_config_load(){
-    if ! ___X_CMD_ENV_VERSION_CONFIG="$(cat "$___X_CMD_ENV_VERSION_CONFIG_PATH")"; then
-        env:error "Config file not found."
+    if ! ___X_CMD_ENV_VERSION_CONFIG="$(cat "$___X_CMD_ENV_VERSION_CONFIG_PATH" 2>/dev/null)"; then
+        x mkdirp "${___X_CMD_ENV_VERSION_CONFIG_PATH%/*}"
+        touch "$___X_CMD_ENV_VERSION_CONFIG_PATH"
+        env:debug "Config file not found then create $___X_CMD_ENV_VERSION_CONFIG_PATH file"
     fi
-    ___x_cmd_env_try "$@"
+
+    local line
+    while read -r line; do
+        ___x_cmd_env_try "$line"
+    done <<A
+$(___x_cmd_ldict_print ___X_CMD_ENV_VERSION_CONFIG)
+A
+
 }
 
 ___x_cmd_env_config_save(){
     local tgt="${1:-"$___X_CMD_ENV_VERSION_CONFIG_PATH"}"
 
-    if ! x ensuredir "${tgt%/*}"; then
+    if ! x mkdirp "${tgt%/*}"; then
         env:error "Couldn't create folder: ${tgt%/*}"
         return 1
     fi
@@ -30,16 +39,17 @@ ___x_cmd_env___configstr_set_(){
     local file="${1:-Provide file}"
     ___x_cmd_ldict_load ___X_CMD_ENV___CONFIGSTR_SET_ "$file"
     shift
-    local i
-    local pkg_name
+    local pkg_name_version
+    local name
     local version
-    for i in "$@"; do
-        pkg_name="${i%=*}"
-        version="${i#*=}"
+    for pkg_name_version in "$@"; do
+        name="${pkg_name_version%=*}"
+        version="${pkg_name_version#*=}"
+
         if [ -n "$version" ]; then
-            ___x_cmd_ldict_put ___X_CMD_ENV___CONFIGSTR_SET_ "$pkg_name" "$(___x_cmd_env_get_version "$i")"
+            ___x_cmd_ldict_put ___X_CMD_ENV___CONFIGSTR_SET_ "$name" "$(___x_cmd_env_get_version "$pkg_name_version")"
         else
-            ___x_cmd_ldict_rm ___X_CMD_ENV___CONFIGSTR_SET_ "$pkg_name"
+            ___x_cmd_ldict_rm ___X_CMD_ENV___CONFIGSTR_SET_ "$name"
         fi
     done
 

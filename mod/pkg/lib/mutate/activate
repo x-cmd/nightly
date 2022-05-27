@@ -4,28 +4,28 @@ ___x_cmd_pkg_activate(){
 }
 
 ___x_cmd_pkg_activate___min(){
-    local pkg_name="${1:?Provide pkg name}"
-    local version="${2:-$(___x_cmd_pkg_default_version "$pkg_name")}"
+    local name="${1:?Provide pkg name}"
+    local version="${2:-$(___x_cmd_pkg_default_version "$name")}"
     local osarch="${3:-${___X_CMD_PKG_OSARCH:-$(___x_cmd_pkg_osarch)}}"
 
     local script_path
-    if script_path="$(___x_cmd_pkg___get_script_path "$pkg_name" "$version" "$osarch" activate)"; then
-        pkg:debug "Activate running $script_path for $pkg_name $version"
+    if script_path="$(___x_cmd_pkg___get_script_path "$name" "$version" "$osarch" activate)"; then
+        pkg:debug "Activate running $script_path for $name $version"
         . "${script_path}"
     else
-        ___x_cmd_pkg_activate___min_default "$pkg_name" "$version"
+        ___x_cmd_pkg_activate___min_default "$name" "$version"
     fi
 
     ___X_CMD_PKG_ACTIVATE___LIST="$___X_CMD_PKG_ACTIVATE___LIST
-$pkg_name=$version
+$name=$version
 "
 }
 
 ___x_cmd_pkg_activate___min_default(){
-    local pkg_name="${1:?Provide pkg name}"
+    local name="${1:?Provide pkg name}"
     local version="${2:?Provide version}"
     local bin_path
-    bin_path="$(___x_cmd_pkg_xbin_path "$pkg_name" "$version")"
+    bin_path="$(___x_cmd_pkg_xbin_path "$name" "$version")"
     bin_path="${bin_path%/*}"
     pkg:debug "path add_existed_folder $bin_path"
     x path add_existed_folder "$bin_path" || return 1

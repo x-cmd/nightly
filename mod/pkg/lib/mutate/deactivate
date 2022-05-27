@@ -4,12 +4,12 @@ ___x_cmd_pkg_deactivate(){
 }
 
 ___x_cmd_pkg_deactivate___min(){
-    local pkg_name="${1:?Provide pkg name}"
+    local name="${1:?Provide pkg name}"
     local version
     local _line
     while read -r _line; do
         [ -n "$_line" ] || continue
-        if [ "$pkg_name" = "${_line%=*}" ]; then
+        if [ "$name" = "${_line%=*}" ]; then
             version="${_line#*=}"
         fi
     done <<A
@@ -21,29 +21,29 @@ A
 
     local osarch="${3:-${___X_CMD_PKG_OSARCH:-$(___x_cmd_pkg_osarch)}}"
     local script_path
-    if script_path="$(___x_cmd_pkg___get_script_path "$pkg_name" "$version" "$osarch" deactivate)"; then
-        pkg:debug "Deactivate running $script_path for $pkg_name $version"
+    if script_path="$(___x_cmd_pkg___get_script_path "$name" "$version" "$osarch" deactivate)"; then
+        pkg:debug "Deactivate running $script_path for $name $version"
         . "${script_path}"
     else
-        ___x_cmd_pkg_deactivate___min_default "$pkg_name" "$version"
+        ___x_cmd_pkg_deactivate___min_default "$name" "$version"
     fi
 
     local tmp="${___X_CMD_PKG_ACTIVATE___LIST#*
-${pkg_name}=*
+"${name}"=*
 }"
 
     if [ "$tmp" != "$___X_CMD_PKG_ACTIVATE___LIST" ]; then
         ___X_CMD_PKG_ACTIVATE___LIST="${___X_CMD_PKG_ACTIVATE___LIST%%
-${pkg_name}=*
+"${name}"=*
 }${tmp}"
     fi
 }
 
 ___x_cmd_pkg_deactivate___min_default(){
-    local pkg_name="${1:?Provide pkg name}"
+    local pkg="${1:?Provide pkg name}"
     local version="${2:?Provide version}"
     local bin_path
-    bin_path="$(___x_cmd_pkg_xbin_path "$pkg_name" "$version")"
+    bin_path="$(___x_cmd_pkg_xbin_path "$pkg" "$version")"
     bin_path="${bin_path%/*}"
     pkg:debug "path rm $bin_path"
     x path rm "$bin_path" || return 1

@@ -26,9 +26,8 @@ ___x_cmd_rmrf(){
     local rule
     local target
     if ! code="$(___x_cmd_rmrf___regex_arr_check "$@")"; then
-        # echo "$code"
         eval "$code"
-        x:error "Try to 'rm -rf $target'. Violation of regex_arr: $regex_arr"
+        x:error "Try to 'rm -rf $target'. Violation of regex_arr: $rule"
         return 1
     fi
 
@@ -60,12 +59,12 @@ ___x_cmd_rmrf_regex_arr_del(){
     local tmp
     for regex_arr in "$@"; do
         tmp="${___X_CMD_RMRF_RULE_LIST#*
-$regex_arr
+"$regex_arr"
 }"
         if [ "$tmp" != "$___X_CMD_RMRF_RULE_LIST" ]; then
             x:info "Removing Rule: $regex_arr"
             ___X_CMD_RMRF_RULE_LIST="${___X_CMD_RMRF_RULE_LIST%%
-$regex_arr
+"$regex_arr"
 *}
 ${tmp}"
         else
@@ -107,7 +106,7 @@ END{
         p = patharr[ i ]
         for (j=1; j<=rule_arrl; ++j) {
             if ( match( p, regex_arr[j] ) ) {
-                printf("regex_arr='\''%s'\''\n", rule_arr[j])
+                printf("rule='\''%s'\''\n", rule_arr[j])
                 printf("target=\"$%s\"", i )
                 exit(1)
             }

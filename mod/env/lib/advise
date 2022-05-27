@@ -1,3 +1,5 @@
+# shellcheck    shell=sh            disable=SC3043,SC3054      # xrc
+
 # Section: advise ls_version
 
 # TODO:Here, the previous argument should be obtained through the interface provided by advise

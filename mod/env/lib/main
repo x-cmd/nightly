@@ -1,3 +1,4 @@
+# shellcheck    shell=sh            disable=SC3043      # xrc
 
 ___x_cmd_env_get_version(){
     local pkg_name="${1%=*}"
@@ -26,11 +27,30 @@ ___x_cmd___env_pasre__pkg__version(){
     esac
 }
 
+# use = try + save-config
+___x_cmd_env_use(){
+    x:trace env/use
+    ___x_cmd_env_try "$@" || return
+
+    ___x_cmd_env_config_set "$@"
+}
+
+
+___x_cmd_env_unuse(){
+    x:trace env/unuse
+    ___x_cmd_env_untry "$@" || return
+    ___x_cmd_env_config_save "$___X_CMD_ENV_VERSION_CONFIG_PATH"
+}
+
+
 # try = install + activate
 ___x_cmd_env_try(){
     x:trace env/try
 
     local i
+    local ___X_CMD___ENV_PARSE_PKG
+    local ___X_CMD___ENV_PARSE_VERSION
+
     for i in "$@"; do
         ___x_cmd___env_pasre__pkg__version "$i"
         env:info "Prepare $___X_CMD___ENV_PARSE_PKG $___X_CMD___ENV_PARSE_VERSION"
@@ -40,13 +60,13 @@ ___x_cmd_env_try(){
         fi
     done
 
-    local ___X_CMD___ENV_PARSE_PKG
-    local ___X_CMD___ENV_PARSE_VERSION
     for i in "$@"; do
         ___x_cmd___env_pasre__pkg__version "$i"
+
         ___x_cmd___env_store_prev "$___X_CMD___ENV_PARSE_PKG"
         env:debug "Try $___X_CMD___ENV_PARSE_PKG $___X_CMD___ENV_PARSE_VERSION"
         ___x_cmd_pkg deactivate "$___X_CMD___ENV_PARSE_PKG" 2>/dev/null
+
         [ -n "$___X_CMD___ENV_PARSE_VERSION" ] || return 0
         ___x_cmd_pkg activate "$___X_CMD___ENV_PARSE_PKG" "$___X_CMD___ENV_PARSE_VERSION"
         ___x_cmd___env_store_current "$___X_CMD___ENV_PARSE_PKG" "$___X_CMD___ENV_PARSE_VERSION"
@@ -56,13 +76,6 @@ ___x_cmd_env_try(){
     ___X_CMD_ENV_VERSION_CONFIG="$(___x_cmd_ldict_print ___X_CMD_ENV___CONFIGSTR_SET_)"
 }
 
-# use = try + save-config
-___x_cmd_env_use(){
-    x:trace env/use
-    ___x_cmd_env_try "$@" || return
-
-    ___x_cmd_env_config_set "$@"
-}
 
 # TODO
 ___x_cmd_env_untry(){
@@ -77,20 +90,17 @@ ___x_cmd_env_untry(){
         ___x_cmd_pkg deactivate "$pkg_name"
         ___x_cmd_env_prev_ "$pkg_name"
         env:debug "untry $pkg_name recover $___X_CMD_ENV_PREV"
-        [ -z "$___X_CMD_ENV_PREV" ] || ___x_cmd___env_store_current "$pkg_name" "$___X_CMD_ENV_PREV"
+        if [ -n "$___X_CMD_ENV_PREV" ]; then
+            ___x_cmd_pkg activate "$pkg_name" "$___X_CMD_ENV_PREV"
+            ___x_cmd___env_store_current "$pkg_name" "$___X_CMD_ENV_PREV"
+        fi
         code="$code $pkg_name="
     done
 
     eval "$code"
 }
-___x_cmd_env_unuse(){
-    x:trace env/unuse
-    ___x_cmd_env_untry "$@" || return
-    ___x_cmd_env_config_save "$___X_CMD_ENV_VERSION_CONFIG_PATH"
-}
 
-
-
+# TODO: ~
 ___x_cmd_env_which(){
     local i
     for i in "$@"; do

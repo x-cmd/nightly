@@ -51,6 +51,18 @@
         "#desc": "Execute your script use the corresponding shell",
         "#1": "___advise_ls"
     },
+    "md5|sha1|sha2|sha256|sha3|sha384|sha5|sha512": {
+        "#desc": "Calculate the hashsum of file",
+        "#n": "___advise_ls"
+    },
+    "yml2json|y2j": {
+        "#desc": "Yaml from stdin convert to JSON to stdout",
+        "#1": "___advise_ls"
+    },
+    "j2y|json2yml": {
+        "#desc": "JSON from stdin convert to YAML to stdout",
+        "#1": "___advise_ls"
+    },
     "nvm": null,
     "pip|npm": null,
     "jar|java|python|js|node|npx|ts|rb|lua": "--- Execute your script use these environments",
@@ -72,6 +84,18 @@
     "ws": {
         "#1": "xrc advise/lib/advise_get && ___x_cmd_advise_get_complete \"$(x advise which ___x_cmd_dev)\" mod ''",
         "#desc": "Execute a file in workspace, usually the .x-cmd directory in the repository"
+    },
+    "rmrf": {
+        "+": {
+            "#desc": "Add rule"
+        },
+        "-": {
+            "#desc": "Remove rule"
+        },
+        "--": {
+            "#desc": "Clear all rules"
+        },
+        "#n": "___advise_ls"
     },
     "#1": [
         "cd --- Change the working directory",

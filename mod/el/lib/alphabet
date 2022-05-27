@@ -25,7 +25,7 @@ alias u=""
 alias v=""
 alias w="who"
 
-alias x="___x_cmd_main"         # sure
+# alias x="___x_cmd_main"         # sure
 alias y="yml"
 alias z=""
 

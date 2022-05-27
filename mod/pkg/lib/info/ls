@@ -12,26 +12,39 @@ ___x_cmd_pkg_ls(){
 
 
 # Invoked pkg ls installed
+# TODO: efficiency defect
 ___x_cmd_pkg_ls_installed()(
     [ -d "$___X_CMD_PKG_INSTALL_PATH" ] || return 0
     cd "$___X_CMD_PKG_INSTALL_PATH" || exit
     (
-        if [ -n "$1" ]; then
-            default_version="$(___x_cmd_pkg_default_version "$1")" || return
-            for i in "$1"/*; do
-                printf "%s\n" "$i/$default_version"
-            done
-        else
-            for i in */*; do
-                printf "%s\n" "$i/$(___x_cmd_pkg_default_version "${i%/*}")"
-            done
-        fi
+        for i in *; do printf "%s\n" "$i"; done
     ) | awk -v FS="/" \
             -v TH_THEME_COLOR="\\033[${___X_CMD_THEME_COLOR_CODE}m" '{
         if ($2 == $3) print $1 "\t" $2 TH_THEME_COLOR " (default)\033[0m"
         else print $1 "\t" $2
     }'
 )
+
+# ___x_cmd_pkg_ls_installed()(
+#     [ -d "$___X_CMD_PKG_INSTALL_PATH" ] || return 0
+#     cd "$___X_CMD_PKG_INSTALL_PATH" || exit
+#     (
+#         if [ -n "$1" ]; then
+#             default_version="$(___x_cmd_pkg_default_version "$1")" || return
+#             for i in "$1"/*; do
+#                 printf "%s\n" "$i/$default_version"
+#             done
+#         else
+#             for i in */*; do
+#                 printf "%s\n" "$i/$(___x_cmd_pkg_default_version "${i%/*}")"
+#             done
+#         fi
+#     ) | awk -v FS="/" \
+#             -v TH_THEME_COLOR="\\033[${___X_CMD_THEME_COLOR_CODE}m" '{
+#         if ($2 == $3) print $1 "\t" $2 TH_THEME_COLOR " (default)\033[0m"
+#         else print $1 "\t" $2
+#     }'
+# )
 
 # Invoked pkg ls activated: check environment variable...
 ___x_cmd_pkg_ls_activated(){

@@ -27,14 +27,13 @@ ___x_cmd_pkg_xbin_path(){
 
 ___x_cmd_pkg_xbin_init(){
     local bin_mod_name="${1:?Provide bin mod name}"
-    local bin_mod_func_name="${2:-___x_cmd_${bin_mod_name}}"
 
     ___x_cmd_pkg___which_p7zip || return
     if [ -z "$___X_CMD_PKG_BINMOD_MAP" ]; then
-        ___X_CMD_PKG_BINMOD_MAP="$(cat $___X_CMD_PKG_RAWPATH/binmod.txt)"
+        ___X_CMD_PKG_BINMOD_MAP="$(cat "$___X_CMD_PKG_RAWPATH/binmod.txt")"
     fi
 
-    local pkg_name="${___X_CMD_PKG_BINMOD_MAP#*:$bin_mod_name:}"
+    local pkg_name="${___X_CMD_PKG_BINMOD_MAP#*:"$bin_mod_name":}"
     if [ "$pkg_name" = "${___X_CMD_PKG_BINMOD_MAP}" ]; then
         pkg:error "Not found: ${bin_mod_name}"
         return 1
@@ -43,15 +42,15 @@ ___x_cmd_pkg_xbin_init(){
     pkg_name="${pkg_name%%
 *}"
 
-    local version="${2:-$(___x_cmd_pkg_default_version ${pkg_name})}"
+    local version="${2:-$(___x_cmd_pkg_default_version "${pkg_name}")}"
     local bin_path
     bin_path="$(___x_cmd_pkg_xbin_path "$pkg_name" "$version")"
     pkg:debug "xbin_init. bin_mod_name: $bin_mod_name package: $pkg_name $version binpath: $bin_path"
 
-    if ! [ -f "$bin_path" ]; then
-        ___x_cmd_pkg_install "$pkg_name" "$version"
-    fi
-    if ! [ -x "$bin_path" ]; then  return 1; fi
+    [ -f "$bin_path" ] || ___x_cmd_pkg_install "$pkg_name" "$version"
+    [ -x "$bin_path" ] || return 1
+
+    local bin_mod_func_name="${3:-___x_cmd_${bin_mod_name}}"
     eval "
         $bin_mod_func_name(){
             $bin_path \"\$@\"

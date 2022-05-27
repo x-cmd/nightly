@@ -4,7 +4,7 @@ ___x_cmd_wx_run(){
     local wxfile="${1:-.}"; [ "$#" -eq 0 ] || shift
 
     case "$wxfile" in
-        @me/*|@i/*|@/*|@*/*) wxfile="$(x hub file which script/demo.wx)" || return 1 ;;
+        @me/*|@i/*|@/*|@*/*) wxfile="$(x hub file which "$wxfile")" || return 1 ;;
     esac
 
     local ___X_CMD_WX_UNPKG_
@@ -22,7 +22,7 @@ ___x_cmd_wx_run(){
     fi
 
     # TODO: To use no shift at ws module.
-    x ws run run "$@"
+    x ws execfile run "$@"
 
     # if [ -f ".x-cmd/run-dist" ]; then
     #     x ws run-dist "$@"
@@ -78,7 +78,7 @@ ___x_cmd_wx_unpkg_(){
     ___X_CMD_WX_UNPKG_="$___X_CMD_ROOT_TMP/wx/unpkg/${md5sum}"
     [ ! -d "$___X_CMD_ROOT_TMP/wx/unpkg/${md5sum}" ] || return 0
 
-    if ! x ensuredir "$___X_CMD_ROOT_TMP/wx/unpkg"; then
+    if ! x mkdirp "$___X_CMD_ROOT_TMP/wx/unpkg"; then
         x:error "Exit=1 for wx unpack depend on folder: $___X_CMD_WX_UNPKG_"
         ___X_CMD_WX_UNPKG_=
         return 1

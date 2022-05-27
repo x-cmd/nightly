@@ -38,3 +38,7 @@ coboot(){
     code "$HOME/.x-cmd/.boot" "$HOME/.bashrc" "$HOME/.bash_profile"
 }
 
+codk(){
+    docker run -d --name xpace -it -v "$HOME/x-bash":/root/x-bash -v "$HOME/x-cmd":/root/x-cmd xcmd/debian:latest
+}
+
