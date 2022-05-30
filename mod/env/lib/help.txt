@@ -1,8 +1,9 @@
 subcommands:
-    ls                      "list all installed environments"
+    ls                      "list environments"
     try                     "Set environment version in this shell session"
     use                     "Set global environment version"
-    unuse                   "Remove environment"
+    untry                   "Remove environment in this shell session"
+    unuse                   "Remove global environment"
     exec                    "Run an executable with the selected candidates version"
     which                   "Display path of environment installed"
     var                     "backup or recover environment"

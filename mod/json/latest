@@ -39,7 +39,7 @@ ___x_cmd_json(){
 
 # Section: data
 ___x_cmd_json_data(){
-    ___x_cmd_curl_gitx x-cmd json-test-data main data/one.mb.json "${TMPDIR}/mb1.json"
+    ___x_cmd_httpget_gitx x-cmd json-test-data main data/one.mb.json "${TMPDIR}/mb1.json"
     seq "${1:-1}" | x args 1 - cat "${TMPDIR}/mb1.json"
 }
 # EndSection

@@ -1,4 +1,3 @@
-# Author:       Li Junhao   l@x-cmd.com     # xrc
 # shellcheck    shell=sh    disable=SC2039,SC3043
 # Notice: ___x_cmd_http_qs_put will put the empty value
 
@@ -53,7 +52,7 @@ ______x_cmd_http_qs_put(){
     param:void
     local header_key="${1:?header key}"
     if [ $# -eq 1 ]; then
-        eval O=$O dict put qs "\$header_key" "\$${header_key}"
+        eval "O=$O" dict put qs "\$header_key" "\$${header_key}"
     else
         O=$O dict put qs "$header_key" "$2"
     fi
@@ -69,8 +68,7 @@ ______x_cmd_http_qs_mput(){
     # Notice 2: `abc=; ___x_cmd_http_qs_put abc` will NOT put any entry
     param:void
     local value
-    local i
-    for i in "$@"; do
+    local i; for i in "$@"; do
         # if [[ "$i" = *=* ]]; then
         if [ "$i" != "${i%%=*}" ]; then
             ______x_cmd_http_qs_put "${i%%=*}" "${i#*=}"

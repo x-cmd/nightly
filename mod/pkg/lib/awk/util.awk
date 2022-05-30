@@ -48,13 +48,13 @@ function pkg_get_version_or_head_version( jobj, table, pkg_name,            _fin
     _final_version = table_version( table, pkg_name )
     _final_version = juq(_final_version)
     if ( _final_version != "" ){
-        print _final_version
+        return _final_version
     } else {
         l = jobj[ jqu(pkg_name), jqu("version") L ]
         if (l <= 0 ) {
-            print "Not found version." >"/dev/stderr"
+            return ""
         } else {
-            print juq(jobj[ jqu( pkg_name ), jqu("version"), 1 ])
+            return juq(jobj[ jqu( pkg_name ), jqu("version"), 1 ])
         }
     }
 }

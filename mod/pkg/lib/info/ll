@@ -1,3 +1,4 @@
+# shellcheck    shell=sh            disable=SC3043      # xrc
 
 # Provide infomation for specific pkg and version
 ___x_cmd_pkg_ll()(

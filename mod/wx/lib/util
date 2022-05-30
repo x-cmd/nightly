@@ -94,6 +94,7 @@ ___x_cmd_wx_unpkg_(){
 
 ___x_cmd_wx_unpkg(){
     local ___X_CMD_WX_UNPKG_
+    # FIXME: It hide the return code.
     ___x_cmd_wx_unpkg_ "$@"
     printf "%s\n" "$___X_CMD_WX_UNPKG_"
 }

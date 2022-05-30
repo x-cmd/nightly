@@ -1,3 +1,4 @@
+# shellcheck    shell=sh            disable=SC3043,SC1090       # xrc
 
 ___x_cmd_pkg_install(){
     x:trace pkg/install

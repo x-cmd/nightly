@@ -4,13 +4,13 @@ ___x_cmd_http_graphql() {
     local op="$1"; shift
     case "$op" in
         query)
-            local url=${1:?Provide URL}
+            local url="${1:?Provide URL}"
             local body="query { ${2:?Provide GRAPHQL} }"
             shift 2
             ___x_cmd_http_graphql execute "$url" "$body" "$@"
             ;;
         query-json)
-            local url=${1:?Provide URL}
+            local url="${1:?Provide URL}"
             local body
             body="{ \"query\": $(jo quote "{ ${2:?Provide GRAPHQL} }")"
             shift 2

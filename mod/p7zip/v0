@@ -36,7 +36,7 @@ _7zd_which(){
         ;;
     esac
     p7zd_log debug "Downloading: p7zip/main/bin/$exe"
-    if CACHE="$target/$exe" ___x_cmd_curl_gitx static-build "p7zip" main "7zd/19.00/$exe" "$target/$exe"; then
+    if CACHE="$target/$exe" ___x_cmd_httpget_gitx static-build "p7zip" main "7zd/19.00/$exe" "$target/$exe"; then
         chmod +x "$target/$exe" && printf "%s" "$target/$exe"
     else
         p7zd_log error "Fail to download: p7zip/main/bin/$exe"

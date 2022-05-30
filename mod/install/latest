@@ -69,7 +69,7 @@ A
 
 ___x_cmd_install_which(){
     local cache="$___X_CMD_ROOT/.tmp/install/index.yml"
-    if ___x_cmd_curl_gitx x-cmd install main index.yml "$cache" "${___X_CMD_CURL_UPDATE:-1}"; then
+    if ___x_cmd_httpget_gitx x-cmd install main index.yml "$cache" "${___X_CMD_INSTALL_WHICH_UPDATE:--}"; then
         printf "%s" "$cache"
     else
         return 1
@@ -146,7 +146,7 @@ end{
 
 ___x_cmd_install_update(){
     param:void
-    ___X_CMD_CURL_UPDATE=0 ___x_cmd_install_which 1>/dev/null && printf "Update success.\n" >&2
+    ___X_CMD_INSTALL_WHICH_UPDATE=0 ___x_cmd_install_which 1>/dev/null && printf "Update success.\n" >&2
 }
 
 ___x_cmd_install_name(){

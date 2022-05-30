@@ -14,8 +14,8 @@ ___x_cmd_http_download_request(){
     local header_filepath
     header_filepath="$(___x_cmd_http_resp header_filepath)"
     mkdir -p "${2%/*}"
-    http_log debug "http request data:$(______x_cmd_http_qs_dump curl)"
-    http_log debug curl -Lo -D "$header_filepath" -X "$X" "$(______x_cmd_http_qs_dump curl)" "$(___x_cmd_http_header_dump curl)" --output "$2" "$paths"
+    http:debug "http request data:$(______x_cmd_http_qs_dump curl)"
+    http:debug curl -Lo -D "$header_filepath" -X "$X" "$(______x_cmd_http_qs_dump curl)" "$(___x_cmd_http_header_dump curl)" --output "$2" "$paths"
     eval curl -Lo -D "$header_filepath" -X "$X" --output "$2"  "$(______x_cmd_http_qs_dump curl)" "$(___x_cmd_http_header_dump curl)" "$paths" 2>/dev/null
     local a b c
     read -r a b c <<A
@@ -31,8 +31,8 @@ A
 
 ___x_cmd_http_request() {
     local IFS=" "
-    local X=${X:-GET}
-    local data=${2:-"$D"}
+    local X="${X:-GET}"
+    local data="${2:-"$D"}"
 
     local paths
     paths="$(___x_cmd_http_cd path "$1")"
@@ -48,7 +48,7 @@ ___x_cmd_http_request() {
         printf "%s" "$data" >"$tmp"
     fi
     # TODO: Display the data if only if body is text and data is NOT a lot
-    # http_log debug "body is: $data"
+    # http:debug "body is: $data"
     # [ -n "$DEBUG" ] && echo "body is: $data" >&2
 
     local header_filepath data_filepath
@@ -56,17 +56,17 @@ ___x_cmd_http_request() {
     data_filepath="$(___x_cmd_http_resp body_filepath)"
 
     if [ "$X" = GET ] || [ "$X" = DELETE ] || [ "$X" = HEAD ]; then
-        http_log debug "http request data:$(______x_cmd_http_qs_dump curl)"
-        http_log debug curl -D "$header_filepath" -X "$X" "$(______x_cmd_http_qs_dump curl)" "$(___x_cmd_http_header_dump curl)" "$paths"
-        eval curl -D "$header_filepath" -X "$X" "$(______x_cmd_http_qs_dump curl)" "$(___x_cmd_http_header_dump curl)" "$paths" 1>"$data_filepath" 2>/dev/null #2>(http_log debug)
+        http:debug "http request data:$(______x_cmd_http_qs_dump curl)"
+        http:debug curl -D "$header_filepath" -X "$X" "$(______x_cmd_http_qs_dump curl)" "$(___x_cmd_http_header_dump curl)" "$paths"
+        eval curl -D "$header_filepath" -X "$X" "$(______x_cmd_http_qs_dump curl)" "$(___x_cmd_http_header_dump curl)" "$paths" 1>"$data_filepath" 2>/dev/null #2>(http:debug)
     else
-        http_log debug "http request data:$(cat "$tmp")"
-        http_log debug curl -D "$header_filepath" -X "$X" "$(___x_cmd_http_header_dump curl)" -d "@$tmp" "$paths"
-        eval curl -D "$header_filepath" -X "$X" "$(___x_cmd_http_header_dump curl)" -d "@$tmp" "$paths" 1>"$data_filepath" 2>/dev/null #2>(http_log debug)
+        http:debug "http request data:$(cat "$tmp")"
+        http:debug curl -D "$header_filepath" -X "$X" "$(___x_cmd_http_header_dump curl)" -d "@$tmp" "$paths"
+        eval curl -D "$header_filepath" -X "$X" "$(___x_cmd_http_header_dump curl)" -d "@$tmp" "$paths" 1>"$data_filepath" 2>/dev/null #2>(http:debug)
     fi
     [ "$tmp" != "-" ] && rm "$tmp"
 
-    http_log debug "Response Header is: $(cat "$header_filepath")"
+    http:debug "Response Header is: $(cat "$header_filepath")"
 
     local a b c
     # shellcheck disable=SC2034

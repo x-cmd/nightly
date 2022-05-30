@@ -3,7 +3,15 @@
 # crud
 ___x_cmd_http_get() (
     param:void  # Notice: Using subshell
-    local url=${1:?Provide https url}
+    local url="${1:?Provide https url}"
+    shift
+    ___x_cmd_http_qs mput "$@"
+    X=GET ___x_cmd_http_request "$url"
+)
+
+___x_cmd_http_rget() (
+    param:void  # Notice: Using subshell
+    local url="${1:?Provide https url}"
     shift
     ___x_cmd_http_qs mput "$@"
     X=GET ___x_cmd_http_request "$url"
@@ -11,8 +19,8 @@ ___x_cmd_http_get() (
 
 ___x_cmd_http_download() (   # Notice: Using subshell
     param:void
-    local url=${1:?Provide https url}
-    local outPath=${2:?Provide https outPath}
+    local url="${1:?Provide https url}"
+    local outPath="${2:?Provide https outPath}"
     shift 2
     ___x_cmd_http_qs mput "$@"
     X=GET ___x_cmd_http_download_request "$url" "$outPath"

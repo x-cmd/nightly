@@ -1,3 +1,4 @@
+# shellcheck    shell=sh            disable=SC3043      # xrc
 
 # Section: attr
 ___x_cmd_pkg___static_build_attr(){
@@ -62,18 +63,18 @@ ___x_cmd_pkg_locate(){
 
 # Default, China
 ___x_cmd_pkg___all_info(){
-    local pkg_name="${1:?Provide pkg name}"
+    local name="${1:?Provide pkg name}"
     local version="${2:-""}"
     local osarch="${3:-${___X_CMD_PKG_OSARCH:-$(___x_cmd_pkg_osarch)}}"
 
-    pkg_name="$(___x_cmd_pkg_locate "$pkg_name")" || return
+    name="$(___x_cmd_pkg_locate "$name")" || return
 
-    pkg:debug "Function ___x_cmd_pkg___all_info(). pkg_name: $pkg_name version: $version osarch: $osarch ___X_CMD_PKG_RAWPATH: $___X_CMD_PKG_RAWPATH ___X_CMD_WHICHNET: $___X_CMD_WHICHNET"
-    printf "%s\n%s\n%s\n%s\n%s\n" "$pkg_name" "$version" "$osarch" "$___X_CMD_PKG_RAWPATH" "$___X_CMD_WHICHNET"
+    pkg:debug "Function ___x_cmd_pkg___all_info(). package: $name $version osarch: $osarch ___X_CMD_PKG_RAWPATH: $___X_CMD_PKG_RAWPATH ___X_CMD_WHICHNET: $___X_CMD_WHICHNET"
+    printf "%s\n%s\n%s\n%s\n%s\n" "$name" "$version" "$osarch" "$___X_CMD_PKG_RAWPATH" "$___X_CMD_WHICHNET"
 
-    cat "$___X_CMD_PKG_RAWPATH/$pkg_name/meta.tt.json" || return
+    cat "$___X_CMD_PKG_RAWPATH/$name/meta.tt.json" || return
     printf "\n"
-    cat "$___X_CMD_PKG_RAWPATH/$pkg_name/version.tt.json" || return
+    cat "$___X_CMD_PKG_RAWPATH/$name/version.tt.json" || return
 }
 # EndSection
 

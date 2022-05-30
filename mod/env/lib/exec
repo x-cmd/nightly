@@ -23,10 +23,7 @@ ___x_cmd___env_exec_set(){
         case "$1" in
             -*)     ___x_cmd_env untry "${1#*-}" ;;
             *=)     ___x_cmd_env untry "${1%=*}" ;;
-            *=-)
-                    local ___X_CMD_ENV_PREV_
-                    ___x_cmd_env_prev_ "${1%=-*}"
-                    [ -z "$___X_CMD_ENV_PREV_" ] || ___x_cmd_env try "${1%=-*}=${___X_CMD_ENV_PREV_}" ;;
+            *=-)    ___x_cmd_env try "$1" ;;
             *=*)    ___x_cmd_env try "$1" ;;
         esac
         shift

@@ -7,39 +7,39 @@
 ___x_cmd_pkg_download(){
     x:trace pkg/download
 
-    local pkg_name="${1:?Provide pkg name}"
-    local version="${2:-$(___x_cmd_pkg_default_version "$pkg_name")}"
+    local name="${1:?Provide pkg name}"
+    local version="${2:-$(___x_cmd_pkg_default_version "$name")}"
     local osarch="${3:-${___X_CMD_PKG_OSARCH:-$(___x_cmd_pkg_osarch)}}"
     [ -n "$version" ] || return
 
     local sb_repo
     local sb_app
-    ___x_cmd_pkg___static_build_attr "$pkg_name" "$version" "$osarch"
+    ___x_cmd_pkg___static_build_attr "$name" "$version" "$osarch"
     if [ -n "$sb_repo" ] && [ -n "$sb_app" ]; then
         ___x_cmd_pkg_download_file___from_static_build_and_deflate "$sb_repo" "$sb_app" "$version"
         return
     fi
 
     local url_list
-    url_list="$(___x_cmd_pkg___list "$pkg_name" "$version" "$osarch" "url.${___X_CMD_WHICHNET:-_}" )"
+    url_list="$(___x_cmd_pkg___list "$name" "$version" "$osarch" "url.${___X_CMD_WHICHNET:-_}" )"
     if [ -z "$url_list" ]; then
         pkg:error "Not found url."
         return 1
     fi
 
     local file_suffix
-    ___x_cmd_pkg___attr "$pkg_name" "$version" "$osarch" file_suffix
+    ___x_cmd_pkg___attr "$name" "$version" "$osarch" file_suffix
     local url
-    local ball="$___X_CMD_PKG_DOWNLOAD_PATH/$pkg_name/$version.$file_suffix"
-    mkdir -p "$___X_CMD_PKG_DOWNLOAD_PATH/$pkg_name"
-    pkg:debug "Download $pkg_name $version url_list: $url_list ball: $ball"
+    local ball="$___X_CMD_PKG_DOWNLOAD_PATH/$name/$version.$file_suffix"
+    mkdir -p "$___X_CMD_PKG_DOWNLOAD_PATH/$name"
+    pkg:debug "Download $name $version url_list: $url_list ball: $ball"
 
     local md5
     local sha1
     local sha256
     local sha512
 
-    ___x_cmd_pkg___attr "$pkg_name" "$version" "$osarch" "md5,sha1,sha256,sha512"
+    ___x_cmd_pkg___attr "$name" "$version" "$osarch" "md5,sha1,sha256,sha512"
     if [ -f "$ball" ]; then
         ! ___x_cmd_pkg_download___check_hashsum "$ball" "$md5" "$sha1" "$sha256" "$sha512" || return 0
 
@@ -49,7 +49,7 @@ ___x_cmd_pkg_download(){
     while read -r url; do
         # TODO: ___x_cmd_httpget support 302
         # ___x_cmd_httpget "$url" "$ball" || {
-        pkg:info "Download $pkg_name $version from $url to $ball"
+        pkg:info "Download $name $version from $url to $ball"
         # TODO: x curl
         if ! curl --progress-bar --location --retry-max-time 10 --retry 0 "$url" --output "$ball"; then
             pkg:warn "Fail to download from $url"
@@ -88,7 +88,7 @@ ___x_cmd_pkg_download_file___from_static_build_and_deflate(){
     # Rely
     if [ ! -f "$target/$exe" ]; then
         pkg:info "Downloading: $repo/$app/$version/$exe.7z to $target"
-        if ! ___x_cmd_curl_gitx static-build "${repo}" main "$app/$version/$exe.7z" "$target/$exe.7z"; then
+        if ! ___x_cmd_httpget_gitx static-build "${repo}" main "$app/$version/$exe.7z" "$target/$exe.7z"; then
             pkg:warn "Download failure: $repo/main $app/$version/$exe.7z. Perhaps platform unsupported."
             return 1
         fi
@@ -113,7 +113,7 @@ ___x_cmd_pkg_download_file___from_static_build_and_deflate(){
                     for i in $(seq "$size"); do
                         # suffix="$(printf "%03s" "$i")" # Not work in gnu bash
                         suffix="$(printf "%3s" "$i" | tr " " 0)"
-                        if ! ___x_cmd_curl_gitx static-build "${repo}" main "$app/$version/$exe.7z.$suffix" "$target/$exe.7z.$suffix"; then
+                        if ! ___x_cmd_httpget_gitx static-build "${repo}" main "$app/$version/$exe.7z.$suffix" "$target/$exe.7z.$suffix"; then
                             pkg:warn "Download failure in $exe.7z.$suffix" >&2
                             return 1
                         fi

@@ -20,9 +20,10 @@ ______x_cmd_http_resp_header(){
     else
         local filepath
         filepath="$(______x_cmd_http_resp_header_filepath)"
-        local filter=${1:?provide filter} A
+        local filter="${1:?provide filter}"
+        local A
         A="$(grep "$filter:" "$filepath")"
-        A="${A##$filter: }"
+        A="${A##"$filter": }"
         printf "%s" "${A%"${A##*[![:space:]]}"}"
     fi
 }

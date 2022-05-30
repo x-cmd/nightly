@@ -1,5 +1,4 @@
 
-
 # Section: release
 
 ___x_cmd_os_kernal(){
@@ -11,7 +10,7 @@ ___x_cmd_os_release_code(){
 }
 
 ___x_cmd_os_extract(){
-    awk -v name=${1:-Provide name} -v code=1 -v FS='=' '
+    awk -v name="${1:-Provide name}" -v code=1 -v FS='=' '
 $1==name { print $2; code=0 }
 END { exit code }
 '
@@ -172,93 +171,4 @@ ___x_cmd_os_release_all(){
 
 # EndSection
 
-# Section: name
-___x_cmd_os_lsname(){
-    printf "%s" "linux
-darwin
-sunos
-freebsd
-openbsd
-aix
-win"
-}
-
-
-# code from nvm
-___x_cmd_os_name() {
-    case "$(command uname -a)" in
-        Linux\ *)                   printf "%s\n" linux ;;
-        Darwin\ *)                  printf "%s\n" darwin ;;
-        SunOS\ *)                   printf "%s\n" sunos ;;
-        FreeBSD\ *)                 printf "%s\n" freebsd ;;
-        OpenBSD\ *)                 printf "%s\n" openbsd ;;         # TODO: Netbsd?
-        AIX\ *)                     printf "%s\n" aix ;;
-        CYGWIN* | MSYS* | MINGW*)   printf "%s\n" win ;;
-    esac
-}
-
-# EndSection
-
-# Section: arch
-___x_cmd_os_lsarch(){
-    printf "%s" "linux
-x64
-x64
-arm64"
-}
-
-# code from nvm
-___x_cmd_os_arch() {
-    local HOST_ARCH
-    local OS
-
-    OS="$(___x_cmd_os_name)"
-    if [ "${OS}" = "sunos" ]; then
-        # first try to use pkgsrc to guess the most appropriate arch.
-        if HOST_ARCH=$(pkg_info -Q MACHINE_ARCH pkg_install 2>/dev/null); then
-            HOST_ARCH=$(echo "${HOST_ARCH}" | command tail -1)
-        else
-            # If it's not available, use isainfo to get the instruction set supported by the kernel.
-            HOST_ARCH=$(isainfo -n)
-        fi
-    elif [ "${OS}" = "aix" ]; then
-        HOST_ARCH=ppc64
-    else
-        HOST_ARCH="$(command uname -m)"
-    fi
-
-    local ARCH
-    case "${HOST_ARCH}" in
-        x86_64 | amd64)     ARCH="x64" ;;
-        i*86)               ARCH="x86" ;;
-        aarch64)            ARCH="arm64" ;;
-        *)                  ARCH="${HOST_ARCH}" ;;     # TODO: Consider 32bit arm? For router or raspberry pi 3?
-    esac
-
-    # If running a 64bit ARM kernel but a 32bit ARM userland, change ARCH to 32bit ARM (armv7l)
-    if [ "$OS" = "Linux" ] && [ "${ARCH}" = arm64 ]; then
-        local L
-        L=$(ls -dl /sbin/init 2>/dev/null) #                                         if /sbin/init is 32bit executable
-        if [ "$(od -An -t x1 -j 4 -N 1 "${L#*-> }")" = ' 01' ]; then
-            ARCH=armv7l
-            HOST_ARCH=armv7l
-        fi
-    fi
-
-    local arg
-    local src
-    local tgt
-    for arg in "$@"; do
-        src="${arg%%=*}"
-        tgt="${arg#*=}"
-        if [ "$src" = "$ARCH" ]; then
-            printf "%s\n" "$tgt"
-            return 0
-        fi
-    done
-
-    printf "%s\n" "${ARCH}"
-}
-
-# EndSection
 

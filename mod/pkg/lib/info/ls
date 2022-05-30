@@ -15,55 +15,53 @@ ___x_cmd_pkg_ls(){
 # TODO: efficiency defect
 ___x_cmd_pkg_ls_installed()(
     [ -d "$___X_CMD_PKG_INSTALL_PATH" ] || return 0
-    cd "$___X_CMD_PKG_INSTALL_PATH" || exit
+    osarch="$(___x_cmd_pkg_osarch)"
+    locate_list="$(___x_cmd_pkg_ll)"
     (
-        for i in *; do printf "%s\n" "$i"; done
+        cd "$___X_CMD_PKG_INSTALL_PATH" || return
+        for i in */*; do
+            printf "%s\n" "$i";
+        done
     ) | awk -v FS="/" \
-            -v TH_THEME_COLOR="\\033[${___X_CMD_THEME_COLOR_CODE}m" '{
-        if ($2 == $3) print $1 "\t" $2 TH_THEME_COLOR " (default)\033[0m"
-        else print $1 "\t" $2
-    }'
-)
+        -v OSARCH="$osarch" \
+        -v LOCAL_LIST="$locate_list" \
+        -v PKG_RAWPATH="$___X_CMD_PKG_RAWPATH" \
+        -v TH_THEME_COLOR="\\033[${___X_CMD_THEME_COLOR_CODE}m" \
+        -f "$___X_CMD_ROOT_MOD/awk/lib/default.awk" \
+        -f "$___X_CMD_ROOT_MOD/awk/lib/jqparse.awk" \
+        -f "$___X_CMD_ROOT_MOD/awk/lib/str.awk" \
+        -f "$___X_CMD_ROOT_MOD/pkg/lib/awk/util.awk" \
+        -f "$___X_CMD_ROOT_MOD/pkg/lib/awk/pkg.ls.awk"
 
-# ___x_cmd_pkg_ls_installed()(
-#     [ -d "$___X_CMD_PKG_INSTALL_PATH" ] || return 0
-#     cd "$___X_CMD_PKG_INSTALL_PATH" || exit
-#     (
-#         if [ -n "$1" ]; then
-#             default_version="$(___x_cmd_pkg_default_version "$1")" || return
-#             for i in "$1"/*; do
-#                 printf "%s\n" "$i/$default_version"
-#             done
-#         else
-#             for i in */*; do
-#                 printf "%s\n" "$i/$(___x_cmd_pkg_default_version "${i%/*}")"
-#             done
-#         fi
-#     ) | awk -v FS="/" \
-#             -v TH_THEME_COLOR="\\033[${___X_CMD_THEME_COLOR_CODE}m" '{
-#         if ($2 == $3) print $1 "\t" $2 TH_THEME_COLOR " (default)\033[0m"
-#         else print $1 "\t" $2
-#     }'
-# )
+)
 
 # Invoked pkg ls activated: check environment variable...
 ___x_cmd_pkg_ls_activated(){
     [ -n "$___X_CMD_PKG_ACTIVATE___LIST" ] || return
     local _line
+    local osarch
+    local locate_list
+    osarch="$(___x_cmd_pkg_osarch)"
+    locate_list="$(___x_cmd_pkg_ll)"
     printf "%s\n" "$___X_CMD_PKG_ACTIVATE___LIST" | while read -r _line; do
         [ -n "$_line" ] || continue
-        printf "%s\n" "$_line=$(___x_cmd_pkg_default_version "${_line%=*}")" | awk -v FS="=" \
-        -v TH_THEME_COLOR="\\033[${___X_CMD_THEME_COLOR_CODE}m" '{
-            if ($2 == $3) print $1 "\t" $2 TH_THEME_COLOR " (default)\033[0m"
-            else print $1 "\t" $2
-        }'
-    done
+        printf "%s\n" "$_line"
+    done | awk -v FS="=" \
+        -v OSARCH="$osarch" \
+        -v LOCAL_LIST="$locate_list" \
+        -v PKG_RAWPATH="$___X_CMD_PKG_RAWPATH" \
+        -v TH_THEME_COLOR="\\033[${___X_CMD_THEME_COLOR_CODE}m" \
+        -f "$___X_CMD_ROOT_MOD/awk/lib/default.awk" \
+        -f "$___X_CMD_ROOT_MOD/awk/lib/jqparse.awk" \
+        -f "$___X_CMD_ROOT_MOD/awk/lib/str.awk" \
+        -f "$___X_CMD_ROOT_MOD/pkg/lib/awk/util.awk" \
+        -f "$___X_CMD_ROOT_MOD/pkg/lib/awk/pkg.ls.awk"
 }
 
 ___x_cmd_pkg_ls_all(){
     if ! [ -d "$___X_CMD_PKG_RAWPATH" ]; then return 0; fi
     pkg_name="${1:?Provide package name}"
-    cat "$___X_CMD_PKG_RAWPATH"/*/"$pkg_name/version.tt.json" | x ja 'V=="{"&&_[1]==K&&_[1]!=1{print uq(_[1])}'
+    cat "$___X_CMD_PKG_RAWPATH"/*/"$pkg_name/version.tt.json" | x ja '_[2]=="\"'"$(os name)/$(os arch)"'\""&&K=="\"sha\""{print uq(_[1])}'
 }
 
 

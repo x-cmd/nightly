@@ -1,4 +1,4 @@
-# Author:       Li Junhao   l@x-cmd.com     # xrc
+# Author:       Li Junhao   l@x-cmd.com             # xrc
 # shellcheck    shell=sh    disable=SC2039,SC3043
 
 xrc param
@@ -18,7 +18,8 @@ ___x_cmd_http() {
         download        "download file"                                     \
         header          "set the default header"                            \
         head            "launch a head request"                             \
-        get             "launch a head request"                             \
+        get             "launch a get request"                              \
+        rget            "launch a get request and follow 3xx redirection"   \
         post            "launch a post request"                             \
         put             "launch a put request"                              \
         patch           "launch a patch request"                            \
@@ -37,16 +38,6 @@ ___x_cmd_http() {
 
 x log init http
 
-# shellcheck disable=SC1091
-{
-    . "$___X_CMD_ROOT/http/lib/utils"
-    . "$___X_CMD_ROOT/http/lib/header"
-    . "$___X_CMD_ROOT/http/lib/qs"
-    . "$___X_CMD_ROOT/http/lib/body"
-    . "$___X_CMD_ROOT/http/lib/request"
-    . "$___X_CMD_ROOT/http/lib/resp"
-    . "$___X_CMD_ROOT/http/lib/crud"
-    . "$___X_CMD_ROOT/http/lib/graphql"
-}
+xrc:mod:lib http    utils header qs body request resp crud graphql
 
 xrc setmain ___x_cmd_http

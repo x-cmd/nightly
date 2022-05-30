@@ -1,3 +1,4 @@
+# shellcheck    shell=sh            disable=SC3043      # xrc
 
 # ls app, default app
 # Those folder without _tmp is success
