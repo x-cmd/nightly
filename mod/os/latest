@@ -1,0 +1,35 @@
+# Author:       Li Junhao   l@x-cmd.com         # xrc
+# shellcheck    shell=sh    disable=SC3043
+
+xrc:mod:lib os      import osarch release
+
+___x_cmd_os(){
+    local subcmd="${1:?Provide Sub Command}";   shift
+    case "$subcmd" in
+
+        name_)                  ___x_cmd_os_name          "$@"    ;;
+        arch_)                  ___x_cmd_os_arch          "$@"    ;;
+
+        name)                   ___x_cmd_os_name          "$@"    ;;
+        arch)                   ___x_cmd_os_arch          "$@"    ;;
+
+        release)                ___x_cmd_os_release       "$@"    ;;
+        rname)                  ___x_cmd_os_release_name  "$@"    ;;
+
+        lsname)                 ___x_cmd_os_lsname        "$@"    ;;
+        lsarch)                 ___x_cmd_os_lsarch        "$@"    ;;
+
+        help|--help|-h)         ___x_cmd_os_help ;;
+        _x_cmd_advise_json)     cat "${___X_CMD_ROOT_MOD}/os/lib/os.advise.json" ;;
+
+        *)                      ___x_cmd_os_help          "$@"    ;;
+    esac
+}
+
+___x_cmd_os_import ls
+
+___x_cmd_os_help(){
+    cat "${___X_CMD_ROOT_MOD}/os/lib/help.txt" >&2
+}
+
+xrc setmain ___x_cmd_os
