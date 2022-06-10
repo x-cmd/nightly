@@ -1,0 +1,65 @@
+{
+    "ls": {
+        "installed": "--- List installed language or application",
+        "activate": "--- List activated language or application",
+        "all": {
+            "#desc": "List all deactivated language or application",
+            "#1": "___x_cmd_pkg_rawpath_name_advise_ls"
+        }
+    },
+
+    "update": "--- download the latest app",
+
+    "version": null,
+    "default_version": {
+        "#desc": "Uninstall language or application",
+        "#1": "___x_cmd_pkg_rawpath_name_advise_ls"
+    },
+
+    "ll": null,
+
+    "which": null,
+    "download": {
+        "#desc": "Download language or application package",
+        "#1": "___x_cmd_pkg_rawpath_name_advise_ls",
+        "#2": "___x_cmd_pkg_rawpath_version_advise_ls"
+    },
+    "install": {
+        "#desc": "Install language or application",
+        "#1": "___x_cmd_pkg_rawpath_name_advise_ls",
+        "#2": "___x_cmd_pkg_rawpath_version_advise_ls"
+    },
+    "uninstall": {
+        "#desc": "Uninstall language or application",
+        "#1": "___x_cmd_pkg_rawpath_name_advise_ls",
+        "#2": "___x_cmd_pkg_rawpath_version_advise_ls"
+    },
+    "reinstall":{
+        "#desc": "Reuninstall language or application",
+        "#1": "___x_cmd_pkg_rawpath_name_advise_ls",
+        "#2": "___x_cmd_pkg_rawpath_version_advise_ls"
+    },
+
+    "activate": {
+        "#desc": "Activate language or application",
+        "#1": "___x_cmd_pkg_rawpath_name_advise_ls",
+        "#2": "___x_cmd_pkg_rawpath_version_advise_ls"
+    },
+    "deactivate": {
+        "#desc": "Deactivate language or application",
+        "#1": "___x_cmd_pkg_rawpath_name_advise_ls",
+        "#2": "___x_cmd_pkg_rawpath_version_advise_ls"
+    },
+
+    "xbin": {
+        "init" : {
+            "#1": "___x_cmd_pkg_rawpath_name_advise_ls",
+            "#2": "___x_cmd_pkg_rawpath_version_advise_ls"
+        },
+        "path": {
+            "#desc": "Show bin path",
+            "#1": "___x_cmd_pkg_rawpath_name_advise_ls",
+            "#2": "___x_cmd_pkg_rawpath_version_advise_ls"
+        }
+    }
+}

@@ -1,0 +1,37 @@
+# Author:       Li Junhao       l@x-cmd.com                 # xrc
+# shellcheck    shell=sh        disable=SC2039,3043
+
+___x_cmd_ffmpeg(){
+    local op="$1"
+
+    case "$op" in
+        show)       shift; ___x_cmd_ffmpeg_show "$@" ;;
+        convert)    shift; ___x_cmd_ffmpeg_convert "$@" ;;
+        play)       shift; ___x_cmd_ffmpeg_play "$@" ;;
+        *)          shift; ___x_cmd_ffmpeg_origin "$@" ;;
+    esac
+
+}
+
+___x_cmd_ffmpeg_origin(){
+    if ! ___x_cmd_pkg_xbin_init ffmpeg ___x_cmd_ffmpeg_origin; then
+        x:error "Fail to pkg_xbin_init ffmpeg"
+        return 1
+    fi
+    ___x_cmd_ffmpeg_origin "$@"
+}
+
+___x_cmd_ffmpeg_show(){
+    local op
+    op="$1"
+
+    case "$op" in
+        buildconf)      ___x_cmd_ffmpeg_origin -buildconf ;;
+        formats)        ___x_cmd_ffmpeg_origin -formats ;;
+    esac
+
+}
+
+# EndSection
+
+xrc setmain ___x_cmd_ffmpeg
