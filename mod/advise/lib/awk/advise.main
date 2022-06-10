@@ -1,4 +1,0 @@
-advise_test(){
-    :
-    awk -f ""
-}
