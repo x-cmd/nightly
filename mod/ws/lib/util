@@ -1,7 +1,0 @@
-# Help Command
-___x_cmd_ws_help(){
-    cat "$___X_CMD_ROOT_MOD/ws/lib/help.txt"
-}
-
-
-
