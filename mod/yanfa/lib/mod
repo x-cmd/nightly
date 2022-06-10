@@ -173,11 +173,21 @@ ___x_cmd_yanfa_mod_getfp(){
 }
 
 
-___x_cmd_yanfa_mod_ls_latest(){
+___x_cmd_yanfa_mod_ls_latest___one(){
     ___x_cmd_httpget_gitx_official modlist | ___x_cmd_yanfa_mod_ls_awk_
-    local code=$?
-    yanfa:warn "___x_cmd_yanfa_mod_ls_latest: $code"
-    return $code
+}
+
+___x_cmd_yanfa_mod_ls_latest(){
+    local code
+    local i
+    for i in 1 2 3; do
+        ___x_cmd_yanfa_mod_ls_latest___one
+        local code=$?
+        [ "$code" -ne 0 ] || return 0
+        yanfa:warn "___x_cmd_yanfa_mod_ls_latest: $code"
+        sleep 1
+    done
+    return 1
 }
 
 ___x_cmd_yanfa_mod_ls_awk_(){

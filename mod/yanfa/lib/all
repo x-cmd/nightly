@@ -24,10 +24,19 @@ A
 }
 
 
-___x_cmd_yanfa_all_repolist(){
-    param:void
+___x_cmd_yanfa_all_repolist___one(){
     # curl https://gitee.com/x-cmd/x-cmd/raw/main/repolist 2>/dev/null | awk '{ if ($0 ~ /^\+/) gsub(/^\+/, "", $0); print $0 }'
     ___x_cmd_httpget_gitx_official repolist | awk '{ if ($0 ~ /^\+/) gsub(/^\+/, "", $0); print $0 }'
+}
+
+___x_cmd_yanfa_all_repolist(){
+    param:void
+    local i
+    for i in 1 2 3; do
+        ! ___x_cmd_yanfa_all_repolist___one || return 0
+        sleep 1
+    done
+    return 1
 }
 
 ___x_cmd_yanfa_all_map(){
