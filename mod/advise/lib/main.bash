@@ -10,8 +10,7 @@ ___advise_run(){
         /*) filepath="$resname" ;;
         -)  filepath=/dev/stdin ;;
         *)  filepath="$___ADVISE_RUN_CMD_FOLDER/$resname"
-            [ ! -d "$filepath" ] || filepath="$___ADVISE_RUN_CMD_FOLDER/$resname/advise.json"
-            [ -f "$filepath" ] || filepath="$___ADVISE_RUN_CMD_FOLDER/$resname/advise.t.json";;
+            [ ! -d "$filepath" ] || filepath="$filepath/advise.json" ;;
     esac
     [ -f "$filepath" ] || return
 
