@@ -1,0 +1,57 @@
+# Author:       Li Junhao           l@x-cmd.com
+# shellcheck    shell=sh            disable=SC3043      # xrc
+
+x log init pkg
+xrc os
+___x_cmd_pkg(){
+    # ___x_cmd_pkg___which_p7zip || return
+    local op="$1"
+    case "$op" in
+        ls)                     shift; ___x_cmd_pkg_ls                    "$@" ;;      # add filter, remote, installed, ...
+        update)                 shift; ___x_cmd_pkg_update                "$@" ;;
+
+        version)                shift; ___x_cmd_pkg_version               "$@" ;;
+        default_version)        shift; ___x_cmd_pkg_default_version       "$@" ;;
+        ll)                     shift; ___x_cmd_pkg_ll                    "$@" ;;
+
+        # x pkg which node=v12
+        which)                  shift; ___x_cmd_pkg_which                 "$@" ;;
+
+        # x pkg download         node=v12
+        download)               shift; ___x_cmd_pkg_download              "$@" ;;
+        install)                shift; ___x_cmd_pkg_install               "$@" ;;
+        uninstall)              shift; ___x_cmd_pkg_uninstall             "$@" ;;
+        reinstall)              shift; ___x_cmd_pkg_reinstall             "$@" ;;
+
+        # x pkg activate/deactivate  node=v12
+        activate)               shift; ___x_cmd_pkg_activate              "$@" ;;
+        deactivate)             shift; ___x_cmd_pkg_deactivate            "$@" ;;
+
+        xbin)                   shift; ___x_cmd_pkg_xbin                  "$@"          ;;
+        ""|--help|-h)           cat "$___X_CMD_ROOT_MOD/pkg/lib/help.txt" >&2; return 0 ;;
+        _x_cmd_advise_json)     cat "$___X_CMD_ROOT_MOD/pkg/lib/pkg.advise.json"        ;;
+
+        *)                      pkg:error "Not found command: x pkg $1"; return 1
+    esac
+}
+
+xrc:mod:lib     pkg \
+    util                xbin                main \
+    info/ls             info/ll             info/ls_installed  \
+    mutate/download     mutate/install      mutate/activate     mutate/deactivate
+
+if ___x_cmd_is_suitable_advise_env; then
+    xrc:mod:lib pkg     advise
+fi
+
+___X_CMD_PKG_RAWPATH="$___X_CMD_ROOT_TMP/pkg/raw"
+___X_CMD_PKG_DOWNLOAD_PATH="$___X_CMD_ROOT_TMP/pkg/download"
+___X_CMD_PKG_INSTALL_PATH="$___X_CMD_ROOT_TMP/pkg/installed"
+
+x mkdirp "$___X_CMD_PKG_RAWPATH" "$___X_CMD_PKG_DOWNLOAD_PATH" "$___X_CMD_PKG_INSTALL_PATH"
+# x defineddir \
+#     ___X_CMD_PKG_RAWPATH        "$___X_CMD_ROOT_TMP/pkg/raw" \
+#     ___X_CMD_PKG_DOWNLOAD_PATH  "$___X_CMD_ROOT_TMP/pkg/download" \
+#     ___X_CMD_PKG_INSTALL_PATH   "$___X_CMD_ROOT_TMP/pkg/installed"
+
+xrc setmain ___x_cmd_pkg
