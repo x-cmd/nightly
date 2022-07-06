@@ -1,0 +1,55 @@
+{
+    "ls": {
+        "#desc": "Show all available advise json obj"
+    },
+    "rm": {
+        "#desc": "Remove one obj, if no obj is given, remove all obj",
+        "#1": {
+            "#exec": "___x_cmd_advise__ls $___X_CMD_ADVISE_TMPDIR"
+        }
+    },
+    "which": {
+        "#desc": "Show the path of the obj",
+        "#1": {
+            "#exec": "___x_cmd_advise__ls $___X_CMD_ADVISE_TMPDIR"
+        }
+    },
+    "cat": {
+        "#desc": "Show the content of the obj",
+        "#n": {
+            "#exec": "___x_cmd_advise__ls $___X_CMD_ADVISE_TMPDIR"
+        }
+    },
+    "init|new": {
+        "#desc": "Create a new obj",
+        "#2": {
+            "#exec": "___x_cmd_advise__file"
+        }
+    },
+    "man": {
+        "#desc": "Manager for x-cmd/advise",
+        "ls": null,
+        "update": null,
+        "rm": {
+            "#1": {
+                "#exec": "candidate_exec_arr=( $(___x_cmd_advise_man ls) )"
+            }
+        },
+        "which": {
+            "#1": {
+                "#exec": "candidate_exec_arr=( $(___x_cmd_advise_man ls) )"
+            }
+        },
+        "load": {
+            "#1": {
+                "#exec": "candidate_exec_arr=( $(___x_cmd_advise_man ls) )"
+            }
+        }
+    },
+    "del": null,
+    "obj-new": null,
+    "obj-del": null,
+    "clear": {
+        "#desc": "Clear all of the advise cache."
+    }
+}
