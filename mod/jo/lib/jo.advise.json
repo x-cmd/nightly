@@ -18,7 +18,7 @@
         }
     },
     "qu": {
-        "#desc": "Query json data             Uasge: jaon data | jo qu [path] [argument...]",
+        "#desc": "Query json data             Uasge: json data | jo qu [path] [argument...]",
         "#1": {
             "#cand": []
         }

@@ -96,7 +96,7 @@
     },
     "nvm": null,
     "pip|npm": null,
-    "jar|java|python|js|node|npx|ts|rb|lua": {
+    "jar|java|python|js|node|ts|rb|lua": {
         "#desc": "Execute your script use these environments"
     },
     "jq|yq": null,
@@ -141,45 +141,25 @@
         }
     },
     "#1": {
-        "cd": {
-            "#desc": "Change the working directory"
-        },
-        "hub": {
-            "#desc": "Manage your script file in x-service"
-        },
-        "yanfa": null,
-        "man": {
-            "#desc": "An interface to the system reference manuals"
-        },
-        "env": {
-            "#desc": "Inject the environment"
-        },
-        "advise": {
-            "#desc": "Generate command completion based on advise json"
-        },
-        "theme": {
-            "#desc": "Change terminal theme"
-        },
-        "tldr": {
-            "#desc": "Collaborative cheatsheets for console commands"
-        },
-        "install": {
-            "#desc": "Install Command-line tools"
-        },
-        "proxy": {
-            "#desc": "Setting up mirror sources for various package management"
-        },
-        "cowsay": {
-            "#desc": "Generates ASCII art pictures of a cow with a message"
-        },
-        "jo": {
-            "#desc": "Command-line incomplete JSON processor"
-        },
         "#cand": [
+            "cd --- Change the working directory",
+            "hub --- Manage your script file in x-service",
+            "yanfa",
+            "man --- An interface to the system reference manuals",
+            "env --- Inject the environment",
+            "advise --- Generate command completion based on advise json",
+            "theme --- Change terminal theme",
+            "tldr --- Collaborative cheatsheets for console commands",
+            "install --- Install Command-line tools",
+            "proxy --- Setting up mirror sources for various package management",
+            "cowsay --- Generates ASCII art pictures of a cow with a message",
+            "jo --- Command-line incomplete JSON processor",
+            "npx --- Run a command from a local or remote npm package",
+            "pipx",
             "license"
         ]
     },
     "#n": {
-        "#exec": "___x_cmd_advise__get_result"
+        "#exec": "___x_cmd_advise__offset"
     }
 }

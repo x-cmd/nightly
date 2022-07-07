@@ -81,6 +81,7 @@ ___x_cmd_main(){        # x:trace x     # TODO: will effect x log
         ""|help|-H|--help|-h)                           ___x_cmd_x_cmd_help ;;
 
         *.wx)                                           x wx run "$@" ;;
+        :*)                                     shift;  x xdk "${subcmd#:}" "$@" ;;
         *)                                              ___x_cmd_main_otherwise "$@" ;;
     esac
 }
