@@ -3,7 +3,7 @@
 
 ___x_cmd_pipx(){
     case "$1" in
-        _x_cmd_advise_json)       printf "{}";;
+        _x_cmd_advise_json)       cat "$(x advise man which pipx)";;
         *)                        ___x_cmd___pipx_exec "$@" ;;
     esac
 }

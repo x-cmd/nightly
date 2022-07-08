@@ -2,11 +2,10 @@
 # shellcheck    shell=sh        disable=SC3043,SC2164,SC1091
 
 ___x_cmd_npx(){
-    # ___x_cmd___npx_origin "$@"
     ___x_cmd___npx_exec "$@"
 }
 
-if ! command -v npx; then
+if ! command -v npx 1>/dev/null; then
     x env try node
 fi
 
@@ -17,8 +16,9 @@ ___x_cmd___npx_origin(){
 ___x_cmd___npx_exec(){
     local name="$1";  [ "$#" -gt 1 ] && shift
     case "$name" in
-        -*)     ___x_cmd___npx_origin "$name" "$@" ;;
-        *)      ___x_cmd___npx_exec_2 "$name" "$@"
+        _x_cmd_advise_json) cat "$(x advise man which npx)" ;;
+        -*)                 ___x_cmd___npx_origin "$name" "$@" ;;
+        *)                  ___x_cmd___npx_exec_2 "$name" "$@" ;;
     esac
 }
 

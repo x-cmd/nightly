@@ -41,13 +41,13 @@ ___x_cmd_xdk_accept_os_(){
     case "$os" in
         python|py)          ___X_CMD_XDK_ACCEPT_OS_=xcmd/python     ;;
         java|ja)            ___X_CMD_XDK_ACCEPT_OS_=xcmd/java       ;;
-        node|js)            ___X_CMD_XDK_ACCEPT_OS_=xcmd/python     ;;
-        perl|pl)            ___X_CMD_XDK_ACCEPT_OS_=xcmd/python     ;;
+        node|js)            ___X_CMD_XDK_ACCEPT_OS_=xcmd/node       ;;
+        perl|pl)            ___X_CMD_XDK_ACCEPT_OS_=xcmd/perl       ;;
         ruby|rb)            ___X_CMD_XDK_ACCEPT_OS_=xcmd/ruby       ;;
-        lua)                ___X_CMD_XDK_ACCEPT_OS_=xcmd/python     ;;
+        lua)                ___X_CMD_XDK_ACCEPT_OS_=xcmd/lua        ;;
 
-        rust)               ___X_CMD_XDK_ACCEPT_OS_=xcmd/python     ;;
-        gcc)                ___X_CMD_XDK_ACCEPT_OS_=xcmd/python     ;;
+        rust)               ___X_CMD_XDK_ACCEPT_OS_=xcmd/rust       ;;
+        gcc)                ___X_CMD_XDK_ACCEPT_OS_=xcmd/gcc        ;;
         clang)              ___X_CMD_XDK_ACCEPT_OS_=xcmd/clang      ;;
 
         ubuntu|ubu)         ___X_CMD_XDK_ACCEPT_OS_=xcmd/ubuntu     ;;
