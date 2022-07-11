@@ -28,15 +28,13 @@ ___X_CMD_UI_REGION_ENTER="$(printf "\015")"
 ___X_CMD_UI_REGION_BACKSPACE="$(printf "\010")"
 ___X_CMD_UI_REGION_DELETE="$(printf "\177")" # 7f
 
-
-if [ -n "$BASH_VERSION" ]; then
+if [ -n "$BASH_VERSION" ] || [ "ash" = "$___X_CMD_SHELL" ]; then
 ___x_cmd_ui_region_getchar_read1(){
     local IFS="$(printf "\001")"
     read -rsn "${1:-1}" ___X_CMD_UI_GETCHAR_CHAR
     local code=$?
     return $code
 }
-
 
 elif [ -n "$ZSH_VERSION" ]; then
 

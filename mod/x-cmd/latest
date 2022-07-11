@@ -1,7 +1,7 @@
 # Author:       Li Junhao   l@x-cmd.com             # xrc
 # shellcheck    shell=sh    disable=SC3043,SC1091
 
-xrc:mod:lib x-cmd glob con alias args rmrf cond util lang exe hashsum
+xrc:mod:lib x-cmd glob con alias args rmrf cond util lang exe hashsum lenv
 
 # Section : x main function
 ___x_cmd_main_otherwise(){

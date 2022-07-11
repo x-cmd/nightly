@@ -28,8 +28,10 @@ ___x_cmd_pkg(){
         deactivate)             shift; ___x_cmd_pkg_deactivate            "$@" ;;
 
         xbin)                   shift; ___x_cmd_pkg_xbin                  "$@"          ;;
+        _smoke)                 shift; ___x_cmd_pkg__smoke                "$@"          ;;
         ""|--help|-h)           cat "$___X_CMD_ROOT_MOD/pkg/lib/help.txt" >&2; return 0 ;;
         _x_cmd_advise_json)     cat "$___X_CMD_ROOT_MOD/pkg/lib/pkg.advise.json"        ;;
+
 
         *)                      pkg:error "Not found command: x pkg $1"; return 1
     esac
@@ -53,5 +55,18 @@ x mkdirp "$___X_CMD_PKG_RAWPATH" "$___X_CMD_PKG_DOWNLOAD_PATH" "$___X_CMD_PKG_IN
 #     ___X_CMD_PKG_RAWPATH        "$___X_CMD_ROOT_TMP/pkg/raw" \
 #     ___X_CMD_PKG_DOWNLOAD_PATH  "$___X_CMD_ROOT_TMP/pkg/download" \
 #     ___X_CMD_PKG_INSTALL_PATH   "$___X_CMD_ROOT_TMP/pkg/installed"
+
+___x_cmd_pkg__smoke(){
+    local name="${1:?Provide a candidate name}"
+
+    smokepath=$(ls "$___X_CMD_PKG_RAWPATH"/*"/$name/.x-cmd/smoke.sh") 2>/dev/null
+    if [ -f "$smokepath" ]; then
+        . "$smokepath"
+    else
+        pkg:error "Smoke file of "$name" doesn't exist"
+    fi
+
+}
+
 
 xrc setmain ___x_cmd_pkg

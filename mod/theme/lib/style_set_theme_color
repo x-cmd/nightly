@@ -1,4 +1,4 @@
-# shellcheck shell=sh   disable=
+# shellcheck shell=sh   disable=SC3043
 ###
  # @description: set theme hightlight color
  # @param $1:color => black | red | green | yellow | blue | magenta | cyan | white | colour${0~255} | #rrggbb

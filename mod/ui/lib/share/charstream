@@ -1,0 +1,6 @@
+
+read_charstream(){
+    while read -rsn 1 a; do
+        printf "%s\n" "$a"
+    done | awk -f ord.awk -f ./charstream.awk
+}

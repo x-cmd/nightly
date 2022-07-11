@@ -18,63 +18,48 @@ ___x_cmd_gh_current(){
 }
 
 # shellcheck disable=SC2120
-___x_cmd_gh_current_repo() {
-    param:void
-
-    local O="${O:-___x_cmd_gh_GITHUB_DEFAULT}"
-
-    if [ -n "$1" ]; then
-        ___x_cmd_gh_default set "github_$O" "repo" "$@"
-        return
-    fi
-
-    ___x_cmd_gh_default get "github_$O" "repo"
-}
-
-# shellcheck disable=SC2120
 ___x_cmd_gh_current_owner() {
     param:void
     local O="${O:-___x_cmd_gh_GITHUB_DEFAULT}"
+
     if [ -n "$1" ]; then
         ___X_CMD_GITHUB_DEFAULT_OWNER="$1"
-        ___x_cmd_gh_config_set  "user" "$___X_CMD_GITHUB_DEFAULT_OWNER"
-        ___x_cmd_ui_tf true "Manually change the owner to $___X_CMD_GITHUB_DEFAULT_OWNER"
-        return 0
-    fi
-
-    [ -n "$___X_CMD_GITHUB_DEFAULT_OWNER" ] && printf "%s\n" "$___X_CMD_GITHUB_DEFAULT_OWNER" && return 0
-
-    ___X_CMD_GITHUB_DEFAULT_OWNER="$(___x_cmd_gh_http get "/user" | ___x_cmd_git_json_query ".login")"
-    if [ -n "$___X_CMD_GITHUB_DEFAULT_OWNER" ];then
+        if ___x_cmd_gh_config_set  "user" "$___X_CMD_GITHUB_DEFAULT_OWNER" 1>/dev/null 2>&1;then
+            ___x_cmd_ui_tf true "Manually change the owner to $___X_CMD_GITHUB_DEFAULT_OWNER"
+        fi
+        return
+    elif [ -z "$___X_CMD_GITHUB_DEFAULT_OWNER" ];then
+        if ! ___X_CMD_GITHUB_DEFAULT_OWNER="$(___x_cmd_gh_http get "/user" | ___x_cmd_git_json_query ".login")";then
+            gh_log error "get current owner fail"
+            return 1
+        fi
         ___x_cmd_gh_config_set  "user" "$___X_CMD_GITHUB_DEFAULT_OWNER" 1>/dev/null 2>&1
-        printf "%s\n" "$___X_CMD_GITHUB_DEFAULT_OWNER"
-    else
-        gh_log error "get current owner fail"
-        return 1
     fi
+    printf "%s\n" "$___X_CMD_GITHUB_DEFAULT_OWNER"
 }
 
 # shellcheck disable=SC2120
 ___x_cmd_gh_current_owner_type() {
     param:void
     local O="${O:-___x_cmd_gh_GITHUB_DEFAULT}"
+    if ! ___x_cmd_gh_current_owner 1>/dev/null 2>&1;then
+        ___x_cmd_ui_tf false "get current owner name fail"
+        return 1
+    fi
     if [ -n "$1" ]; then
-        ___x_cmd_gh_default put "github_$O" owner_type "$1"
+        if ___x_cmd_gh_config_set "$___X_CMD_GITHUB_DEFAULT_OWNER"_owner_type "$1";then
+            ___x_cmd_ui_tf true "Manually change the owner type to $1"
+        fi
         return
     fi
 
     local data
-    data="$(___x_cmd_gh_default get "github_$O" owner_type "$1")"
+    data="$(___x_cmd_gh_config_get "$___X_CMD_GITHUB_DEFAULT_OWNER"_owner_type)"
     if [ -z "$data" ]; then
-        local owner
-        owner="$(___x_cmd_gh_current_owner)"
-        if [ -z "$owner" ]; then
-            echo "Owner is empty. While owner not set." >&2
+        if ! data="$(___x_cmd_gh_owner_type_query "$___X_CMD_GITHUB_DEFAULT_OWNER")";then
             return 1
         fi
-        data="$(___x_cmd_gh_owner_type_query "$owner")"
-        [ -z "$data" ] && return 1
-        ___x_cmd_gh_default put "github_$O" owner_type "$data"
+        ___x_cmd_gh_config_set "$___X_CMD_GITHUB_DEFAULT_OWNER"_owner_type "$data" 1>/dev/null 2>&1
     fi
     printf "%s\n" "$data"
 }
@@ -84,7 +69,10 @@ ___x_cmd_gh_owner_type_query() {
     local owner="${1:?Provide owner name}"
     for types in "org" "user"
     do
-        ___x_cmd_gh_${types}_info "$owner" 1>/dev/null 2>&1 && [ $? -eq 0 ] && printf "%s" "$types" && return 0
+        if  ___x_cmd_gh_${types}_info "$owner" 1>/dev/null 2>&1;then
+            printf "%s" "$types"
+            return
+        fi
     done
     return 1
 }

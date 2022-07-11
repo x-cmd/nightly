@@ -23,10 +23,10 @@ ___x_cmd_gh(){
         auth          "Authorize gh"
     param:subcmd:try
 
-    # param:subcmd ___x_cmd_gh_repo               \
-    #     release       "manage release"          \
-    #     member        "Authorize gh"
-    # param:subcmd:try
+    param:subcmd ___x_cmd_gh_repo               \
+        release       "manage release"          \
+        member        "Authorize gh"
+    param:subcmd:try
     param:run
 
     gh_log warn "Subcmd Not Found."
