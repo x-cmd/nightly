@@ -326,3 +326,39 @@ ___x_cmd_j2y(){
 ___x_cmd_osc52(){
     "$@" | tee /dev/stderr | awk -f "${___X_CMD_ROOT_MOD}/x-cmd/lib/osc52.awk"
 }
+
+___x_cmd_seq(){
+    local s="$1";   shift
+    local start=1; local end; local sep=1
+    case "$s" in
+        *:*:*:*)        ;; # fail
+        *:*:*)          start="${s%:*:*}";  end="${s#*:*:}"
+                        sep="${s#*:}";      sep="${sep%:*}"
+                        ;;
+        *:*)            start="${s%:*}";    end="${s#*:}"
+                        [ "$start" -lt "$end" ] || sep=-1
+                        ;;
+        *)              end="$s"
+                        ;;
+    esac
+
+    if [ "$#" -eq 0 ]; then
+        set -- 'printf "%s\n" "$i"'
+    fi
+
+    local i
+    if [ "$start" -lt "$end" ]; then
+        [ "$sep" -gt 0 ] || { printf "%s\n" "Expect sep > 0 but get $sep"; return 1; }
+        i="$start"; while [ "$i" -le "$end" ]; do
+            eval "$@"
+            i=$((i + sep))
+        done
+    else
+        [ "$sep" -lt 0 ] || { printf "%s\n" "Expect sep < 0 but get $sep"; return 1; }
+        i="$start"; while [ "$i" -ge "$end" ]; do
+            eval "$@"
+            i=$((i + sep))
+        done
+    fi
+
+}

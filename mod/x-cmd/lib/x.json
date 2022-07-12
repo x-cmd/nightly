@@ -160,6 +160,6 @@
         ]
     },
     "#n": {
-        "#exec": "___x_cmd_advise__offset x"
+        "#exec": "___x_cmd_advise__comp_from_x"
     }
 }

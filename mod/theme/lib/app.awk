@@ -28,23 +28,26 @@ function view_help(){
     return sprintf("%s", th_help_text( ctrl_help_get() ) )
 }
 
-function view_tag(         i, _tag, _data, _head_line, _foot_line, _head_line_item, _foot_line_item, _SELECTED_ITEM_STYLE ){
+function view_tag(         i, _tag, _tag_len, _data, _max_tag_len, _head_line, _foot_line, _head_line_item, _foot_line_item, _SELECTED_ITEM_STYLE ){
     for (i=1; i<=THEME_TAG_L; i++){
-        _tag = THEME_TAG[i]
-        _tag = str_pad_right( _tag, max_tag_len )
-        _head_line_item = ui_str_rep(" ", max_tag_len)
-        _foot_line_item = ui_str_rep("─", max_tag_len)
+        _tag = THEME_TAG[ i ]
+        _tag_len = THEME_TAG[ i L ] + 4
+        _max_tag_len = _max_tag_len + _tag_len
+        _tag = str_pad_right( _tag, _tag_len )
+        _head_line_item = ui_str_rep(" ", _tag_len)
+        _foot_line_item = ui_str_rep("─", _tag_len)
+
         if (ctrl_sw_get( IS_FOCUS_TAG ) == true) _SELECTED_ITEM_STYLE = TH_THEME_PREVIEW_FOCUSE UI_TEXT_REV
         if ( CUR_TAG_IDX == i ) {
-            _head_line_item = "┌" ui_str_rep("─", max_tag_len)    "┐"
+            _head_line_item = "┌" ui_str_rep("─", _tag_len)       "┐"
             _tag            = "│" th(_SELECTED_ITEM_STYLE , _tag) "│"
-            _foot_line_item = "┘" ui_str_rep(" ", max_tag_len)    "└"
+            _foot_line_item = "┘" ui_str_rep(" ", _tag_len)       "└"
         }
         _head_line = _head_line _head_line_item
         _foot_line = _foot_line _foot_line_item
         _data      = _data  _tag
     }
-    _foot_line = _foot_line ui_str_rep("─", max_col_size - (THEME_TAG_L * max_tag_len) - 2)
+    _foot_line = _foot_line ui_str_rep("─", max_col_size - _max_tag_len - 2)
     return _head_line "\n" _data "\n" _foot_line
 }
 
@@ -153,7 +156,7 @@ function get_theme_tag(         _cmd, i, _tag, _line, _theme){
             _tag = substr(_line, 3)
             _tag_len = length(_tag)
             THEME_TAG[ ++THEME_TAG_L ] = _tag
-            if ( max_tag_len < _tag_len ) max_tag_len = _tag_len
+            THEME_TAG[ THEME_TAG_L L ] = _tag_len
         } else {
             _theme = substr(_line, 5)
             _theme_len = length(_theme)
