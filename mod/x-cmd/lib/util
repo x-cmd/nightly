@@ -362,3 +362,8 @@ ___x_cmd_seq(){
     fi
 
 }
+
+___x_cmd_a(){
+    alias "$@"
+    # set complete
+}

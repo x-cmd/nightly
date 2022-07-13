@@ -1,0 +1,77 @@
+# shellcheck shell=sh
+# shellcheck disable=SC2039,3043
+
+# author:       Li Junhao           edwin.jh.lee@gmail.com    edwinjhlee.github.io
+# maintainer:   Li Junhao
+
+# loading dependencies
+xrc http param str ui
+xrc ui/lib/table gh/lib/resource
+
+xrc:inner:lib gt utils config token user current issue enterprise/main enterprise/member enterprise/team org/main org/member \
+    repo/utils repo/main repo/pr/main repo/pr/assign repo/pr/tester repo/release/main repo/release/attachment repo/member repo/tag repo/page repo/branch _type/main
+
+
+x log init gt
+___x_cmd_gt(){
+    param:subcmd ___x_cmd_gt                                        \
+        repo                             "repo command"             \
+        issue                            "issue"                    \
+        current                          "set current owner, repo"  \
+        enterprise                       "manage enterprise"        \
+        org                              "manage org"               \
+        user                             "user"                     \
+        config                           "save, load, which"        \
+        token                            "set token"
+    param:subcmd:try
+
+    param:subcmd ___x_cmd_gitlab_repo                                   \
+        pr                               "pull request"             \
+        release                          "release management"       \
+        member                           "repo member"              \
+        tag                              "repo tag"
+    param:subcmd:try
+    param:run
+
+    ___x_cmd_gt _param_help_doc
+    gt_log warn "Subcmd Not Found."
+    return 1
+}
+
+
+############################
+# Section 10: Instantiation
+############################
+___x_cmd_gitlab_make(){
+    param:void
+
+    local O="___x_cmd_gitlab_${1:?Provide client name by O environment}"
+
+    ___x_cmd_http make  'https://gitee.com/api'
+    ___x_cmd_http header put type  "application/json;charset=utf-8"
+
+    local token
+    token="$(___x_cmd_gitlab_config_get "oauth_token")"
+
+    if [ -n "$token" ]; then
+        ___x_cmd_http header put Authorization "token $token"
+        local user
+        user="$(___x_cmd_gitlab_current_owner)" || return 1
+        gt_log info "Hi $user! You've successfully authenticated."
+        return 0
+    fi
+
+    local info
+    info=$(printf "\n%s %s \n%s" \
+         "$(___x_cmd_ui yellow 'You need run command to add token:')" \
+         "$(___x_cmd_ui bold cyan "\`gt token <token>\`")" \
+         "$(___x_cmd_ui 'https://gitee.com/profile/personal_access_tokens')")
+    gt_log warn "Token is null.${info}"
+}
+
+if [ -z "$DO_NOT_INIT_GITEE_DEFAULT" ]; then
+    ___x_cmd_gitlab_make "GITEE_DEFAULT" && DO_NOT_INIT_GITEE_DEFAULT="true"
+fi
+
+xrc setmain ___x_cmd_gt
+

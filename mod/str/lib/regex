@@ -31,4 +31,4 @@ R_or(){
 # export IP="\\b${IP_0_255}\.${IP_0_255}\.${IP_0_255}\.${IP_0_255}\\b"
 
 # [[:alpha:]] [[:alphanum:]] [[:number:]]
-# EndSection
+## EndSection

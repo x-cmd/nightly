@@ -254,18 +254,14 @@ NR==2 {  consume_header(); }
 
 NR>2 {
     if ( DATA_MODE == DATA_MODE_CTRL ) {
-        if (try_update_width_height( $0 ) == true) {
-            # view()
-        } else {
-            DATA_HAS_CHANGED = true
+        if (($0 ~ /^R:/) && ( try_update_width_height( $0 ) == false )) next
 
-            cmd=$0
-            gsub(/^C:/, "", cmd)
-            idx = index(cmd, ":")
-            ctrl(substr(cmd, 1, idx-1), substr(cmd, idx+1))
-            view()
-        }
-        # return
+        DATA_HAS_CHANGED = true
+        cmd=$0
+        gsub(/^C:/, "", cmd)
+        idx = index(cmd, ":")
+        ctrl(substr(cmd, 1, idx-1), substr(cmd, idx+1))
+        view()
     } else {
         consumer_item()
     }

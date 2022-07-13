@@ -8,30 +8,21 @@ function exec_help(){
 
 BEGIN{
     HAS_SPE_ARG = false
+    _X_CMD_PARAM_ARG_ = "_X_CMD_PARAM_ARG_"
 }
 
 NR==4 {
     if( arg_arr[1] == "_dryrun" ){
         DRYRUN_FLAG = true
         IS_INTERACTIVE = false
-        for(i=1; i < arg_arr[ L ]; ++i){
-            arg_arr[i]=arg_arr[i+1]
-        }
+        arr_shift( arg_arr, 1 )
         handle_arguments()
         print "return 0"
         exit_now(0)
     }
 
-    if ( "help" == arg_arr[1] ) {
-        has_help_subcmd = false
-        for (i=1; i <= subcmd_len(); ++i) {
-            if ( "help" == subcmd_id( i ) )  has_help_subcmd = true
-        }
-        if (has_help_subcmd == false)                                   exec_help()
-    }
-    if ( ( "--help" == arg_arr[1] ) || ( "-h" == arg_arr[ 1 ] ) ) {
-        if ("" == option_alias_2_option_id[ arg_arr[ 1 ] ])             exec_help()
-    }
+    if ( arg_arr[1] == "help" )             if (! subcmd_exist_by_id( subcmd_id_by_name("help") ))      exec_help()
+    if ( arg_arr[1] ~ /^(--help|-h)$/ )     if (! option_exist_by_alias( arg_arr[ 1 ] ))                exec_help()
 }
 
 ###############################
@@ -42,11 +33,10 @@ NR>=5 {
     # Setting default values
     if (keyline == "") {
         line_arr_len = split($0, line_arr, ARG_SEP)
-        if (line_arr[1] == OBJECT_NAME) {
-            keyline = line_arr[2]
-        }
+        objectname = line_arr[1]
+        keyline = line_arr[2]
     } else {
-        option_default_map[keyline] = $0
+        if (objectname == OBJECT_NAME)  option_default_map[keyline] = $0
         keyline = ""
     }
 }
@@ -59,31 +49,26 @@ function arg_typecheck_then_generate_code(option_id, optarg_id, arg_var_name, ar
     _ret = assert( optarg_id, arg_var_name, arg_val )
     if ( _ret == true ) {
         code_append_assignment( arg_var_name, arg_val )
-    } else if ( false == IS_INTERACTIVE ) {
+    } else if ( ! is_interactive() ) {
         panic_error( _ret )
     } else {
-        code_query_append(   arg_var_name,
-            option_desc_get( option_id ),
-            oparr_join_quoted( optarg_id )       )
+        code_query_append_by_optionid_optargid( arg_var_name, option_id, optarg_id )
     }
 }
 
-function handle_arguments_restargv_typecheck(is_interative, i, argval, is_dsl_default,
+function handle_arguments_restargv_typecheck( use_ui_form, i, argval, is_dsl_default,
     tmp, _option_id, _optarg_id){
-    _option_id = option_alias_2_option_id[ "#" i ]
+    _option_id = option_get_id_by_alias( "#" i )
     _optarg_id = _option_id S 1
 
     if (argval != "") {
         _ret = assert(_optarg_id, "$" i, argval)
         if (_ret == true)                       return true
-        else if (false == is_interative) {
+        else if (false == use_ui_form) {
             if (is_dsl_default == true)         panic_param_define_error(_ret)
             else                                panic_error( _ret )
         } else {
-            # TODO: XXX
-            code_query_append(  "_X_CMD_PARAM_ARG_" i,
-                option_desc_get( _option_id ),
-                oparr_join_quoted( _optarg_id )      )
+            code_query_append_by_optionid_optargid( _X_CMD_PARAM_ARG_ i, _option_id, _optarg_id )
             return false
         }
     }
@@ -92,14 +77,11 @@ function handle_arguments_restargv_typecheck(is_interative, i, argval, is_dsl_de
 
     _ret = assert(_optarg_id, "$" i, argval)
     if (_ret == true)                           return true
-    else if (false == is_interative) {
+    else if (false == use_ui_form) {
         if (is_dsl_default == true)             panic_param_define_error(_ret)
         else                                    panic_error( _ret )
     } else {
-        # TODO: XXX
-        code_query_append(  "_X_CMD_PARAM_ARG_" i,
-            option_desc_get( _option_id ),
-            oparr_join_quoted( _optarg_id )          )
+        code_query_append_by_optionid_optargid( _X_CMD_PARAM_ARG_ i, _option_id, _optarg_id )
         return false
     }
 }
@@ -117,33 +99,24 @@ function handle_arguments_restargv(         final_rest_argv_len, i, arg_val, opt
         if ( i <= arg_arr[ L ]) {
             arg_val = arg_arr[ i ]
             # To set the input value and continue
-            if ( true != handle_arguments_restargv_typecheck( IS_INTERACTIVE, i, arg_val, false ) ) {
-                set_arg_namelist[ i ] = "_X_CMD_PARAM_ARG_" i
+            if ( true != handle_arguments_restargv_typecheck( is_interactive(), i, arg_val, false ) ) {
+                set_arg_namelist[ i ] = _X_CMD_PARAM_ARG_ i
                 _need_set_arg = true
             }
 
-            option_id = option_alias_2_option_id[ "#" i ]
-            tmp = option_name_get_without_hyphen( option_id )
-            if( tmp != "" ) {
-                code_append_assignment( tmp, arg_val )
-                set_arg_namelist[ i ] = tmp
-                _need_set_arg = true
-            } else {
-                code_append_assignment( "_X_CMD_PARAM_ARG_" i , arg_val )
-                set_arg_namelist[ i ] = "_X_CMD_PARAM_ARG_" i
-                _need_set_arg = true
-            }
+            option_id = option_get_id_by_alias( "#" i )
 
-            continue
+            tmp = option_name_get_without_hyphen( option_id ); if( tmp == "" ) tmp = _X_CMD_PARAM_ARG_ i
+            code_append_assignment( tmp, arg_val )
+            set_arg_namelist[ i ] = tmp;                    _need_set_arg = true
         } else {
-            option_id = option_alias_2_option_id[ "#" i ]
+            option_id = option_get_id_by_alias( "#" i )
             named_value = rest_arg_named_value[ option_id ]
 
             # TODO: Using something better, like OPTARG_DEFAULT_REQUIRED_VALUE
             if (named_value != "") {
                 tmp = option_name_get_without_hyphen( option_id )
-                set_arg_namelist[ i ] = tmp
-                _need_set_arg = true
+                set_arg_namelist[ i ] = tmp;                _need_set_arg = true
                 continue                # Already check
             }
 
@@ -151,42 +124,23 @@ function handle_arguments_restargv(         final_rest_argv_len, i, arg_val, opt
             if ( optarg_default_value_eq_require(arg_val) ) {
                 # Don't define a default value
                 # TODO: Why can't exit here???
-                if (false == IS_INTERACTIVE)   return panic_required_value_error( option_id )
+                if (! is_interactive())   return panic_required_value_error( option_id )
 
-                tmp = option_name_get_without_hyphen( option_id )
-                if( tmp != "" ) {
-                    code_query_append( tmp,
-                        option_desc_get( option_id ),
-                        oparr_join_quoted( optarg_id ) )
-                    set_arg_namelist[ i ] = tmp
-                } else {
-                    code_query_append( "_X_CMD_PARAM_ARG_" i,
-                        option_desc_get( option_id ),
-                        oparr_join_quoted( optarg_id ) )
-                    set_arg_namelist[ i ] = "_X_CMD_PARAM_ARG_" i
-                }
-                _need_set_arg = true
-                continue
+                tmp = option_name_get_without_hyphen( option_id ); if (tmp == "") tmp = _X_CMD_PARAM_ARG_ i
+                code_query_append_by_optionid_optargid( tmp, option_id, optarg_id )
+                set_arg_namelist[ i ] = tmp;                _need_set_arg = true
             } else {
                 # Already defined a default value
                 # TODO: Tell the user, it is wrong because of default definition in DSL, not the input.
                 handle_arguments_restargv_typecheck( false, i, arg_val, true )
-                tmp = option_name_get_without_hyphen( option_id )
-                if( tmp != "" ) {
-                    code_append_assignment( tmp, arg_val )
-                    set_arg_namelist[ i ] = tmp
-                    _need_set_arg = true
-                } else {
-                    code_append_assignment( "_X_CMD_PARAM_ARG_" i , arg_val )
-                    set_arg_namelist[ i ] = "_X_CMD_PARAM_ARG_" i
-                    _need_set_arg = true
-                }
+                tmp = option_name_get_without_hyphen( option_id ); if (tmp == "") tmp = _X_CMD_PARAM_ARG_ i
+                code_append_assignment( tmp, arg_val )
+                set_arg_namelist[ i ] = tmp;                _need_set_arg = true
             }
         }
     }
 
-    #TODO: You should set the default value, if you have no .
-
+    # TODO: You should set the default value, if you have no .
     if (QUERY_CODE != ""){
         QUERY_CODE = "local ___X_CMD_UI_FORM_EXIT_STRATEGY=\"execute|exit\"; x ui form " substr(QUERY_CODE, 9)
         QUERY_CODE = QUERY_CODE ";\nif [ \"$___X_CMD_UI_FORM_EXIT\" = \"exit\" ]; then return 1; fi;"
@@ -198,40 +152,27 @@ function handle_arguments_restargv(         final_rest_argv_len, i, arg_val, opt
     }
 
     if (_need_set_arg == true) {
-        tmp = "set -- "
-        for ( _index=1; _index<=final_rest_argv_len; ++_index ) {
-            tmp = tmp " " "\"$" set_arg_namelist[ _index ] "\""
-        }
-        code_append( tmp )
+        code_append( "set -- " str_joinwrap( " ", "\"$", "\"", set_arg_namelist, "", 1, final_rest_argv_len  ) )
     }
-
 }
 
 function handle_arguments(          i, j, arg_name, arg_name_short, arg_val, option_id, option_argc, count, sw, arg_arr_len, _tmp, _subcmd_id ) {
-
-    # code_append( "local PARAM_SUBCMD" )     # Avoid the external environment influence.
-
     arg_arr_len = arg_arr[ L ]
-    i = 1
     arr_clone(arg_arr, tmp_arr)
-    while (i <= arg_arr_len) {
-
+    i = 1; while (i <= arg_arr_len) {
         arg_name = arg_arr[ i ]
         # ? Notice: EXIT: Consider unhandled arguments are rest_argv
         if ( arg_name == "--" )  break
+        if ( ( arg_name == "--help") || ( arg_name == "-h") )   exec_help()
 
-        if ( ( arg_name == "--help") && ( arg_name == "-h") ) {
-            exec_help()
-        }
-
-        option_id     = option_alias_2_option_id[arg_name]
+        option_id = option_get_id_by_alias( arg_name )
         if ( option_id == ""  ) {
             if (arg_name ~ /^-[^-]/) {
                 arg_name = substr(arg_name, 2)
                 arg_len = split(arg_name, arg_arr, //)
                 for (j=1; j<=arg_len; ++j) {
                     arg_name_short  = "-" arg_arr[ j ]
-                    option_id       = option_alias_2_option_id[ arg_name_short ]
+                    option_id       = option_get_id_by_alias( arg_name_short )
                     option_name     = option_name_get_without_hyphen( option_id )
 
                     if (option_name == "") {
@@ -255,11 +196,7 @@ function handle_arguments(          i, j, arg_name, arg_name_short, arg_val, opt
 
         # If option_argc == 0, op
         if ( option_multarg_is_enable( option_id ) ) {
-            if (option_assignment_count[ option_id ] != "") {
-                counter = option_assignment_count[ option_id ] + 1
-            } else {
-                counter = 1
-            }
+            counter = option_assignment_count[ option_id ] + 1      # option_assignment_count[ option_id ] can be ""
             option_assignment_count[ option_id ] = counter
             option_name = option_name "_" counter
         }
@@ -270,33 +207,18 @@ function handle_arguments(          i, j, arg_name, arg_name_short, arg_val, opt
             # print code XXX=true
             code_append_assignment( option_name, "true" )
         } else if (option_argc == 1) {
-            i = i + 1
-            arg_val = arg_arr[ i ]
+            arg_val = arg_arr[ ++i ]
 
-            if ( option_id ~ /^#/ )
-            {
-                # NAMED REST_ARGUMENT
-                rest_arg_named_value[ option_id ] = arg_val
-            }
+            if ( option_id ~ "^#" )     rest_arg_named_value[ option_id ] = arg_val     # NAMED REST_ARGUMENT
+            if (i > arg_arr_len)        panic_required_value_error(option_id)
 
-            if (i > arg_arr_len) {
-                panic_required_value_error(option_id)
-            }
-
-            arg_typecheck_then_generate_code( option_id, option_id S 1,
-                option_name,
-                arg_val)
+            arg_typecheck_then_generate_code(       option_id, option_id S 1,     option_name,            arg_val )
         } else {
             for ( j=1; j<=option_argc; ++j ) {
-                i += 1
-                arg_val = arg_arr[i]
-                if (i > arg_arr_len) {
-                    panic_required_value_error(option_id)
-                }
+                arg_val = arg_arr[ ++i ]
+                if (i > arg_arr_len)    panic_required_value_error(option_id)
 
-                arg_typecheck_then_generate_code( option_id, option_id S j,
-                    option_name "_" j,
-                    arg_val)
+                arg_typecheck_then_generate_code(   option_id, option_id S j,     option_name "_" j,      arg_val )
             }
         }
         i += 1
@@ -325,10 +247,7 @@ function handle_arguments(          i, j, arg_name, arg_name_short, arg_val, opt
     }
 
     #Remove the processed arg_arr and move the arg_arr back forward
-    for ( j=i; j<=arg_arr_len; ++j ) {
-        arg_arr[ j-i+1 ] = arg_arr[j]
-    }
-    arg_arr[ L ]=arg_arr[ L ]-i+1
+    arr_shift( arg_arr, (i-1) )
 
     handle_arguments_restargv()
     if( HAS_PATH == true ){
@@ -338,10 +257,7 @@ function handle_arguments(          i, j, arg_name, arg_name_short, arg_val, opt
 }
 
 END{
-
-    if (EXIT_CODE == "000") {
-        code_print()
-    }
+    # if (EXIT_CODE == "000") code_print()    # TODO: Why?
     if (EXIT_CODE == 0) {
         handle_arguments()
         # debug( CODE )

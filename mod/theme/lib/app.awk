@@ -150,6 +150,7 @@ function get_theme_tag(         _cmd, i, _tag, _line, _theme){
     # _cmd = "cat ../xcmd/theme/ui.yml 2>/dev/null"
     THEME_TAG_L = 0
     while ( _cmd | getline _line) {
+        if ( _line == "" ) continue
         if ( _line ~ /^-/ ) {
             THEME_TAG_ITEM[ _tag L ] = i
             i=0

@@ -198,7 +198,7 @@ function ctrl(char_type, char_value) {
 }
 
 function consume_ctrl(      _cmd) {
-    if (try_update_width_height( $0 ) == true) return
+    if (($0 ~ /^R:/) && ( try_update_width_height( $0 ) == false )) return
 
     DATA_HAS_CHANGED = true
     _cmd=$0

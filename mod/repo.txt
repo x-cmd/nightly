@@ -72,9 +72,10 @@ proxy	head
 theme	head
 license	head
 qr	head
+gh	head
 ali	head
 gt	head
-gh	head
+gitlab	head
 mosquitto	head
 aliyun	head
 ucloud	head

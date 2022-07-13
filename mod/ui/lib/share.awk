@@ -26,7 +26,7 @@ function update_width_height(width, height) {
     max_row_in_page = max_row_size - 10
 }
 
-function is_height_change(width, height) {
+function is_height_change() {
     if ( max_row_size_prev != max_row_size ) {
         return true
     } else {
@@ -41,7 +41,7 @@ function try_update_width_height(text){
 
     split(text, arr, ":")
     update_width_height(arr[3], arr[4])
-    return true
+    return is_height_change()
 }
 
 # Section: Buffer

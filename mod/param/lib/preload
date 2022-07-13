@@ -80,8 +80,7 @@ ___x_cmd_param_int(){
             ___X_CMD_PARAM_AWK_PATH="$___X_CMD_ROOT_MOD/param/lib/awk/help.awk"     ___x_cmd_param_exec_dsl
             ;;
         _x_cmd_advise_json)
-            eval "$(___X_CMD_PARAM_AWK_PATH="$___X_CMD_ROOT_MOD/param/lib/awk/advise.bak.awk" ___x_cmd_param_exec_dsl "$@")"
-            # eval "$(___X_CMD_PARAM_AWK_PATH="$___X_CMD_ROOT_MOD/param/lib/awk/advise.awk" ___x_cmd_param_exec_dsl "$@")"
+            eval "$(___X_CMD_PARAM_AWK_PATH="$___X_CMD_ROOT_MOD/param/lib/awk/advise.awk" ___x_cmd_param_exec_dsl "$@")"
             ;;
         _param_list_subcmd | _param_has_subcmd | _ls_subcmd | _ls_option | _ls_option_name | _ls_option_subcmd )
             ___X_CMD_PARAM_AWK_PATH="$___X_CMD_ROOT_MOD/param/lib/awk/meta.awk"     ___x_cmd_param_exec_dsl "$@"
@@ -133,6 +132,9 @@ ___x_cmd_param_exec_dsl() {
             -v IS_INTERACTIVE="$___X_CMD_PARAM_IS_INTERACTIVE" \
             -v IS_TTY="$___X_CMD_PARAM_STDERR_IS_TTY" \
             -f "$___X_CMD_ROOT_MOD/awk/lib/re.awk" \
+            -f "$___X_CMD_ROOT_MOD/awk/lib/str.awk" \
+            -f "$___X_CMD_ROOT_MOD/awk/lib/arr.awk" \
+            -f "$___X_CMD_ROOT_MOD/param/lib/awk/assert.awk" \
             -f "$___X_CMD_ROOT_MOD/param/lib/awk/util.awk" \
             -f "$___X_CMD_ROOT_MOD/param/lib/awk/oo.awk" \
             -f "$___X_CMD_ROOT_MOD/param/lib/awk/dsl.awk" \

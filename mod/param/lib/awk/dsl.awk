@@ -1,4 +1,8 @@
 
+function is_interactive(){
+    return IS_INTERACTIVE == 1
+}
+
 # Section: token argument
 BEGIN{
     PARAM_RE_1 = "<[A-Za-z0-9_ ]*>" "(:[A-Za-z_\\-]+)*"
@@ -61,19 +65,17 @@ function handle_option_id(option_id, special_option_id,            _arr, _arr_le
     # debug("handle_option_id \t" _arr_len)
     for ( _index=1; _index<=_arr_len; ++_index ) {
         _arg_name = _arr[ _index ]
-
-        if (option_alias_2_option_id[ _arg_name ] != "")    panic_param_define_error("Already exsits: " _arg_name)       # Prevent name conflicts
-
         if (_arg_name == "m") {
             option_multarg_enable( option_id )
             continue
         }
 
+        if (option_exist_by_alias( _arg_name ))    panic_param_define_error("Already exsits: " _arg_name)       # Prevent name conflicts
+        option_set_alias( option_id, _arg_name )
+
         if ( _index == 1 )  option_name_set( option_id, _arg_name )
-        option_alias_2_option_id[ _arg_name ] = option_id
-        # debug( "option_alias_2_option_id\t" _arg_name "!\t!" option_id "|" )
     }
-    if( special_option_id != "" )  option_alias_2_option_id[ option_id SPECIAL_OPTION_ID ] = special_option_id
+    if( special_option_id != "" )  option_set_alias(special_option_id,  option_id SPECIAL_OPTION_ID )
 }
 
 BEGIN {
@@ -136,15 +138,12 @@ function parse_param_dsl_for_positional_argument(line,
     for ( _index=1; _index <= _arr_len; ++_index ) {
         _arg_name = _arr[ _index ]
         # Prevent name conflicts
-        if (option_alias_2_option_id[ _arg_name ] != "") {
-            panic_param_define_error("Already exsits: " _arg_name)
-        }
+        if (option_exist_by_alias( _arg_name ))     panic_param_define_error("Already exsits: " _arg_name)
+        option_set_alias( option_id, _arg_name )
 
         if ( _index == 1 )              _arg_no = substr( _arg_name, 2)
         else if ( _index == 2 )         option_name_set( option_id, _arg_name )
-        option_alias_2_option_id[ _arg_name ] = option_id
     }
-
 
     option_desc_set( option_id, _arg_tokenarr[2] )
     if ( _arg_tokenarr[ L ] >= 3 ) {
@@ -238,18 +237,18 @@ function parse_param_dsl(line,
 
         if (line == "") continue
 
-        if (line ~ /^advise:/)                                    state = STATE_ADVISE
-        else if (line ~ /^type:/)                                 state = STATE_TYPE
-        else if (line ~ /^options?:/)                             state = STATE_OPTION
-        else if (line ~ /^((subcommand)|(subcmd))s?:/)          { state = STATE_SUBCOMMAND; split(line, tmp, ":"); subcmd_funcname = str_trim( tmp[2] ); }
-        else if (line ~ /^arguments?:/)                           state = STATE_ARGUMENT
+        if (line ~ /^advise:/)                                      state = STATE_ADVISE
+        else if (line ~ /^type:/)                                   state = STATE_TYPE
+        else if (line ~ /^options?:/)                               state = STATE_OPTION
+        else if (line ~ /^((subcommand)|(subcmd))s?:/)          {   state = STATE_SUBCOMMAND; split(line, tmp, ":"); subcmd_funcname = str_trim( tmp[2] ); }
+        else if (line ~ /^arguments?:/)                             state = STATE_ARGUMENT
         else {
-            if (state == STATE_ADVISE)                          advise_add( line )
-            else if ( state == STATE_TYPE )                     type_add_line( line )
-            else if ( state == STATE_SUBCOMMAND )               subcmd_add_line( line, subcmd_funcname )
-            else if (state == STATE_OPTION) {
-                if ( match(line, /^#n[\s]*/ ) )                     parse_param_dsl_for_all_positional_argument( line )         # HANDLE:   option like #n
-                else if ( match( line, /^#[0-9]+[\s]*/ ) )          parse_param_dsl_for_positional_argument( line )             # HANDLE:   option like #1 #2 #3 ...
+            if (state == STATE_ADVISE)                              advise_add( line )
+            else if ( state == STATE_TYPE )                         type_add_line( line )
+            else if ( state == STATE_SUBCOMMAND )                   subcmd_add_line( line, subcmd_funcname )
+            else if ( state == STATE_OPTION ) {
+                if ( match(line, "^#n[\s]*" ) )                     parse_param_dsl_for_all_positional_argument( line )         # HANDLE:   option like #n
+                else if ( match( line, "^#[0-9]+[\s]*" ) )          parse_param_dsl_for_positional_argument( line )             # HANDLE:   option like #1 #2 #3 ...
                 else                                            i = parse_param_dsl_for_named_options( line_arr, line, i )                # HANDLE:   option like --token|-t
             }
         }
@@ -295,8 +294,8 @@ function check_required_option_ready(       i, j, option, option_argc, option_id
             }
 
             if ( optarg_default_value_eq_require( val ) ) {
-                if ( false == IS_INTERACTIVE )      panic_required_value_error( option_id )
-                code_query_append(      _varname,       option_desc_get( option_id ),  oparr_join_quoted( option_id SUBSEP j ) )
+                if ( ! is_interactive() )      panic_required_value_error( option_id )
+                code_query_append_by_optionid_optargid( _varname, option_id, option_id SUBSEP j )
             } else {
                 _ret = assert(option_id SUBSEP j, _varname, val)
                 if ( _ret == true ) {
@@ -312,8 +311,8 @@ function check_required_option_ready(       i, j, option, option_argc, option_id
                     }
                 }
                 else {
-                    if ( false == IS_INTERACTIVE )     panic_error( _ret )
-                    else    code_query_append(  _varname,       option_desc_get( option_id ),  oparr_join_quoted( option_id SUBSEP j ) )
+                    if ( ! is_interactive() )     panic_error( _ret )
+                    else    code_query_append_by_optionid_optargid( _varname, option_id, option_id SUBSEP j )
                 }
             }
         }
