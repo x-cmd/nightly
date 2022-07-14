@@ -110,6 +110,23 @@ function str_split_safe(string, array, fieldsep){
     return split(string, array, fieldsep)
 }
 
+function str_split( string, array, fieldsep,    e, i, l ){
+    l = str_split_without_recovery( string, array, fieldsep )
+    for (i=1; i<=l; ++i) {
+        e = array[ i ]
+        gsub("\001", "\n", e)
+        array[i] = e
+    }
+    return l
+}
+
+function str_split_without_recovery( string, array, fieldsep,    l ){
+    gsub("\n", "\001", string)
+    l = split(string, array, fieldsep)
+    array[ L ] = l
+    return l
+}
+
 function str_split_safe_recover(string){
     gsub("\001", "\n", string)
 }

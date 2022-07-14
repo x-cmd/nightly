@@ -103,3 +103,8 @@ function get_option_string(option_id,
     return _option_string
 }
 
+
+function is_interactive(){
+    return IS_INTERACTIVE == 1
+}
+

@@ -2,7 +2,7 @@
 # shellcheck disable=SC2039,3043
 
 ___x_cmd_gitlab_repo_pr_assign(){
-    param:scope     ___x_cmd_gt
+    param:scope     ___x_cmd_gitlab
     param:subcmd ___x_cmd_gitlab_repo_pr_assign             \
         add             "Add assignee"                  \
         del             "Del assignee"                  \
@@ -12,12 +12,12 @@ ___x_cmd_gitlab_repo_pr_assign(){
     param:run
 
     ___x_cmd_gitlab_repo_pr_assign _param_help_doc
-    gt_log warn "Subcmd Not Found."
+    gitlab_log warn "Subcmd Not Found."
     return 1
 }
 
 ___x_cmd_gitlab_repo_pr_assign_add(){
-    param:scope     ___x_cmd_gt
+    param:scope     ___x_cmd_gitlab
     param:dsl       '
 options:
     #1|--pr             "pr id"                                                     <>:NatureNumber
@@ -28,11 +28,11 @@ options:
     # TODO: interactive ui
 
     ___parse_pr_init_owner_repo_and_pr
-    ___x_cmd_gitlab_http post "/v5/repos/${owner_repo}/pulls/$pr/assignees" assignees
+    ___x_cmd_gitlab_http post "/repos/${owner_repo}/pulls/$pr/assignees" assignees
 }
 
 ___x_cmd_gitlab_repo_pr_assign_del(){
-    param:scope     ___x_cmd_gt
+    param:scope     ___x_cmd_gitlab
     param:dsl       '
 options:
     #1|--pr             "pr id"                                                     <>:NatureNumber
@@ -41,11 +41,11 @@ options:
     param:run
 
     ___parse_pr_init_owner_repo_and_pr
-    ___x_cmd_gitlab_http delete "/v5/repos/${owner_repo}/pulls/$pr/assignees?assignees=$assignees"
+    ___x_cmd_gitlab_http delete "/repos/${owner_repo}/pulls/$pr/assignees?assignees=$assignees"
 }
 
 ___x_cmd_gitlab_repo_pr_assign_reset(){
-    param:scope     ___x_cmd_gt
+    param:scope     ___x_cmd_gitlab
     param:dsl       '
 options:
     #1|--pr             "pr id"                 <>:NatureNumber
@@ -56,11 +56,11 @@ options:
     ___parse_pr_init_owner_repo_and_pr
 
     reset_all=${reset_all:-false}
-    ___x_cmd_gitlab_http patch "/v5/repos/${owner_repo}/pulls/$pr/assignees" reset_all
+    ___x_cmd_gitlab_http patch "/repos/${owner_repo}/pulls/$pr/assignees" reset_all
 }
 
 ___x_cmd_gitlab_repo_pr_assign_review(){
-    param:scope     ___x_cmd_gt
+    param:scope     ___x_cmd_gitlab
     param:dsl       '
 options:
     #1|--pr         "pr id"                     <>:NatureNumber
@@ -70,5 +70,5 @@ options:
 
     ___parse_pr_init_owner_repo_and_pr
 
-    ___x_cmd_gitlab_http post "/v5/repos/${owner_repo}/pulls/$pr/review" force
+    ___x_cmd_gitlab_http post "/repos/${owner_repo}/pulls/$pr/review" force
 }

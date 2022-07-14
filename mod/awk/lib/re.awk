@@ -75,3 +75,10 @@ BEGIN{
 }
 
 # awk 'BEGIN{ match("-b+cd", "[[:alnum:][:punct:]]*"); print RLENGTH " " RSTART; }'
+
+
+# 11-13 = 1[1-3]
+# 128-192=[1]
+function re_range2pattern(){
+    return 0
+}

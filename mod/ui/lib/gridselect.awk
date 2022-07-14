@@ -198,14 +198,15 @@ function ctrl(char_type, char_value) {
 }
 
 function consume_ctrl(      _cmd) {
-    if (($0 ~ /^R:/) && ( try_update_width_height( $0 ) == false )) return
-
-    DATA_HAS_CHANGED = true
-    _cmd=$0
-    gsub(/^C:/, "", _cmd)
-    idx = index(_cmd, ":")
-    ctrl(substr(_cmd, 1, idx-1), substr(_cmd, idx+1))
-    view()
+    if ($0 ~ /^R:/) if ( try_update_width_height( $0 ) == true ) view()
+    else {
+        DATA_HAS_CHANGED = true
+        _cmd=$0
+        gsub(/^C:/, "", _cmd)
+        idx = index(_cmd, ":")
+        ctrl(substr(_cmd, 1, idx-1), substr(_cmd, idx+1))
+        view()
+    }
 }
 # EndSection
 

@@ -5,12 +5,12 @@
 # Section 2: Wrapping std/http module with object naming changing
 ############################
 ___x_cmd_gitlab_resp_header(){
-    O="${O:-___x_cmd_gitlab_GITEE_DEFAULT}" ___x_cmd_http resp header "$@"
+    O="${O:-___x_cmd_gitlab_GITLAB_DEFAULT}" ___x_cmd_http resp header "$@"
 }
 
 # TODO: Not supported yet
 ___x_cmd_gitlab_resp_body(){
-    O="${O:-___x_cmd_gitlab_GITEE_DEFAULT}" ___x_cmd_http resp body "$@"
+    O="${O:-___x_cmd_gitlab_GITLAB_DEFAULT}" ___x_cmd_http resp body "$@"
 }
 
 ___x_cmd_gitlab_get_multi(){
@@ -30,10 +30,10 @@ ___x_cmd_gitlab_get_multi(){
 }
 
 ___x_cmd_gitlab_http(){
-    if ! O="${O:-___x_cmd_gitlab_GITEE_DEFAULT}" ___x_cmd_http header get Content-Type 1>/dev/null 2>&1; then
-         O="${O:-___x_cmd_gitlab_GITEE_DEFAULT}" ___x_cmd_http header put Content-Type application/json
+    if ! O="${O:-___x_cmd_gitlab_GITLAB_DEFAULT}" ___x_cmd_http header get Content-Type 1>/dev/null 2>&1; then
+         O="${O:-___x_cmd_gitlab_GITLAB_DEFAULT}" ___x_cmd_http header put Content-Type application/json
     fi
-    O="${O:-___x_cmd_gitlab_GITEE_DEFAULT}" ___x_cmd_http "$@"
+    O="${O:-___x_cmd_gitlab_GITLAB_DEFAULT}" ___x_cmd_http "$@"
 }
 
 ############################
@@ -83,7 +83,7 @@ ___x_cmd_gitlab_param_normalize_repo(){
 ### Repo #1
 
 ___x_cmd_gitlab_parse_owner_repo(){
-    local O="${O:-___x_cmd_gitlab_GITEE_DEFAULT}"
+    local O="${O:-___x_cmd_gitlab_GITLAB_DEFAULT}"
     if [ -z "$repo" ]; then
         repo="$(___x_cmd_gitlab_current_repo)"
     fi
@@ -101,7 +101,7 @@ ___x_cmd_gitlab_default(){
     param_default "$@" 2>/dev/null || return 1
 }
 
-___gt_ui_mutual(){
+___gitlab_ui_mutual(){
     if [ ! -t 1 ] || [ -n "$ENFORCE_JSON" ] ; then
         "$@"
     else
@@ -109,7 +109,7 @@ ___gt_ui_mutual(){
         eval "$(cat)"
     fi
 
-    local ___gt_exit_code="$?"
-    [ "$___gt_exit_code" -eq 0 ] || gt_log error "${___gt_error_msg:-"Couldn't find any data"}"
-    return "$___gt_exit_code"
+    local ___gitlab_exit_code="$?"
+    [ "$___gitlab_exit_code" -eq 0 ] || gitlab_log error "${___gitlab_error_msg:-"Couldn't find any data"}"
+    return "$___gitlab_exit_code"
 }

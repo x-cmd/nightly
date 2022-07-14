@@ -2,11 +2,11 @@
 # shellcheck disable=SC2039,3043
 
 # define lazy loader
-# ___x_cmd_definelazyloader   ___x_cmd_gitlab_repo_ls             gt/lib/repo/main
+# ___x_cmd_definelazyloader   ___x_cmd_gitlab_repo_ls             gitlab/lib/repo/main
 
 ___x_cmd_gitlab_user(){
-    param:scope     ___x_cmd_gt
-    param:subcmd ___x_cmd_gitlab_user                   \
+    param:scope     ___x_cmd_gitlab
+    param:subcmd ___x_cmd_gitlab_user               \
         info        "Show information"              \
         repo        "List all repos"                \
         email       "Show user email"               \
@@ -16,16 +16,16 @@ ___x_cmd_gitlab_user(){
     param:run
 
     ___x_cmd_gitlab_user _param_help_doc
-    gt_log warn "Subcmd Not Found."
+    gitlab_log warn "Subcmd Not Found."
     return 1
 }
 
 # Section: info repo email issue
 
 # shellcheck disable=SC2154
-# https://gitee.com/api/v5/swagger#/getV5UsersUsername
+# https://gitee.com/api/swagger#/getV5UsersUsername
 ___x_cmd_gitlab_user_info(){
-    param:scope     ___x_cmd_gt
+    param:scope     ___x_cmd_gitlab
     param:dsl       '
 options:
     #1              "Username, if not set, show the user information of current owner, or owner of this token"
@@ -35,9 +35,9 @@ options:
     local owner="$1"
     local data
     if [ -z "$owner" ]; then
-        data=$(___x_cmd_gitlab_http get "/v5/user" )
+        data=$(___x_cmd_gitlab_http get "/user" )
     else
-        data=$(___x_cmd_gitlab_http get "/v5/users/$1")
+        data=$(___x_cmd_gitlab_http get "/users/$1")
     fi
 
     [ ! -t 1 ] && printf "%s" "$data" && return 0
@@ -54,21 +54,21 @@ options:
     }
 }
 
-# https://gitee.com/api/v5/swagger#/getV5UserRepos
+# https://gitee.com/api/swagger#/getV5UserRepos
 ___x_cmd_gitlab_user_repo(){
-    param:scope     ___x_cmd_gt
+    param:scope     ___x_cmd_gitlab
     param:subcmd ___x_cmd_gitlab_user_repo                  \
         ls      "list repo of the designated user"
     param:subcmd:try
     param:run
 
     ___x_cmd_gitlab_user_repo _param_help_doc
-    gt_log warn "Subcmd Not Found."
+    gitlab_log warn "Subcmd Not Found."
     return 1
 }
 
 ___x_cmd_gitlab_user_repo_ls(){
-    param:scope     ___x_cmd_gt
+    param:scope     ___x_cmd_gitlab
     param:dsl       '
 type:
     Authority = all public private
@@ -86,20 +86,20 @@ options:
     param:run
 
     local url
-    if [ "$#" -gt 0 ]; then
-        url="/v5/users/$1/repos"
+    if [ "$#" -gitlab 0 ]; then
+        url="/users/$1/repos"
     else
-        url="/v5/user/repos"
+        url="/user/repos"
     fi
 
-    ___gt_ui_mutual ___x_cmd_gitlab_get_multi "$url" visibility affiliation sort direction <<A
+    ___gitlab_ui_mutual ___x_cmd_gitlab_get_multi "$url" visibility affiliation sort direction <<A
         ___ui_table_json Id=.id Name=.name Owner=.owner.login Url=.html_url -- \$@
 A
 }
 
-# https://gitee.com/api/v5/swagger#/getV5Emails
+# https://gitee.com/api/swagger#/getV5Emails
 ___x_cmd_gitlab_user_email(){
-    param:scope     ___x_cmd_gt
+    param:scope     ___x_cmd_gitlab
     param:dsl       '
 options:
     --page          "page"                        <>:NatureNumber=1
@@ -107,14 +107,14 @@ options:
 '
     param:run
 
-    ___gt_ui_mutual ___x_cmd_gitlab_get_multi "/v5/emails" <<A
+    ___gitlab_ui_mutual ___x_cmd_gitlab_get_multi "/emails" <<A
         ___ui_table_json Email=.email State=.state -- \$@
 A
 }
 
-# https://gitee.com/api/v5/swagger#/getV5UserIssues
+# https://gitee.com/api/swagger#/getV5UserIssues
 ___x_cmd_gitlab_user_issue(){
-    param:scope     ___x_cmd_gt
+    param:scope     ___x_cmd_gitlab
     param:dsl       '
 type:
     Screen = all assigned created
@@ -136,7 +136,7 @@ options:
 '
     param:run
 
-    ___gt_ui_mutual ___x_cmd_gitlab_get_multi "/v5/user/issues" filter state direction labels \
+    ___gitlab_ui_mutual ___x_cmd_gitlab_get_multi "/user/issues" filter state direction labels \
         since schedule deadline created_at finished_at <<A
             ___ui_table_json ID=.number State=.issue_state Assigner=.assignee.name \
                 Repo=.repository.full_name Type=.issue_type Title=.title Url=.html_url -- \$@
@@ -149,7 +149,7 @@ A
 
 # generate a key by openssl, then save it in the x-cmd cloud.
 ___x_cmd_gitlab_user_key(){
-    param:scope      ___x_cmd_gt
+    param:scope      ___x_cmd_gitlab
     param:subcmd ___x_cmd_gitlab_user_key           \
         ls          "List all key"              \
         add         "Add key"                   \
@@ -159,13 +159,13 @@ ___x_cmd_gitlab_user_key(){
     param:run
 
     ___x_cmd_gitlab_user_key _param_help_doc
-    gt_log warn "Subcmd Not Found."
+    gitlab_log warn "Subcmd Not Found."
     return 1
 }
 
-# https://gitee.com/api/v5/swagger#/getV5UserKeys
+# https://gitee.com/api/swagger#/getV5UserKeys
 ___x_cmd_gitlab_user_key_ls(){
-    param:scope     ___x_cmd_gt
+    param:scope     ___x_cmd_gitlab
     param:dsl       '
 options:
     --page        "page"                    <>:NatureNumber=1
@@ -173,15 +173,15 @@ options:
 '
     param:run
 
-    ___gt_ui_mutual ___x_cmd_gitlab_get_multi "/v5/user/keys" <<A
+    ___gitlab_ui_mutual ___x_cmd_gitlab_get_multi "/user/keys" <<A
         ___ui_table_json Id=.id Title=.title Key=.key Url=.url -- \$@
 A
 }
 
 # shellcheck disable=SC2154
-# https://gitee.com/api/v5/swagger#/getV5UserKeysId
+# https://gitee.com/api/swagger#/getV5UserKeysId
 ___x_cmd_gitlab_user_key_get(){
-    param:scope     ___x_cmd_gt
+    param:scope     ___x_cmd_gitlab
     param:dsl       '
 options:
     --id        "provided key id"       <>:NatureNumber
@@ -194,15 +194,15 @@ options:
         if [ -n "$key" ]; then
             printf "%s" "$key"                        && return 0
         else
-            gt_log error "Couldn't find key by $id"   && return 1
+            gitlab_log error "Couldn't find key by $id"   && return 1
         fi
     }
 }
 
 # shellcheck disable=SC2181
-# https://gitee.com/api/v5/swagger#/deleteV5UserKeysId
+# https://gitee.com/api/swagger#/deleteV5UserKeysId
 ___x_cmd_gitlab_user_key_del(){
-    param:scope     ___x_cmd_gt
+    param:scope     ___x_cmd_gitlab
     param:dsl       '
 options:
     #1|--id        "provided key id"           <>:NatureNumber
@@ -210,7 +210,7 @@ options:
     param:run
 
     # TODO:http handle，delete repo return data is null.Status: 204 No Content
-    if ___x_cmd_gitlab_http delete "/v5/user/keys/$id" >/dev/null; then
+    if ___x_cmd_gitlab_http delete "/user/keys/$id" >/dev/null; then
         ___x_cmd_ui_tf true  "Deleted key successfully"
     else
         ___x_cmd_ui_tf false "Deleting key failure by $id."
@@ -219,19 +219,19 @@ options:
 }
 
 # shellcheck disable=SC2154
-# https://gitee.com/api/v5/swagger#/postV5UserKeys
+# https://gitee.com/api/swagger#/postV5UserKeys
 ___x_cmd_gitlab_user_key_add(){
-    param:scope     ___x_cmd_gt
+    param:scope     ___x_cmd_gitlab
     param:dsl       '
 options:
     --key       "add key"                   <>
     --title     "add key title"             <>
 '
     param:run
-    local gen_gt_json
-    gen_gt_json="$(param:option2json)"
+    local gen_gitlab_json
+    gen_gitlab_json="$(param:option2json)"
 
-    ___x_cmd_gitlab_http post "/v5/user/keys" "$gen_gt_json" | \
+    ___x_cmd_gitlab_http post "/user/keys" "$gen_gitlab_json" | \
     {
         ___x_cmd_git_json_query_rename "$data" id=.id title=.title key=.key
         if [ -n "$id" ]; then

@@ -3,7 +3,7 @@
 
 # author:       Li Junhao           l@x-cmd.com
 
-xrc http param str ui
+xrc http param ui
 xrc ui/lib/table
 
 xrc:inner:lib gh utils resource config token repo/main repo/branch/main current user/main org/main \
@@ -50,9 +50,8 @@ ____x_cmd_gh_make() {
 
     if [ -n "$token" ]; then
         ___x_cmd_http header put Authorization "token $token"
-        local user
-        user="$(___x_cmd_gh_current_owner)" || return 1
-        gh_log info "Hi $user! You've successfully authenticated."
+        ___x_cmd_gh_current_owner 1>/dev/null || return 1
+        gh_log info "Hi $___X_CMD_GITHUB_DEFAULT_OWNER! You've successfully authenticated."
         return 0
     fi
 

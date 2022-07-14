@@ -5,7 +5,7 @@
 # Section 6: Repo Path & Clone
 ############################
 ___x_cmd_gitlab_repo_url_http(){
-    param:scope  ___x_cmd_gt
+    param:scope  ___x_cmd_gitlab
     param:dsl    '
 options:
     #n  "Provide repo list"
@@ -24,7 +24,7 @@ ___x_cmd_gitlab_repo_url(){
 }
 
 ___x_cmd_gitlab_repo_url_ssh(){
-    param:scope     ___x_cmd_gt
+    param:scope     ___x_cmd_gitlab
     param:dsl       '
 options:
     #n "Provide repo list"
@@ -55,10 +55,10 @@ ___x_cmd_gitlab_repo_clone_https(){
     git clone "$(___x_cmd_gitlab_repo_url_http "$@")"
 }
 
-# https://gitee.com/api/v5/swagger#/postV5ReposOwnerRepoForks
+# https://gitee.com/api/swagger#/postV5ReposOwnerRepoForks
 # TODO Not available Gitee return Not Found Project
 ___x_cmd_gitlab_repo_fork(){
-    param:scope     ___x_cmd_gt
+    param:scope     ___x_cmd_gitlab
     param:dsl       '
 options:
     --repo              "Provide owner name and repo name.(default:the current user repo)"   <>:RepoName
@@ -69,5 +69,5 @@ options:
     local owner_repo
     owner_repo="$(___x_cmd_gitlab_param_normalize_repo "$repo")"
 
-    ___x_cmd_gitlab_http post "https://gitee.com/api/v5/repos/${owner_repo}/forks" organization
+    ___x_cmd_gitlab_http post "https://gitee.com/api/repos/${owner_repo}/forks" organization
 }

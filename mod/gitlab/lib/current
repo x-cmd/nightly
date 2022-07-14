@@ -13,14 +13,14 @@ ___x_cmd_gitlab_current(){
     param:run
 
     ___x_cmd_gitlab_current _param_help_doc
-    gt_log warn "Subcmd Not Found."
+    gitlab_log warn "Subcmd Not Found."
     return 1
 }
 
 # shellcheck disable=SC2120
 ___x_cmd_gitlab_current_repo(){
     param:void
-    local O="${O:-___x_cmd_gitlab_GITEE_DEFAULT}"
+    local O="${O:-___x_cmd_gitlab_GITLAB_DEFAULT}"
 
     if [ -n "$1" ]; then
         param_default set "gitee_$O" "repo" "$@"
@@ -31,29 +31,29 @@ ___x_cmd_gitlab_current_repo(){
 }
 
 # shellcheck disable=SC2120
-# https://gitee.com/api/v5/swagger#/getV5User
+# https://gitee.com/api/swagger#/getV5User
 ___x_cmd_gitlab_current_owner(){
     param:void
-    local O="${O:-___x_cmd_gitlab_GITEE_DEFAULT}"
+    local O="${O:-___x_cmd_gitlab_GITLAB_DEFAULT}"
     if [ -n "$1" ]; then
-        ___X_CMD_GITEE_DEFAULT_OWNER="$1"
-        ___x_cmd_gitlab_config_set  "user" "$___X_CMD_GITEE_DEFAULT_OWNER"
-        ___x_cmd_ui_tf "true" "Manually change the owner to $___X_CMD_GITEE_DEFAULT_OWNER"
+        ___X_CMD_GITLAB_DEFAULT_OWNER="$1"
+        ___x_cmd_gitlab_config_set  "user" "$___X_CMD_GITLAB_DEFAULT_OWNER"
+        ___x_cmd_ui_tf "true" "Manually change the owner to $___X_CMD_GITLAB_DEFAULT_OWNER"
         return 0
     fi
 
-    [ -n "$___X_CMD_GITEE_DEFAULT_OWNER" ] && printf "%s" "$___X_CMD_GITEE_DEFAULT_OWNER" && return 0
+    [ -n "$___X_CMD_GITLAB_DEFAULT_OWNER" ] && printf "%s" "$___X_CMD_GITLAB_DEFAULT_OWNER" && return 0
 
     local owner
     owner="$(___x_cmd_gitlab_default get "gitee_$O" owner)"
     [ -n "$owner" ] && printf "%s" "$owner" && return 0
 
-    ___X_CMD_GITEE_DEFAULT_OWNER="$(___x_cmd_gitlab_http get "/v5/user" | ___x_cmd_git_json_query ".login")"
-    if [ -n "$___X_CMD_GITEE_DEFAULT_OWNER" ];then
-        ___x_cmd_gitlab_config_set  "user" "$___X_CMD_GITEE_DEFAULT_OWNER" 1>/dev/null 2>&1
-        printf "%s" "$___X_CMD_GITEE_DEFAULT_OWNER"
+    ___X_CMD_GITLAB_DEFAULT_OWNER="$(___x_cmd_gitlab_http get "/user" | ___x_cmd_git_json_query ".login")"
+    if [ -n "$___X_CMD_GITLAB_DEFAULT_OWNER" ];then
+        ___x_cmd_gitlab_config_set  "user" "$___X_CMD_GITLAB_DEFAULT_OWNER" 1>/dev/null 2>&1
+        printf "%s" "$___X_CMD_GITLAB_DEFAULT_OWNER"
     else
-        gt_log error "get current owner fail"
+        gitlab_log error "get current owner fail"
         return 1
     fi
 }
@@ -61,7 +61,7 @@ ___x_cmd_gitlab_current_owner(){
 # shellcheck disable=SC2120
 ___x_cmd_gitlab_current_owner_type(){
     param:void
-    local O="${O:-___x_cmd_gitlab_GITEE_DEFAULT}"
+    local O="${O:-___x_cmd_gitlab_GITLAB_DEFAULT}"
     if [ -n "$1" ]; then
         # Set owner type
         ___x_cmd_gitlab_default put "gitee_$O" owner_type "$1"
@@ -73,7 +73,7 @@ ___x_cmd_gitlab_current_owner_type(){
     if [ -z "$data" ]; then
         owner="$(___x_cmd_gitlab_current_owner)"
         if [ -z "$owner" ]; then
-            gt_log error "Owner is empty. While owner not set."
+            gitlab_log error "Owner is empty. While owner not set."
             return 1
         fi
 

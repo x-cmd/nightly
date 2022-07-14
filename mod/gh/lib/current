@@ -29,7 +29,8 @@ ___x_cmd_gh_current_owner() {
         fi
         return
     elif [ -z "$___X_CMD_GITHUB_DEFAULT_OWNER" ];then
-        if ! ___X_CMD_GITHUB_DEFAULT_OWNER="$(___x_cmd_gh_http get "/user" | ___x_cmd_git_json_query ".login")";then
+        ___x_cmd_gh_http get "/user" |  x jo env . ___X_CMD_GITHUB_DEFAULT_OWNER=.login
+        if [ -z "$___X_CMD_GITHUB_DEFAULT_OWNER" ];then
             gh_log error "get current owner fail"
             return 1
         fi

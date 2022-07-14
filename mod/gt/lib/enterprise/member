@@ -84,13 +84,15 @@ options:
     param:run
 
     [ $# -eq 0 ] && gt_log error "At least one user's spatial address or email is needed" && return 1
-    local username="%%username%%"
+    # local username="%%username%%"
+    local username="${___X_CMD_TX}"
     local gen_gt_json
     gen_gt_json="$(param:option2json +username)"
 
     # TODO: http handle，delete repo return data is null.Status: 204 No Content
     for username in "$@"; do
-        if printf "%s" "${gen_gt_json}" | sed s/%%username%%/"${username##%/}"/g | \
+        # if printf "%s" "${gen_gt_json}" | sed s/%%username%%/"${username##%/}"/g | \
+        if x tmpl "$gen_gt_json" "${username##%/}" | \
             ___x_cmd_gt_http post "/v5/enterprises/${enterprise}/members" - >/dev/null; then
             gt_log info  "Add $username successfully"
         else

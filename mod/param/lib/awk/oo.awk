@@ -185,6 +185,16 @@ function option_exist_by_alias( alias ){
     return ( option_alias_2_option_id[ alias ] != "" )
 }
 
+function option_assign_count_inc( option_id,    _counter ){
+    _counter = option_assignment_count[ option_id ] + 1      # option_assignment_count[ _option_id ] can be ""
+    option_assignment_count[ option_id ] = _counter
+    return _counter
+}
+
+function option_assign_count_get( option_id     ){
+    return option_assignment_count[ option_id ]
+}
+
 
 # EndSection
 
@@ -206,7 +216,19 @@ function optarg_name_get( id ){ return option_arr[ id, OPTARG_NAME ]; }
 
 function optarg_default_get( id ){ return option_arr[ id, OPTARG_DEFAULT ]; }
 function optarg_default_set( id, value ){ option_arr[ id, OPTARG_DEFAULT ] = value; }
-function optarg_default_set_required( id ){ option_arr[ id, OPTARG_DEFAULT ] = OPTARG_DEFAULT_REQUIRED_VALUE; }
+
+BEGIN {
+    EXISTS_REQUIRED_OPTION = false
+}
+
+function optarg_default_set_required( id ){
+    EXISTS_REQUIRED_OPTION = true
+    option_arr[ id, OPTARG_DEFAULT ] = OPTARG_DEFAULT_REQUIRED_VALUE;
+}
+
+function option_exist_required(){       # Seemed Not Used
+    return EXISTS_REQUIRED_OPTION
+}
 
 function optarg_default_value_eq_require( value ){ return value == OPTARG_DEFAULT_REQUIRED_VALUE; }
 

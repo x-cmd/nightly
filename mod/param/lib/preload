@@ -22,7 +22,8 @@ alias param:run='local IFS; ___x_cmd_param_int "$@" ; local _x_cmd_param_code="$
     else
         return $_x_cmd_param_code
     fi'
-alias param:void="local ___X_CMD_PARAM_SCOPE;  local ___X_CMD_PARAM_DSL; param:run"
+
+# alias param:void="local ___X_CMD_PARAM_SCOPE;  local ___X_CMD_PARAM_DSL; param:run"
 alias param:debug='local IFS; ___x_cmd_param_eval_echo "$(___x_cmd_param_exec_dsl "$@"  )"'
 
 ___x_cmd_param_eval_echo(){
@@ -30,6 +31,12 @@ ___x_cmd_param_eval_echo(){
     printf "%s\n" "$*" >&2
     eval "$*"
 }
+
+___x_cmd_param___void_json(){
+    printf "{\n%s\n:\n%s\n}\n" "\"#desc\"" "\"$1\""
+}
+
+alias param:void='[ "$1" != _x_cmd_advise_json ] || { ___x_cmd_param___void_json "$2" ; return 0; }'
 # EndSection
 
 # Section 3: param:subcmd param:subcmd:try
@@ -83,6 +90,27 @@ ___x_cmd_param_int(){
             eval "$(___X_CMD_PARAM_AWK_PATH="$___X_CMD_ROOT_MOD/param/lib/awk/advise.awk" ___x_cmd_param_exec_dsl "$@")"
             ;;
         _param_list_subcmd | _param_has_subcmd | _ls_subcmd | _ls_option | _ls_option_name | _ls_option_subcmd )
+            ___X_CMD_PARAM_AWK_PATH="$___X_CMD_ROOT_MOD/param/lib/awk/meta.awk"     ___x_cmd_param_exec_dsl "$@"
+            ;;
+        ___x_cmd_param_meta )   # TODO: place all of the subcmd above.
+            # subcmd, subcmd <name>, option, option_name, option_subcmd
+            shift 1; ___X_CMD_PARAM_AWK_PATH="$___X_CMD_ROOT_MOD/param/lib/awk/meta.awk"     ___x_cmd_param_exec_dsl "$@"
+            ;;
+        *)  return 125
+    esac
+}
+
+alias param:meta='___X_CMD_PARAM_REFLECT=1'
+___x_cmd_param_int_reflect(){
+    [ -n "${___X_CMD_PARAM_REFLECT}" ] || return 125
+    case "$1" in
+        help)
+            ___X_CMD_PARAM_AWK_PATH="$___X_CMD_ROOT_MOD/param/lib/awk/help.awk"     ___x_cmd_param_exec_dsl
+            ;;
+        advise)
+            eval "$(___X_CMD_PARAM_AWK_PATH="$___X_CMD_ROOT_MOD/param/lib/awk/advise.awk" ___x_cmd_param_exec_dsl "$@")"
+            ;;
+        subcmd | option | subcmd_option )
             ___X_CMD_PARAM_AWK_PATH="$___X_CMD_ROOT_MOD/param/lib/awk/meta.awk"     ___x_cmd_param_exec_dsl "$@"
             ;;
         *)  return 125

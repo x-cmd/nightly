@@ -1,5 +1,6 @@
 BEGIN {
-    LEN = "\001"
+    # LEN = "\001"
+    LEN = L
     NULL = "\001"
 }
 

@@ -44,7 +44,7 @@ ___x_cmd_yanfa_mod_code(){
     ___X_CMD_YANFA_MOD_CODE_LINE=0
     ___X_CMD_YANFA_MOD_CODE_CHAR=0
     ___X_CMD_YANFA_MOD_CODE_BYTE=0
-    eval "$(xargs wc 2>/dev/null | tail -n1 | awk '{
+    eval "$(xargs wc 2>/dev/null | tail -n1 | command awk '{
         print "___X_CMD_YANFA_MOD_CODE_LINE=" $1
         print "___X_CMD_YANFA_MOD_CODE_CHAR=" $2
         print "___X_CMD_YANFA_MOD_CODE_BYTE=" $3
@@ -100,7 +100,7 @@ $awk_list
 A
             awk_line="$___X_CMD_YANFA_MOD_CODE_LINE"
             yanfa:info "Installed $total files: sh=$sh awk=$awk json=$json txt=$txt"
-            yanfa:info "Lines: total=  sh=${sh_line} awk=${awk_line}"
+            yanfa:info "Lines: total=$total  sh=${sh_line} awk=${awk_line}"
         }
 
         # buggy code

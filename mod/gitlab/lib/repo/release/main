@@ -14,14 +14,14 @@ ___x_cmd_gitlab_repo_release(){
     param:run
 
     ___x_cmd_gitlab_repo_release _param_help_doc
-    gt_log warn "Subcmd Not Found."
+    gitlab_log warn "Subcmd Not Found."
     return 1
 }
 
 # shellcheck disable=SC2086,SC2154
-# https://gitee.com/api/v5/swagger#/getV5ReposOwnerRepoReleases
+# https://gitee.com/api/swagger#/getV5ReposOwnerRepoReleases
 ___x_cmd_gitlab_repo_release_ls(){
-    param:scope     ___x_cmd_gt
+    param:scope     ___x_cmd_gitlab
     param:dsl    '
 type:
     Direction = asc  desc
@@ -32,16 +32,16 @@ options:
     param:run
     ___x_cmd_gitlab_param_init_owner_repo
 
-    ___gt_ui_mutual ___x_cmd_gitlab_http get "/v5/repos/${owner_repo}/releases" direction page per_page <<A
+    ___gitlab_ui_mutual ___x_cmd_gitlab_http get "/repos/${owner_repo}/releases" direction page per_page <<A
         ___ui_table_json Id=.id ReleaseName=.name TagName=.tag_name Message=.body \
             IsPreRelease=.prerelease User=.author.login Time=.created_at -- \$@
 A
 }
 
 # shellcheck disable=SC2086,SC2154
-# TODO:https://gitee.com/api/v5/swagger#/getV5ReposOwnerRepoReleasesTagsTag
+# TODO:https://gitee.com/api/swagger#/getV5ReposOwnerRepoReleasesTagsTag
 ___x_cmd_gitlab_repo_get_release_by_tag(){
-    param:scope     ___x_cmd_gt
+    param:scope     ___x_cmd_gitlab
     param:dsl    '
 options:
     #1|--repo          "Provide owner name and repo name.(default:the current user repo)"   <>:RepoName
@@ -50,13 +50,13 @@ options:
     param:run
     ___x_cmd_gitlab_param_init_owner_repo
 
-    ___x_cmd_gitlab_http get "/v5/repos/${owner_repo}/releases/tags/${tag}"
+    ___x_cmd_gitlab_http get "/repos/${owner_repo}/releases/tags/${tag}"
 }
 
 # shellcheck disable=SC2154,SC2181
-# https://gitee.com/api/v5/swagger#/postV5ReposOwnerRepoReleases
+# https://gitee.com/api/swagger#/postV5ReposOwnerRepoReleases
 ___x_cmd_gitlab_repo_release_create(){
-    param:scope  ___x_cmd_gt
+    param:scope  ___x_cmd_gitlab
     param:dsl    '
 options:
     #1|--repo           "Provide owner name and repo name.(default:the current user repo)"   <>:RepoName
@@ -67,11 +67,11 @@ options:
     --target_commitish  "Default is master"                                                  <>="master"
 '
     param:run
-    local gen_gt_json
-    gen_gt_json="$(param:option2json tag_name=tag -tag)"
+    local gen_gitlab_json
+    gen_gitlab_json="$(param:option2json tag_name=tag -tag)"
     ___x_cmd_gitlab_param_init_owner_repo
 
-    printf "%s" "$gen_gt_json" | ___x_cmd_gitlab_http post "/v5/repos/${owner_repo}/releases" - | \
+    printf "%s" "$gen_gitlab_json" | ___x_cmd_gitlab_http post "/repos/${owner_repo}/releases" - | \
         ___x_cmd_gitlab_repo_release_create_status_handler
 }
 
@@ -107,9 +107,9 @@ alias ______x_cmd_gitlab_repo_release_init_owner_repo_and_release="
 
 
 # shellcheck disable=SC2154,SC2181
-# TODO:https://gitee.com/api/v5/swagger#/patchV5ReposOwnerRepoReleasesId
+# TODO:https://gitee.com/api/swagger#/patchV5ReposOwnerRepoReleasesId
 ___x_cmd_gitlab_repo_release_update(){
-    param:scope  ___x_cmd_gt
+    param:scope  ___x_cmd_gitlab
     param:dsl    '
 options:
     #1|--release        "Release ID"                <>:NatureNumber
@@ -120,15 +120,15 @@ options:
 '
     param:run
     ______x_cmd_gitlab_repo_release_init_owner_repo_and_release
-    ___x_cmd_gitlab_http patch "/v5/repos/${owner_repo}/releases/${release}" \
+    ___x_cmd_gitlab_http patch "/repos/${owner_repo}/releases/${release}" \
         tag_name="$tag" name body prerelease 1>/dev/null 2>&1
-    [ $? -ne 0 ] && gt_log error "Update release failure: $name by $owner_repo $release" && return 1
+    [ $? -ne 0 ] && gitlab_log error "Update release failure: $name by $owner_repo $release" && return 1
     ___x_cmd_ui tf "true" "Success release" "name: $name" "body: $body" "prerelease: $prerelease"  && return 0
 }
 
-# TODO: https://gitee.com/api/v5/swagger#/deleteV5ReposOwnerRepoReleasesId
+# TODO: https://gitee.com/api/swagger#/deleteV5ReposOwnerRepoReleasesId
 ___x_cmd_gitlab_repo_release_rm(){
-    param:scope  ___x_cmd_gt
+    param:scope  ___x_cmd_gitlab
     param:dsl    '
 options:
     #1|--release        "Release ID"                <>:NatureNumber
@@ -136,12 +136,12 @@ options:
     param:run
 
     ______x_cmd_gitlab_repo_release_init_owner_repo_and_release
-    ___x_cmd_gitlab_http delete "/v5/repos/${owner_repo}/releases/$release"
+    ___x_cmd_gitlab_http delete "/repos/${owner_repo}/releases/$release"
 }
 
-# TODO: https://gitee.com/api/v5/swagger#/getV5ReposOwnerRepoReleasesLatest
+# TODO: https://gitee.com/api/swagger#/getV5ReposOwnerRepoReleasesLatest
 ___x_cmd_gitlab_repo_release_latest(){
-    param:scope     ___x_cmd_gt
+    param:scope     ___x_cmd_gitlab
     param:dsl    '
 options:
     #1|--repo   "Provide owner name and repo name.(default:the current user repo)"   <>:RepoName
@@ -149,12 +149,12 @@ options:
     param:run
 
     ___x_cmd_gitlab_param_init_owner_repo
-    ___x_cmd_gitlab_http get "/v5/repos/${owner_repo}/releases/latest"
+    ___x_cmd_gitlab_http get "/repos/${owner_repo}/releases/latest"
 }
 
-# TODO: https://gitee.com/api/v5/swagger#/getV5ReposOwnerRepoReleasesId
+# TODO: https://gitee.com/api/swagger#/getV5ReposOwnerRepoReleasesId
 ___x_cmd_gitlab_repo_release_info(){
-    param:scope     ___x_cmd_gt
+    param:scope     ___x_cmd_gitlab
     param:dsl    '
 options:
     #1|--release        "Release ID"                <>:NatureNumber
@@ -162,5 +162,5 @@ options:
     param:run
 
     ______x_cmd_gitlab_repo_release_init_owner_repo_and_release
-    ___x_cmd_gitlab_http get "/v5/repos/${owner_repo}/releases/${release}"
+    ___x_cmd_gitlab_http get "/repos/${owner_repo}/releases/${release}"
 }
