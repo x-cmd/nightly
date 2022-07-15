@@ -24,7 +24,7 @@ ___x_cmd_gh_token(){
         ___x_cmd_http header put Authorization "token $1"
         ___X_CMD_GITHUB_DEFAULT_OWNER=
         if ! ___x_cmd_gh_current_owner 1>/dev/null 2>&1; then
-            ___x_cmd_http header put Authorization "token $tmp_token"
+            [ -z "$tmp_token" ] || ___x_cmd_http header put Authorization "token $tmp_token"
             gh_log error "set default token $1 fail,Please check if it is a valid token"
             return 1
         fi

@@ -6,8 +6,8 @@ ___x_cmd_hub_main(){
     param:subcmd ___x_cmd_hub_main                              \
         file           "File management"                        \
         share          "Share management"                       \
+        account        "Account management"                     \
         msg            "Send message"                           \
-        user           "Get user info '<username> <userid>'"    \
         token          "User token management"                  \
         login          "Login to hub service"                   \
         logout         "Logout from hub service"                \
@@ -19,7 +19,33 @@ ___x_cmd_hub_main(){
     ___x_cmd_hub_main help
 }
 
-# Section(account): login, register, logout, token, user
+# Section(account): login, register, logout, token
+
+___x_cmd_hub_main_account(){
+    param:subcmd ___x_cmd_hub_main_account                              \
+        info          "Get account info '<username> <userid>'"          \
+        connect       "Connect to other platform such as wechat telegram github gitee etc."
+    param:subcmd:try
+    param:run
+    hub:error "Subcommand required"
+    ___x_cmd_hub_main_account help
+}
+
+___x_cmd_hub_main_account_info(){
+    param:void
+    ___x_cmd_hub_user
+    # TODO: to show what platform is connected
+}
+
+___x_cmd_hub_main_account_connect(){
+    param:dsl<<A
+option:
+    #1    "the platform name"   <platform_name> = wechat telegram github gitee
+A
+    param:run
+
+    echo ___x_cmd_hub_account_connect_"$1" "$@"
+}
 
 ___x_cmd_hub_main_login(){
     param:void
@@ -88,11 +114,6 @@ ___x_cmd_hub_main_logout(){
 ___x_cmd_hub_main_token(){
     param:void
     ___x_cmd_hub_token "$@"
-}
-
-___x_cmd_hub_main_user(){
-    param:void
-    ___x_cmd_hub_user "$@"
 }
 
 # EndSection
@@ -270,7 +291,8 @@ A
 
 ___x_cmd_hub_main_msg(){
     param:subcmd ___x_cmd_hub_main_msg         \
-        telegram "Send message to your telegram account"
+        telegram "Send message to your telegram account" \
+        wechat   "Send message to your wechat account"
     param:subcmd:try
     param:run
     hub:error "subcommand required"
@@ -280,11 +302,21 @@ ___x_cmd_hub_main_msg(){
 ___x_cmd_hub_main_msg_telegram(){
     param:dsl<<A
 option:
-    #1    "Resourse path"
+    #1    "Text for your message to send"
 A
     param:run
 
     ___x_cmd_hub_msg_telegram "$@"
+}
+
+___x_cmd_hub_main_msg_wechat(){
+    param:dsl<<A
+option:
+    #1    "Text for your message to send"
+A
+    param:run
+
+    ___x_cmd_hub_msg_wechat "$@"
 }
 
 # EndSection

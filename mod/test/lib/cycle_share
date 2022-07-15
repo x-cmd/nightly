@@ -64,7 +64,7 @@ ___x_cmd_test_true_or_exit(){
     "$@"
     code=$?
     if [ $code -ne 0 ]; then
-        [ -n "$___X_CMD_TEST_ASSERT_ERREXIT" ] && exit $code
+        [ -z "$___X_CMD_TEST_ASSERT_ERREXIT" ] || exit $code
     fi
     return "$code"
 }

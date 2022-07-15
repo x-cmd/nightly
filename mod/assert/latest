@@ -153,6 +153,8 @@ ___x_cmd_assert_otherwise(){
 
         stdout)             ___x_cmd_assert_stdout "$@" ;;
         stderr)             ___x_cmd_assert_stderr "$@" ;;
+        
+        *)                  ___x_cmd_assert_t "$op" "$@" ;;
     esac
 }
 

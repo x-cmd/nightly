@@ -8,12 +8,13 @@
 xrc http param ui
 xrc ui/lib/table gh/lib/resource
 
-xrc:inner:lib gitlab utils config current token
+xrc:inner:lib gitlab utils config current token user repo/main
 
 x log init gitlab
 ___x_cmd_gitlab(){
     param:subcmd ___x_cmd_gitlab        \
         user        "user"              \
+        repo        "repo command"      \
         config      "save, load, which" \
         token       "set token"
     param:subcmd:try
@@ -41,7 +42,7 @@ ___x_cmd_gitlab_make(){
 
     if [ -n "$token" ]; then
         ___x_cmd_http header put "PRIVATE-TOKEN" "$token"
-        ___x_cmd_gitlab_current_owner || return 1
+        ___x_cmd_gitlab_current_owner 1>/dev/null || return 1
         gitlab_log info "Hi $___X_CMD_GITLAB_DEFAULT_OWNER! You've successfully authenticated."
         return 0
     fi

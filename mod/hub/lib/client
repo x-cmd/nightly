@@ -69,7 +69,7 @@ ___x_cmd_hub_client_file_rm(){
 # Section: share
 
 ___x_cmd_hub_client_share_ls(){
-    http get "$___X_CMD_HUB_SERVICE_URL/api/v0/share"  token="$(___x_cmd_hub_token)"
+    ___x_cmd_http get "$___X_CMD_HUB_SERVICE_URL/api/v0/share"  token="$(___x_cmd_hub_token)"
     # ___x_cmd_httpget "$___X_CMD_HUB_SERVICE_URL/api/v0/share?token=$(___x_cmd_hub_token)"
 }
 
@@ -101,7 +101,16 @@ ___x_cmd_hub_client_share_update(){
 
 ___x_cmd_hub_client_send_telegram_msg(){
     local msg="${1}"
-    curl -X POST --silent "$___X_CMD_HUB_SERVICE_URL/api/v0/telegram/msg?token=$(___x_cmd_hub_token)" \
+    curl -X POST --silent "$___X_CMD_HUB_SERVICE_URL/api/v0/msg/telegram?token=$(___x_cmd_hub_token)" \
         -H 'Content-Type: application/json' \
         -d '{ "msg": "'"$msg"'" }'
 }
+
+___x_cmd_hub_client_send_wechat_msg(){
+    local msg="${1}"
+    curl -X POST --silent "$___X_CMD_HUB_SERVICE_URL/api/v0/msg/wechat?token=$(___x_cmd_hub_token)" \
+        -H 'Content-Type: application/json' \
+        -d '{ "msg": "'"$msg"'" }'
+}
+
+# EndSection

@@ -5,10 +5,10 @@
 # maintainer:   Li Junhao
 
 # loading dependencies
-xrc http param str ui
+xrc http param ui
 xrc ui/lib/table gh/lib/resource
 
-xrc:inner:lib gt utils config token user current issue enterprise/main enterprise/member enterprise/team org/main org/member \
+xrc:inner:lib gt utils config token user current issue event enterprise/main enterprise/member enterprise/team org/main org/member \
     repo/utils repo/main repo/pr/main repo/pr/assign repo/pr/tester repo/release/main repo/release/attachment repo/member repo/tag repo/page repo/branch _type/main
 
 
@@ -21,6 +21,7 @@ ___x_cmd_gt(){
         enterprise                       "manage enterprise"        \
         org                              "manage org"               \
         user                             "user"                     \
+        event                            "list event information"   \
         config                           "save, load, which"        \
         token                            "set token"
     param:subcmd:try
@@ -28,8 +29,8 @@ ___x_cmd_gt(){
     param:subcmd ___x_cmd_gt_repo                                   \
         pr                               "pull request"             \
         release                          "release management"       \
-        member                           "repo member"              \
-        tag                              "repo tag"
+        tag                              "repo tag"                 \
+        member                           "repo member"
     param:subcmd:try
     param:run
 
@@ -55,9 +56,8 @@ ___x_cmd_gt_make(){
 
     if [ -n "$token" ]; then
         ___x_cmd_http header put Authorization "token $token"
-        local user
-        user="$(___x_cmd_gt_current_owner)" || return 1
-        gt_log info "Hi $user! You've successfully authenticated."
+        ___x_cmd_gt_current_owner 1>/dev/null || return 1
+        gt_log info "Hi $___X_CMD_GITEE_DEFAULT_OWNER! You've successfully authenticated."
         return 0
     fi
 

@@ -14,8 +14,41 @@
 
 # - to reprenset a ch in bracket must be the last ch
 
-function re( p0, ch ){
-    return "(" p0 ")" ch
+function re( p0, ch ){              return "(" p0 ")" ch;   }
+function re_match( str, regex ){    return match( str, re_patgen( regex ) ); }
+function re_patgen( regex,  t ){    return ((t = RE_PAT_CACHE[ regex ]) != "") ? t : (RE_PAT_CACHE[ regex ] = re_patgen___( regex )); }
+
+function re___pat_gsub( srcpat, tgtpat, regex ){
+    while (gsub( srcpat, tgtpat, regex )) {}
+    return regex
+}
+
+function re_patname( name ){    return "\\[:" name ":\\]";  }
+function re_patgen___( regex,  _tmp, _tmp_arr ){
+
+    regex = re___pat_gsub( re_patname( "int" ),        RE_NUMBER,          regex )
+    regex = re___pat_gsub( re_patname( "real" ),       RE_NUM,             regex )
+    regex = re___pat_gsub( re_patname( "qu" ),         RE_STR2,            regex )
+    regex = re___pat_gsub( re_patname( "qu1" ),        RE_STR1,            regex )
+
+    # regex = re___pat_gsub( re_patname( "ip-a" ),       "",               regex )
+    # regex = re___pat_gsub( re_patname( "ip-b" ),       "",               regex )
+    # regex = re___pat_gsub( re_patname( "ip-c" ),       "",               regex )
+    # regex = re___pat_gsub( re_patname( "ip-d" ),       "",               regex )
+    regex = re___pat_gsub( re_patname( "ip" ),         RE_IP,              regex )
+    # regex = re___pat_gsub( re_patname( "ipv6" ),       "",               regex )
+    regex = re___pat_gsub( re_patname( "url" ),        RE_URL,             regex )
+    regex = re___pat_gsub( re_patname( "http" ),       RE_URL_HTTP,       regex )
+    regex = re___pat_gsub( re_patname( "https" ),      RE_URL_HTTPS,       regex )
+    regex = re___pat_gsub( re_patname( "httpx" ),      RE_URL_HTTPX,       regex )
+
+    if (match(regex, /\[\:([0-9])+-([0-9])+\:\]/)) {
+        _tmp = substr(regex, RSTART, RLENGTH)
+        split(_tmp, _tmp_arr, "-")
+        regex = re___pat_gsub( re_patname( _tmp_arr[1] "-" _tmp_arr[2] ), re_range( _tmp_arr[1], _tmp_arr[2] ), regex)
+    }
+
+    return regex
 }
 
 BEGIN{
@@ -47,7 +80,8 @@ BEGIN {
 
     RE_033 = "\033\\[([0-9]+;)*[0-9]+m"
 
-    RE_IP = ""
+
+    #######
 
     RE_IP_A = ""
     RE_IP_B = ""
@@ -56,6 +90,15 @@ BEGIN {
     RE_IP_E = ""
 
     RE_IP_SUBNET = ""
+
+    RE_URL_BODY     =   "[^[:space:]]+"
+
+    RE_IP           =   re_range(0, 255) "([.]" re_range(0, 255) "){3}"
+
+    RE_URL          =   "[^:[:space:]]+://" RE_URL_BODY
+    RE_URL_HTTP     =   "http://"           RE_URL_BODY
+    RE_URL_HTTPX    =   "https?://"         RE_URL_BODY
+    RE_URL_HTTPS    =   "https://"          RE_URL_BODY
 }
 
 BEGIN{
@@ -76,26 +119,11 @@ BEGIN{
 
 # awk 'BEGIN{ match("-b+cd", "[[:alnum:][:punct:]]*"); print RLENGTH " " RSTART; }'
 
-
-# [:email:]
-# [:ip-a:]
-# [:ip-b:]
-# [:ip-c:]
-# [:ip-d:]
-# [:ip-e:]
-# [:ipv6:]
-# [:ip:192.168.0.0/16:]
-# param design, consider the ip and number
-
-# 0-65536
-# 0-9, 10-99, 100-999, 1000-9999, 10000-65535
-
-
+# Section: range
 function re_range2pattern_all_digit( num, digit ){
     gsub(/[0-9]/, digit, num)
     return num
 }
-
 
 function re_range( start, end,      i, _startl, _endl, _res, _num9 ){
     _startl = length( start )
@@ -154,53 +182,4 @@ function re_range2pattern( start, end,      l, _res, _rest_0, _rest_9, _start_a,
     if (_mid_start <  _mid_end) _res =  ((_res == "") ? "" : _res "|")  ( (l==2) ?  sprintf("([%s-%s][0-9])",  _mid_start, _mid_end) : sprintf("([%s-%s][0-9]{%s})", _mid_start, _mid_end, (l-1)) )
     return "(" _res ")"
 }
-
-
-
-function re_range_rest(){
-    print re_range2pattern(10, 99)
-
-    # ([0-9]|(([1-9][0-9]))|1((2[0-7])|([0-1][0-9])))
-
-    print re_range(0, 65535)
-    pat = "^" re_range(0, 65535) "$"
-
-    for (i=0; i<=65535; ++i) {
-        if (i !~ pat) print "Wrong i"
-    }
-
-    for (i=65536; i<=100000; ++i) {
-        if (i ~ pat) print "Wrong " i
-    }
-
-    # print re_range2pattern(11, 13)
-    # print re_range2pattern(11, 23)
-    # print re_range2pattern(11, 33)
-    # print re_range2pattern(11, 63)
-    # print re_range2pattern(111, 863)
-}
-
-# END{
-#     re_range_rest()
-# }
-
-function re_match( str, regex ){
-    return 0
-}
-
-function re_patgen( regex ){
-    gsub(/\[\:ip-a\:\]/, "", regex)
-    gsub(/\[\:ip-b\:\]/, "", regex)
-    gsub(/\[\:ip-c\:\]/, "", regex)
-    gsub(/\[\:ip-d\:\]/, "", regex)
-    gsub(/\[\:ip\:\]/, "", regex)
-    gsub(/\[\:ip\:\]/, "", regex)
-    gsub(/\[\:url\:\]/, "", regex)
-    gsub(/\[\:httpx-url\:\]/, "", regex)
-
-    # Calculate ...
-    gsub(/\[\:[0-9]+-[0-9]+\:\]/, "", regex)
-
-    return regex
-}
-
+# EndSection

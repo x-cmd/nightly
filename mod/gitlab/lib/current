@@ -34,8 +34,7 @@ ___x_cmd_gitlab_current_repo(){
 # https://gitee.com/api/swagger#/getV5User
 ___x_cmd_gitlab_current_owner(){
     param:void
-    local O="${O:-___x_cmd_gh_GITLAB_DEFAULT}"
-
+    local O="${O:-___x_cmd_gitlab_GITLAB_DEFAULT}"
     if [ -n "$1" ]; then
         ___X_CMD_GITLAB_DEFAULT_OWNER="$1"
         if ___x_cmd_gh_config_set  "user" "$___X_CMD_GITLAB_DEFAULT_OWNER" 1>/dev/null 2>&1;then
@@ -43,9 +42,9 @@ ___x_cmd_gitlab_current_owner(){
         fi
         return
     elif [ -z "$___X_CMD_GITLAB_DEFAULT_OWNER" ];then
-        ___x_cmd_gh_http get "/user" |  x jo env . ___X_CMD_GITLAB_DEFAULT_OWNER=.login
+        ___x_cmd_gitlab_http get "/user" |  x jo env . ___X_CMD_GITLAB_DEFAULT_OWNER=.username
         if [ -z "$___X_CMD_GITLAB_DEFAULT_OWNER" ];then
-            gh_log error "get current owner fail"
+            gitlab_log error "get current owner fail"
             return 1
         fi
         ___x_cmd_gh_config_set  "user" "$___X_CMD_GITLAB_DEFAULT_OWNER" 1>/dev/null 2>&1

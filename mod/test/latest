@@ -4,7 +4,7 @@
 x log init test
 xrc ui/latest
 
-xrc:mod:lib test    cycle_share     cycle   cycle_con
+xrc:mod:lib test    cycle_share     cycle
 
 # TODO: add advise.json
 # TODO: subcmd: ls
@@ -15,10 +15,9 @@ ___x_cmd_test(){
     case "$1" in
         :)          ;;
         :*)         : other shell ;;
-        bench)      shift; ( . "$___X_CMD_ROOT_MOD/test/lib/bench"; ___x_cmd_test_bench "$@" ) ;;
+        bench)      shift; ( . "$___X_CMD_ROOT_MOD/test/lib/bench/index"; ___x_cmd_test_bench "$@" ) ;;
         errexit)    shift; ___x_cmd_test_errexit "$@" ;;
         cycle)      shift; ___x_cmd_test_cycle_exec "$@" ;;
-        con)        shift; ___x_cmd_test_cycle_con_exec "$@" ;;
         *)          ___x_cmd_test_cycle_exec "$@" ;;
     esac
 }

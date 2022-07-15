@@ -1,8 +1,11 @@
 
 ___x_cmd_test_cycle_exec(){
     local target="${1}"
+    local WSROOT
+
+    WSROOT="$(x wsroot)"
     case "$1" in
-        ""|-*|+*)   target="$(x wsroot)/.x-cmd/___test___" ;;
+        ""|-*|+*)   target="${WSROOT}/.x-cmd/___test___" ;;
         *)          target="$1"; shift ;;
     esac
 
@@ -86,7 +89,7 @@ ___x_cmd_test___cycle_exec_folder_iterate(){
     local code
     for testcase in *; do
         case "$testcase" in
-            setup|teardown|init|tini|_*)         continue ;;
+            setup|teardown|init|tini|lib|_*)         continue ;;
         esac
 
         (

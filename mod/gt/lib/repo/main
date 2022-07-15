@@ -213,7 +213,7 @@ ___x_cmd_gt_repo_ls(){
         owner_type=user
     else
         local owner="$1"
-        owner_type="$(______x_cmd_gt_owner_type_query "$owner")"
+        owner_type="$(___x_cmd_gt_owner_type_query "$owner")"
     fi
     ___x_cmd_gt_"${owner_type}"_repo ls "$@"
 }
