@@ -105,6 +105,22 @@ function assert(optarg_id, arg_name, arg_val,
     } else if (op ~ /^=~.$/) {
         sep = substr(op, 3, 1)
         assert_arr_regex( optarg_id, arg_name, arg_val, sep )
+    } else if (op ~ /^=email$/) {
+        if (! match(arg_val, "^[^@]+@[^.]+.[^.]$") ) {    # float is: /[+-]?[0-9]+(.[0-9]+)?/
+            return "Arg: [" arg_name "] value is [" arg_val "]\n  Is NOT an integer."
+        }
+    } else if (op == "=httpx") {
+        if (! match(arg_val, "^[+-]?[0-9]+$") ) {    # float is: /[+-]?[0-9]+(.[0-9]+)?/
+            return "Arg: [" arg_name "] value is [" arg_val "]\n  Is NOT a http or https url."
+        }
+    } else if (op ~ "^=url:[A-Za-z0-9_-]+$") {      # =url:http   =url:https    =url:ftp
+        if (! match(arg_val, "^[+-]?[0-9]+$") ) {    # float is: /[+-]?[0-9]+(.[0-9]+)?/
+            return "Arg: [" arg_name "] value is [" arg_val "]\n  Is NOT an integer."
+        }
+    } else if (op ~ /=int\[[0-9]+(:[0-9]+(:[0-9]+)?)?\]/) {
+        if (! match(arg_val, "^[+-]?[0-9]+$") ) {    # float is: /[+-]?[0-9]+(.[0-9]+)?/
+            return "Arg: [" arg_name "] value is [" arg_val "]\n  Is within the range."
+        }
     } else if (op == "") {
         # Do nothing.
     } else {

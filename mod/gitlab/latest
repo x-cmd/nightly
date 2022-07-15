@@ -41,9 +41,8 @@ ___x_cmd_gitlab_make(){
 
     if [ -n "$token" ]; then
         ___x_cmd_http header put "PRIVATE-TOKEN" "$token"
-        local user
-        user="$(___x_cmd_gitlab_current_owner)" || return 1
-        gitlab_log info "Hi $user! You've successfully authenticated."
+        ___x_cmd_gitlab_current_owner || return 1
+        gitlab_log info "Hi $___X_CMD_GITLAB_DEFAULT_OWNER! You've successfully authenticated."
         return 0
     fi
 

@@ -22,7 +22,7 @@ ___x_cmd_gitlab_token(){
 
         ___x_cmd_http header put "PRIVATE-TOKEN" "$1"
         ___X_CMD_GITLAB_DEFAULT_OWNER=
-        if ! ___x_cmd_gitlab_current_owner;then
+        if ! ___x_cmd_gitlab_current_owner 1>/dev/null 2>&1;then
             ___x_cmd_http  header put "PRIVATE-TOKEN" "$tmp_token"
             gitlab_log error "set default token $1 fail, Please check if it is a valid token"
             return 1
