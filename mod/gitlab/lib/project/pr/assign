@@ -28,7 +28,7 @@ options:
     # TODO: interactive ui
 
     ___parse_pr_init_owner_repo_and_pr
-    ___x_cmd_gitlab_http post "/repos/${owner_repo}/pulls/$pr/assignees" assignees
+    ___x_cmd_gitlab_http post "/repos/${owner_project}/pulls/$pr/assignees" assignees
 }
 
 ___x_cmd_gitlab_repo_pr_assign_del(){
@@ -41,7 +41,7 @@ options:
     param:run
 
     ___parse_pr_init_owner_repo_and_pr
-    ___x_cmd_gitlab_http delete "/repos/${owner_repo}/pulls/$pr/assignees?assignees=$assignees"
+    ___x_cmd_gitlab_http delete "/repos/${owner_project}/pulls/$pr/assignees?assignees=$assignees"
 }
 
 ___x_cmd_gitlab_repo_pr_assign_reset(){
@@ -56,7 +56,7 @@ options:
     ___parse_pr_init_owner_repo_and_pr
 
     reset_all=${reset_all:-false}
-    ___x_cmd_gitlab_http patch "/repos/${owner_repo}/pulls/$pr/assignees" reset_all
+    ___x_cmd_gitlab_http patch "/repos/${owner_project}/pulls/$pr/assignees" reset_all
 }
 
 ___x_cmd_gitlab_repo_pr_assign_review(){
@@ -70,5 +70,5 @@ options:
 
     ___parse_pr_init_owner_repo_and_pr
 
-    ___x_cmd_gitlab_http post "/repos/${owner_repo}/pulls/$pr/review" force
+    ___x_cmd_gitlab_http post "/repos/${owner_project}/pulls/$pr/review" force
 }

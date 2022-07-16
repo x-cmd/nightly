@@ -45,26 +45,26 @@ options:
     --labels            "labels"                                                             <>=""
 '
     param:run
-    ___x_cmd_gitlab_param_init_owner_repo
+    ___x_cmd_gitlab_param_init_owner_project
 
-    ___gitlab_ui_mutual ___x_cmd_gitlab_http get "/repos/${owner_repo}/pulls" state head base sort since direction milestone_number \
+    ___gitlab_ui_mutual ___x_cmd_gitlab_http get "/repos/${owner_project}/pulls" state head base sort since direction milestone_number \
         labels page per_page <<A
             ___ui_table_json Id=.id Title=.title Body=.body User=.user.login TargetBranch=.base.ref SourceBranch=.head.ref \
                 CreateTime=.created_at UpdateTime=.updated_at Url=.html_url -- \$@
 A
 }
 
-# Assume pr and owner_repo are environments
+# Assume pr and owner_project are environments
 ___parse_pr_init_owner_repo_and_pr_main(){
     local pr_number=${pr##*/}
-    owner_repo=${pr%/$pr_number}
-    ___x_cmd_gitlab_param_normalize_repo "$owner_repo"
+    owner_project=${pr%/$pr_number}
+    ___x_cmd_gitlab_param_normalize_repo "$owner_project"
     pr="$pr_number"
 }
 
 alias ___parse_pr_init_owner_repo_and_pr='
     local pr
-    local owner_repo
+    local owner_project
     ___parse_pr_init_owner_repo_and_pr_main || return
 '
 
@@ -78,7 +78,7 @@ options:
 
     ___parse_pr_init_owner_repo_and_pr
 
-    ___x_cmd_gitlab_http get "/repos/${owner_repo}/pulls/$pr"
+    ___x_cmd_gitlab_http get "/repos/${owner_project}/pulls/$pr"
 }
 
 
@@ -94,7 +94,7 @@ options:
     param:run
 
     ___parse_pr_init_owner_repo_and_pr
-    ___x_cmd_gitlab_http get "/repos/${owner_repo}/pulls/$pr/operate_logs" sort
+    ___x_cmd_gitlab_http get "/repos/${owner_project}/pulls/$pr/operate_logs" sort
 }
 
 ___x_cmd_gitlab_repo_pr_commit(){
@@ -106,7 +106,7 @@ options:
     param:run
 
     ___parse_pr_init_owner_repo_and_pr
-    ___x_cmd_gitlab_http get "/repos/${owner_repo}/pulls/$pr/commits"
+    ___x_cmd_gitlab_http get "/repos/${owner_project}/pulls/$pr/commits"
 }
 
 ___x_cmd_gitlab_repo_pr_view(){
@@ -119,7 +119,7 @@ options:
 
     ___parse_pr_init_owner_repo_and_pr
 
-    ___x_cmd_http browse "https://gitee.com/${owner_repo}/pulls/$pr"
+    ___x_cmd_http browse "https://gitee.com/${owner_project}/pulls/$pr"
 }
 
 # EndSection
@@ -149,20 +149,20 @@ options:
 '
     param:run
 
-    ___x_cmd_gitlab_param_init_owner_repo
+    ___x_cmd_gitlab_param_init_owner_project
     local data
     local title
     local state
     local html_url
-    data="$(___x_cmd_gitlab_http post "/repos/$owner_repo/pulls" title head base body milestone_number \
+    data="$(___x_cmd_gitlab_http post "/repos/$owner_project/pulls" title head base body milestone_number \
         labels issue assignees testers assignees_number testers_number prune_source_branch)"
     ___x_cmd_gitlab_json_query_rename "$data" title=.title state=.state html_url=.html_url
     if [ -n "$title" ];then
-        ___x_cmd_ui tf "true" "Success" "title: $title" "owner_repo: $owner_repo" "state: $state" \
+        ___x_cmd_ui tf "true" "Success" "title: $title" "owner_project: $owner_project" "state: $state" \
          "base: $base" "source branch: $head" "target branch: $base" "url: $html_url"
         return 0
     else
-        gitlab_log error "Create pull request failure: $title by $owner_repo $base"
+        gitlab_log error "Create pull request failure: $title by $owner_project $base"
         return 1
     fi
 }
@@ -186,7 +186,7 @@ options:
     param:run
 
     ___parse_pr_init_owner_repo_and_pr
-    ___x_cmd_gitlab_http patch "/repos/${owner_repo}/pulls/$pr" title body milestone_number\
+    ___x_cmd_gitlab_http patch "/repos/${owner_project}/pulls/$pr" title body milestone_number\
         labels assignees_number testers_number state
 }
 
@@ -205,7 +205,7 @@ options:
     param:run
 
     ___parse_pr_init_owner_repo_and_pr
-    ___x_cmd_gitlab_http put json "/repos/${owner_repo}/pulls/$pr/merge"  merge_method \
+    ___x_cmd_gitlab_http put json "/repos/${owner_project}/pulls/$pr/merge"  merge_method \
         prune_source_branch title description
 }
 

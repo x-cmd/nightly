@@ -1,23 +1,25 @@
 
 function shqu( s ){
-    gsub("$", "\\$", s)
+    gsub("\\\\", "\\\\", s)
+    gsub(/\$/, "\\$", s)
     gsub("\"", "\\\"", s)
     return "\"" s "\""
 }
 
 function shuq( s ){
-    gsub("\\$", "$", s)
-    gsub("\\\"", "\"", s)
+    gsub(/\\\$/, "$", s)
+    gsub(/\\"/, "\"", s)
+    gsub(/\\\\/, "x", s)
     return substr(s, 2, length(s) - 2)
 }
 
 function shqu1( s ){
-    gsub("'", "\\'", s)
+    gsub("'", "'\\''", s)
     return "'" s "'"
 }
 
-function shuq1(){
-    gsub("\\'", "'", s)
+function shuq1( s ){
+    gsub(/'\\''/, "'", s)
     return substr(s, 2, length(s) - 2)
 }
 

@@ -8,14 +8,17 @@
 xrc http param ui
 xrc ui/lib/table gh/lib/resource
 
-xrc:inner:lib gitlab utils config current token user repo/main
+xrc:inner:lib gitlab utils config current token user project/main groups/main
 
 x log init gitlab
 ___x_cmd_gitlab(){
     param:subcmd ___x_cmd_gitlab        \
         user        "user"              \
-        repo        "repo command"      \
+        project     "project command"   \
         config      "save, load, which" \
+        current     "current user"      \
+        groups      "groups manage"     \
+        subgroup    "subgroups manage"  \
         token       "set token"
     param:subcmd:try
     param:run

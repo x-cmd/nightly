@@ -26,9 +26,9 @@ options:
 '
     param:run
 
-    ___x_cmd_gitlab_param_init_owner_repo
+    ___x_cmd_gitlab_param_init_owner_project
 
-    ___x_cmd_gitlab_http get "/repos/${owner_repo}/pages"
+    ___x_cmd_gitlab_http get "/repos/${owner_project}/pages"
 }
 
 # https://gitee.com/api/swagger#/postV5ReposOwnerRepoPagesBuilds
@@ -42,7 +42,7 @@ options:
 '
     param:run
 
-    ___x_cmd_gitlab_param_init_owner_repo
+    ___x_cmd_gitlab_param_init_owner_project
 
-    ___x_cmd_gitlab_http post "/repos/${owner_repo}/pages/builds"
+    ___x_cmd_gitlab_http post "/repos/${owner_project}/pages/builds"
 }

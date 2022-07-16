@@ -24,7 +24,6 @@ ___x_cmd_gt_token(){
         ___X_CMD_GITEE_DEFAULT_OWNER=
         if ! ___x_cmd_gt_current_owner 1>/dev/null 2>&1; then
             [ -z "$tmp_token" ] || ___x_cmd_http header put Authorization "token $tmp_token"
-            ___x_cmd_http  header put Authorization "token $tmp_token"
             gt_log error "set default token $1 fail, Please check if it is a valid token"
             return 1
         fi

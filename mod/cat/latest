@@ -20,7 +20,10 @@ ___x_cmd_cat(){
 }
 
 ___x_cmd_cat_bat(){
-    ___x_cmd_static_build_help      bat bat                 "$@"
+    if ! [ -d $___X_CMD_INSTALL_PATH/bat ]; then
+        x pkg install bat 1>/dev/null
+    fi
+    x bat "$@"
 }
 
 xrc setmain ___x_cmd_cat

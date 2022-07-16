@@ -57,7 +57,7 @@ function view_body(            _col_num, _selected_item_idx, _iter_item_idx, _da
     view_item_index_len = length(model_len)
     if ( ITEM_INDEX_STATE == true ) view_item_len = view_item_len + view_item_index_len + 2
     if ( ctrl_sw_get( MULTIPLE_EDIT ) == true ) view_item_len = view_item_len + 2
-    view_body_col_num   = int( (max_col_size -1 ) / view_item_len) + 1
+    view_body_col_num   = int(max_col_size / view_item_len)
 
     _col_num             = int( ( model_len - 1 ) / view_body_row_num ) + 1
     if ( _col_num <= view_body_col_num ) view_body_row_num = int( (model_len - 1 ) / _col_num ) + 1
@@ -198,15 +198,14 @@ function ctrl(char_type, char_value) {
 }
 
 function consume_ctrl(      _cmd) {
-    if ($0 ~ /^R:/) if ( try_update_width_height( $0 ) == true ) view()
-    else {
-        DATA_HAS_CHANGED = true
-        _cmd=$0
-        gsub(/^C:/, "", _cmd)
-        idx = index(_cmd, ":")
-        ctrl(substr(_cmd, 1, idx-1), substr(_cmd, idx+1))
-        view()
-    }
+    if ( try_update_width_height( $0 ) == true ) view()
+    if ($0 ~ /^R:/)  return
+    DATA_HAS_CHANGED = true
+    _cmd=$0
+    gsub(/^C:/, "", _cmd)
+    idx = index(_cmd, ":")
+    ctrl(substr(_cmd, 1, idx-1), substr(_cmd, idx+1))
+    view()
 }
 # EndSection
 

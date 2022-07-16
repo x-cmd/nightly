@@ -203,15 +203,14 @@ function view_exit( _ctrl_current,              data, _is_focused, _is_selected,
 
 # Section: NR>1     command stream and end
 NR>1{
-    if ($0 ~ /^R:/) if ( try_update_width_height( $0 ) == true ) view()
-    else {
-        cmd=$0
-        gsub(/^C:/, "", cmd)
-        idx = index(cmd, ":")
-        ctrl(substr(cmd, 1, idx-1), substr(cmd, idx+1))
-        if ( ( exit_strategy_arrl == 1 ) && ( ctrl_rstate_get( CURRENT ) == rulel + 1 ) ) exit(0)
-        view()
-    }
+    if ( try_update_width_height( $0 ) == true ) view()
+    if ($0 ~ /^R:/)  next
+    cmd=$0
+    gsub(/^C:/, "", cmd)
+    idx = index(cmd, ":")
+    ctrl(substr(cmd, 1, idx-1), substr(cmd, idx+1))
+    if ( ( exit_strategy_arrl == 1 ) && ( ctrl_rstate_get( CURRENT ) == rulel + 1 ) ) exit(0)
+    view()
 }
 
 END {

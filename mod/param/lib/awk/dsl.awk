@@ -205,8 +205,8 @@ function parse_param_dsl(line,                      _line_arr_len, _line_arr, i,
             else if ( _state == STATE_TYPE )                         type_add_line( line )
             else if ( _state == STATE_SUBCOMMAND )                   subcmd_add_line( line, _subcmd_funcname )
             else if ( _state == STATE_OPTION ) {
-                if ( match(line, "^#n[\s]*" ) )                      parse_param_dsl_for_all_positional_argument( line )         # HANDLE:   option like #n
-                else if ( match( line, "^#[0-9]+[\s]*" ) )           parse_param_dsl_for_positional_argument( line )             # HANDLE:   option like #1 #2 #3 ...
+                if ( match(line, "^#n[ \t\r\n\v]*" ) )               parse_param_dsl_for_all_positional_argument( line )         # HANDLE:   option like #n
+                else if ( match( line, "^#[0-9]+[ \t\r\n\v]*" ) )    parse_param_dsl_for_positional_argument( line )             # HANDLE:   option like #1 #2 #3 ...
                 else                                            i =  parse_param_dsl_for_named_options( _line_arr, line, i )                # HANDLE:   option like --token|-t
             }
         }

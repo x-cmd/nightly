@@ -109,10 +109,10 @@ options:
     --sort          "sort(asc、desc)"                                                    <>="desc"
 '
     param:run
-    ___x_cmd_gitlab_param_init_owner_repo
+    ___x_cmd_gitlab_param_init_owner_project
 
     local ___gitlab_error_msg="Couldn't find any data by: $repo $number"
-    ___gitlab_ui_mutual ___x_cmd_gitlab_http get "/repos/${owner_repo##*/}/issues/${number}/operate_logs" repo sort <<A
+    ___gitlab_ui_mutual ___x_cmd_gitlab_http get "/repos/${owner_project##*/}/issues/${number}/operate_logs" repo sort <<A
         ___ui_table_json Time=.created_at User=.user.login Type=.action_type Content=.content -- \$@
 A
 }
@@ -140,25 +140,25 @@ options:
     --number        "repo issue number"                                                  <>=""
 '
     param:run
-    ___x_cmd_gitlab_param_init_owner_repo
+    ___x_cmd_gitlab_param_init_owner_project
 
     local gen_gitlab_json
     gen_gitlab_json="$(param:option2json -repo -page -per_page)"
 
     if [ -z "$number" ]; then
-        ___gitlab_ui_mutual ___x_cmd_gitlab_get_multi "/repos/${owner_repo}/issues" state labels milestone \
+        ___gitlab_ui_mutual ___x_cmd_gitlab_get_multi "/repos/${owner_project}/issues" state labels milestone \
             assignee creator program sort direction number <<A
         IssueNumber=.number Title=.title State=.issue_state Assigner=.assignee.name Body=.body -- \$@
 A
     else
-        ___x_cmd_gitlab_http get "/repos/${owner_repo}/issues/${number}" | \
+        ___x_cmd_gitlab_http get "/repos/${owner_project}/issues/${number}" | \
         {
             ___x_cmd_gitlab_json_query_rename "$data" id=.number title=.title state=.state assignee=.assignee.name
             if [ -n "$id" ]; then
                 ___x_cmd_ui_tf true  "Success" "id: $id" "title: $title" "state: $state" "assignee: $assignee"
                 return 0
             else
-                ___x_cmd_ui_tf false "Getting repo issue info failure by $owner_repo $number"
+                ___x_cmd_ui_tf false "Getting repo issue info failure by $owner_project $number"
                 return 1
             fi
         }
@@ -255,10 +255,10 @@ options:
     --order         "order(asc、desc)"                                                   <>="asc"
 '
     param:run
-    ___x_cmd_gitlab_param_init_owner_repo
+    ___x_cmd_gitlab_param_init_owner_project
 
-    local ___gitlab_error_msg="Couldn't find any data by: ${owner_repo}"
-    ___gitlab_ui_mutual ___x_cmd_gitlab_get_multi "/repos/${owner_repo}/issues/$number/comments" since order <<A
+    local ___gitlab_error_msg="Couldn't find any data by: ${owner_project}"
+    ___gitlab_ui_mutual ___x_cmd_gitlab_get_multi "/repos/${owner_project}/issues/$number/comments" since order <<A
         ___ui_table_json CommitId=.id IssueNumber=.target.issue.number Title=.target.issue.title User=.user.login Body=.body -- \$@
 A
 }
@@ -327,12 +327,12 @@ options:
     --id            "comments id"                                                        <>
 '
     param:run
-    ___x_cmd_gitlab_param_init_owner_repo
+    ___x_cmd_gitlab_param_init_owner_project
     # TODO:http handle，delete repo return data is null.Status: 204 No Content
-    if ___x_cmd_gitlab_http delete "/repos/${owner_repo}/issues/comments/${id}" >/dev/null; then
+    if ___x_cmd_gitlab_http delete "/repos/${owner_project}/issues/comments/${id}" >/dev/null; then
         ___x_cmd_ui_tf true  "Deleted comment successfully"
     else
-        ___x_cmd_ui_tf false "Deleting comment failure by ${owner_repo} $id."
+        ___x_cmd_ui_tf false "Deleting comment failure by ${owner_project} $id."
         return 1
     fi
 }

@@ -66,7 +66,8 @@ option:
     # TODO:owner may be personal
     local name
     for name in "$@"; do
-        printf "%s" "${gen_gh_json}" | sed s/%%name%%/"${name##%/}"/g | \
+        # printf "%s" "${gen_gh_json}" | sed s/%%name%%/"${name##%/}"/g | \
+            x tmpl "$gen_gh_json"  "${name##%/}" | \
             ___x_cmd_gh_http post "/orgs/$org/repos" - | \
             ___x_cmd_gh_org_repo_create_json_status_handler
     done

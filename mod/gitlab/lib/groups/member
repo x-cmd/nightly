@@ -9,72 +9,72 @@
 # gitlab repo member add user-b
 
 # gitlab repo member +el:admin -user-a +user-b
-___x_cmd_gitlab_org_member(){
-    param:subcmd ___x_cmd_gitlab_org_member                     \
+___x_cmd_gitlab_groups_member(){
+    param:subcmd ___x_cmd_gitlab_groups_member                     \
         ls              "List member"                       \
-        user            "Show org member user info"         \
+        user            "Show groups member user info"         \
         add             "Add member"                        \
         rm              "Remove member"
     param:subcmd:try
     param:run
 
-    ___x_cmd_gitlab_org_member _param_help_doc
+    ___x_cmd_gitlab_groups_member _param_help_doc
     gitlab_log warn "Subcmd Not Found."
     return 1
 }
 
 # shellcheck disable=SC2154
-# https://gitee.com/api/swagger#/getV5OrgsOrgMembers
-___x_cmd_gitlab_org_member_ls(){
+# https://gitee.com/api/swagger#/getV5groupssgroupsMembers
+___x_cmd_gitlab_groups_member_ls(){
     param:scope     ___x_cmd_gitlab
     param:dsl       '
 options:
     --role          "role"                  <>:UserRole="all"
-    #1|--org        "org space address"     <>:Address
+    #1|--groups        "groups space address"     <>:Address
     --page          "page"                  <>:NatureNumber=1
     --per_page      "per_page"              <>:NatureNumber=20
 '
     param:run
 
-    local ___gitlab_error_msg="Couldn't find any data by: $org"
-    ___gitlab_ui_mutual ___x_cmd_gitlab_get_multi "/orgs/${org##*/}/members" role <<A
+    local ___gitlab_error_msg="Couldn't find any data by: $groups"
+    ___gitlab_ui_mutual ___x_cmd_gitlab_get_multi "/groups/${groups##*/}/members" role <<A
         ___ui_table_json NameSpace=.login Name=.name Role=.member_role Url=.html_url -- \$@
 A
 }
 
 # shellcheck disable=SC2154
-# https://gitee.com/api/swagger#/getV5OrgsOrgMembershipsUsername
-___x_cmd_gitlab_org_member_user(){
+# https://gitee.com/api/swagger#/getV5groupssgroupsMembershipsUsername
+___x_cmd_gitlab_groups_member_user(){
     param:scope     ___x_cmd_gitlab
     param:dsl      '
 options:
     --username          "username: user space address"   <>:UserName
-    #1|--org            "org space address"              <>:address
+    #1|--groups            "groups space address"              <>:address
 '
     param:run
 
-    ___x_cmd_gitlab_http get "/orgs/${org##*/}/memberships/${username##*/}" | \
+    ___x_cmd_gitlab_http get "/groups/${groups##*/}/memberships/${username##*/}" | \
     {
-        ___x_cmd_git_json_query_rename organization=.organization.name name=.user.name name_space=.user.login role=.role html_url=.user.html_url
+        ___x_cmd_git_json_query_rename groups=.groups.name name=.user.name name_space=.user.login role=.role html_url=.user.html_url
         if [ -n "$name" ]; then
-             ___x_cmd_ui_tf true  "Success" "Organization: $organization" "Name: $name" "NameSpace: $name_space" "Role: $role" "UserUrl: $html_url"
+             ___x_cmd_ui_tf true  "Success" "groups: $groups" "Name: $name" "NameSpace: $name_space" "Role: $role" "UserUrl: $html_url"
              return 0
         else
-            ___x_cmd_ui_tf false "Couldn't find any data by $org $username"
+            ___x_cmd_ui_tf false "Couldn't find any data by $groups $username"
             return 1
         fi
     }
 }
 
 # shellcheck disable=SC2181
-# https://gitee.com/api/swagger#/putV5OrgsOrgMembershipsUsername
-___x_cmd_gitlab_org_member_add(){
+# https://gitee.com/api/swagger#/putV5groupssgroupsMembershipsUsername
+___x_cmd_gitlab_groups_member_add(){
     param:scope     ___x_cmd_gitlab
     param:dsl       '
 type:
     role = admin member
 options:
-    --org           "org"       <>:address
+    --groups           "groups"       <>:address
     --role          "role"      <>:role="member"
     #n              "username"
 '
@@ -88,7 +88,7 @@ options:
     local username
     for username in "$@"; do
         # TODO:http handle，delete repo return data is null.Status: 204 No Content
-        if ___x_cmd_gitlab_http put "/orgs/${org##*/}/memberships/${username##*/}" "$role" >/dev/null; then
+        if ___x_cmd_gitlab_http put "/groups/${groups##*/}/memberships/${username##*/}" "$role" >/dev/null; then
             gitlab_log info  "Add $username successfully"
         else
             gitlab_log error "Add $username failure"
@@ -98,12 +98,12 @@ options:
 }
 
 # shellcheck disable=SC2181
-# https://gitee.com/api/swagger#/deleteV5OrgsOrgMembershipsUsername
-___x_cmd_gitlab_org_member_rm(){
+# https://gitee.com/api/swagger#/deleteV5groupssgroupsMembershipsUsername
+___x_cmd_gitlab_groups_member_rm(){
     param:scope     ___x_cmd_gitlab
     param:dsl       '
 options:
-    --org       "org space address"         <>:address
+    --groups       "groups space address"         <>:address
     #n          "username"
 '
     param:run
@@ -116,7 +116,7 @@ options:
     local username
     for username in "$@"; do
         # TODO:http handle，delete repo return data is null.Status: 204 No Content
-        if ___x_cmd_gitlab_http delete "/orgs/${org##*/}/memberships/${username##*/}" >/dev/null; then
+        if ___x_cmd_gitlab_http delete "/groups/${groups##*/}/memberships/${username##*/}" >/dev/null; then
             gitlab_log info  "Remove $username successfully."
         else
             gitlab_log error "Remove $username failure"

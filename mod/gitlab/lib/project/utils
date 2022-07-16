@@ -66,8 +66,8 @@ options:
 '
     param:run
 
-    local owner_repo
-    owner_repo="$(___x_cmd_gitlab_param_normalize_repo "$repo")"
+    local owner_project
+    owner_project="$(___x_cmd_gitlab_param_normalize_repo "$repo")"
 
-    ___x_cmd_gitlab_http post "https://gitee.com/api/repos/${owner_repo}/forks" organization
+    ___x_cmd_gitlab_http post "https://gitee.com/api/repos/${owner_project}/forks" organization
 }

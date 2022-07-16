@@ -108,7 +108,8 @@ option:
             auto_init=^no_auto_init)"
 
     for name in "$@"; do
-        printf "%s" "${gen_gh_json}" | sed s/%%name%%/"${name##%/}"/g | \
+        # printf "%s" "${gen_gh_json}" | sed s/%%name%%/"${name##%/}"/g | \
+        x tmpl "$gen_gh_json"  "${name##%/}" | \
         ___x_cmd_gh_http post "/user/repos" - | ___x_cmd_gh_repo_create_status_handler
     done
 }
