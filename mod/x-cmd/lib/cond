@@ -70,3 +70,15 @@ ___x_cmd_eqifelse(){
 }
 
 # EndSection
+
+# Section: varjoin
+
+# x a=join' ' a b c d e
+___x_cmd___varjoin(){
+    local varname="${1%%=*}"; local IFS="${1#*=join}"; shift
+    local s="$*"
+    eval "$varname=\"\$s\""
+}
+
+
+# EndSection

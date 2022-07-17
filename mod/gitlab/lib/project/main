@@ -3,16 +3,13 @@
 
 ___x_cmd_gitlab_project(){
     param:scope         ___x_cmd_gitlab
-    param:subcmd ___x_cmd_gitlab_project                                       \
+    param:subcmd ___x_cmd_gitlab_project                                   \
         create          "Create project"                                   \
         ls              "List project of owner"                            \
         info            "Show detailed information of project"             \
         update          "Setup project configure"                          \
         rm              "Remove project"                                   \
-        clear           "Clear project"                                    \
-        review          "Setup review project configure"                   \
-        issue           "List project issue or Show the project issue info"   \
-        branch          "project branch management"
+        member          "project member manage"
     param:subcmd:try
     param:run
 
@@ -236,30 +233,28 @@ ___x_cmd_gitlab_project_update_status_handler(){
 
 # Section: info
 # shellcheck disable=SC2154
-# https://gitee.com/api/swagger#/getV5ReposOwnerRepo
-___x_cmd_gitlab_repo_info(){
+___x_cmd_gitlab_project_info(){
     param:scope     ___x_cmd_gitlab
     param:dsl       '
 options:
-    #1|--repo          "Provide owner name and repo name.(default:the current user repo)"   <>:RepoName
+    #1|--id                                 "The ID or URL-encoded path of the project."    <>
+    --license                               "Include project license data."
+    --statistics                            "Include project statistics. Only available to Reporter or higher level role members."
+    --with_custom_attributes                "Include custom attributes in response. (administrator only)"
 '
-    param:run
-
-    ___x_cmd_gitlab_param_init_owner_project
-
-    ___x_cmd_gitlab_http get "/repos/${owner_project}" | ___x_cmd_gitlab_repo_info_status_handler
+ param:run
+   ___x_cmd_gitlab_http get "/projects/$id"| ___x_cmd_gitlab_repo_info_status_handler
 }
 
-# shellcheck disable=SC2154
 ___x_cmd_gitlab_repo_info_status_handler() {
     if [ ! -t 1 ] || [ -n "$ENFORCE_JSON" ]; then
         cat
         return
     fi
 
-    ___x_cmd_git_json_query_rename id=.id name=.name html_url=.html_url
+    ___x_cmd_git_json_query_rename id=.id name=.name default_branch=.default_branch web_url=.web_url
     if [ -n "$id" ]; then
-        ___x_cmd_ui_tf true    "Success" "id: $id" "name: $name" "url: $html_url"
+        ___x_cmd_ui_tf true    "Success" "id: $id" "name:$name" "default_branch: $default_branch" "url: $web_url"
     else
         ___x_cmd_ui_tf false   "Couldn't find any repo: $owner_project"
         return 1
@@ -267,48 +262,20 @@ ___x_cmd_gitlab_repo_info_status_handler() {
 }
 # EndSection
 
-# Section: del & clear
-# https://gitee.com/api/swagger#/deleteV5ReposOwnerRepo
+# Section: del
 # shellcheck disable=SC2181,SC2154
-___x_cmd_gitlab_repo_rm(){
-    # TODO: -y force del
+___x_cmd_gitlab_project_rm(){
     param:scope     ___x_cmd_gitlab
     param:dsl       '
 options:
-    #n      "Provide repo path list"    <>
+    #1|--id                                    "The ID or URL-encoded path of the project."   <>                                                                            <>
 '
-    param:run
+ param:run
 
-    local i
-    for i in "$@"; do
-        ___x_cmd_gitlab_param_normalize_repo "$i"
-        # TODO:http handle，delete repo return data is null.Status: 204 No Content
-        if ___x_cmd_gitlab_http delete "/repos/$owner_project" >/dev/null; then
-            ___x_cmd_ui_tf true  "Deleting repo $i successfully"
-        else
-            ___x_cmd_ui_tf false "Deleting repo failure: $i. Probably because it desn't exists."
-            return 1
-        fi
-    done
-}
-
-# shellcheck disable=SC2181
-# https://gitee.com/api/swagger#/putV5ReposOwnerRepoClear
-___x_cmd_gitlab_repo_clear(){
-    param:scope     ___x_cmd_gitlab
-    param:dsl       '
-options:
-    #1|--repo          "Provide owner name and repo path.(default:the current user repo)"   <>:RepoName
-'
-    param:run
-
-    ___x_cmd_gitlab_param_init_owner_project
-
-    # TODO:http handle，delete repo return data is null.Status: 204 No Content
-    if ___x_cmd_gitlab_http put "/repos/${owner_project}/clear" >/dev/null; then
-        ___x_cmd_ui_tf true   "Clearing repo ${owner_project} successfully"
+    if ___x_cmd_gitlab_http delete "/projects/$1" >/dev/null; then
+        ___x_cmd_ui_tf true  "Deleting repo $1 successfully"
     else
-        ___x_cmd_ui_tf false  "Clearing repo failure: ${owner_project}"
+        ___x_cmd_ui_tf false "Deleting repo failure: $1. Probably because it desn't exists."
         return 1
     fi
 }

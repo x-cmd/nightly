@@ -9,11 +9,8 @@ ___x_cmd_gitlab_groups(){
     param:subcmd ___x_cmd_gitlab_groups                                                 \
         ls                      "List all groups"                                       \
         info                    "Show groups information"                               \
-        repo                    "List all repos"                                        \
         create                  "Create groups"                                         \
-        quit                    "Quit groups"                                           \
-        issue                   "List all issues"                                       \
-        member                  "groups member management"
+        update                  "Update group"
     param:subcmd:try
     param:run
 
@@ -148,7 +145,7 @@ options:
 }
 # EndSection
 
-# Section: create
+# Section: create subgroup
 # shellcheck disable=SC2181
 # TODO:On GitLab SaaS, you must use the GitLab UI to create groups without a parent group. You cannot use the API to do this.???
 ___x_cmd_gitlab_subgroup_create(){
@@ -210,6 +207,39 @@ options:
 A
 }
 # EndSection
+
+# Section:groups update
+___x_cmd_gitlab_groups_update(){
+    param:scope     ___x_cmd_gitlab
+    param:dsl       '
+options:
+    -p|--path                   "groups path"                   <>=""
+    --name                      "The name of the group"         <>=""
+    --description               "The group description."        <>=""
+    --visibility                "The groups visibility."        <>="" = "" private internal public
+    --subgroup_creation_level   "Allowed to create subgroups."  <>="" = "" maintainer owner
+    #1                          "The ID of the group."
+'
+    param:run
+    [ $# -ne 0 ] || { gitlab_log error "Please provide groups ID"; return 1; }
+    local gitlab_path="$p"
+    local gen_gitlab_json
+    # path=gitlab_path
+    gen_gitlab_json="$(param:option2json -p)"
+
+    ___x_cmd_gitlab_http put "/groups/$1" "$gen_gitlab_json" | \
+    {
+        ___x_cmd_git_json_query_rename id=.id
+        if [ -n "$id" ]; then
+            ___x_cmd_ui_tf true   "Update groups Successfully"
+        else
+            ___x_cmd_ui_tf false  "Update groups failure by $1."
+            return 1
+        fi
+    }
+}
+# EndSection
+
 
 # Section: quit
 # shellcheck disable=SC2181

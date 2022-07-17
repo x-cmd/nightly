@@ -10,7 +10,8 @@ else
     return 1
 fi
 
-xrc env/latest
-[ -f "$HOME/.x-cmd/.boot/mod" ] && . "$___X_CMD_ROOT/.boot/mod"
-[ -f "$HOME/.x-cmd/.boot/rc" ] && . "$___X_CMD_ROOT/.boot/rc"
-:
+! ___x_cmd_is_interative_tty || {
+    xrc env/latest
+    [ ! -f "$HOME/.x-cmd/.boot/mod" ]   || . "$___X_CMD_ROOT/.boot/mod"
+    [ ! -f "$HOME/.x-cmd/.boot/rc" ]    || . "$___X_CMD_ROOT/.boot/rc"
+}

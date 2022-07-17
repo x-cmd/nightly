@@ -52,6 +52,12 @@ $___X_CMD_TMUX_BIN set -g     status-style              "fg=$___X_CMD_TMUX_FG_CO
 # $___X_CMD_TMUX_BIN set -g     status-left "#($___X_CMD_TMUX_BIN show -v mouse)  "
 # $___X_CMD_TMUX_BIN set -g     status-left "#(date +%H:%M)  "
 # $___X_CMD_TMUX_BIN set -g     status-left "#(date +%T)  "
+
+# TODO: el
+# x ___X_CMD_TMUX_STATUS_LEFT=join \
+#     "#[" "fg=$___X_CMD_TMUX_MINOR_4"        , "bg=$___X_CMD_TMUX_PRIMARY_COLOR" "]"     "${___X_CMD_TMUX_SESSION_ICON}"         "[#S]" \
+#     "#[" "fg=$___X_CMD_TMUX_PRIMARY_COLOR"  , "bg=$___X_CMD_TMUX_BG_COLOR]"             "${___X_CMD_TMUX_RIGHT_ARROW_ICON}"
+
 ___X_CMD_TMUX_STATUS_LEFT="#[fg=$___X_CMD_TMUX_MINOR_4,bg=$___X_CMD_TMUX_PRIMARY_COLOR]${___X_CMD_TMUX_SESSION_ICON}[#S]"
 ___X_CMD_TMUX_STATUS_LEFT="$___X_CMD_TMUX_STATUS_LEFT#[fg=$___X_CMD_TMUX_PRIMARY_COLOR,bg=$___X_CMD_TMUX_BG_COLOR]${___X_CMD_TMUX_RIGHT_ARROW_ICON}"
 $___X_CMD_TMUX_BIN set -g     status-left               "$___X_CMD_TMUX_STATUS_LEFT"
@@ -60,6 +66,13 @@ $___X_CMD_TMUX_BIN set -g     status-left-length        150
 # ----- right ------
 ___x_cmd_os_name_
 if [ -n "$___X_CMD_TMUX_LEFT_ARROW_ICON" ]; then
+
+    # TODO: el
+    # x ___X_CMD_TMUX_STATUS_RIGHT=join \
+    #     "#[" "fg=$___X_CMD_TMUX_PRIMARY_COLOR"  , "bg=$___X_CMD_TMUX_BG_COLOR"      "]"     "${___X_CMD_TMUX_LEFT_ARROW_ICON}" \
+    #     "#[" "fg=$___X_CMD_TMUX_MINOR_4"        , "bg=$___X_CMD_TMUX_PRIMARY_COLOR" "]"     "#(. $___X_CMD_ROOT_MOD/os/lib/loadavg; ___X_CMD_OS_NAME_=$___X_CMD_OS_NAME_ ___x_cmd_os_loadavg___get_from_osname)" \
+    #     "| ${___X_CMD_TMUX_USER_ICON}"  "#{host}"  ' ' "${___X_CMD_TMUX_LEFT_HOLLOW_ARROW_ICON}" "${___X_CMD_TMUX_TIME_ICON}"  "#(date +%H:%M)"
+
     ___X_CMD_TMUX_STATUS_RIGHT="#[fg=$___X_CMD_TMUX_PRIMARY_COLOR,bg=$___X_CMD_TMUX_BG_COLOR]${___X_CMD_TMUX_LEFT_ARROW_ICON}"
     ___X_CMD_TMUX_STATUS_RIGHT="${___X_CMD_TMUX_STATUS_RIGHT}#[fg=$___X_CMD_TMUX_MINOR_4,bg=$___X_CMD_TMUX_PRIMARY_COLOR]#(. $___X_CMD_ROOT_MOD/os/lib/loadavg; ___X_CMD_OS_NAME_=$___X_CMD_OS_NAME_ ___x_cmd_os_loadavg___get_from_osname) | ${___X_CMD_TMUX_USER_ICON}#{host}"
     ___X_CMD_TMUX_STATUS_RIGHT="$___X_CMD_TMUX_STATUS_RIGHT ${___X_CMD_TMUX_LEFT_HOLLOW_ARROW_ICON}${___X_CMD_TMUX_TIME_ICON}#(date +%H:%M)"
@@ -76,10 +89,22 @@ $___X_CMD_TMUX_BIN setw -g    window-status-separator   ''
 $___X_CMD_TMUX_BIN setw -g    window-status-format      " #I:#W "
 
 if [ -n "$___X_CMD_TMUX_RIGHT_ARROW_ICON" ]; then
+
+    # TODO: el
+    # x ___X_CMD_TMUX_WINDOW_STATUS_CURRENT=join  \
+        # "#["    "fg=$___X_CMD_TMUX_BG_COLOR"        ,   "bg=$___X_CMD_TMUX_MINOR_5"         "]"     "$___X_CMD_TMUX_RIGHT_ARROW_ICON" \
+        # "#["    "fg=${___X_CMD_TMUX_PRIMARY_COLOR}" ,   "bg=${___X_CMD_TMUX_MINOR_5},bold"  "]"     "#I:#W#{?window_zoomed_flag,🔍,}" \
+        # "#["    "fg=$___X_CMD_TMUX_MINOR_5"         ,   "bg=$___X_CMD_TMUX_BG_COLOR,nobold" "]"     "$___X_CMD_TMUX_RIGHT_ARROW_ICON"
+
     ___X_CMD_TMUX_WINDOW_STATUS_CURRENT="#[fg=$___X_CMD_TMUX_BG_COLOR,bg=$___X_CMD_TMUX_MINOR_5]$___X_CMD_TMUX_RIGHT_ARROW_ICON"
     ___X_CMD_TMUX_WINDOW_STATUS_CURRENT="$___X_CMD_TMUX_WINDOW_STATUS_CURRENT#[fg=${___X_CMD_TMUX_PRIMARY_COLOR},bg=${___X_CMD_TMUX_MINOR_5},bold]#I:#W#{?window_zoomed_flag,🔍,}"
     ___X_CMD_TMUX_WINDOW_STATUS_CURRENT="$___X_CMD_TMUX_WINDOW_STATUS_CURRENT#[fg=$___X_CMD_TMUX_MINOR_5,bg=$___X_CMD_TMUX_BG_COLOR,nobold]$___X_CMD_TMUX_RIGHT_ARROW_ICON"
 else
+
+    # TODO: el
+    # x ___X_CMD_TMUX_WINDOW_STATUS_CURRENT=join  \
+        # "#["    "fg=${___X_CMD_TMUX_PRIMARY_COLOR}" ,   "bg=${___X_CMD_TMUX_MINOR_5},bold" "]" " #I:#W " "#{?window_zoomed_flag,🔍,}"
+
     ___X_CMD_TMUX_WINDOW_STATUS_CURRENT="#[fg=${___X_CMD_TMUX_PRIMARY_COLOR},bg=${___X_CMD_TMUX_MINOR_5},bold] #I:#W #{?window_zoomed_flag,🔍,}"
 fi
 $___X_CMD_TMUX_BIN setw -g    window-status-current-format "$___X_CMD_TMUX_WINDOW_STATUS_CURRENT"
