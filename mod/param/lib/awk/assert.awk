@@ -118,8 +118,7 @@ function assert(optarg_id, arg_name, arg_val,
             return "Arg: [" arg_name "] value is [" arg_val "]\n  Is NOT a Correct Email Address ."
         }
     } else if (match(op, "^=url:.+")) {      # =url:http   =url:https    =url:ftp
-        # _tmp = substr(op, 6)
-        "" == substr(op, 5) ? _tmp = "" : _tmp = substr(op, 6)
+        _tmp = substr(op, 6)
         if (_tmp = ""){
             if(! match(arg_val,"(www.)?([^.\\.]([a-zA-Z0-9][-a-zA-Z0-9]{0,62}(.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+(:\\w+)*(\\/\\w+.\\w+)*([\\?&]\\w+=\\w*)*$))") ) {
                 return "Arg: [" arg_name "] value is [" arg_val "]\n  Is NOT an Url."

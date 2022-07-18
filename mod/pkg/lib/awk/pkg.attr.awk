@@ -8,7 +8,7 @@ function handle( qpat,      varname, _arr, _arrl, i, _pat ){
     }
 
     gsub("\\.", "_", varname)
-    print varname "=" shqu( juq( table_attr( table, PKG_NAME, _pat )  ) )
+    print varname "=" shqu1( juq( table_attr( table, PKG_NAME, _pat )  ) )
 }
 
 END {

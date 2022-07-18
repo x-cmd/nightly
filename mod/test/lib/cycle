@@ -13,6 +13,7 @@ ___x_cmd_test_cycle_exec(){
 
     (
         ___x_cmd_test_cycle_init
+        ___x_cmd_test_inject_apply
 
         if [ -f "$target" ]; then
             cd "$(dirname "$target")" || exit 1

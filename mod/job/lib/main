@@ -1,0 +1,48 @@
+
+___x_cmd_job_active(){
+    jobs -r | wc -l | tr -d ' '
+}
+
+___x_cmd_job___wrapper_startlog(){
+    local IFS=" "
+    job:debug "Start: $*"
+}
+
+___x_cmd_job___wrapper(){
+    ___x_cmd_job___wrapper_startlog "$@"
+    (
+        ( eval "$@"; ) 1>/dev/null 2>/dev/null
+        code=$?
+        if [ "$code" = 0 ]; then        job:info "Success: $*"
+        else                            job:error "Fail: [code=$code] $*"
+        fi
+    ) &
+}
+
+___x_cmd_job_offer(){
+    local MAX="${1:?Provide the max number of jobs could hold}"; shift
+    [ "$(___x_cmd_job_active)" -lt "${MAX}" ] || return 1
+
+    case "$___X_CMD_JOB_WRAPPER" in
+        silent)     ___x_cmd_job___wrapper "$@" ;;
+        *)
+                    if [ -z "${OUT}${ERR}" ]; then
+                        ( eval "$@" ) 1>&1 2>&2 &   # 1>&1 2>&2 works
+                    else
+                        ( eval "$@" ) 1>"${OUT:-/dev/stdout}" 2>"${ERR:-/dev/stderr}" &   # 1>&1 2>&2 works
+                    fi
+    esac
+}
+
+# Will block
+___x_cmd_job_put(){
+    until ___x_cmd_job_offer "$@"; do
+        sleep "${interval:-3}"
+    done
+}
+
+___x_cmd_job_wait_until_finished(){
+    while [ "$(___x_cmd_job_active)" -ne "${1:-0}" ]; do
+        sleep "${interval:-1}"
+    done
+}

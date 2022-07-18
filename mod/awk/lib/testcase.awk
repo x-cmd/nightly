@@ -32,12 +32,3 @@ function testcase_assert( ok, errmsg ){
     }
     return 1
 }
-
-function ttt(){
-
-    testcase( "IP Address Test", "IP Not Match", re_match("192.168.1.1", "^[:IP:]$") )
-    testcase( "IP Address Test", "IP Not Match", ! re_match("266.168.1.1", "^[:IP:]$") )
-    testcase( "IP Address Test", "IP Not Match", ! re_match("266.168.1.1", "^[:IP:]$") )
-}
-
-

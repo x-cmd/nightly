@@ -10,6 +10,7 @@ ___x_cmd_gitlab_groups(){
         ls                      "List all groups"                                       \
         info                    "Show groups information"                               \
         create                  "Create groups"                                         \
+        member                  "project member manage"                                 \
         update                  "Update group"
     param:subcmd:try
     param:run
@@ -240,28 +241,3 @@ options:
 }
 # EndSection
 
-
-# Section: quit
-# shellcheck disable=SC2181
-# https://gitee.com/api/swagger#/deleteV5UserMembershipsgroupssgroups
-___x_cmd_gitlab_groups_quit(){
-    param:scope     ___x_cmd_gitlab
-    param:dsl       '
-options:
-    #n      "groups"
-'
-    param:run
-
-    [ $# -eq 0 ] && gitlab_log error "At least one groups spatial address is needed." && return 1
-
-    for groups in "$@"; do
-        # TODO:http handle，delete repo return data is null.Status: 204 No Content
-        if ___x_cmd_gitlab_http delete "/user/memberships/groups/${groups##*/}" >/dev/null; then
-            gitlab_log info  "Quit $groups groups successfully."
-        else
-            gitlab_log error "Quit $groups groups failure"
-            return 1
-        fi
-    done
-}
-# EndSection

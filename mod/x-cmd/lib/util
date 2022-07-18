@@ -25,15 +25,6 @@ ___x_cmd_abspath(){
     # fi
 }
 
-___x_cmd_repeat(){
-    local ___X_CMD_REPEAT_TMP="${1:?Provide time}"; shift
-    # for ((; ___X_CMD_REPEAT_TMP>0; --___X_CMD_REPEAT_TMP)); do
-    while [ $___X_CMD_REPEAT_TMP -gt 0 ]; do
-        ___x_cmd_eval "$@"
-        ___X_CMD_REPEAT_TMP=$((___X_CMD_REPEAT_TMP-1))
-    done
-}
-
 ___x_cmd_which_panic(){
     local ___X_CMD_WHICH_ONE_RESULT
     if ! ___x_cmd_which_one "$p"; then
@@ -351,12 +342,14 @@ ___x_cmd_seq(){
         [ "$sep" -gt 0 ] || { printf "%s\n" "Expect sep > 0 but get $sep"; return 1; }
         i="$start"; while [ "$i" -le "$end" ]; do
             eval "$@"
+            # ___x_cmd_eval "$@"
             i=$((i + sep))
         done
     else
         [ "$sep" -lt 0 ] || { printf "%s\n" "Expect sep < 0 but get $sep"; return 1; }
         i="$start"; while [ "$i" -ge "$end" ]; do
             eval "$@"
+            # ___x_cmd_eval "$@"
             i=$((i + sep))
         done
     fi
@@ -367,3 +360,23 @@ ___x_cmd_a(){
     alias "$@"
     # set complete
 }
+
+
+___x_cmd_mcd(){
+    local folder="${1:?Provide folder path}"
+    if [ ! -d "$folder" ]; then
+        if [ -e "$folder" ]; then
+            x:log "File existed but not a folder: $folder"
+            return 1
+        elif ! mkdir -p "$folder"; then
+            x:log "Fail to create folder: $folder"
+            return 1
+        fi
+    fi
+
+    if ! cd "$folder"; then
+        x:log "Fail to enter into folder: $folder"
+        return 1
+    fi
+}
+

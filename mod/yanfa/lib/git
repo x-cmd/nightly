@@ -15,3 +15,23 @@ giam(){
     fi
     git commit -m "$msg"
 }
+
+
+____x_cmd_yanfa_git_commit()(
+    cd "$name"
+    git commit -m "${MSG:-...}"
+)
+
+
+____x_cmd_yanfa_git_push()(
+    cd "$name"
+    xws push
+)
+
+____x_cmd_yanfa_git_update(){
+    if [ -d "$name" ]; then
+        ( cd "$name" && git pull && git pull origin main )
+    else
+        git clone "git@gitee.com:$org/$name.git"
+    fi
+}

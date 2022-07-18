@@ -1,6 +1,6 @@
 
 function handle( varname, val ){
-    print varname "=" shqu( val )
+    print varname "=" shqu1( val )
 }
 
 END {

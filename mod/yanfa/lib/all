@@ -7,6 +7,8 @@ ___x_cmd_yanfa_all(){
 subcommand:
     ls          "list modules"
     update      "clone or update all repos"
+    commit      "clone or update all repos"
+    push        "clone or update all repos"
     repolist    "Show all repo"
     map         "map"
 A
@@ -70,20 +72,72 @@ ___x_cmd_yanfa_all_map(){
 }
 
 # shellcheck disable=SC2016
-___x_cmd_yanfa_all_update(){
-    param:void
-    ___x_cmd_yanfa_all_map "${1:-$HOME}" '
-        if [ -d "$name" ]; then
-            cd "$name" && git pull && git pull origin main
-        else
-            git clone "git@gitee.com:$org/$name.git"
-        fi
-    '
+# ___x_cmd_yanfa_all_update(){
+#     param:void
+#     ___x_cmd_yanfa_all_map "${1:-$HOME}" '
+#         if [ -d "$name" ]; then
+#             cd "$name" && git pull && git pull origin main
+#         else
+#             git clone "git@gitee.com:$org/$name.git"
+#         fi
+#     '
+# }
+
+____x_cmd_yanfa_git_update(){
+    if [ -d "$name" ]; then
+        ( cd "$name" && git pull && git pull origin main )
+    else
+        git clone "git@gitee.com:$org/$name.git"
+    fi
 }
+
+___x_cmd_yanfa_all_update()(
+    ___x_cmd_yanfa_all_foreach "${1:-$HOME}" ____x_cmd_yanfa_git_update
+)
+
+____x_cmd_yanfa_git_commit()(
+    cd "$name"
+    git commit -m "$MSG"
+)
+
+____x_cmd_yanfa_all_commit(){
+    local MSG="${1:-...}"; shift
+    ___x_cmd_yanfa_all_foreach "${1:-$HOME}" ____x_cmd_yanfa_git_commit
+}
+
+____x_cmd_yanfa_git_push()(
+    cd "$name"
+    xws push
+)
+
+____x_cmd_yanfa_all_push(){
+    local MSG="${1:-...}"; shift
+    ___x_cmd_yanfa_all_foreach "${1:-$HOME}" ____x_cmd_yanfa_git_push
+}
+
+___x_cmd_yanfa_all_foreach()(
+    local dir="${1:-$HOME}"; shift
+
+    local ___X_CMD_JOB_WRAPPER=silent
+
+    mkdir -p "$dir/x-bash" "$dir/x-cmd"
+    cd "$dir/x-bash" || return
+    ___x_cmd_yanfa_all_ls | while read -r mod; do
+        x job put 7 org=x-bash name="$mod" "$@"
+    done
+
+    cd "$dir/x-cmd" || return
+    ___x_cmd_yanfa_all_repolist | while read -r mod; do
+        x job put 7 org=x-cmd name="$mod" "$@"
+    done
+
+    x job wait
+    sleep 3 # We have to reconsider it
+)
 
 ___x_cmd_yanfa_all_ls(){
     param:void
     ___x_cmd_yanfa_mod_ls "$@"
 }
 
-# EndSection
+## EndSection

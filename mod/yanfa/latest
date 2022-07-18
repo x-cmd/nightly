@@ -5,9 +5,11 @@ xrc param/latest
 
 x log init yanfa
 
-xrc:mod:lib yanfa   all ws mod pkg init try git release
+xrc:mod:lib yanfa   all ws mod pkg init try git release xb xc
 
 # git config --worktree --get-regexp "remote[a-z\.]+.url"
+
+___X_CMD_YANFA_CONCURRENCY=10
 
 ___x_cmd_yanfa(){
     param:dsl <<A
@@ -18,6 +20,8 @@ subcommand:
     release     "release"
     ws          "workspace"
     all         "all modules"
+    xb          "x-bash"
+    xc          "x-cmd"
     try         "do some experiment on all poxis shell"
 A
     param:run

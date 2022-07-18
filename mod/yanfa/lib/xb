@@ -1,0 +1,58 @@
+# shellcheck shell=sh disable=SC3043,2120 # xrc
+
+# Section: git
+
+___x_cmd_yanfa_xb(){
+    param:dsl <<A
+subcommand:
+    ls          "list modules"
+    update      "clone or update all repos"
+    commit      "clone or update all repos"
+    push        "clone or update all repos"
+A
+    param:run
+    # push        "push"
+    # pull        "pull"
+
+    if [ -z "${PARAM_SUBCMD}" ]; then
+        ___x_cmd_yanfa_xb_update
+        return
+    fi
+
+    "___x_cmd_yanfa_xb_${PARAM_SUBCMD}" "$@"
+}
+
+
+____x_cmd_yanfa_xb_commit(){
+    ___x_cmd_yanfa_xb_foreach "${1:-$HOME}" ____x_cmd_yanfa_git_commit
+}
+
+
+___x_cmd_yanfa_xb_update()(
+    ___x_cmd_yanfa_xb_foreach "${1:-$HOME}" ____x_cmd_yanfa_git_update
+)
+
+____x_cmd_yanfa_xb_push(){
+    ___x_cmd_yanfa_xb_foreach "${1:-$HOME}" ____x_cmd_yanfa_git_push
+}
+
+___x_cmd_yanfa_xb_foreach()(
+    local dir="${1:-$HOME}"; shift
+
+    local ___X_CMD_JOB_WRAPPER=silent
+
+    x mcd "$dir/x-bash" || return 1
+    ___x_cmd_yanfa_xb_ls | while read -r mod; do
+        x job put "$___X_CMD_YANFA_CONCURRENCY" org=x-bash name="$mod" "$@"
+    done
+
+    x job wait
+    sleep 3 # We have to reconsider it
+)
+
+___x_cmd_yanfa_xb_ls(){
+    param:void
+    ___x_cmd_yanfa_mod_ls "$@"
+}
+
+## EndSection
