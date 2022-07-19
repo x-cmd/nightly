@@ -126,7 +126,16 @@ ___x_cmd_theme_prompt_comp_symbol(){
     fi
 }
 
-___x_cmd_theme_prompt_comp_username() {
+___x_cmd_theme_prompt_comp_exit_code() {
+    if [ "${___X_CMD_THEME_EXIT_STATUS}" -ne 0 ];then
+        eval "$(printf "%s" "___x_cmd_theme_style ${2:-"red"} ${3:-$___X_CMD_THEME_EXIT_STATUS}")"
+    else
+        [ "${1#transparent}" = "$1" ] || return
+        eval "$(printf "%s" "___x_cmd_theme_style ${1:-"green"} ${3:-$___X_CMD_THEME_EXIT_STATUS}")"
+    fi
+}
+
+___x_cmd_theme_prompt_comp_username(){
     if [ -n "$SSH_CONNECTION" ] || [ -f "/.dockerenv" ]; then
         printf "%s" "${___X_CMD_THEME_USER}${SEP:-@}${___X_CMD_THEME_HOST}"
     else

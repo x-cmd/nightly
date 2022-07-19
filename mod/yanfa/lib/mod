@@ -128,11 +128,19 @@ ___x_cmd_yanfa_mod_tgz(){
 
 # EndSection
 
+# Section: common: wc/test
 ___x_cmd_yanfa_mod_wc(){
     param:void
     x:trace yanfa/mod/wc
     ___x_cmd_yanfa_mod_lsfile "$@" | xargs wc | sort -n -r | less
 }
+
+___x_cmd_yanfa_mod_test(){
+    x test inject http "$(x wsroot)"
+    x test "$@"
+}
+
+# EndSection
 
 # Section: devi
 ___x_cmd_yanfa_mod_devi(){
@@ -240,6 +248,7 @@ subcommand:
     wc          "wc"
     devi        "container"
     tgz         "package"
+    test        "test"
 
     install      "cp file to home folder"
     lsfile      "ls file to p"

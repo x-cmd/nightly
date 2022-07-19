@@ -7,9 +7,9 @@ function seq( seqstr,    i, j, a ){
 
 function seq_parse(  seqstr,       l, a, b, e, d ){
     l = split(seqstr, a, ":")
-    if (l == 1) {               SEQ_BEGIN = 1;      SEQ_DELTA = a[1];   SEQ_END = 1;  }
-    else if (l == 2) {          SEQ_BEGIN = a[1];   SEQ_DELTA = a[2];   SEQ_END = 1;  }
-    else {                      SEQ_BEGIN = a[1];   SEQ_DELTA = a[2];   SEQ_END = a[3]; }
+    if (l == 1)      {          SEQ_BEGIN =   1 ;   SEQ_DELTA =   1 ;   SEQ_END = a[1];     }
+    else if (l == 2) {          SEQ_BEGIN = a[1];   SEQ_DELTA =   1 ;   SEQ_END = a[2];     }
+    else             {          SEQ_BEGIN = a[1];   SEQ_DELTA = a[2];   SEQ_END = a[3];     }
 }
 
 function seq_within( number, seqstr ){

@@ -23,7 +23,7 @@ function testcase( description, ok ){
 function testcase_assert( ok, errmsg ){
     if (ok != true) {
         TESTC_EXIT_CODE = 1
-        if (errmsg == "") {
+        if (errmsg != "") {
             testcase_panic( errmsg )
         } else {
             testcase_panic( ok )

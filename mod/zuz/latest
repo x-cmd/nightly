@@ -27,7 +27,7 @@ ___x_cmd_zuz_run(){
     # shellcheck disable=SC2154
     zuz:info "Command to execute => $* $extra_logger_msg"
     # IFS=
-    "$@"
+    "$@" 2>/dev/null 1>&2
     local exit_code=$?
     [ "$exit_code" = 0 ] || zuz:error "EXIT=$exit_code: $*"
     return $exit_code

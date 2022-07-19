@@ -58,11 +58,11 @@ ___x_cmd_http_request() {
     if [ "$X" = GET ] || [ "$X" = DELETE ] || [ "$X" = HEAD ]; then
         http:debug "http request data:$(______x_cmd_http_qs_dump curl)"
         http:debug curl -D "$header_filepath" -X "$X" "$(______x_cmd_http_qs_dump curl)" "$(___x_cmd_http_header_dump curl)" "$paths"
-        eval curl -D "$header_filepath" -X "$X" "$(______x_cmd_http_qs_dump curl)" "$(___x_cmd_http_header_dump curl)" "$paths" 1>"$data_filepath" 2>/dev/null #2>(http:debug)
+        curl -D "$header_filepath" -X "$X" "$(______x_cmd_http_qs_dump curl)" "$(___x_cmd_http_header_dump curl)" "$paths" 1>"$data_filepath" 2>/dev/null #2>(http:debug)
     else
         http:debug "http request data:$(cat "$tmp")"
-        http:debug curl -D "$header_filepath" -X "$X" "$(___x_cmd_http_header_dump curl)" -d "@$tmp" "$paths"
-        eval curl -D "$header_filepath" -X "$X" "$(___x_cmd_http_header_dump curl)" -d "@$tmp" "$paths" 1>"$data_filepath" 2>/dev/null #2>(http:debug)
+        http:debug curl -D "$header_filepath" -X "$X" "$(___x_cmd_http_header_dump curl)" -d "@$tmp" "$paths" "1>$data_filepath 2>/dev/null"
+        curl -D "$header_filepath" -X "$X" "$(___x_cmd_http_header_dump curl)" -d "@$tmp" "$paths" 1>"$data_filepath" 2>/dev/null #2>(http:debug)
     fi
     [ "$tmp" != "-" ] && rm "$tmp"
 
@@ -83,8 +83,31 @@ A
 }
 
 ____x_cmd_http_request_json_body() (    # Notice: Using subshell
-    url=$1
+    local ___X_CMD_HTTP_REQUEST_TMP_URL="$1"
     shift
-    ___x_cmd_http_body mput "$@"
-    ___x_cmd_http_request "$url" "$(___x_cmd_http_body dump json "")"
+
+    case "$#" in
+        0)                              ___x_cmd_http_request "$___X_CMD_HTTP_REQUEST_TMP_URL" "$(cat)"
+                return ;; # Or just pipe
+        1)
+                if [ "$1" = - ]; then   ___x_cmd_http_request "$___X_CMD_HTTP_REQUEST_TMP_URL" "$(cat)"
+                else                    ___x_cmd_http_request "$___X_CMD_HTTP_REQUEST_TMP_URL" "$1";
+                fi
+                return ;;
+    esac
+
+    local arg; for arg in "$@"; do
+        case "$arg" in
+            *==*)       shift; ___x_cmd_http_qs_put "${arg%%==*}" "${arg#*==}" ;;  # Query String
+            *:*)        shift; ___x_cmd_http_header_put "${arg%%:*}" "${arg#*:}" ;;
+            --)         shift;
+                        data="$(x jo dict "$@")"
+                        ;;
+            -)
+                        data="$(cat)"       # TODO: Merge the data and the $(x jo $@)
+                        ;;
+        esac
+    done
+
+    ___x_cmd_http_request "$___X_CMD_HTTP_REQUEST_TMP_URL" "$data"
 )

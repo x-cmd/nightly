@@ -156,7 +156,7 @@ function get_theme_tag(         _cmd, i, _tag, _line, _theme){
             i=0
             _tag = substr(_line, 3)
             _tag_len = length(_tag)
-            THEME_TAG[ ++THEME_TAG_L ] = _tag
+            if (_tag != "all" )THEME_TAG[ ++THEME_TAG_L ] = _tag
             THEME_TAG[ THEME_TAG_L L ] = _tag_len
         } else {
             _theme = substr(_line, 5)

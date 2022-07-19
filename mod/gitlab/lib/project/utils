@@ -55,7 +55,6 @@ ___x_cmd_gitlab_repo_clone_https(){
     git clone "$(___x_cmd_gitlab_repo_url_http "$@")"
 }
 
-# https://gitee.com/api/swagger#/postV5ReposOwnerRepoForks
 # TODO Not available Gitee return Not Found Project
 ___x_cmd_gitlab_repo_fork(){
     param:scope     ___x_cmd_gitlab

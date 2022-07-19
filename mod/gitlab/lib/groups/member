@@ -87,8 +87,6 @@ options:
 }
 
 # shellcheck disable=SC2181
-# 10398306
-# 55641134 
 ___x_cmd_gitlab_groups_member_rm(){
     param:scope     ___x_cmd_gitlab
     param:dsl       '

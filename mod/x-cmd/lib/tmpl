@@ -28,6 +28,10 @@ ___x_cmd_tmpl_(){
     case "$1" in
         :*:)                        ___x_cmd_tmpl_sub_ "$@" ;;
         :*:=*)                      ___x_cmd_tmpl_sub_eq_ "$@" ;;
+
+        [*])                        ___x_cmd_tmpl_sub_ "$@" ;;
+        [*]=*)                      ___x_cmd_tmpl_sub_eq_ "$@" ;;
+
         *)                          ___x_cmd_tmpl_1by1_ "$@" ;
     esac
 }
@@ -100,7 +104,10 @@ ___x_cmd_tmpl_name(){
 
 
 # x tmpl "${___X_CMD_TX}, ${___X_CMD_TX}" hello world
+
 # x tmpl "${___X_CMD_T}:abc:, ${___X_CMD_T}:cde:" :cde:=world :abc:=hello
+# x tmpl "${___X_CMD_T}[abc], ${___X_CMD_T}[cde]" [cde]=world [abc]=hello
+# x tmpl "${___X_CMD_T}[2], ${___X_CMD_T}[1]" [1]=world [2]=hello
 
 # ___X_CMD_TMPL_="${___X_CMD_T}:abc:, ${___X_CMD_T}:cde:"
 # x tmpl_ "$___X_CMD_TMPL_" :cde:  world

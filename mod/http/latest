@@ -12,20 +12,20 @@ ___x_cmd_http() {
     fi
     O="___X_BASH_HTTP_${O}"
     param:subcmd ___x_cmd_http                                              \
-        make            "make a new client"                                 \
-        browse          "open browser"                                      \
-        dict            "http dict"                                         \
-        download        "download file"                                     \
-        header          "set the default header"                            \
-        head            "launch a head request"                             \
         get             "launch a get request"                              \
+        download        "download file"                                     \
         rget            "launch a get request and follow 3xx redirection"   \
         post            "launch a post request"                             \
         put             "launch a put request"                              \
         patch           "launch a patch request"                            \
         delete          "launch a delete request"                           \
+        resp            "get resp data"                                     \
+        head            "launch a head request"                             \
+        header          "set the default header"                            \
         body            "set the default attribute in body"                 \
         qs              "set the default query string parameter"            \
+        browse          "open browser"                                      \
+        make            "make a new client"                                 \
         cd              "enter into the subpath relative to current path"
     param:subcmd:try
     param:run
@@ -38,6 +38,6 @@ ___x_cmd_http() {
 
 x log init http
 
-xrc:mod:lib http    utils header qs body request resp crud graphql
+xrc:mod:lib http  utils header qs body request resp crud/index
 
 xrc setmain ___x_cmd_http

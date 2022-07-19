@@ -46,7 +46,7 @@ function pkg_modify_table_by_meta_rule( table, pkg_name, table_kp,          _ver
 
 function pkg_get_version_or_head_version( jobj, table, pkg_name,            _final_version, l ){
     _final_version = table_version( table, pkg_name )
-    _final_version = juq(_final_version)
+    if (_final_version ~ /^".*"$/) _final_version = juq(_final_version)
     if ( _final_version != "" ){
         return _final_version
     } else {

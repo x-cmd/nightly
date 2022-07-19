@@ -19,27 +19,30 @@ function re_match( str, regex ){    return match( str, re_patgen( regex ) ); }
 function re_patgen( regex,  t ){    return ((t = RE_PAT_CACHE[ regex ]) != "") ? t : (RE_PAT_CACHE[ regex ] = re_patgen___( regex )); }
 
 function re___pat_gsub( srcpat, tgtpat, regex ){
-    while (gsub( srcpat, tgtpat, regex )) {}
+    if ( srcpat == regex ){
+        return tgtpat
+    }
     return regex
 }
 
-function re_patname( name ){    return "\\[:" name ":\\]";  }
+function re_patname( name ){    return "[:" name ":]";  }
 function re_patgen___( regex,  _tmp, _tmp_arr ){
 
     regex = re___pat_gsub( re_patname( "int" ),       RE_NUMBER,             regex )
     regex = re___pat_gsub( re_patname( "real" ),      RE_NUM,                regex )
     regex = re___pat_gsub( re_patname( "qu" ),        RE_STR2,               regex )
     regex = re___pat_gsub( re_patname( "qu1" ),       RE_STR1,               regex )
-
+    regex = re___pat_gsub( re_patname( "float" ),     RE_FLOAT,              regex )
     regex = re___pat_gsub( re_patname( "ip-a" ),      RE_IP_A,               regex )
     regex = re___pat_gsub( re_patname( "ip-b" ),      RE_IP_B,               regex )
     regex = re___pat_gsub( re_patname( "ip-c" ),      RE_IP_C,               regex )
     regex = re___pat_gsub( re_patname( "ip-d" ),      RE_IP_D,               regex )
+    regex = re___pat_gsub( re_patname( "ip-E" ),      RE_IP_E,               regex )
     regex = re___pat_gsub( re_patname( "ip" ),        RE_IP,                 regex )
     # regex = re___pat_gsub( re_patname( "ipv6" ),       "",                 regex )
     regex = re___pat_gsub( re_patname( "url" ),       RE_URL,                regex )
     regex = re___pat_gsub( re_patname( "http" ),      RE_URL_HTTP,           regex )
-    regex = re___pat_gsub( re_patname( "https" ),     RE_URL_HTTPS,          re1gexq)
+    regex = re___pat_gsub( re_patname( "https" ),     RE_URL_HTTPS,          regex )
     regex = re___pat_gsub( re_patname( "httpx" ),     RE_URL_HTTPX,          regex )
 
     if (match(regex, /\[:([0-9])+-([0-9])+:\]/)) {
@@ -73,7 +76,7 @@ BEGIN {
 
     RE_INT = "[+-]?([1-9][0-9]*)|0"
     RE_INT0 = "[+-]?[0-9]+"
-    RE_FLOAT = RE_INT "(.[0-9]*)*"
+    RE_FLOAT = "(^-?[1-9][0-9]*.[0-9]+$|^-?0.[0-9]+$|^-?[1-9][0-9]*$|^0$)"
 
     RE_UTF8_HAN = "[一-龥]+"
     RE_UTF8_NON_ASCII = "[^\0-\127]+$"
@@ -89,11 +92,11 @@ BEGIN {
 
     RE_IP_SUBNET = ""
 
-    RE_URL_BODY     =   "([^.\\.]([a-zA-Z0-9][-a-zA-Z0-9]{0,62}(.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+(:\\w+)*(\\/\\w+.\\w+)*([\\?&]\\w+=\\w*)*$))"                                     RE_URL
-    RE_URL          =   "^(www.)([^.\\.]([a-zA-Z0-9][-a-zA-Z0-9]{0,62}(.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+(:\\w+)*(\\/\\w+.\\w+)*([\\?&]\\w+=\\w*)*$))"                              RE_URL_BODY
-    RE_URL_HTTP     =   "^((http)://)(www.)([^.\\.]([a-zA-Z0-9][-a-zA-Z0-9]{0,62}(.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+(:\\w+)*(\\/\\w+.\\w+)*([\\?&]\\w+=\\w*)*$))"                   RE_URL_HTTP
-    RE_URL_HTTPX    =   "^((httpx)://)(www.)([^.\\.]([a-zA-Z0-9][-a-zA-Z0-9]{0,62}(.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+(:\\w+)*(\\/\\w+.\\w+)*([\\?&]\\w+=\\w*)*$))"                  RE_URL_HTTPX
-    RE_URL_HTTPS    =   "^((https)://)(www.)([^.\\.]([a-zA-Z0-9][-a-zA-Z0-9]{0,62}(.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+(:\\w+)*(\\/\\w+.\\w+)*([\\?&]\\w+=\\w*)*$))"                  RE_URL_BODY
+    RE_URL_BODY     =   "[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]"
+    RE_URL          =   "([a-zA-Z0-9]+://)?" RE_URL_BODY
+    RE_URL_HTTP     =   "(http)://"          RE_URL_BODY
+    RE_URL_HTTPX    =   "(httpS?)://"        RE_URL_BODY
+    RE_URL_HTTPS    =   "(https)://"         RE_URL_BODY
 }
 
 BEGIN{

@@ -34,6 +34,7 @@ ___x_cmd_main_otherwise(){
         x:debug "Resource Executed: [type=$___X_CMD_WHICH_ONE_RESOURCE_TYPE] [file=$___X_CMD_WHICH_ONE_RESULT] [code=$___x_cmd_main_otherwise_code]"
         return "$___x_cmd_main_otherwise_code"
     else
+        # TODO: If we fail to introduct from xbin. Please provide the interface, ask user for what he/she wants and whether set the alias for that module globally.
         ___x_cmd_main_otherwise_code=$?
         if x pkg xbin init "$subcmd"; then
             # Introduce binmod

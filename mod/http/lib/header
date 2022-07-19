@@ -1,14 +1,5 @@
 # shellcheck    shell=sh    disable=SC2039,SC3043
 
-: <<'DOCTEST'
-> ___x_cmd_http_make git https://api.git.com
-> O=git ___x_cmd_http_qs token token123
-> O=git ___x_cmd_http_header content-type application/json
-> O=git ___x_cmd_http_header accept application/json
-> O=git ___x_cmd_http_header
-content-type: application/json
-accept: application/json
-DOCTEST
 ___x_cmd_http_header() {
     param:subcmd ___x_cmd_http_header               \
         dump                "dump header"           \
@@ -56,12 +47,14 @@ ___x_cmd_http_header_put(){
 
 ___x_cmd_http_header_mput(){
     param:void
+    local value
     for i in "$@"; do
         # if [[ "$i" = *=* ]]; then
         if [ "$i" != "${i%%=*}" ]; then
             ___x_cmd_http_header_put "${i%=*}" "${i##*=}"
         else
-            ___x_cmd_http_header_put "$i"
+            eval value="\"\$${i}\""
+            [ -z "$value" ] || ___x_cmd_http_header_put "$i" "$value"
         fi
     done
 }
