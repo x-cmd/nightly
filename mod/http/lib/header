@@ -7,7 +7,8 @@ ___x_cmd_http_header() {
         put                 "put header"            \
         mput                "mput header"           \
         remove              "remove header"         \
-        referer             "set the referer"
+        referer             "set the referer"       \
+        type                "set header Content-Type"
     param:subcmd:try
     param:run
 

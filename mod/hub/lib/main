@@ -44,7 +44,7 @@ option:
 A
     param:run
 
-    echo ___x_cmd_hub_account_connect_"$1" "$@"
+    ___x_cmd_hub_account_connect_"$1" "$@"
 }
 
 ___x_cmd_hub_main_login(){

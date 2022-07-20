@@ -62,7 +62,7 @@ options:
         while true;do
             name="${username%%,*}"
             username="${username#*,}"
-            ___x_cmd_gh_http put json "/repos/$owner_repo/collaborators/${name##*/}" permission | (
+            ___x_cmd_gh_http put json "/repos/$owner_repo/collaborators/${name##*/}" -- permission | (
             ___x_cmd_git_json_query_rename id=.id
             if [ -n "$id" ];then
                 ___x_cmd_ui tf "true" "add $name to $repo successfully"

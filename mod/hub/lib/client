@@ -69,17 +69,16 @@ ___x_cmd_hub_client_file_rm(){
 # Section: share
 
 ___x_cmd_hub_client_share_ls(){
-    ___x_cmd_http get "$___X_CMD_HUB_SERVICE_URL/api/v0/share"  token="$(___x_cmd_hub_token)"
-    # ___x_cmd_httpget "$___X_CMD_HUB_SERVICE_URL/api/v0/share?token=$(___x_cmd_hub_token)"
+    ___x_cmd_http get "$___X_CMD_HUB_SERVICE_URL/api/v0/share?token=$(___x_cmd_hub_token)"
 }
 
 ___x_cmd_hub_client_share_add(){
     local respath="${1:?Provide respath}"
-    # http post "$___X_CMD_HUB_SERVICE_URL/api/v0/share?token=$(___x_cmd_hub_token)&res=${respath}"
-    # post '{ "res": "/path/to/file" }'
-    curl -X POST --silent "$___X_CMD_HUB_SERVICE_URL/api/v0/share?token=$(___x_cmd_hub_token)" \
-        -H 'Content-Type: application/json' \
-        -d '{ "res": "'"${respath}"'" }'
+    # TODO: x http should do more better
+    ___x_cmd_http post "https://hub.x-cmd.com/api/v0/share?token=$(___x_cmd_hub_token)" "res=${respath}"
+    code="$?"
+    printf "%s\n" "$(___x_cmd_http resp body)"
+    return $code
 }
 
 ___x_cmd_hub_client_share_rm(){

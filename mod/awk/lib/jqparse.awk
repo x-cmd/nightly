@@ -2,6 +2,11 @@ BEGIN{
     L = "\003"
 }
 
+function jqparse0( text, obj,       l, a ){
+    l = split(json_to_machine_friendly(text), a, "\n")
+    return jqparse( obj, "", l, a )
+}
+
 function jqparse(obj, kp,      token_arrl, token_arr,                                   i, l ){
     i = 1
     while (i <= token_arrl) {

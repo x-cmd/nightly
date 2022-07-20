@@ -6,7 +6,11 @@ BEGIN{
     arrl = split(query, arr, ",")
     for (i=1; i<=arrl; ++i) {
         e = arr[i]
-        if (e ~ /(json)|(text)|(xml)|(yml)/)    code = "application/" e
+        if ((e ~ /(json)|(text)|(xml)|(yml)/)&&(e ~ /(application)/)){
+            code = e
+        }else{
+            code = "application/" e
+        }
     }
 
     for (i=1; i<=arrl; ++i) {

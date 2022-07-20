@@ -135,10 +135,19 @@ ___x_cmd_yanfa_mod_wc(){
     ___x_cmd_yanfa_mod_lsfile "$@" | xargs wc | sort -n -r | less
 }
 
-___x_cmd_yanfa_mod_test(){
-    x test inject http "$(x wsroot)"
+___x_cmd_yanfa_mod_test()(
+    local module
+    module="$(< "$(x wsroot)"/latest awk '{
+        if (match($0, "^___x_cmd_[a-zA-Z]*\\()\\{$")) mod = substr($0, 10, RLENGTH-12)
+        if (match($0, "setmain ___x_cmd_")) setmain = substr($0, RSTART+RLENGTH)
+    }
+    END{
+        if ((setmain != "") && (setmain !~ "_")) print setmain
+        else print mod
+    }' 2>/dev/null)"
+    x test inject "$module" "$(x wsroot)"
     x test "$@"
-}
+)
 
 # EndSection
 

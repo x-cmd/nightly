@@ -6,7 +6,7 @@ function arr_len(arr){
     return arr[ L ]
 }
 
-function arr_seq( arr, s, delta, e,        _arr, i, c ){
+function arr_seq( arr, s, delta, e,        i, c ){
     for (i=0; s<=e; s+=delta) arr[++i] = s
     arr[ L ] = i
     return i
@@ -63,8 +63,8 @@ function arr_shift( arr, offset,        l, i ){
 
 function arr_unshift( arr, v,        l, i ){
     arr[ L ] = l = arr[ L ] + 1
-    arr[1] = v
     for (i=l; i>1; --i) arr[i] = arr[i-1]
+    arr[1] = v
     return l
 }
 

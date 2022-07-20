@@ -4,7 +4,7 @@
 x log init hub
 xrc ui/lib/select http
 xrc:mod:lib hub  advise client file share account/wechat \
-    account/login account/registration account/user account/token msg
+    account/login account/registration account/user account/token account/connect msg
 
 ___X_CMD_HUB_ENV="$___X_CMD_ROOT/.hub"
 ! [ -d "$___X_CMD_HUB_ENV" ] || mkdir -p "$___X_CMD_HUB_ENV"

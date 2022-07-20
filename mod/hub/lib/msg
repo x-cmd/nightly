@@ -7,7 +7,7 @@ ___x_cmd_hub_msg_telegram(){
         hub:error "Failed to send msg, res:$res, msg:$msg"
         return 1
     fi
-    hub:info "response: ${res}"
+    printf "%s\n" "${res}"
 }
 
 ___x_cmd_hub_msg_wechat(){
@@ -17,5 +17,5 @@ ___x_cmd_hub_msg_wechat(){
         hub:error "Failed to send msg, res:$res, msg:$msg"
         return 1
     fi
-    hub:info "response: ${res}"
+    printf "%s\n" "${res}"
 }

@@ -85,7 +85,7 @@ options:
     local gen_gh_json
     gen_gh_json="$(param:option2json -repo)"
 
-    ___x_cmd_gh_http post "/repos/$owner_repo/pulls" "$gen_gh_json"
+    ___x_cmd_gh_http post "/repos/$owner_repo/pulls" -- "$gen_gh_json"
 }
 
 ___x_cmd_gh_repo_pr_update() {
@@ -111,7 +111,7 @@ options:
     local gen_gh_json
     gen_gh_json="$(param:option2json -repo)"
 
-    ___x_cmd_gh_http patch "/repos/${owner_repo}/pulls/$pr" "$gen_gh_json"
+    ___x_cmd_gh_http patch "/repos/${owner_repo}/pulls/$pr" -- "$gen_gh_json"
 }
 
 ___x_cmd_gh_repo_pr_merge() {
@@ -132,7 +132,7 @@ options:
     ___x_cmd_gh_param_init_owner_repo
     local gen_gh_json
     gen_gh_json="$(param:option2json -repo)"
-    ___x_cmd_gh_http put "/repos/${owner_repo}/pulls/$pr/merge" "$gen_gh_json"
+    ___x_cmd_gh_http put "/repos/${owner_repo}/pulls/$pr/merge" -- "$gen_gh_json"
 }
 
 # EndSection
@@ -200,7 +200,7 @@ options:
     ___x_cmd_gh_param_init_owner_repo
     local gen_gh_json
     gen_gh_json="$(param:option2json -repo)"
-    ___x_cmd_gh_http post "/repos/${owner_repo}/pulls/$number/comments" "$gen_gh_json"
+    ___x_cmd_gh_http post "/repos/${owner_repo}/pulls/$number/comments" -- "$gen_gh_json"
 }
 
 ___x_cmd_gh_repo_pr_comments_rm(){

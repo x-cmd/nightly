@@ -181,6 +181,7 @@ option:
         can_comment=^no_comment         auto_init=^^no_auto_init)"
 
     for name in "$@"; do
+        # x tmpl "$gen_gt_json"  "${name##%/}" | \
         printf "%s" "${gen_gt_json}" | sed s/%%name%%/"${name##%/}"/g | \
             ___x_cmd_gt_http post "/v5/enterprises/${enterprise##*/}/repos" - | \
             ___x_cmd_gt_enterprise_repo_create_status_handler

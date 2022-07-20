@@ -18,6 +18,8 @@ ___x_cmd_gt_repo_release(){
     return 1
 }
 
+# Section: List
+
 # shellcheck disable=SC2086,SC2154
 # https://gitee.com/api/v5/swagger#/getV5ReposOwnerRepoReleases
 ___x_cmd_gt_repo_release_ls(){
@@ -38,20 +40,9 @@ options:
 A
 }
 
-# shellcheck disable=SC2086,SC2154
-# TODO:https://gitee.com/api/v5/swagger#/getV5ReposOwnerRepoReleasesTagsTag
-___x_cmd_gt_repo_get_release_by_tag(){
-    param:scope     ___x_cmd_gt
-    param:dsl    '
-options:
-    #1|--repo          "Provide owner name and repo name.(default:the current user repo)"   <>:RepoName
-    #2|--tag           "tag name"                                                           <>
-'
-    param:run
-    ___x_cmd_gt_param_init_owner_repo
+# EndSection
 
-    ___x_cmd_gt_http get "/v5/repos/${owner_repo}/releases/tags/${tag}"
-}
+# Section: Create
 
 # shellcheck disable=SC2154,SC2181
 # https://gitee.com/api/v5/swagger#/postV5ReposOwnerRepoReleases
@@ -75,55 +66,64 @@ options:
         ___x_cmd_gt_repo_release_create_status_handler
 }
 
+# shellcheck disable=SC2154
 ___x_cmd_gt_repo_release_create_status_handler(){
     if [ ! -t 1 ] || [ -n "$ENFORCE_JSON" ]; then
         cat
         return
     fi
 
-    ___x_cmd_git_json_query_rename name=.name tag_name=.tag_name prerelease=.prerelease
-    if [ -n "$tag_name" ]; then
-        ___x_cmd_ui_tf true     "Release Successfully" "name: $name"
+    ___x_cmd_git_json_query_rename id=.id tag_name=.tag_name name=.name target_commitish=.target_commitish prerelease=.prerelease
+    if [ -n "$id" ]; then
+        ___x_cmd_ui_tf true    "Release Successfully" "Id: $id" "Name: $name" "TagName: $tag_name" "TargetCommitish: $target_commitish" "Prerelease: $prerelease"
     else
-        ___x_cmd_ui_tf false    "Release failure: $name."
+        ___x_cmd_ui_tf false   "Release failure: $name"
         return 1
     fi
 }
 
+# EndSection
 
-# Assume pr and owner_repo are environments
-______x_cmd_gt_repo_release_init_owner_repo_and_release_main(){
-    local release_id=${release##*/}
-    owner_repo=${release%$release_id}
-
-    owner_repo="$(___x_cmd_gt_param_normalize_repo "$owner_repo")"
-    release="${release_id}"
-}
-
-alias ______x_cmd_gt_repo_release_init_owner_repo_and_release="
-    local owner_repo
-    ______x_cmd_gt_repo_release_init_owner_repo_and_release_main || return
-"
-
+# Section: Update and Remove
 
 # shellcheck disable=SC2154,SC2181
-# TODO:https://gitee.com/api/v5/swagger#/patchV5ReposOwnerRepoReleasesId
+# https://gitee.com/api/v5/swagger#/patchV5ReposOwnerRepoReleasesId
 ___x_cmd_gt_repo_release_update(){
     param:scope  ___x_cmd_gt
     param:dsl    '
 options:
-    #1|--release        "Release ID"                <>:NatureNumber
-    --tag               "Please provide tag name"   <>
-    --name              "Release name"              <>
-    --body              "Release Description"       <>
-    --prerelease        "Is release version"        <>:Bool="false"
+    #1|--release        "Release ID"                                                         <>:NatureNumber
+    --repo              "Provide owner name and repo name.(default:the current user repo)"   <>:RepoName
+    --tag               "Please provide tag name"                                            <>
+    --name              "Release name"                                                       <>
+    --body              "Release Description"                                                <>
+    --prerelease        "Is release version"                                                 <>
 '
     param:run
-    ______x_cmd_gt_repo_release_init_owner_repo_and_release
-    ___x_cmd_gt_http patch "/v5/repos/${owner_repo}/releases/${release}" \
-        tag_name="$tag" name body prerelease 1>/dev/null 2>&1
-    [ $? -ne 0 ] && gt_log error "Update release failure: $name by $owner_repo $release" && return 1
-    ___x_cmd_ui tf "true" "Success release" "name: $name" "body: $body" "prerelease: $prerelease"  && return 0
+
+    local gen_gt_json
+    gen_gt_json="$(param:option2json tag_name=tag -tag)"
+
+    ___x_cmd_gt_param_init_owner_repo
+    printf "%s" "${gen_gt_json}" | ___x_cmd_gt_http patch "/v5/repos/${owner_repo}/releases/${release}" - | \
+        ___x_cmd_gt_repo_release_update_status_handler
+}
+
+# shellcheck disable=SC2154
+___x_cmd_gt_repo_release_update_status_handler() {
+    if [ ! -t 1 ] || [ -n "$ENFORCE_JSON" ]; then
+        cat
+        return
+    fi
+
+    ___x_cmd_git_json_query_rename id=.id tag_name=.tag_name name=.name target_commitish=.target_commitish prerelease=.prerelease
+    if [ -n "$id" ]; then
+        ___x_cmd_ui_tf true    "Update rlease successfully" \
+            "Id: $id" "Name: $name" "TagName: $tag_name" "TargetCommitish: $target_commitish" "Prerelease: $prerelease"
+    else
+        ___x_cmd_ui_tf false   "Update release failure: $name by $owner_repo $release"
+        return 1
+    fi
 }
 
 # TODO: https://gitee.com/api/v5/swagger#/deleteV5ReposOwnerRepoReleasesId
@@ -131,15 +131,56 @@ ___x_cmd_gt_repo_release_rm(){
     param:scope  ___x_cmd_gt
     param:dsl    '
 options:
-    #1|--release        "Release ID"                <>:NatureNumber
+    #1|--release        "Release ID"                                                         <>:NatureNumber
+    --repo              "Provide owner name and repo name.(default:the current user repo)"   <>:RepoName
 '
     param:run
 
-    ______x_cmd_gt_repo_release_init_owner_repo_and_release
-    ___x_cmd_gt_http delete "/v5/repos/${owner_repo}/releases/$release"
+    ___x_cmd_gt_param_init_owner_repo
+
+    # TODO:http handle，delete repo return data is null.Status: 204 No Content
+    if ___x_cmd_gt_http delete "/v5/repos/${owner_repo}/releases/$release" >/dev/null; then
+        ___x_cmd_ui_tf true  "Deleting release ${owner_repo}: ${release} successfully"
+    else
+        ___x_cmd_ui_tf false "Deleting release failure: ${owner_repo}: ${release}. Probably because it desn't exists."
+        return 1
+    fi
 }
 
-# TODO: https://gitee.com/api/v5/swagger#/getV5ReposOwnerRepoReleasesLatest
+# EndSection
+
+# Section: Info
+
+# TODO: https://gitee.com/api/v5/swagger#/getV5ReposOwnerRepoReleasesId
+___x_cmd_gt_repo_release_info(){
+    param:scope     ___x_cmd_gt
+    param:dsl    '
+options:
+    #1|--release        "Release ID"                                                         <>:NatureNumber
+    --repo              "Provide owner name and repo name.(default:the current user repo)"   <>:RepoName
+'
+    param:run
+
+    ___x_cmd_gt_param_init_owner_repo
+    ___x_cmd_gt_http get "/v5/repos/${owner_repo}/releases/${release}" | ___x_cmd_gt_repo_release_info_status_handler
+}
+
+# shellcheck disable=SC2086,SC2154
+# https://gitee.com/api/v5/swagger#/getV5ReposOwnerRepoReleasesTagsTag
+___x_cmd_gt_repo_get_release_by_tag(){
+    param:scope     ___x_cmd_gt
+    param:dsl    '
+options:
+    #1|--repo          "Provide owner name and repo name.(default:the current user repo)"   <>:RepoName
+    #2|--tag           "tag name"                                                           <>
+'
+    param:run
+
+    ___x_cmd_gt_param_init_owner_repo
+    ___x_cmd_gt_http get "/v5/repos/${owner_repo}/releases/tags/${tag}" | ___x_cmd_gt_repo_release_info_status_handler
+}
+
+# https://gitee.com/api/v5/swagger#/getV5ReposOwnerRepoReleasesLatest
 ___x_cmd_gt_repo_release_latest(){
     param:scope     ___x_cmd_gt
     param:dsl    '
@@ -149,18 +190,38 @@ options:
     param:run
 
     ___x_cmd_gt_param_init_owner_repo
-    ___x_cmd_gt_http get "/v5/repos/${owner_repo}/releases/latest"
+    ___x_cmd_gt_http get "/v5/repos/${owner_repo}/releases/latest" | ___x_cmd_gt_repo_release_info_status_handler
 }
 
-# TODO: https://gitee.com/api/v5/swagger#/getV5ReposOwnerRepoReleasesId
-___x_cmd_gt_repo_release_info(){
-    param:scope     ___x_cmd_gt
-    param:dsl    '
-options:
-    #1|--release        "Release ID"                <>:NatureNumber
-'
-    param:run
+# shellcheck disable=SC2154
+___x_cmd_gt_repo_release_info_status_handler(){
+    if [ ! -t 1 ] || [ -n "$ENFORCE_JSON" ]; then
+        cat
+        return
+    fi
 
-    ______x_cmd_gt_repo_release_init_owner_repo_and_release
-    ___x_cmd_gt_http get "/v5/repos/${owner_repo}/releases/${release}"
+    ___x_cmd_git_json_query_rename id=.id tag_name=.tag_name name=.name target_commitish=.target_commitish prerelease=.prerelease
+    if [ -n "$id" ]; then
+        ___x_cmd_ui_tf true    "Success" "Id: $id" "Name: $name" "TagName: $tag_name" "TargetCommitish: $target_commitish" "Prerelease: $prerelease"
+    else
+        ___x_cmd_ui_tf false   "Couldn't find any Release: $owner_repo"
+        return 1
+    fi
 }
+
+# EndSection
+
+#TODO: Use release and release attachment management. Need reserve？
+# Assume pr and owner_repo are environments
+# ______x_cmd_gt_repo_release_init_owner_repo_and_release_main(){
+#     local release_id="${release##*/}"
+#     owner_repo="${release%"$release_id"}"
+
+#     owner_repo="$(___x_cmd_gt_param_normalize_repo "$owner_repo")"
+#     release="${release_id}"
+# }
+
+# alias ______x_cmd_gt_repo_release_init_owner_repo_and_release="
+#     local owner_repo
+#     ______x_cmd_gt_repo_release_init_owner_repo_and_release_main || return
+# "

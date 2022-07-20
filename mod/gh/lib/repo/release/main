@@ -72,7 +72,7 @@ options:
     ___x_cmd_gh_param_init_owner_repo
     local gen_gh_json
     gen_gh_json="$(param:option2json tag_name=tag)"
-    ___x_cmd_gh_http post "/repos/${owner_repo}/releases" "$gen_gh_json" | ___x_cmd_gh_repo_release_create_status_handle
+    ___x_cmd_gh_http post "/repos/${owner_repo}/releases" -- "$gen_gh_json" | ___x_cmd_gh_repo_release_create_status_handle
 }
 
 # shellcheck disable=SC2154
@@ -124,7 +124,7 @@ options:
     local gen_gh_json
     gen_gh_json="$(param:option2json tag_name=tag -repo)"
 
-    ___x_cmd_gh_http patch "/repos/${owner_repo}/releases/${release}" "$gen_gh_json"
+    ___x_cmd_gh_http patch "/repos/${owner_repo}/releases/${release}" -- "$gen_gh_json"
 }
 
 ___x_cmd_gh_repo_release_rm() {
