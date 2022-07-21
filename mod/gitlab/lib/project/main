@@ -95,7 +95,7 @@ option:
     local name="$1"
     local gen_gitlab_json
     gen_gitlab_json="$(param:option2json +name -p path=gitlab_path)"
-    ___x_cmd_gitlab_http post "/projects" "$gen_gitlab_json" | ___x_cmd_gitlab_project_create_status_handler
+    ___x_cmd_gitlab_http post "/projects" -- "$gen_gitlab_json" | ___x_cmd_gitlab_project_create_status_handler
 }
 
 # shellcheck disable=SC2154
@@ -125,7 +125,7 @@ options:
 '
     param:run
     ___x_cmd_gitlab_current_owner 1>/dev/null
-    ___gitlab_ui_mutual  ___x_cmd_gitlab_http get "/users/$___X_CMD_GITLAB_DEFAULT_OWNER/projects"  <<A
+    ___gitlab_ui_mutual  ___x_cmd_gitlab_get_multi "/users/$___X_CMD_GITLAB_DEFAULT_OWNER/projects"  <<A
     ___ui_table_json Id=.id Name=.name Owner=.owner.username Url=.web_url -- \$@
 A
 }

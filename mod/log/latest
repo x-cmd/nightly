@@ -62,7 +62,7 @@ ${logger_name}_log(){     ___x_cmd_log_pr $logger_name \"\$@\";   }
     for level_code in 1 2 3 4; do
         ___x_cmd_log_level_code_to_level_name "$level_code"
         code="$code
-alias ${logger_name}:$level_name='test -z \"\$___X_CMD_LOG_DEBUG\" -a $level_code -lt \"\${___X_CMD_LOG__${logger_name}:-2}\" || O=${logger_name} ___x_cmd_log_pr_${level_name}'
+alias ${logger_name}:$level_name='/bin/test -z \"\$___X_CMD_LOG_DEBUG\" -a $level_code -lt \"\${___X_CMD_LOG__${logger_name}:-2}\" || O=${logger_name} ___x_cmd_log_pr_${level_name}'
 "
     done
 
@@ -179,7 +179,7 @@ ___x_cmd_log_set_level(){
 
     local var="___X_CMD_LOG__${logger_name}"
 
-    if eval test -z "\$___X_CMD_LOG__0_$logger_name"; then
+    if eval /bin/test -z "\$___X_CMD_LOG__0_$logger_name"; then
         eval "$var=$level_code"
     else
         eval "$var=$level_code"
@@ -245,11 +245,11 @@ ___X_CMD_LOG_C_TIMESTAMP_END="${___X_CMD_LOG_C_WARN:-"]"}"
 
 ___x_cmd_log_pr(){
     case "${2:?Provide level}" in
-        debug)      eval "test -z \"\$___X_CMD_LOG_DEBUG\" -a 1 -lt \"\${___X_CMD_LOG__${1#:}:-2}\"" || { local O="${1#:}"; shift 2; L=DBG C="$___X_CMD_LOG_C_DEBUG"  ___x_cmd_log_0 "$@"; } ;;
-        info)       eval "test -z \"\$___X_CMD_LOG_DEBUG\" -a 2 -lt \"\${___X_CMD_LOG__${1#:}:-2}\"" || { local O="${1#:}"; shift 2; L=INF C="$___X_CMD_LOG_C_INFO"   ___x_cmd_log_0 "$@"; } ;;
-        warn)       eval "test -z \"\$___X_CMD_LOG_DEBUG\" -a 3 -lt \"\${___X_CMD_LOG__${1#:}:-2}\"" || { local O="${1#:}"; shift 2; L=WRN C="$___X_CMD_LOG_C_WARN"   ___x_cmd_log_0 "$@"; } ;;
-        error)      eval "test -z \"\$___X_CMD_LOG_DEBUG\" -a 4 -lt \"\${___X_CMD_LOG__${1#:}:-2}\"" || { local O="${1#:}"; shift 2; L=ERR C="$___X_CMD_LOG_C_ERROR"  ___x_cmd_log_0 "$@"; } ;;
-        *)          eval "test -z \"\$___X_CMD_LOG_DEBUG\" -a 3 -lt \"\${___X_CMD_LOG__${1#:}:-2}\"" || { local O="${1#:}"; shift 1; L=INF C="$___X_CMD_LOG_C_INFO"   ___x_cmd_log_0 "$@"; } ;;
+        debug)      eval "/bin/test -z \"\$___X_CMD_LOG_DEBUG\" -a 1 -lt \"\${___X_CMD_LOG__${1#:}:-2}\"" || { local O="${1#:}"; shift 2; L=DBG C="$___X_CMD_LOG_C_DEBUG"  ___x_cmd_log_0 "$@"; } ;;
+        INFO)       eval "/bin/test -z \"\$___X_CMD_LOG_DEBUG\" -a 2 -lt \"\${___X_CMD_LOG__${1#:}:-2}\"" || { local O="${1#:}"; shift 2; L=INF C="$___X_CMD_LOG_C_INFO"   ___x_cmd_log_0 "$@"; } ;;
+        warn)       eval "/bin/test -z \"\$___X_CMD_LOG_DEBUG\" -a 3 -lt \"\${___X_CMD_LOG__${1#:}:-2}\"" || { local O="${1#:}"; shift 2; L=WRN C="$___X_CMD_LOG_C_WARN"   ___x_cmd_log_0 "$@"; } ;;
+        error)      eval "/bin/test -z \"\$___X_CMD_LOG_DEBUG\" -a 4 -lt \"\${___X_CMD_LOG__${1#:}:-2}\"" || { local O="${1#:}"; shift 2; L=ERR C="$___X_CMD_LOG_C_ERROR"  ___x_cmd_log_0 "$@"; } ;;
+        *)          eval "/bin/test -z \"\$___X_CMD_LOG_DEBUG\" -a 3 -lt \"\${___X_CMD_LOG__${1#:}:-2}\"" || { local O="${1#:}"; shift 1; L=INF C="$___X_CMD_LOG_C_INFO"   ___x_cmd_log_0 "$@"; } ;;
     esac
 }
 

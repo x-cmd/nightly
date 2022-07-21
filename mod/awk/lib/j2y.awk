@@ -16,9 +16,9 @@ function j2y_list( obj, kp, indent,     l, i ){
     }
 }
 
-function DB( msg ){
-    print "<debug>:\t:" msg
-}
+# function DB( msg ){
+#     print "<debug>:\t:" msg
+# }
 
 function j2y_dict( obj, kp, indent,     l, i ){
     if ( (l = obj[ kp L ]) < 1) {   print "{}";  return;    }
@@ -28,7 +28,7 @@ function j2y_dict( obj, kp, indent,     l, i ){
     j2y_val( obj, kp SUBSEP k, indent "  " )
     for (i=2; i<=l; ++i) {
         k = obj[kp, i]
-        if (obj[kp SUBSEP k] !~ /^[\[\{]$/){
+        if (obj[kp SUBSEP k] !~ "^[\\[\\{]$"){
             printf( "%s", indent j2y_better_key(k) ": " )
         } else {
             printf( "%s\n", indent j2y_better_key(k) ":" )

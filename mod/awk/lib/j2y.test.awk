@@ -2,7 +2,7 @@ END{
 
     jqparse0( str, obj )
 
-    print jstr( obj )
+    # print jstr( obj )
 
     j2y_all( obj )
 

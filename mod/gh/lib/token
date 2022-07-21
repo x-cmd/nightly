@@ -81,7 +81,7 @@ ____x_cmd_gh_auth_login(){
     [ "$scope" = "all" ] && scope=" admin:public_key admin:repo_hook admin:org_hook gist notifications user delete_repo write:discussion admin:enterprise admin:gpg_key"
 
     ___x_cmd_http header put  "Accept" "application/json"
-    ___x_cmd_http post   json "https://github.com/login/device/code" client_id="$client_id" scope="$scope" | (
+    ___x_cmd_http post   json "https://github.com/login/device/code" -- client_id="$client_id" scope="$scope" | (
         x jo env . .device_code user_code=.user_code verification_uri=.verification_uri
         gh_log info "Copy your one-time code:$user_code"
         ___x_cmd_http browse "$verification_uri"

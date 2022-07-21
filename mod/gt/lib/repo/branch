@@ -82,7 +82,7 @@ options:
     ___x_cmd_gt_param_init_owner_repo
 
     # TODO:http handle，delete repo return data is null.Status: 204 No Content
-    if ___x_cmd_gt_http post "/v5/repos/${owner_repo}/branches" refs branch_name >/dev/null; then
+    if ___x_cmd_gt_http post "/v5/repos/${owner_repo}/branches" -- refs branch_name >/dev/null; then
         ___x_cmd_ui_tf true  "Add repo ${owner_repo} ${branch_name} brach successfully"
     else
         ___x_cmd_ui_tf false "Add repo failure" "owner_repo: $owner_repo" "branch: $branch_name" "refs: $refs"

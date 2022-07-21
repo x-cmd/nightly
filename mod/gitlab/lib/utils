@@ -5,28 +5,49 @@
 # Section 2: Wrapping std/http module with object naming changing
 ############################
 ___x_cmd_gitlab_resp_header(){
-    O="${O:-___x_cmd_gitlab_GITLAB_DEFAULT}" ___x_cmd_http resp header "$@"
+    O="${O:-___X_BASH_HTTP____x_cmd_gitlab_GITLAB_DEFAULT}" ___x_cmd_http_resp header "$@"
 }
 
 # TODO: Not supported yet
 ___x_cmd_gitlab_resp_body(){
-    O="${O:-___x_cmd_gitlab_GITLAB_DEFAULT}" ___x_cmd_http resp body "$@"
+    O="${O:-___X_BASH_HTTP____x_cmd_gitlab_GITLAB_DEFAULT}" ___x_cmd_http_resp body "$@"
 }
 
-___x_cmd_gitlab_get_multi(){
+___x_cmd_gitlab_get_multi() {
     if [ -n "$page" ] || [ -n "$per_page" ]; then
         ___x_cmd_gitlab_http get "$@" page per_page
-        return "$?"
+        return
     fi
-    local i=1
-    local total_count=100000
-    while [ "$i" -le "$total_count" ]; do
-        ___x_cmd_gitlab_http get "$@" page="$i" per_page=100
-        total_count="$(___x_cmd_gitlab_resp_header "total_count")"
-        [ -z "$total_count" ] && return
-        # echo "total_count:$total_count" >&2
-        i=$((i+1))
+    local tmp
+    tmp=$(mktemp)
+    ___x_cmd_gitlab_http get "$@" page=1 per_page=100 >> "$tmp"
+    local next_url
+    _____x_cmd_gitlab_next_url
+    if [ -z "$next_url" ];then
+        cat "$tmp"
+        rm "$tmp"
+        return
+    fi
+    while [ -n "$next_url" ]; do
+        ___x_cmd_gitlab_http get "$next_url" >> "$tmp"
+        _____x_cmd_gitlab_next_url
     done
+    x ja 'BEGIN{print "["} END{print "]"}O[1]{
+    if ((V == "}") || (V == "]") || (K ~ "^[0-9]+$")) print V
+    else print K ": "V;
+    }' < "$tmp" | x jo fmt
+    rm "$tmp"
+}
+
+_____x_cmd_gitlab_next_url(){
+    next_url="$(___x_cmd_gitlab_resp_header "link")"
+    next_url="${next_url#*'rel="prev", <'}"
+    local tmp_url="${next_url%%'>; rel="next"'*}"
+    if [ "$next_url" != "$tmp_url" ];then
+         next_url="${tmp_url#*'api/v4'*}"
+    else
+        next_url=""
+    fi
 }
 
 ___x_cmd_gitlab_http(){
@@ -63,7 +84,7 @@ ___x_cmd_gitlab_param_normalize_repo(){
         owner_project="$(printf "%s" "$___X_CMD_GITLAB_DEFAULT_OWNER/$op")"
         ;;
     esac
-    
+    printf "%s" "$owner_project" | sed s:'/':'%2F':g
 }
 
 ### Repo #1

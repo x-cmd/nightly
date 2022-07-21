@@ -28,7 +28,7 @@ options:
     # TODO: interactive ui
 
     ___parse_pr_init_owner_repo_and_pr
-    ___x_cmd_gitlab_http post "/repos/${owner_project}/pulls/$pr/assignees" assignees
+    ___x_cmd_gitlab_http post "/repos/${owner_project}/pulls/$pr/assignees" -- assignees
 }
 
 ___x_cmd_gitlab_repo_pr_assign_del(){
@@ -70,5 +70,5 @@ options:
 
     ___parse_pr_init_owner_repo_and_pr
 
-    ___x_cmd_gitlab_http post "/repos/${owner_project}/pulls/$pr/review" force
+    ___x_cmd_gitlab_http post "/repos/${owner_project}/pulls/$pr/review"  -- force
 }

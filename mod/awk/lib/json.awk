@@ -536,8 +536,11 @@ function json_stringify_format(obj, keypath, indent,       i, l,_ret){
 }
 # EndSection
 
-function json_split2tokenarr( arr, text ){
-    return split( json_to_machine_friendly(text), arr, "\n" )
+# TODO: This is a problem
+function json_split2tokenarr( arr, text,    l ){
+    l = split( json_to_machine_friendly(text), arr, "\n" )
+    arr[ L ] = l
+    return l
 }
 
 function json_split2tokenarr_( text ){

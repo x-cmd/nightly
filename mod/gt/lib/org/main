@@ -83,7 +83,7 @@ options:
     name="$1"
     gen_gt_json="$(param:option2json +name)"
 
-    ___x_cmd_gt_http post "/v5/users/organization" "$gen_gt_json" | \
+    ___x_cmd_gt_http post "/v5/users/organization" -- "$gen_gt_json" | \
     {
         ___x_cmd_git_json_query_rename id=.id
         if [ -n "$id" ]; then

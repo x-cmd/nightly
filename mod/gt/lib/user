@@ -231,7 +231,7 @@ options:
     local gen_gt_json
     gen_gt_json="$(param:option2json)"
 
-    ___x_cmd_gt_http post "/v5/user/keys" "$gen_gt_json" | \
+    ___x_cmd_gt_http post "/v5/user/keys" -- "$gen_gt_json" | \
     {
         ___x_cmd_git_json_query_rename "$data" id=.id title=.title key=.key
         if [ -n "$id" ]; then

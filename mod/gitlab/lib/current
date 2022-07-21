@@ -3,7 +3,7 @@
 
 ___x_cmd_gitlab_current(){
     param:subcmd ___x_cmd_gitlab_current                        \
-        owner       "Get current owner"          
+        owner       "Get current owner"
     param:subcmd:try
     param:run
 

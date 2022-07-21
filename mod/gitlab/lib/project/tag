@@ -25,7 +25,7 @@ options:
 
     ___x_cmd_gitlab_param_init_owner_project
 
-    ___gitlab_ui_mutual ___x_cmd_gitlab_http get "/repos/${owner_project}/tags" <<A
+    ___gitlab_ui_mutual ___x_cmd_gitlab_get_multi "/repos/${owner_project}/tags" <<A
         ___ui_table_json TagName=.name Message=.message Commit=.commit.sha Time=.commit.date -- \$@
 A
 }
@@ -48,7 +48,7 @@ options:
     param:run
     ___x_cmd_gitlab_param_init_owner_project
 
-    ___x_cmd_gitlab_http post "/repos/${owner_project}/tags" \
+    ___x_cmd_gitlab_http post "/repos/${owner_project}/tags"  -- \
         refs tag_message="$msg" tag_name="$name" 1>/dev/null 2>&1
 
     [ $? -ne 0 ] && gitlab_log error "Add $owner_project tag: $name failure"      &&   return 1

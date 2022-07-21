@@ -59,7 +59,7 @@ options:
 
     local username
     for username in "$@"; do
-        ___x_cmd_gt_http put json "/v5/repos/$owner_repo/collaborators/${username##*/}" permission | \
+        ___x_cmd_gt_http put json "/v5/repos/$owner_repo/collaborators/${username##*/}" -- permission | \
             ___x_cmd_gt_repo_member_add_json_status_handler
     done
 }

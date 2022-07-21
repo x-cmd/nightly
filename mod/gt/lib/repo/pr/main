@@ -154,7 +154,7 @@ options:
     local title
     local state
     local html_url
-    data="$(___x_cmd_gt_http post "/v5/repos/$owner_repo/pulls" title head base body milestone_number \
+    data="$(___x_cmd_gt_http post "/v5/repos/$owner_repo/pulls" -- title head base body milestone_number \
         labels issue assignees testers assignees_number testers_number prune_source_branch)"
     ___x_cmd_gt_json_query_rename "$data" title=.title state=.state html_url=.html_url
     if [ -n "$title" ];then
@@ -186,7 +186,7 @@ options:
     param:run
 
     ___parse_pr_init_owner_repo_and_pr
-    ___x_cmd_gt_http patch "/v5/repos/${owner_repo}/pulls/$pr" title body milestone_number\
+    ___x_cmd_gt_http patch "/v5/repos/${owner_repo}/pulls/$pr" -- title body milestone_number\
         labels assignees_number testers_number state
 }
 
@@ -205,7 +205,7 @@ options:
     param:run
 
     ___parse_pr_init_owner_repo_and_pr
-    ___x_cmd_gt_http put json "/v5/repos/${owner_repo}/pulls/$pr/merge"  merge_method \
+    ___x_cmd_gt_http put json "/v5/repos/${owner_repo}/pulls/$pr/merge" --  merge_method \
         prune_source_branch title description
 }
 

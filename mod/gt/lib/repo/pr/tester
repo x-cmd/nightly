@@ -27,7 +27,7 @@ options:
     param:run
 
     ___parse_pr_init_owner_repo_and_pr
-    ___x_cmd_gt_http post "/v5/repos/${owner_repo}/pulls/$pr/testers" testers
+    ___x_cmd_gt_http post "/v5/repos/${owner_repo}/pulls/$pr/testers" -- testers
 }
 
 # https://gitee.com/api/v5/swagger#/deleteV5ReposOwnerRepoPullsNumberTesters
@@ -56,7 +56,7 @@ options:
 
     ___parse_pr_init_owner_repo_and_pr
 
-    ___x_cmd_gt_http patch "/v5/repos/${owner_repo}/pulls/$pr/testers" reset_all
+    ___x_cmd_gt_http patch "/v5/repos/${owner_repo}/pulls/$pr/testers" -- reset_all
 }
 
 #
@@ -71,7 +71,7 @@ options:
 
     ___parse_pr_init_owner_repo_and_pr
 
-    ___x_cmd_gt_http post "/v5/repos/${owner_repo}/pulls/$pr/test" force
+    ___x_cmd_gt_http post "/v5/repos/${owner_repo}/pulls/$pr/test" -- force
 }
 
 

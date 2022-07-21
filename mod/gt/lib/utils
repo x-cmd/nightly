@@ -12,21 +12,41 @@ ___x_cmd_gt_resp_header(){
 ___x_cmd_gt_resp_body(){
     O="${O:-___x_cmd_gt_GITEE_DEFAULT}" ___x_cmd_http resp body "$@"
 }
-
-___x_cmd_gt_get_multi(){
+___x_cmd_gt_get_multi() {
     if [ -n "$page" ] || [ -n "$per_page" ]; then
         ___x_cmd_gt_http get "$@" page per_page
-        return "$?"
+        return
     fi
-    local i=1
-    local total_count=100000
-    while [ "$i" -le "$total_count" ]; do
-        ___x_cmd_gt_http get "$@" page="$i" per_page=100
-        total_count="$(___x_cmd_gt_resp_header "total_count")"
-        [ -z "$total_count" ] && return
-        # echo "total_count:$total_count" >&2
-        i=$((i+1))
+    local tmp
+    tmp=$(mktemp)
+    ___x_cmd_gt_http get "$@" page=1 per_page=100 >> "$tmp"
+    local next_url
+    _____x_cmd_gt_next_url
+    if [ -z "$next_url" ];then
+        cat "$tmp"
+        rm "$tmp"
+        return
+    fi
+    while [ -n "$next_url" ]; do
+        ___x_cmd_gt_http get "$next_url" >> "$tmp"
+        _____x_cmd_gt_next_url
     done
+    x ja 'BEGIN{print "["} END{print "]"}O[1]{
+    if ((V == "}") || (V == "]") || (K ~ "^[0-9]+$")) print V
+    else print K ": "V;
+    }' < "$tmp" | x jo fmt
+    rm "$tmp"
+}
+
+_____x_cmd_gt_next_url(){
+    next_url="$(___x_cmd_gt_resp_header "link")"
+    next_url="${next_url#*"rel='prev', <"}"
+    local tmp_url="${next_url%%">; rel='next'"*}"
+    if [ "$next_url" != "$tmp_url" ];then
+         next_url="${tmp_url#*'.com/api'*}"
+    else
+        next_url=""
+    fi
 }
 
 ___x_cmd_gt_http(){

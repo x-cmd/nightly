@@ -53,3 +53,12 @@ ___x_cmd_ja___normalize_stream(){
 ___x_cmd_ja___normalize_argstring(){
     local IFS=" "; printf "%s" "$*" | ___x_cmd_ja___normalize_stream
 }
+
+
+___x_cmd_ja_toyml(){
+    ___x_cmd_ja_normalize | command awk \
+        -f "$___X_CMD_ROOT/awk/lib/default.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/json.awk" \
+        -f "$___X_CMD_ROOT/awk/lib/ji2y.awk" \
+        -f "$___X_CMD_ROOT/ja/lib/share/toyml.awk"
+}

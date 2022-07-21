@@ -13,17 +13,37 @@ ___x_cmd_gh_get_multi() {
         ___x_cmd_gh_http get "$@" page per_page
         return
     fi
-    local i=1
-    local total_page=100000
-    while [ "$i" -le "$total_page" ]; do
-        ___x_cmd_gh_http get "$@" page="$i" per_page=100
-        total_page="$(___x_cmd_gh_resp_header "total_page")"
-        [ -z "$total_page" ] && return
-        # echo "total_page:$total_page" >&2
-        i=$((i+1))
+    local tmp
+    tmp=$(mktemp)
+    ___x_cmd_gh_http get "$@" page=1 per_page=100 >> "$tmp"
+    local next_url
+    _____x_cmd_gh_next_url
+    if [ -z "$next_url" ];then
+        cat "$tmp"
+        rm "$tmp"
+        return
+    fi
+    while [ -n "$next_url" ]; do
+        ___x_cmd_gh_http get "$next_url" >> "$tmp"
+        _____x_cmd_gh_next_url
     done
+    x ja 'BEGIN{print "["} END{print "]"}O[1]{
+    if ((V == "}") || (V == "]") || (K ~ "^[0-9]+$")) print V
+    else print K ": "V;
+    }' < "$tmp" | x jo fmt
+    rm "$tmp"
 }
 
+_____x_cmd_gh_next_url(){
+    next_url="$(___x_cmd_gh_resp_header "link")"
+    next_url="${next_url#*'rel="prev", <'}"
+    local tmp_url="${next_url%%'>; rel="next"'*}"
+    if [ "$next_url" != "$tmp_url" ];then
+         next_url="${tmp_url#*'.com'*}"
+    else
+        next_url=""
+    fi
+}
 ___x_cmd_gh_http(){
     if ! O="${O:-___x_cmd_gh_GITHUB_DEFAULT}" ___x_cmd_http header get Accept 1>/dev/null 2>&1; then
          O="${O:-___x_cmd_gh_GITHUB_DEFAULT}" ___x_cmd_http header put Accept application/vnd.github.v3+json

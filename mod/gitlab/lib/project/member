@@ -25,7 +25,7 @@ options:
     --skip_users    "Filter out users with the specified ID."      <>:integer_array=""
 '
  param:run
-   ___gitlab_ui_mutual ___x_cmd_gitlab_http get "/projects/$id/users" <<A
+   ___gitlab_ui_mutual ___x_cmd_gitlab_get_multi "/projects/$id/users" <<A
         ___ui_table_json Id=.id Username=.username web_url=.web_url State=.state -- \$@
 A
 }
