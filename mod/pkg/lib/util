@@ -97,6 +97,7 @@ ___x_cmd_pkg_default_version(){
     ___x_cmd_pkg___which_p7zip || return
     ___x_cmd_pkg___all_info "$@" | awk \
         -f "$___X_CMD_ROOT_MOD/awk/lib/default.awk" \
+        -f "$___X_CMD_ROOT_MOD/awk/lib/json.awk"   \
         -f "$___X_CMD_ROOT_MOD/awk/lib/jqparse.awk" \
         -f "$___X_CMD_ROOT_MOD/pkg/lib/awk/util.awk" \
         -f "$___X_CMD_ROOT_MOD/pkg/lib/awk/pkg._.awk" \

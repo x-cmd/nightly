@@ -163,7 +163,7 @@ ___x_cmd_gh_repo_update() {
 type:
     Access  =   private " " public
 option:
-    --access                    "private,public"                                                        <>:Access=sdf
+    --access                    "private,public"                                                        <>:Access=""
     --repo                      "Provide owner name and repo name.(default:the current user repo)"      <>:RepoName
     --name                      "repo alias"                                                            <>:RepoName=""
     --description               "description"                                                           <>=""
@@ -214,9 +214,10 @@ option:
         }"
     )"
 
+    [ -n "$access" ] || unset access
 
     local gen_gh_json
-    gen_gh_json="$(param:option2json -repo +private +security visibility=access \
+    gen_gh_json="$(param:option2json -repo ${access+"private"} +security ${access+"visibility=access"} \
         has_issues=^no_issues                   has_wiki=^no_wiki                       has_projects=^no_projects \
         allow_rebase_merge=^no_rebase_merge     allow_squash_merge=^no_squash_merge     allow_merge_commit=^no_merge_commit \
         auto_init=^no_auto_init

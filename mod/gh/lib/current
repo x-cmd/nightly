@@ -3,8 +3,7 @@
 
 ___x_cmd_gh_current(){
     param:subcmd ___x_cmd_gh_current            \
-        owner       "get current owner"         \
-        repo        "Save the config in memory into file"
+        owner       "get current owner"
     param:subcmd:try
 
     param:subcmd ___x_cmd_gh_current_owner            \

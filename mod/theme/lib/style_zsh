@@ -4,7 +4,8 @@
 # zsh https://zsh.sourceforge.io/Doc/Release/Prompt-Expansion.html#Visual-effects
 
 autoload -U colors && colors
-
+autoload -Uz add-zsh-hook
+zmodload zsh/datetime
 ______x_cmd_theme_setup_zsh_256color() {
     typeset -AHg FG BG
     # shellcheck disable=SC3009
@@ -33,6 +34,44 @@ ______x_cmd_theme_setup_zsh_basecolor
 if [ -z $FG[100] ];then
     ______x_cmd_theme_setup_zsh_256color
 fi
+
+# Hooks
+_____x_cmd_theme_command_record(){
+    # $EPOCHREALTIME from zsh module zsh/datetime
+    [ -n "$EPOCHREALTIME" ] || return
+
+    if [ -n "$___X_CMD_THEME_START_TIME" ]; then
+        ___X_CMD_THEME_END_TIME=$EPOCHREALTIME
+    else
+        ___X_CMD_THEME_START_TIME=$EPOCHREALTIME
+    fi
+}
+
+_____x_cmd_theme_post_command_record(){
+    if [ -z "$___X_CMD_THEME_END_TIME" ];then
+        unset ___X_CMD_THEME_START_TIME
+        unset ___X_CMD_THEME_DURATION_SECOND
+    elif [ -n "$___X_CMD_THEME_START_TIME" ]; then
+        ___X_CMD_THEME_DURATION_SECOND=$((___X_CMD_THEME_END_TIME - ___X_CMD_THEME_START_TIME))
+        unset ___X_CMD_THEME_START_TIME
+    fi
+}
+
+_____x_cmd_theme_register_hook(){
+    add-zsh-hook preexec _____x_cmd_theme_command_record
+    add-zsh-hook precmd  _____x_cmd_theme_command_record
+    add-zsh-hook precmd  _____x_cmd_theme_post_command_record
+}
+
+_____x_cmd_theme_unset_hook(){
+    unset ___X_CMD_THEME_START_TIME
+    unset ___X_CMD_THEME_END_TIME
+    unset ___X_CMD_THEME_DURATION_SECOND
+
+    add-zsh-hook -D preexec _____x_cmd_theme_command_record
+    add-zsh-hook -D precmd _____x_cmd_theme_command_record
+    add-zsh-hook -D precmd  _____x_cmd_theme_post_command_record
+}
 # EndSection
 
 ###

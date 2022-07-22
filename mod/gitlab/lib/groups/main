@@ -10,8 +10,9 @@ ___x_cmd_gitlab_groups(){
         ls                      "List all groups"                                       \
         info                    "Show groups information"                               \
         create                  "Create groups"                                         \
-        member                  "project member manage"                                 \
-        update                  "Update group"
+        member                  "groups member manage"                                  \
+        update                  "Update group"                                          \
+        repo                    "group repo mange"
     param:subcmd:try
     param:run
 
@@ -135,7 +136,7 @@ options:
     local gen_gitlab_json
     gen_gitlab_json="$(param:option2json -p +name path=gitlab_path)"
 
-    ___x_cmd_gitlab_http post "/groups" -- "$gen_gitlab_json" | \
+    ___x_cmd_gitlab_http post "/groups" "$gen_gitlab_json" | \
     {
         ___x_cmd_git_json_query_rename id=.id
         if [ -n "$id" ]; then
@@ -163,7 +164,7 @@ options:
     local group_path="$subgroup_path"
     [ -n "$group_path" ] || group_path="$name"
     gen_gitlab_json="$(param:option2json -subgroup_path path=group_path)"
-    ___x_cmd_gitlab_http post "/groups" -- "$gen_gitlab_json"| \
+    ___x_cmd_gitlab_http post "/groups" "$gen_gitlab_json"| \
     {
         ___x_cmd_git_json_query_rename id=.id
         if [ -n "$id" ]; then
@@ -173,41 +174,6 @@ options:
             return 1
         fi
     }
-}
-# EndSection
-
-# Section: groups repo
-___x_cmd_gitlab_groups_repo(){
-    param:subcmd ___x_cmd_gitlab_groups_repo           \
-        ls          "list repo"                 \
-        create      "groups repo create"
-    param:subcmd:try
-    param:run
-
-    ___x_cmd_gitlab_groups_repo _param_help_doc
-    gitlab_log warn "Subcmd Not Found."
-    return 1
-}
-
-# https://gitee.com/api/swagger#/getV5groupssgroupsRepos
-___x_cmd_gitlab_groups_repo_ls(){
-    param:scope     ___x_cmd_gitlab
-    param:dsl       '
-options:
-    #1|--groups        "Please provide groups"       <>:Address
-    --type          "type"                              <>:RepoAllAccess="all"
-    --page          "page"                              <>:NatureNumber=1
-    --per_page      "per_page"                          <>:NatureNumber=20
-'
-    param:run
-    local gen_gitlab_json
-    gen_gitlab_json="$(param:option2json -page -per_page)"
-
-    local ___gitlab_error_msg="Couldn't find any data by: ${1}"
-    ___gitlab_ui_mutual ___x_cmd_gitlab_get_multi "/groups/$1/repos" type <<A
-        ___ui_table_json Id=.id Name=.name public=.public OwnerName=.owner.name DefaultBranch=.default_branch \
-            OpenIssuesCount=.open_issues_count license=.license Url=.html_url -- \$@
-A
 }
 # EndSection
 
@@ -228,7 +194,7 @@ options:
     local gitlab_path="$p"
     local gen_gitlab_json
     # path=gitlab_path
-    gen_gitlab_json="$(param:option2json -p)"
+    gen_gitlab_json="$(param:option2json -p path=gitlab_path)"
 
     ___x_cmd_gitlab_http put "/groups/$1" "$gen_gitlab_json" | \
     {
@@ -243,3 +209,35 @@ options:
 }
 # EndSection
 
+# Section: groups repo
+___x_cmd_gitlab_groups_repo(){
+    param:subcmd ___x_cmd_gitlab_groups_repo    \
+        ls          "list repo"
+        # create      "groups repo create"
+    param:subcmd:try
+    param:run
+
+    ___x_cmd_gitlab_groups_repo _param_help_doc
+    gitlab_log warn "Subcmd Not Found."
+    return 1
+}
+
+___x_cmd_gitlab_groups_repo_ls(){
+    param:scope     ___x_cmd_gitlab
+    param:dsl       '
+options:
+    #1|--id        "The ID or group path"           <>:Address
+    --page          "page"                          <>:NatureNumber=1
+    --per_page      "per_page"                      <>:NatureNumber=20
+    --visibility    "Limit by visibility"           <>=""
+    --archived      "Limit by archived status"
+'
+    param:run
+
+    ___gitlab_ui_mutual ___x_cmd_gitlab_get_multi "/groups/$id/projects" page per_page visibility archived <<A
+        ___ui_table_json Id=.id Name=.name path=.path visibility=.visibility web_url=.web_url -- \$@
+A
+}
+
+## TODO: create project to groups
+# EndSection

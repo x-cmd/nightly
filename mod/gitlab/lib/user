@@ -67,17 +67,4 @@ options:
         ___ui_table_json Id=.id Name=.username Url=.web_url State=.state -- \$@
 A
 }
-
-# https://gitee.com/api/swagger#/getV5UserRepos
-___x_cmd_gitlab_user_repo(){
-    param:scope     ___x_cmd_gitlab
-    param:subcmd ___x_cmd_gitlab_user_repo                  \
-        ls      "list repo of the designated user"
-    param:subcmd:try
-    param:run
-
-    ___x_cmd_gitlab_user_repo _param_help_doc
-    gitlab_log warn "Subcmd Not Found."
-    return 1
-}
 # EndSection

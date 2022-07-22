@@ -56,13 +56,13 @@ ___x_cmd_assert_main(){
         fi
 
 
-        [ "${#}" -ne 0 ] && {
+        if [ "${#}" -ne 0 ]; then
             if ! ___x_cmd_assert_within "$val" "$@"; then
                 >&2 printf "%s\n" "ERROR: '$val' Not inside the $op set."
                 # param.help.show
                 return 1
             fi 
-        }
+        fi
 
         if [ "$op" = "=int" ]; then
             # if [[ ! "$val" =~ ^[\ \t]*[0-9]+[\ \t]*$ ]]; then
@@ -88,7 +88,7 @@ ___x_cmd_assert_main(){
         val=$(printf "%s" "$val" | tr "$IFS" "\n" )
         local datum
         while read -r datum; do
-            ___x_cmd_assert_within "$datum" "$@" && continue
+            ! ___x_cmd_assert_within "$datum" "$@" || continue
             >&2 printf "%s\n"  "ERROR: ['$val'] After splited with \'$IFS\', element '$datum' is NOT inside the string set"
             return 1
         done <<A

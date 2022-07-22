@@ -143,6 +143,32 @@ ___x_cmd_theme_prompt_comp_username(){
     fi
 }
 
+# current only support ZSH
+# shellcheck disable=SC3006,SC2079
+___x_cmd_theme_prompt_comp_exec_time(){
+    [ -n "$ZSH_VERSION" ]                     || return
+    [ -n "$___X_CMD_THEME_DURATION_SECOND" ]  || return
+    (( ___X_CMD_THEME_DURATION_SECOND >= 0 )) || return
+
+    local _text
+    if (( ___X_CMD_THEME_DURATION_SECOND < 60 )); then
+        local -F 2 _sec=$((___X_CMD_THEME_DURATION_SECOND))
+        _text="${_sec}s"
+    else
+        local -i _init_time=$((___X_CMD_THEME_DURATION_SECOND))
+        _text="$((_init_time % 60))s"
+        if (( _init_time >= 60 )); then
+            _text="$((_init_time / 60 % 60))m $_text"
+            if (( _init_time >= 3600 )); then
+                _text="$((_init_time / 3600 % 24))h $_text"
+            elif (( _init_time >= 86400 )); then
+                _text="$((_init_time / 86400))d $_text"
+            fi
+        fi
+    fi
+    printf "%s" "$_text"
+}
+
 # EndSection
 
 # Section: theme lib for create top prompt

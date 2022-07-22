@@ -77,7 +77,7 @@ options:
     local gen_gitlab_json
     gen_gitlab_json="$(param:option2json -id +user_id)"
 
-    if ___x_cmd_gitlab_http post "/groups/$id/members" -- "$gen_gitlab_json" >/dev/null; then
+    if ___x_cmd_gitlab_http post "/groups/$id/members" "$gen_gitlab_json" >/dev/null; then
         gitlab_log info  "Add $username successfully"
     else
         gitlab_log error "Add $username failure"

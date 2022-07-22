@@ -1,8 +1,7 @@
-# shellcheck shell=sh disable=SC2039,SC1090,SC3043,SC2263
+# Author:       Li Junhao           l@x-cmd.com
+# shellcheck    shell=sh            disable=SC2039,SC1090,SC3043,SC2263
 
-# author:       Li Junhao           l@x-cmd.com
-# maintainer:   Li Junhao
-# license:      GPLv3
+
 ___x_cmd_curl(){
     case "$1" in
         download)       ;;
@@ -12,10 +11,10 @@ ___x_cmd_curl(){
 }
 
 ___x_cmd___curl_origin(){
-    if command -v curl 2>/dev/null; then
+    if PATH="$___X_CMD_INNER_PATH" command -v curl 2>/dev/null; then
         eval '
         ___x_cmd___curl_origin(){
-            command curl "$@"
+            PATH="$___X_CMD_INNER_PATH" command curl "$@"
         }
         '
     elif ( . "$___X_CMD_ROOT_MOD/curl/lib/init"; ___x_cmd___curl___download_curl; ); then

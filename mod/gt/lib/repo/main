@@ -383,7 +383,7 @@ options:
     local gen_gt_json
     gen_gt_json="$(param:option2json)"
 
-    ___x_cmd_gt_http put "/v5/repos/${owner_repo}/reviewer" -- "$gen_gt_json" | ___x_cmd_gt_repo_review_status_handler
+    ___x_cmd_gt_http put "/v5/repos/${owner_repo}/reviewer" "$gen_gt_json" | ___x_cmd_gt_repo_review_status_handler
 }
 
 # shellcheck disable=SC2154

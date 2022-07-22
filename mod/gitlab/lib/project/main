@@ -95,7 +95,7 @@ option:
     local name="$1"
     local gen_gitlab_json
     gen_gitlab_json="$(param:option2json +name -p path=gitlab_path)"
-    ___x_cmd_gitlab_http post "/projects" -- "$gen_gitlab_json" | ___x_cmd_gitlab_project_create_status_handler
+    ___x_cmd_gitlab_http post "/projects" "$gen_gitlab_json" | ___x_cmd_gitlab_project_create_status_handler
 }
 
 # shellcheck disable=SC2154
@@ -276,45 +276,6 @@ options:
         ___x_cmd_ui_tf true  "Deleting repo $1 successfully"
     else
         ___x_cmd_ui_tf false "Deleting repo failure: $1. Probably because it desn't exists."
-        return 1
-    fi
-}
-# EndSection
-
-# Section: pr review config
-
-# shellcheck disable=SC2154,SC2181
-# https://gitee.com/api/swagger#/putV5ReposOwnerRepoReviewer
-___x_cmd_gitlab_repo_review(){
-    param:scope     ___x_cmd_gitlab
-    param:dsl       '
-options:
-    #1|--repo             "Provide owner name and repo name.(default:the current user repo)"   <>:RepoName
-    --assignees           "assignees username"                                                 <>:UserName
-    --testers             "testers usrename"                                                   <>:UserName
-    --assignees_number    "number of reviewers"                                                <>:NatureNumber="1"
-    --testers_number      "number of people tested"                                            <>:NatureNumber="1"
-'
-    param:run
-    ___x_cmd_gitlab_param_init_owner_project
-    local gen_gitlab_json
-    gen_gitlab_json="$(param:option2json)"
-
-    ___x_cmd_gitlab_http put "/repos/${owner_project}/reviewer" "$gen_gitlab_json" | ___x_cmd_gitlab_repo_review_status_handler
-}
-
-# shellcheck disable=SC2154
-___x_cmd_gitlab_repo_review_status_handler(){
-    if [ ! -t 1 ] || [ -n "$ENFORCE_JSON" ]; then
-        cat
-        return
-    fi
-
-    ___x_cmd_git_json_query_rename name=.name
-    if [ -n "$name" ]; then
-        ___x_cmd_ui_tf true   "Setuping ${owner_project} review configure successfully"
-    else
-        ___x_cmd_ui_tf false  "Setuping repo review configure failure: ${owner_project}"
         return 1
     fi
 }

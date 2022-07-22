@@ -34,7 +34,7 @@ ___x_cmd_gitlab_project_member_user(){
     param:scope     ___x_cmd_gitlab
     param:dsl      '
 options:
-    #1|--id         "The ID or URL-encoded path of the group."  <>
+    #1|--id         "The ID or URL-encoded path of the project."  <>
     --user_id       "The user ID of the member"                 <>:UserName
 '
     param:run
@@ -58,24 +58,25 @@ ___x_cmd_gitlab_project_member_add(){
     param:scope     ___x_cmd_gitlab
     param:dsl       '
 options:
-    --project|-r           "Provide owner name and project name.(default:the current user project)"   <>:projectName
-    --permission|-p     "permission"                                                         <>:projectPerm="push"
-    #n                  "Username list"                                                      <>
+    --id                "The ID or URL-encoded path of the project."                                   <>:address
+    --expires_at        "A date string in the format YEAR-MONTH-DAY"                                <>=""
+    --access_level      "A valid access level"                                                      <>:Number
+    --invite_source     "The source of the invitation that starts the member creation process."     <>=""
+    --tasks_to_be_done  "Tasks the inviter wants the member to focus on."                           <>=""
+    --tasks_project_id  "The project ID in which to create the task issues."                        <>=""
+    #1|--user_id        "The user ID of the new member or multiple IDs separated by commas"
 '
     param:run
 
-    # param Design permission:key
-    ___x_cmd_gitlab_param_init_owner_project
-    if [ -z "$1" ];then
-        gitlab_log error "At least one user's spatial address is needed, gitlab member add <user>"
+    if [ $# -eq 0 ];then
+        gitlab_log error "The user ID of the new member or multiple IDs separated by commas"
         return 1
     fi
 
-    local username
-    for username in "$@"; do
-        ___x_cmd_gitlab_http put json "/projects/$owner_project/collaborators/${username##*/}" permission | \
-            ___x_cmd_gitlab_project_member_add_json_status_handler
-    done
+    local gen_gitlab_json
+    gen_gitlab_json="$(param:option2json -id +user_id)"
+
+    ___x_cmd_gitlab_http post "/project/$id/members" "$gen_gitlab_json" | ___x_cmd_gitlab_project_member_add_json_status_handler
 }
 
 ___x_cmd_gitlab_project_member_add_json_status_handler(){
@@ -100,21 +101,25 @@ ___x_cmd_gitlab_project_member_rm(){
     param:scope     ___x_cmd_gitlab
     param:dsl       '
 options:
-    --project|-r       "Provide owner name and project name.(default:the current user project)"   <>:projectName
-    #n              "Username list"
+    --id                    "The ID or URL-encoded path of the group"         <>
+    --skip_subresources     ""
+    --unassign_issuables    ""
+    #n|--user_id            "The user ID of the member"
 '
     param:run
-    [ -z "$1" ] && gitlab_log error "At least one user's spatial address is needed" && return 1
 
-    ___x_cmd_gitlab_param_init_owner_project
+    if [ $# -eq 0 ];then
+        gitlab_log error "At least one user's spatial address is needed"
+        return 1
+    fi
 
     local username
     for username in "$@"; do
-        # TODO:http handle，delete project return data is null.Status: 204 No Content
-        if ___x_cmd_gitlab_http delete "/projects/$owner_project/collaborators/${username##*/}" >/dev/null; then
-            ___x_cmd_ui_tf true  "Remove $username to $owner_project successfully"
+        # TODO:http handle，delete repo return data is null.Status: 204 No Content
+        if ___x_cmd_gitlab_http delete "/project/$id/members/$username" >/dev/null; then
+            gitlab_log info  "Remove $username successfully."
         else
-            ___x_cmd_ui_tf false "Remove user failure: $username"
+            gitlab_log error "Remove $username failure"
             return 1
         fi
     done

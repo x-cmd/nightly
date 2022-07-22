@@ -1,8 +1,7 @@
-# shellcheck shell=sh disable=SC2039,SC1090,SC3043,SC2263
+# Author:       Li Junhao           l@x-cmd.com
+# shellcheck    shell=sh            disable=SC2039,SC1090,SC3043,SC2263
+# License:      GPLv3
 
-# author:       Li Junhao           l@x-cmd.com
-# maintainer:   Li Junhao
-# license:      GPLv3
 ___x_cmd___curl___not_secure_request_nc(){
     printf "GET %s HTTP/1.1\r\nHost: %s\r\nUser-Agent: curl/7.64.1\r\nAccept: */*\r\nConnection: close\r\n\r\n" "$path" "$host" | nc "$host" 80
 }

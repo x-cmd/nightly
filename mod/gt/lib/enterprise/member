@@ -142,7 +142,7 @@ options:
     local gen_gt_json
     gen_gt_json="$(param:option2json active=^^active -enterprise -username)"
 
-    ___x_cmd_gt_http put "/v5/enterprises/${enterprise##*/}/members/${username##*/}" -- "$gen_gt_json" | \
+    ___x_cmd_gt_http put "/v5/enterprises/${enterprise##*/}/members/${username##*/}" "$gen_gt_json" | \
     {
         ___x_cmd_git_json_query_rename user=.user
         if [ -n "$user" ]; then
