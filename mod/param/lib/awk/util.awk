@@ -90,7 +90,7 @@ function debug(msg){
 #   2. --option1,-o1 <arg1> <arg2> ...
 function get_option_string(option_id,
     _option_string, j){
-    _option_string = option_id
+    _option_string = get_option_key_by_id( option_id )
     gsub("\\|m", "", _option_string)
     gsub("\\|", ",", _option_string)
 
@@ -101,6 +101,11 @@ function get_option_string(option_id,
     }
 
     return _option_string
+}
+
+function get_option_key_by_id(option_id){
+    if (match(option_id, "\\|-") && ( option_id !~ "^-") ) return substr( option_id, RSTART+1)
+    return option_id
 }
 
 

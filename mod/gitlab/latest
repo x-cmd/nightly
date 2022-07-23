@@ -8,7 +8,7 @@
 xrc http param ui
 xrc ui/lib/table gh/lib/resource
 
-xrc:inner:lib gitlab utils config current token user project/main project/member groups/main groups/member
+xrc:inner:lib gitlab utils config current token user issue/main project/main project/member groups/main groups/member
 
 x log init gitlab
 ___x_cmd_gitlab(){
@@ -19,6 +19,7 @@ ___x_cmd_gitlab(){
         current     "current user"      \
         groups      "groups manage"     \
         subgroup    "subgroups manage"  \
+        issue       "issue manage"      \
         token       "set token"
     param:subcmd:try
     param:run

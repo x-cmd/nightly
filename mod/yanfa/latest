@@ -9,7 +9,12 @@ xrc:mod:lib yanfa   all ws mod pkg init try git release xb xc
 
 # git config --worktree --get-regexp "remote[a-z\.]+.url"
 
-___X_CMD_YANFA_CONCURRENCY=10
+___X_CMD_YANFA_CONCURRENCY=5
+
+___x_cmd_yanfa_fish(){
+    docker run --rm -it dideler/fish-shell
+    # docker run --rm -it xcmd/fish
+}
 
 ___x_cmd_yanfa(){
     param:dsl <<A
@@ -23,6 +28,7 @@ subcommand:
     xb          "x-bash"
     xc          "x-cmd"
     try         "do some experiment on all poxis shell"
+    fish        "try fish shell"
 A
     param:run
 

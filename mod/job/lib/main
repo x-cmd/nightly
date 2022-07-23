@@ -1,6 +1,8 @@
 
+# TODO: Different Operation
 ___x_cmd_job_active(){
-    jobs -r | wc -l | tr -d ' '
+    # jobs -pr | wc -l | tr -d ' '
+    jobs | awk '($3=="Running")||($2=="Running"){ wc++; } END{ print (wc=="")? 0 : wc; }'
 }
 
 ___x_cmd_job___wrapper_startlog(){
@@ -21,7 +23,14 @@ ___x_cmd_job___wrapper(){
 
 ___x_cmd_job_offer(){
     local MAX="${1:?Provide the max number of jobs could hold}"; shift
-    [ "$(___x_cmd_job_active)" -lt "${MAX}" ] || return 1
+    local ___X_CMD_JOB_OFFER_SIZE
+    ___X_CMD_JOB_OFFER_SIZE="$(___x_cmd_job_active)"
+    if [ "$___X_CMD_JOB_OFFER_SIZE" -ge "${MAX}" ]; then
+        job:debug "ActiveSize=$___X_CMD_JOB_OFFER_SIZE. Waiting: $*"
+        return 1
+    fi
+
+    job:debug "ActiveSize=$___X_CMD_JOB_OFFER_SIZE. Running: $*"
 
     case "$___X_CMD_JOB_WRAPPER" in
         silent)     ___x_cmd_job___wrapper "$@" ;;

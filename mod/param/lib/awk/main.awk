@@ -135,10 +135,6 @@ function handle_arguments_restargv(         _final_rest_argv_len, _set_arg_namel
         QUERY_CODE = "local ___X_CMD_UI_FORM_EXIT_STRATEGY=\"execute|exit\"; x ui form " substr(QUERY_CODE, 9)
         QUERY_CODE = QUERY_CODE ";\nif [ \"$___X_CMD_UI_FORM_EXIT\" = \"exit\" ]; then return 1; fi;"
         code_append(QUERY_CODE)
-        if( HAS_PATH == true){
-            code_append( "local path >/dev/null 2>&1" )
-            code_append( "path=$___x_cmd_param_path" )
-        }
     }
 
     if (_final_rest_argv_len >= 1) {
@@ -182,7 +178,7 @@ function handle_arguments___(   i, j, _arg_name, _arg_name_short, _arg_val, _opt
         option_arr_assigned[ _option_id ] = true
 
         _option_argc     = option_argc_get( _option_id )
-        _option_name     = ( option_alias_2_option_id[  _option_id SPECIAL_OPTION_ID ] != "" ? option_alias_2_option_id[  _option_id SPECIAL_OPTION_ID ] : option_name_get_without_hyphen( _option_id ) )
+        _option_name     = option_name_get_without_hyphen( _option_id )
 
         # If _option_argc == 0, op
         if ( option_multarg_is_enable( _option_id ) )   _option_name = _option_name "_" option_assign_count_inc( _option_id )
@@ -241,10 +237,6 @@ function handle_arguments(          i, _arg_arr_len, _subcmd_id, _tmp ) {
     arr_shift( arg_arr, (i-1) )
 
     handle_arguments_restargv()
-    if( HAS_PATH == true ){
-        code_append( "local path >/dev/null 2>&1" )
-        code_append( "path=$___x_cmd_param_path" )
-    }
 }
 
 END{

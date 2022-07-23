@@ -27,8 +27,8 @@ ___x_cmd_gt_repo_member_ls(){
     param:dsl       '
 options:
     #1|--repo           "Provide owner name and repo name.(default:the current user repo)"   <>:RepoName
-    --page              "page"                                                               <>:NatureNumber=1
-    --per_page          "per_page"                                                           <>:NatureNumber=20
+    --page              "page"                                                               <>=""
+    --per_page          "per_page"                                                           <>=""
 '
     param:run
     ___x_cmd_gt_param_init_owner_repo

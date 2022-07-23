@@ -2,8 +2,8 @@ BEGIN {
     NULL = "\001"
 }
 
-function arr_len(arr){
-    return arr[ L ]
+function arr_len(arr,   l){
+    return ( "" == (l = arr[ L ]) ) ? 0 : l
 }
 
 function arr_seq( arr, s, delta, e,        i, c ){
@@ -12,16 +12,20 @@ function arr_seq( arr, s, delta, e,        i, c ){
     return i
 }
 
-function arr_eq( a1, a2,    i, l ){
+function arr_eq( a1, a2,            i, l ){
     if ((l = arr_len(a1)) != arr_len(a2))       return false
     for (i=1; i<=l; i++) if (a1[i] != a2[i])    return false
     return true
 }
 
-function arr_push(arr, elem, l){
-    l = arr[ L ] + 1
+function arr_get( a, i ){
+    return a[i]
+}
+
+function arr_push(arr, elem,        l){
+    arr[ L ] = l = arr[ L ] + 1
     arr[ l ] = elem
-    arr[ L ] = l
+    return l
 }
 
 function arr_pop(arr,   l){

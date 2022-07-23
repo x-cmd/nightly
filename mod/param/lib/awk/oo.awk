@@ -10,22 +10,17 @@ function code_append(code){
 
 # TODO: check whether all of the invocator correctly quote the value
 function code_append_assignment(varname, value) {
-    if( varname == "path" ){
-        HAS_PATH = true
-        varname  = "___x_cmd_param_path"
-    }
     code_append( "local " varname " >/dev/null 2>&1" )
     code_append( varname "=" qu1( value ) )
 }
 
-function code_query_append(varname, description, typestr){
-    if( varname == "path" ){
-        HAS_PATH = true
-        varname = "___x_cmd_param_path"
-    }
+function code_append_default_assignment(varname, value) {
     code_append( "local " varname " >/dev/null 2>&1" )
-    # code_append( "ui prompt main " qu(description) " " varname " " typestr )
-    # code_query_append( qu(description) " " varname " " "\"\"" " " typestr )
+    if (value != "") code_append( varname "=" qu1( value ) )
+}
+
+function code_query_append(varname, description, typestr){
+    code_append( "local " varname " >/dev/null 2>&1" )
     QUERY_CODE=QUERY_CODE " \"--\" \\" "\n" qu(description) " " varname " " "\"\"" " " typestr
 }
 
@@ -110,26 +105,9 @@ function subcmd_exist_by_id( id ){
 # EndSection
 
 # Section: advise
-
-BEGIN{
-    advise_arr[ L ]=0
-}
-
-function advise_add( line,       _tmp ){
-    _tmp = advise_arr[ L ] + 1
-    advise_arr[ L ] = _tmp
-    advise_arr[ _tmp ] = line
-}
-
-function advise_get( idx ){
-    return advise_arr[ idx ]
-}
-
-
-function advise_len( ){
-    return advise_arr[ L ]
-}
-
+function advise_add( line ){    return arr_push( advise_arr, line );    }
+function advise_get( idx ){     return arr_get(  advise_arr, idx );  }
+function advise_len( ){         return arr_len(  advise_arr ); }
 
 # EndSection
 
@@ -185,10 +163,8 @@ function option_exist_by_alias( alias ){
     return ( option_alias_2_option_id[ alias ] != "" )
 }
 
-function option_assign_count_inc( option_id,    _counter ){
-    _counter = option_assignment_count[ option_id ] + 1      # option_assignment_count[ _option_id ] can be ""
-    option_assignment_count[ option_id ] = _counter
-    return _counter
+function option_assign_count_inc( option_id ){
+    return option_assignment_count[ option_id ] = option_assignment_count[ option_id ] + 1      # option_assignment_count[ _option_id ] can be ""
 }
 
 function option_assign_count_get( option_id     ){

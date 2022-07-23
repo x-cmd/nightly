@@ -8,6 +8,7 @@ ___x_cmd_gitlab_user(){
     param:scope     ___x_cmd_gitlab
     param:subcmd ___x_cmd_gitlab_user               \
         info        "Show information"              \
+        email       "get current user email"        \
         search      "search a user"
     param:subcmd:try
     param:run
@@ -19,7 +20,6 @@ ___x_cmd_gitlab_user(){
 
 # Section: info repo email issue
 # shellcheck disable=SC2154
-# https://gitee.com/api/swagger#/getV5UsersUsername
 ___x_cmd_gitlab_user_info(){
     param:scope     ___x_cmd_gitlab
     param:dsl       '
@@ -67,4 +67,10 @@ options:
         ___ui_table_json Id=.id Name=.username Url=.web_url State=.state -- \$@
 A
 }
+
+___x_cmd_gitlab_user_email(){
+    param:void
+     ___x_cmd_gitlab_http get "/user/emails"
+}
+
 # EndSection

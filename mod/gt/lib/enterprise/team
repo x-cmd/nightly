@@ -41,8 +41,8 @@ options:
     --direction           "sort direction"              <>:Direction="asc"
     --search              "search by keywords"          <>=""
     --scope               "query type"                  <>:Scope=""
-    --page                "page"                        <>:NatureNumber=1
-    --per_page            "per_page"                    <>:NatureNumber=20
+    --page                "page"                        <>=""
+    --per_page            "per_page"                    <>=""
 '
     param:run
     ___x_cmd_gt_get_multi "/enterprises/${enterprise_id}/groups"     qt sort direction search scope
@@ -165,8 +165,8 @@ options:
     --sort                "sort by time type"           <>:Sort="created_at"
     --direction           "sort direction"              <>:Direction="asc"
     --search              "search by keywords"          <>=""
-    --page                "page"                        <>:NatureNumber=1
-    --per_page            "per_page"                    <>:NatureNumber=20
+    --page                "page"                        <>=""
+    --per_page            "per_page"                    <>=""
 '
     param:run
     ___x_cmd_gt_get_multi "/enterprises/${enterprise_id}/groups/${group_id}/members"  qt sort direction search

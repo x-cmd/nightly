@@ -43,7 +43,7 @@ _____x_cmd_gt_next_url(){
     next_url="${next_url#*"rel='prev', <"}"
     local tmp_url="${next_url%%">; rel='next'"*}"
     if [ "$next_url" != "$tmp_url" ];then
-         next_url="${tmp_url#*'.com/api'*}"
+        next_url="${tmp_url#*'.com/api'*}"
     else
         next_url=""
     fi
@@ -51,7 +51,7 @@ _____x_cmd_gt_next_url(){
 
 ___x_cmd_gt_http(){
     if ! O="${O:-___x_cmd_gt_GITEE_DEFAULT}" ___x_cmd_http header get Content-Type 1>/dev/null 2>&1; then
-         O="${O:-___x_cmd_gt_GITEE_DEFAULT}" ___x_cmd_http header put Content-Type application/json
+        O="${O:-___x_cmd_gt_GITEE_DEFAULT}" ___x_cmd_http header put Content-Type application/json
     fi
     O="${O:-___x_cmd_gt_GITEE_DEFAULT}" ___x_cmd_http "$@"
 }

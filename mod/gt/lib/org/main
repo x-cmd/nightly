@@ -30,8 +30,8 @@ ___x_cmd_gt_org_ls(){
     param:dsl       '
 options:
     --admin         "admin"             <>:Bool=false
-    --page          "page"              <>:NatureNumber=1
-    --per_page      "per_page"          <>:NatureNumber=20
+    --page          "page"              <>=""
+    --per_page      "per_page"          <>=""
 '
     param:run
 
@@ -116,8 +116,8 @@ ___x_cmd_gt_org_repo_ls(){
 options:
     #1|--org        "Please provide organization"       <>:Address
     --type          "type"                              <>:RepoAllAccess="all"
-    --page          "page"                              <>:NatureNumber=1
-    --per_page      "per_page"                          <>:NatureNumber=20
+    --page          "page"                              <>=""
+    --per_page      "per_page"                          <>=""
 '
     param:run
     local gen_gt_json

@@ -31,8 +31,8 @@ ___x_cmd_gt_org_member_ls(){
 options:
     --role          "role"                  <>:UserRole="all"
     #1|--org        "org space address"     <>:Address
-    --page          "page"                  <>:NatureNumber=1
-    --per_page      "per_page"              <>:NatureNumber=20
+    --page          "page"                  <>=""
+    --per_page      "per_page"              <>=""
 '
     param:run
 

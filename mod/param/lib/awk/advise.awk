@@ -56,7 +56,7 @@ function generate_advise_json_except_subcmd(      i, j, _option_id, _option_argc
         _option_id       = namedopt_get( i )
         _option_argc     = option_arr[ _option_id L ]
 
-        AJADD(","); AJADD( swrap(_option_id) ); AJADD( ":" );
+        AJADD(","); AJADD( swrap(get_option_key_by_id(_option_id)) ); AJADD( ":" );
         AJADD( "{" );
         AJADD( swrap("#desc") ); AJADD(":"); AJADD( swrap( option_desc_get( _option_id ) ) )
         for ( j=1; j<=_option_argc; ++j ) {

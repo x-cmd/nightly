@@ -70,13 +70,13 @@ BEGIN{
 }
 
 BEGIN {
-    RE_EMAIL = "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(.[a-zA-Z0-9_-]+)+$"    # Check this out ...
+    RE_EMAIL = "[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(.[a-zA-Z0-9_-]+)+"    # Check this out ...
     RE_DIGIT = "[0-9]"      # [:digit:]
     RE_DIGITS = "[0-9]+"    # [:digit:]+
 
     RE_INT = "[+-]?([1-9][0-9]*)|0"
     RE_INT0 = "[+-]?[0-9]+"
-    RE_FLOAT = "(^-?[1-9][0-9]*.[0-9]+$|^-?0.[0-9]+$|^-?[1-9][0-9]*$|^0$)"
+    RE_FLOAT = "(-?[1-9][0-9]*.[0-9]+$|^-?0.[0-9]+$|^-?[1-9][0-9]*$|^0)"
 
     RE_UTF8_HAN = "[一-龥]+"
     RE_UTF8_NON_ASCII = "[^\0-\127]+$"
@@ -179,4 +179,8 @@ function re_range2pattern( start, end,      l, _res, _rest_0, _rest_9, _start_a,
     if (_mid_start == _mid_end) _res =  ((_res == "") ? "" : _res "|")  ( (l==2) ?  sprintf("(%s[0-9])",       _mid_start)          : sprintf("(%s[0-9]{%s})",      _mid_start, (l-1)) )
     if (_mid_start <  _mid_end) _res =  ((_res == "") ? "" : _res "|")  ( (l==2) ?  sprintf("([%s-%s][0-9])",  _mid_start, _mid_end) : sprintf("([%s-%s][0-9]{%s})", _mid_start, _mid_end, (l-1)) )
     return "(" _res ")"
+}
+
+function re_wmatch( val, regex ){
+    return match( val, "^" regex "$" )
 }

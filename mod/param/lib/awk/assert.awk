@@ -48,14 +48,6 @@ function assert_arr_regex(optarg_id, arg_name, value, sep,
     }
 }
 
-function param_assert_range_inner( number, range_str,       l, a, b, e, d ){
-    l = split(range_str, a, ":")
-    if (l == 1)      {          b = 1;      d =   1;    e = a[1];   }
-    else if (l == 2) {          b = a[1];   d =   1 ;   e = a[2];   }
-    else             {          b = a[1];   d = a[2];   e = a[3];   }
-    return ( (number >=b) && (number <= e) && ( 0 == (number - b) % d ) )
-}
-
 # op_arg_idx # token_arr_len, token_arr, op_arg_idx,
 function assert(optarg_id, arg_name, arg_val,
     op, sw, idx, len, val, _tmp){
@@ -66,6 +58,28 @@ function assert(optarg_id, arg_name, arg_val,
     if (op == "=int") {
         if (! match(arg_val, "^[+-]?[0-9]+$") ) {    # float is: /[+-]?[0-9]+(.[0-9]+)?/
             return "Arg: [" arg_name "] value is [" arg_val "]\n  Is NOT an integer."
+        }
+
+        for (idx=2; idx<=len; ++idx) {
+            val = oparr_get( optarg_id, idx )
+            val = str_unquote_if_quoted( val )
+            if (val ~ "^[+-]?[0-9]+$") {
+                if (arg_val == val) {
+                    sw = true
+                    break
+                }
+            } else {
+                if (seq_within( arg_val, val )) {
+                    sw = true
+                    break
+                }
+            }
+        }
+
+        if (sw == false) {
+            option_id = optarg_id
+            gsub("\034[0-9]+$", "", option_id)
+            return panic_match_candidate_error_msg(option_id, arg_val, oparr_join_plain(optarg_id) )
         }
     } else if (op == "=") {
         sw = false
@@ -113,22 +127,18 @@ function assert(optarg_id, arg_name, arg_val,
     } else if (op ~ /^=~.$/) {
         sep = substr(op, 3, 1)
         assert_arr_regex( optarg_id, arg_name, arg_val, sep )
-    } else if (op ~ /^=email$/) {
-        if (! match(arg_val, "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(.[a-zA-Z0-9_-]+)+$") ) {    # float is: /[+-]?[0-9]+(.[0-9]+)?/
+    } else if ( op == "=email" ) {
+        if (! match(arg_val, "^"RE_EMAIL"$") ) {    # float is: /[+-]?[0-9]+(.[0-9]+)?/
             return "Arg: [" arg_name "] value is [" arg_val "]\n  Is NOT a Correct Email Address ."
         }
     } else if (match(op, "^=url:.+")) {      # =url:http   =url:https    =url:ftp
         _tmp = substr(op, 6)
         if (_tmp = ""){
-            if(! match(arg_val,"(www.)?([^.\\.]([a-zA-Z0-9][-a-zA-Z0-9]{0,62}(.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+(:\\w+)*(\\/\\w+.\\w+)*([\\?&]\\w+=\\w*)*$))") ) {
+            if(! re_wmatch(arg_val, RE_URL_BODY) ) {
                 return "Arg: [" arg_name "] value is [" arg_val "]\n  Is NOT an Url."
             }
-        }else if (! match(arg_val, "(" _tmp "://)?(www.)?([^.\\.]([a-zA-Z0-9][-a-zA-Z0-9]{0,62}(.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+(:\\w+)*(\\/\\w+.\\w+)*([\\?&]\\w+=\\w*)*$))") ) {    # float is: /[+-]?[0-9]+(.[0-9]+)?/
+        } else if (! re_wmatch(arg_val, "(" _tmp "://)?" RE_URL_BODY) ) {    # float is: /[+-]?[0-9]+(.[0-9]+)?/
             return "Arg: [" arg_name "] value is [" arg_val "]\n  Is NOT an Url."
-        }
-    } else if (op ~ /=int\[(\+|-)?[0-9]+(:(\+|-)?[0-9]+(:(\+|-)?[0-9]+))\]/) {
-        if ( ! param_assert_range_inner( argval,  substr(op, 6) ) ){
-            return "Arg: [" arg_name "] value is Not within the range: " substr(op, 5)
         }
     } else if (op == "") {
         # Do nothing.

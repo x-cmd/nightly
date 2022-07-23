@@ -80,8 +80,8 @@ options:
     --affiliation   "affiliation"       <>:Group="owner"
     --sort          "sort"              <>:Sort="created"
     --direction     "direction"         <>:Direction="desc"
-    --page          "page"              <>:NatureNumber=1
-    --per_page      "per_page"          <>:NatureNumber=20
+    --page          "page"              <>=""
+    --per_page      "per_page"          <>=""
 '
     param:run
 
@@ -102,8 +102,8 @@ ___x_cmd_gt_user_email(){
     param:scope     ___x_cmd_gt
     param:dsl       '
 options:
-    --page          "page"                        <>:NatureNumber=1
-    --per_page      "per_page"                    <>:NatureNumber=20
+    --page          "page"                        <>=""
+    --per_page      "per_page"                    <>=""
 '
     param:run
 
@@ -125,14 +125,14 @@ options:
     --state         "state(open,progerssing,closed,rejected)"      <>:Sort="open"
     --direction     "direction(asc、desc)"                         <>:Direction="desc"
 
-    --page          "page"                                         <>:NatureNumber=1
-    --per_page      "per_page"                                     <>:NatureNumber=20
     --labels        "labels"                                       <>=""
     --since         "since"                                        <>=""
     --schedule      "schedule"                                     <>=""
     --deadline      "deadline"                                     <>=""
     --created_at    "create date"                                  <>=""
     --finished_at   "finish date"                                  <>=""
+    --page          "page"                                         <>=""
+    --per_page      "per_page"                                     <>=""
 '
     param:run
 
@@ -168,8 +168,8 @@ ___x_cmd_gt_user_key_ls(){
     param:scope     ___x_cmd_gt
     param:dsl       '
 options:
-    --page        "page"                    <>:NatureNumber=1
-    --per_page    "per_page"                <>:NatureNumber=20
+    --page        "page"                    <>=""
+    --per_page    "per_page"                <>=""
 '
     param:run
 

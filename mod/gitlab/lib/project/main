@@ -9,6 +9,7 @@ ___x_cmd_gitlab_project(){
         info            "Show detailed information of project"             \
         update          "Setup project configure"                          \
         rm              "Remove project"                                   \
+        issue           "project issue list"                               \
         member          "project member manage"
     param:subcmd:try
     param:run
@@ -278,5 +279,46 @@ options:
         ___x_cmd_ui_tf false "Deleting repo failure: $1. Probably because it desn't exists."
         return 1
     fi
+}
+# EndSection
+
+# Section: project issue ls
+___x_cmd_gitlab_project_issue(){
+    param:scope     ___x_cmd_gitlab
+    param:dsl       '
+options:
+   --assignee_id                           "Return issues assigned to the given user id."                                                                               <>:Number=""
+   --assignee_username                     "Return issues assigned to the given username."                                                                              <>:array=""
+   --author_id                             "Return issues created by the given user id."                                                                                <>:Number=""
+   --author_username                       "Return issues created by the given username."                                                                               <>=""
+   --confidential                          "Filter confidential or public issues."
+   --created_after                         "Return issues created on or after the given time. Expected in ISO 8601 format"                                              <>:datetime=""
+   --created_before                        "Return issues created on or before the given time."                                                                         <>:datetime=""
+   --due_date                              "Return issues that have no due date,are overdue,or whose due date is this week,this month,or between two weeks ago and next month"     <>=""
+   --epic_id                               "Return issues associated with the given epic ID."                                                                           <>:Number=""
+   --iids                                  "Return only the issues having the given iid"                                                                                <>:array=""
+   --id                                    "The ID or URL-encoded path of the project owned by the authenticated user"                                                  <>
+   --issue_type                            "Filter to a given type of issue. One of issue, incident, or test_case."                                                     <>=""
+   --iteration_id                          "Return issues assigned to the given iteration ID."                                                                          <>:Number=""
+   --iteration_title                       "Return issues assigned to the iteration with the given title."                                                              <>=""
+   --labels                                "Comma-separated list of label names, issues must have all labels to be returned. "                                          <>=""
+   --milestone                             "The milestone title. "                                                                                                      <>=""
+   --my_reaction_emoji                     "Return issues reacted by the authenticated user by the given emoji. "                                                       <>=""
+   --not                                   "Return issues that do not match the parameters supplied. "                                                                  <>:hash=""
+   --order_by                              "Return issues ordered by created_at,due_date,label_priority,milestone_due,popularity,priority,relative_position,title, updated_at,or weight fields.Default is created_at"         <>=""
+   --scope                                 "Return issues for the given scope:"                                                                                         <>=""
+   --sort                                  "Return issues sorted in asc or desc order. Default is desc"                                                                 <>=""
+   --search                                "Search group issues against their title and description"                                                                    <>=""
+   --state                                 "Return all issues or just those that are opened or closed"                                                                  <>=""
+   --updated_after                         "Return issues updated on or after the given time."                                                                          <>:datetime=""
+   --updated_before                        "Return issues updated on or before the given time."                                                                         <>:datetime=""
+   --weight                                "Return issues with the specified weight."                                                                                   <>:Number=""
+   --with_labels_details                   "If true, the response returns more details for each label in labels field: :name, :color, :description, :description_html,:text_color.Default is false."
+'
+ param:run
+
+  ___gitlab_ui_mutual  ___x_cmd_gitlab_get_multi  "/projects/$id/issues" sort order_by search state  <<A
+        ___ui_table_json Id=.id iid=.iid project_id=.project_id title=.title state=.state web_url=.web_url -- \$@
+A
 }
 # EndSection

@@ -30,8 +30,8 @@ ___x_cmd_gt_enterprise_member_ls(){
 options:
     --enterprise    "enterprise space address"          <>:Address
     --role          "role type"                         <>:UserRole="all"
-    --page          "page"                              <>:NatureNumber=1
-    --per_page      "per_page"                          <>:NatureNumber=20
+    --page          "page"                              <>=""
+    --per_page      "per_page"                          <>=""
 '
     param:run
 
@@ -49,8 +49,8 @@ ___x_cmd_gt_enterprise_member_user(){
 options:
     #1|--enterprise     "enterprise: space address"     <>:Address
     #2|--username       "username: space address"       <>
-    --page              "page"                          <>:NatureNumber=1
-    --per_page          "per_page"                      <>:NatureNumber=20
+    --page              "page"                          <>=""
+    --per_page          "per_page"                      <>=""
 '
     param:run
 

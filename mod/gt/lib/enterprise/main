@@ -29,8 +29,8 @@ ___x_cmd_gt_enterprise_ls(){
     param:dsl       '
 options:
     --admin      "list only managed enterprise"     <>:Bool=false
-    --page       "page"                             <>:NatureNumber=1
-    --per_page   "per_page"                         <>:NatureNumber=20
+    --page       "page"                             <>=""
+    --per_page   "per_page"                         <>=""
 '
     param:run
 
@@ -86,8 +86,8 @@ options:
     #1              "Please provide enterprise path"    <>
     --repo_type     "type"                              <>:Genre="all"
     --direct        "direct"                            <>:Bool="false"
-    --page          "page"                              <>:NatureNumber=1
-    --per_page      "per_page"                          <>:NatureNumber=20
+    --page          "page"                              <>=""
+    --per_page      "per_page"                          <>=""
 '
     param:run
 

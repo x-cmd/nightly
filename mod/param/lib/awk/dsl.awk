@@ -28,11 +28,9 @@ function tokenize_argument( astr, array,  l ) {
 # Section: Step 2 Utils: Parse param DSL
 BEGIN {
     final_rest_argv[ L ]    = 0
-    HAS_PATH                = false
-    SPECIAL_OPTION_ID       = "special_option_id"
 }
 
-function handle_option_id( _option_id, special_option_id,            _arr, _arr_len, _arg_name, i ){
+function handle_option_id( _option_id,            _arr, _arr_len, _arg_name, i ){
     # Add _option_id to option_id_list
     option_multarg_disable( _option_id )
 
@@ -50,7 +48,6 @@ function handle_option_id( _option_id, special_option_id,            _arr, _arr_
         if ( i == 1 )  option_name_set( _option_id, _arg_name )
     }
 
-    if ( "" != special_option_id )  option_set_alias(special_option_id,  _option_id SPECIAL_OPTION_ID )
 }
 
 function handle_optarg_declaration( arg_tokenarr, optarg_id,            _optarg_definition_token1, _optarg_type,    _type_rule, i ){
@@ -137,18 +134,13 @@ function parse_param_dsl_for_all_positional_argument( line,                  _op
     }
 }
 
-function parse_param_dsl_for_named_options( _line_arr, line, i,            _nextline, _option_id, _arg_tokenarr, j, special_option_id, _tmp_idx ){
+function parse_param_dsl_for_named_options( _line_arr, line, i,            _nextline, _option_id, _arg_tokenarr, j, _tmp_idx ){
     # HANDLE:   option like --user|-u, or --verbose
     arr_push( option_arr, line )
 
     tokenize_argument( line, _arg_tokenarr )
     _option_id = _arg_tokenarr[1]
-    if( _option_id !~ /^-/ ){
-        _tmp_idx = index(_option_id, "|")
-        special_option_id = substr( _option_id, 1, _tmp_idx - 1 )
-        _option_id = substr( _option_id, _tmp_idx + 1 )
-    }
-    handle_option_id( _option_id, special_option_id )
+    handle_option_id( _option_id )
     option_desc_set( _option_id, _arg_tokenarr[2] )
 
     j = 0
@@ -220,7 +212,7 @@ function check_required_option_ready(       i, j, _option_argc, _option_id, _opt
     for ( i=1; i <= namedopt_len(); ++i ) {
         _option_id       = namedopt_get( i )
         _option_m        = option_multarg_get( _option_id )
-        _option_name     = ( option_alias_2_option_id[  _option_id SPECIAL_OPTION_ID ] != "" ? option_alias_2_option_id[  _option_id SPECIAL_OPTION_ID ] : option_name_get_without_hyphen( _option_id ) )
+        _option_name     = option_name_get_without_hyphen( _option_id )
 
         if ( option_arr_assigned[ _option_id ] == true ) {      # if assigned, continue
             # count the number of arguments
@@ -253,14 +245,14 @@ function check_required_option_ready(       i, j, _option_argc, _option_id, _opt
             }
 
             if ( true != _option_m ) {
-                code_append_assignment( _varname, _value )
+                code_append_default_assignment( _varname, _value )
                 continue
             }
 
             if ( _value == "" )     code_append_assignment( _option_name "_n", 0 )   # TODO: should be 0. Handle later.
             else {
                                     code_append_assignment( _option_name "_n", 1 )   # TODO: should be 0. Handle later.
-                                    code_append_assignment( _varname, _value )
+                                    code_append_default_assignment( _varname, _value )
             }
         }
     }

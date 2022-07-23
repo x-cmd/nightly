@@ -41,7 +41,7 @@ alias param:void='[ "$1" != _x_cmd_advise_json ] || { ___x_cmd_param___void_json
 
 # Section 3: param:subcmd param:subcmd:try
 
-alias param:subcmd='local PARAM_EXEC=""; local ___X_CMD_PARAM_DSL 1>&/dev/null; FIRST_ARG="$1" ___x_cmd_param_define_subcmd'
+alias param:subcmd='local PARAM_EXEC=""; [ -n "$PARAM_SUBCMD_DEF" ] || local PARAM_SUBCMD_DEF; local ___X_CMD_PARAM_DSL 1>&/dev/null; FIRST_ARG="$1" ___x_cmd_param_define_subcmd'
 ___x_cmd_param_define_subcmd(){
     PARAM_FUNCNAME="${1:?Provide prefix}"; shift
     PARAM_SUBCMD_DEF="$PARAM_SUBCMD_DEF
@@ -171,6 +171,7 @@ ___x_cmd_param_exec_dsl() {
     local code="$?"
     # Notice: Must clear this variable.
     ___X_CMD_PARAM_SCOPE=
+    PARAM_SUBCMD_DEF=
     return $code
 }
 

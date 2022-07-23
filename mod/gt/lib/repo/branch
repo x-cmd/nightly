@@ -23,8 +23,8 @@ ___x_cmd_gt_repo_branch_ls(){
     param:dsl       '
 options:
     #1|--repo       "Provide owner name and repo name.(default:the current user repo)"   <>:RepoName
-    --per_page      "results per page"                                                   <>=30
-    --page          "page number of the results to fetch."                               <>=1
+    --per_page      "results per page"                                                   <>=""
+    --page          "page number of the results to fetch."                               <>=""
 '
     param:run
     ___x_cmd_gt_param_init_owner_repo
