@@ -1,0 +1,14 @@
+# shellcheck shell=dash
+
+___x_cmd_zuz_z_tgz(){
+    if [ "$#" -eq 0 ]; then
+        if [ "$size" != 0 ]; then       ___x_cmd_zuz_run x 7z -v"$size" "$target_file" @/dev/stdin
+        else                            ___x_cmd_zuz_run tar cz --files-from "/dev/stdin" -f "$target_file" "$@"
+        fi
+        return
+    fi
+
+    if [ "$size" != 0 ]; then       ___x_cmd_zuz_run x 7z -v"$size" "$target_file" "$@"
+    else                            ___x_cmd_zuz_run tar czf "$target_file" "$@"
+    fi
+}

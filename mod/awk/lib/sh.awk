@@ -1,6 +1,7 @@
 
 function shqu( s ){
-    gsub("\\\\", "\\\\", s)
+    gsub(/\\/, "\\\001\\", s)
+    gsub("\001", "", s)
     gsub(/\$/, "\\$", s)
     gsub("\"", "\\\"", s)
     return "\"" s "\""
@@ -9,7 +10,7 @@ function shqu( s ){
 function shuq( s ){
     gsub(/\\\$/, "$", s)
     gsub(/\\"/, "\"", s)
-    gsub(/\\\\/, "x", s)
+    gsub(/\\\\/, "\\", s)
     return substr(s, 2, length(s) - 2)
 }
 

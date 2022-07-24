@@ -5,7 +5,7 @@ xrc param/latest
 
 x log init yanfa
 
-xrc:mod:lib yanfa   all ws mod pkg init try git release xb xc
+xrc:mod:lib yanfa   ws mod pkg init try git release xb xc
 
 # git config --worktree --get-regexp "remote[a-z\.]+.url"
 
@@ -24,7 +24,6 @@ subcommand:
     pkg         "package"
     release     "release"
     ws          "workspace"
-    all         "all modules"
     xb          "x-bash"
     xc          "x-cmd"
     try         "do some experiment on all poxis shell"

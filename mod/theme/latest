@@ -24,8 +24,9 @@ A
     param:run
 
     if [ -z "$PARAM_SUBCMD" ]; then
-        ___x_cmd_theme_control _param_help_doc
-        return 0
+        # ___x_cmd_theme_control _param_help_doc
+        ___x_cmd_theme_control_app "$@"
+        return
     fi
 
     "___x_cmd_theme_control_${PARAM_SUBCMD}" "$@"
@@ -168,27 +169,31 @@ ___x_cmd_theme_control_unplugin(){
 ___x_cmd_theme_control_font() {
     param:void
     local _font_dir
-    local _font_name
+    local _font_name='Fira Code Retina Nerd Font Complete.ttf'
     if [ "$(uname)" = "Darwin" ]; then
         # MacOS
         _font_dir="$HOME/Library/Fonts"
-        _font_name='MonacoPL.ttf'
     else
         # Linux
         _font_dir="$HOME/.local/share/fonts"
         mkdir -p "$_font_dir"
-        _font_name='CascadiaCodePL.ttf'
     fi
-    if [ -f "$_font_dir/$_font_name" ];then
+    if [ -f "$_font_dir/$_font_name" ]; then
         printf "%s\n" "[x-cmd]: font already installed: $_font_dir"
-        return 0
-    fi
-    local cache="$_font_dir/$_font_name"
-    local expiration=""
-    ___x_cmd_httpget_gitx x-cmd theme main "font/$_font_name" "$cache" "$expiration"
-    if command -v fc-cache ; then
-        printf "%s\n" "[x-cmd]: Resetting font cache, this may take a moment..."
-        command fc-cache -f "$_font_dir"
+    else
+        local cache="$_font_dir/nerdfont.tgz"
+        local expiration=""
+        if ! ___x_cmd_httpget_gitx x-cmd theme main "font/nerdfont.tgz" "$cache" "$expiration"; then
+            printf "\033[31m%s\033[0m\n" "[x-cmd]: nerdfont install failed"
+            return 1
+        fi
+
+        tar -zxf "$cache" -C "$_font_dir" || return 1
+
+        if command -v fc-cache >/dev/null; then
+            printf "%s\n" "[x-cmd]: Resetting font cache, this may take a moment..."
+            command fc-cache -f "$_font_dir"
+        fi
     fi
 }
 

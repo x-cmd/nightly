@@ -17,18 +17,18 @@ giam(){
 }
 
 
-____x_cmd_yanfa_git_commit()(
+___x_cmd_yanfa_git_commit()(
     cd "$name"
     git commit -m "${MSG:-...}"
 )
 
 
-____x_cmd_yanfa_git_push()(
+___x_cmd_yanfa_git_push()(
     cd "$name"
     xws push
 )
 
-____x_cmd_yanfa_git_update(){
+___x_cmd_yanfa_git_update(){
     if [ -d "$name" ]; then
         { cd "$name" && git pull && git pull origin main; }
     else
