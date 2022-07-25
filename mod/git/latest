@@ -1,7 +1,7 @@
 # Author:       Li Junhao           l@x-cmd.com     # xrc
 # shellcheck    shell=sh
 
-xrc:mod:lib git     util assert rootout track main
+xrc:mod:lib git     util meta assert rootout track main
 
 ___x_cmd_git(){
     case "$1" in
@@ -9,6 +9,8 @@ ___x_cmd_git(){
         ignore)     shift; x gitignore "$@" ;;
         rootout)    shift; ___x_cmd_git_rootout "$@" ;;
         track)      shift; ___x_cmd_git_track "$@" ;;
+
+        meta)       shift; ___x_cmd_git_meta "$@" ;;
 
         *)          ___x_cmd___git_origin "$@" ;;
     esac

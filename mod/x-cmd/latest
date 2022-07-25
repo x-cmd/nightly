@@ -1,7 +1,7 @@
 # Author:       Li Junhao   l@x-cmd.com             # xrc
 # shellcheck    shell=sh    disable=SC3043,SC1091
 
-xrc:mod:lib x-cmd glob con alias args rmrf cond util lang exe hashsum lenv tmpl
+xrc:mod:lib x-cmd glob con alias args rmrf cond util lang exe hashsum lenv tmpl spell
 
 # Section : x main function
 ___x_cmd_main_otherwise(){
@@ -49,6 +49,7 @@ ___x_cmd_main_otherwise(){
 ___x_cmd_alias_init ___x_cmd
 
 ___x_cmd_main(){        # x:trace x     # TODO: will effect x log
+
     local subcmd="$1"
     case "$subcmd" in
         log)                                    shift;  ___x_cmd_log "$@" ;;        # For efficiency

@@ -2,25 +2,25 @@
     "z": {
         "#desc": "compress file",
         "#n": {
-            "#exec": "___advise_ls"
+            "#exec": "___x_cmd_advise__file"
         }
     },
     "uz": {
         "#desc": "decompress zipfile",
         "#n": {
-            "#exec": "___advise_ls"
+            "#exec": "___x_cmd_advise__file"
         }
     },
     "uzr": {
         "#desc": "decompress zipfile then remove the original file",
         "#n": {
-            "#exec": "___advise_ls"
+            "#exec": "___x_cmd_advise__file"
         }
     },
     "ls": {
         "#desc": "list compress inside file",
         "#n": {
-            "#exec": "___advise_ls"
+            "#exec": "___x_cmd_advise__file"
         }
     }
 }

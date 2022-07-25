@@ -162,10 +162,10 @@ ___x_cmd_yanfa_mod_devi(){
     id="$(docker container ls -a -f name=ws-x-bash-dev --quiet)"
 
     if [ -z "$id" ]; then
-        docker run -it --network host --name "$name" \
-            -v "$HOME/.ssh:/root/.ssh" \
-            -v "$(x wsroot):/$name}" \
-            -v "$(x wsroot):/ws" \
+        docker run -it --network host --name "$name"    \
+            -v "$HOME/.ssh:/root/.ssh"                  \
+            -v "$(x wsroot):/$name}"                    \
+            -v "$(x wsroot):/ws"                        \
             xcmd/alpine-dev bash
     else
         docker container start "$id"
@@ -241,39 +241,28 @@ ___x_cmd_yanfa_mod(){
         return
     fi
 
-    param:subcmd ___x_cmd_yanfa                    \
-        init    "init"
+    param:subcmd ___x_cmd_yanfa                             \
+        init        "init"
     param:subcmd:try
 
-    param:subcmd ___x_cmd_yanfa_ws                  \
-        pull        "pull"                         \
-        push        "push"                          \
+    param:subcmd ___x_cmd_yanfa_ws                          \
+        pull        "pull"                                  \
+        push        "push"                                  \
         name        "get workspace name from git config"
     param:subcmd:try
 
-    param:dsl <<A
-subcommand:
-    ls          "ls mod"
-    wc          "wc"
-    devi        "container"
-    tgz         "package"
-    test        "test"
-
-    install      "cp file to home folder"
-    lsfile      "ls file to p"
-    lsfile0     "ls file to p"
-A
-    param:run
+    param:subcmd ___x_cmd_yanfa_mod                         \
+        ls          "ls mod"                                \
+        wc          "wc"                                    \
+        devi        "container"                             \
+        tgz         "package"                               \
+        test        "test"                                  \
+        install     "cp file to home folder"                \
+        lsfile      "ls file to p"                          \
+        lsfile0     "ls file to p"
 
     x:trace yanfa/mod
+    param:subcmd:try
 
-    if [ -z "$PARAM_SUBCMD" ]; then
-        ___x_cmd_yanfa_mod help
-        return 1
-    fi
-
-    if command -v "___x_cmd_yanfa_mod_${PARAM_SUBCMD}" >/dev/null; then
-        "___x_cmd_yanfa_mod_$PARAM_SUBCMD" "$@"
-    fi
-
+    param:run
 }

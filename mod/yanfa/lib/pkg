@@ -1,18 +1,10 @@
 # shellcheck shell=sh disable=SC3043
 
-___x_cmd_yanfa_pkg_gitx(){
-    if [ -z "$___X_CMD_IN_CHINA_NET" ]; then
-        printf "%s\n" "github.com"
-    else
-        printf "%s\n" "gitee.com"
-    fi
-}
-
 # Section: module add pull update
 ___x_cmd_yanfa_pkg_add(){
     local name="${1:?Provide module name}"
-    local position="${2:-"git@$(___x_cmd_yanfa_pkg_gitx):x-bash/$name.git"}"
-    # local position="${2:-"https://$(___x_cmd_yanfa_pkg_gitx)/x-bash/$name.git"}"
+    local position="${2:-"git@$(___x_cmd_yanfa_git_domain):x-bash/$name.git"}"
+    # local position="${2:-"https://$(___x_cmd_yanfa_git_domain)/x-bash/$name.git"}"
     local branch="${3:-main}"
     git subtree add --prefix="mod/$name" "$position" "$branch" --squash
 }
@@ -20,8 +12,8 @@ ___x_cmd_yanfa_pkg_add(){
 ___x_cmd_yanfa_pkg_pull(){
     param:void
     local name="${1:?Provide module name}"
-    local position="${2:-"git@$(___x_cmd_yanfa_pkg_gitx):x-bash/$name.git"}"
-    # local position="${2:-"https://$(___x_cmd_yanfa_pkg_gitx)/x-bash/$name.git"}"
+    local position="${2:-"git@$(___x_cmd_yanfa_git_domain):x-bash/$name.git"}"
+    # local position="${2:-"https://$(___x_cmd_yanfa_git_domain)/x-bash/$name.git"}"
     local branch="${3:-main}"
     git subtree pull --prefix="mod/$name" "$position" "$branch" --squash
 }
@@ -100,7 +92,7 @@ ___x_cmd_yanfa_pkg_lsfile()(
     ___x_cmd_yanfa_pkg_lsmod "$@" | (
         cd "$(x wsroot)/mod" && \
         while read -r line; do
-            ( cd "$line" && ___x_cmd_yanfa_mod_lsfile | x arg1 printf "%s/%s\n" "$line" )
+            ( cd "$line" && ___x_cmd_yanfa_mod_lsfile | x arg1 'printf "%s/%s\n" "$line" "$1"' )
         done
     )
 )
@@ -193,46 +185,33 @@ ___x_cmd_yanfa_pkg_pub(){
 }
 
 ___x_cmd_yanfa_pkg(){
-
     if [ -f "$(x wsroot)/.x-cmd/$1" ]; then
         x ws execfile "$@"
         return
     fi
 
-    param:subcmd ___x_cmd_yanfa                    \
-        init    "init"
+    param:subcmd ___x_cmd_yanfa                                 \
+        init            "init"
     param:subcmd:try
 
-    param:subcmd ___x_cmd_yanfa_ws                  \
-        pull        "pull"                         \
-        push        "push"                          \
-        name        "get workspace name from git config"
+    param:subcmd ___x_cmd_yanfa_ws                              \
+        pull            "pull"                                  \
+        push            "push"                                  \
+        name            "get workspace name from git config"
     param:subcmd:try
 
-    param:dsl <<A
-subcommand:
-    install         "install all modules"
+    param:subcmd ___x_cmd_yanfa_pkg                             \
+        install         "install all modules"                   \
+        update          "update or add module"                  \
+        pub0            "publish the package"                   \
+        pub             "publish the package"                   \
+        lsmod           "ls module"                             \
+        lsfile          "lsfile"                                \
+        wc              "count"                                 \
+        tgz             "compress modules of core/all/<special-release> into <name>.tgz" \
+        tar             "compress modules"                      \
+        7z              "compress modules of 7z"
+    param:subcmd:try
 
-    update          "update or add module"
-    pub0            "publish the package"
-    pub             "publish the package"
-    lsmod           "ls module"
-    lsfile          "lsfile"
-    wc              "count"
-
-    tgz             "compress modules of core/all/<special-release> into <name>.tgz"
-    tar             "compress modules"
-    7z              "compress modules of 7z"
-A
     param:run
-
-    if [ -z "$PARAM_SUBCMD" ]; then
-        ___x_cmd_yanfa_pkg help
-        return 1
-    fi
-
-    if command -v "___x_cmd_yanfa_pkg_${PARAM_SUBCMD}" >/dev/null; then
-        "___x_cmd_yanfa_pkg_${PARAM_SUBCMD}" "$@"
-    fi
-
 }

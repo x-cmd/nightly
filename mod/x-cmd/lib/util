@@ -57,9 +57,9 @@ ___x_cmd_shell_exec(){
 }
 
 ___x_cmd_reval(){
-    local _
-    while read -r _; do
-        eval "$_"      # Notice: If read encountering EOF, return 1
+    local ___X_CMD_REVAL_CODE
+    while read -r ___X_CMD_REVAL_CODE; do
+        eval "$___X_CMD_REVAL_CODE"      # Notice: If read encountering EOF, return 1
         [ $# -eq 0 ] || "$@"
     done
 }

@@ -32,6 +32,10 @@ ___x_cmd_yanfa_git_update(){
     if [ -d "$name" ]; then
         { cd "$name" && git pull && git pull origin main; }
     else
-        git clone "git@gitee.com:$org/$name.git"
+        git clone "git@$(___x_cmd_yanfa_git_domain):$org/$name.git"
     fi
+}
+
+___x_cmd_yanfa_git_domain(){
+    x ifelse '[ -z "$___X_CMD_IN_CHINA_NET" ]'  "github.com"    "gitee.com"
 }

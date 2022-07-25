@@ -21,6 +21,7 @@ ___x_cmd_job(){
         active)                 ___x_cmd_job_active "$@" ;;
         offer)                  ___x_cmd_job_offer "$@" ;;
         put)                    ___x_cmd_job_put "$@" ;;
+        report)                 ___x_cmd_job_report "$@" ;;
         wait)                   ___x_cmd_job_wait_until_finished "$@" ;;
         pool)                   ___x_cmd_job_pool "$@" ;;
         help)                   ___x_cmd_job_help "$@" ;;

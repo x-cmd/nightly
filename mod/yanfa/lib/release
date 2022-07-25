@@ -2,49 +2,35 @@
 
 # Section: main
 ___x_cmd_yanfa_release(){
-
     if [ -f "$(x wsroot)/.x-cmd/$1" ]; then
         x _ws "$@"
         return
     fi
 
-    param:subcmd ___x_cmd_yanfa                    \
-        init    "init"
+    x:trace yanfa/relesae "$@"
+
+    param:subcmd    ___x_cmd_yanfa                  \
+        init        "init"
     param:subcmd:try
 
-    param:subcmd ___x_cmd_yanfa_ws                  \
-        pull        "pull"                         \
+    param:subcmd    ___x_cmd_yanfa_ws               \
+        pull        "pull"                          \
         push        "push"                          \
         name        "get workspace name from git config"
     param:subcmd:try
 
-    param:dsl <<A
-subcommand:
-    update          "update or add module"
-    pub             "publish the package"
-    lsmod           "ls module"
-    lsfile          "ls file"
-    wc              "count"
+    param:subcmd    ___x_cmd_yanfa_release          \
+        update          "update or add module"      \
+        pub             "publish the package"       \
+        lsmod           "ls module"                 \
+        lsfile          "ls file"                   \
+        wc              "count"                     \
+        tgz             "compress modules of core/all/<special-release> into <name>.tgz"    \
+        7z              "compress modules of 7z"
+    param:subcmd:try
 
-    tgz             "compress modules of core/all/<special-release> into <name>.tgz"
-    7z              "compress modules of 7z"
-A
     param:run
-
-    # tar             "compress modules"
-    # install         "install all modules"
-
-    x:trace yanfa/relesae "$@"
-
-    if [ -z "$PARAM_SUBCMD" ]; then
-        ___x_cmd_yanfa_release help
-        return 1
-    fi
-
-    if command -v "___x_cmd_yanfa_release_${PARAM_SUBCMD}" >/dev/null; then
-        "___x_cmd_yanfa_release_${PARAM_SUBCMD}" "$@"
-    fi
-
+    ___x_cmd_yanfa_release help
 }
 # EndSection
 
@@ -55,16 +41,26 @@ ___x_cmd_yanfa_release_pub()(
     # set -o errexit
     if {
         yanfa:info "update"
-        ___x_cmd_yanfa_release_update "${CONCURRENCY:-7}"
-        # return
+        ___x_cmd_yanfa_release_update "${CONCURRENCY:-7}" || {
+            local code=$?;  yanfa:info "update fail exit: $?"
+            false
+        }
     } && {
         yanfa:info "create tgz"
-        ___x_cmd_yanfa_release_tgz "$@"
-        yanfa:info "create tgz exit: $?"
+        ___x_cmd_yanfa_release_tgz "$@" || {
+            local code=$?;  yanfa:info "create tgz exit: $code"
+            false
+        }
     } && {
-        yanfa:info "Add && Commit && Push"
-        git add . && git commit -m ... && ___x_cmd_yanfa_ws_push
-        yanfa:info "Add && Commit && Push exit: $?"
+        if [ -n "$NO_UPLOAD" ]; then
+            yanfa:info "No Upload. Skip Add && Commit && Push"
+        else
+            yanfa:info "Add && Commit && Push"
+            if ! git add . && git commit -m ... && ___x_cmd_yanfa_ws_push; then
+                local code=$?;  yanfa:info "Add && Commit && Push exit: $code"
+                false
+            fi
+        fi
     }; then
         yanfa:info "OK"
     else
@@ -75,22 +71,14 @@ ___x_cmd_yanfa_release_pub()(
 # EndSection
 
 # Section: module add pull update
-___x_cmd_yanfa_release_gitx(){
-    if [ -z "$___X_CMD_IN_CHINA_NET" ]; then
-        printf "%s\n" "github.com"
-    else
-        printf "%s\n" "gitee.com"
-    fi
-}
 
 ___X_CMD_YANFA_RELEASE_TMP="${TMPDIR}/release/mod"
-
 
 ___x_cmd_yanfa_release_add()(
     x:trace yanfa/relesae/add "[name=$1]" "[position=$2]" "[branch=$branch]"
     local name="${1:?Provide module name}"
-    local position="${2:-"git@$(___x_cmd_yanfa_release_gitx):x-bash/$name.git"}"
-    # local position="${2:-"https://$(___x_cmd_yanfa_release_gitx)/x-bash/$name.git"}"
+    local position="${2:-"git@$(___x_cmd_yanfa_git_domain):x-bash/$name.git"}"
+    # local position="${2:-"https://$(___x_cmd_yanfa_git_domain)/x-bash/$name.git"}"
     local branch="${3:-main}"
 
     cd "$___X_CMD_YANFA_RELEASE_TMP" || exit 1
@@ -141,7 +129,7 @@ ___x_cmd_yanfa_release_update(){
 
     yanfa:debug "Starting CPFILE"
     ___x_cmd_yanfa_release_cpfile
-    yanfa:debug "FINISIH CPFILE exit: $?"
+    local code=$?; yanfa:debug "FINISIH CPFILE exit: $code"
 }
 
 # EndSection

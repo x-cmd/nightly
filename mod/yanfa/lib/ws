@@ -75,6 +75,9 @@ ___x_cmd_yanfa_ws_push(){
 
     git push gitee "$branch"
     git push github "$branch"
+    local code=$?
+    yanfa:info Exit-Code for push is "$code"
+    return "$code"
 }
 
 ___x_cmd_yanfa_ws(){
