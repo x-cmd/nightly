@@ -11,12 +11,15 @@ ___x_cmd_rmrf(){
     for i in "$@"; do
         # Using core:debug ...
         case "$i" in
-            /)          printf "%s" "Try to 'rm -rf $i'" >&2 ;;
-            /bin)       printf "%s" "Try to 'rm -rf $i'" >&2 ;;
-            /usr)       printf "%s" "Try to 'rm -rf $i'" >&2 ;;
-            /home)      printf "%s" "Try to 'rm -rf $i'" >&2 ;;
-            /var)       printf "%s" "Try to 'rm -rf $i'" >&2 ;;
-            *//*)       printf "%s" "Path consists of //. Variable expansion might not behave as you want." >&2 ;;
+            /)          x:error "Try to 'rm -rf $i'" ;;
+            /bin)       x:error "Try to 'rm -rf $i'" ;;
+            /usr)       x:error "Try to 'rm -rf $i'" ;;
+            /home)      x:error "Try to 'rm -rf $i'" ;;
+            /var)       x:error "Try to 'rm -rf $i'" ;;
+            *//*)
+                        x:warn "Path consists of //. Variable expansion might not behave as you want: $i"
+                        continue
+                        ;;
             *)          continue
         esac
         return 1

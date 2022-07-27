@@ -1,6 +1,7 @@
 $1=="sart:"{
     $1=""
     log_debug("job", "Start: " $0)
+    next
 }
 
 $1=="exit:"{
@@ -12,6 +13,11 @@ $1=="exit:"{
         log_warn("job", sprintf("Fail: [code=%s] %s", code, $0))
         failure ++
     }
+    next
+}
+
+{
+    print $0
 }
 
 END{

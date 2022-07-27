@@ -1,124 +1,225 @@
 # shellcheck shell=sh disable=SC3043
 
-# Section: module add pull update
-___x_cmd_yanfa_pkg_add(){
-    local name="${1:?Provide module name}"
-    local position="${2:-"git@$(___x_cmd_yanfa_git_domain):x-bash/$name.git"}"
-    # local position="${2:-"https://$(___x_cmd_yanfa_git_domain)/x-bash/$name.git"}"
-    local branch="${3:-main}"
-    git subtree add --prefix="mod/$name" "$position" "$branch" --squash
-}
-
-___x_cmd_yanfa_pkg_pull(){
-    param:void
-    local name="${1:?Provide module name}"
-    local position="${2:-"git@$(___x_cmd_yanfa_git_domain):x-bash/$name.git"}"
-    # local position="${2:-"https://$(___x_cmd_yanfa_git_domain)/x-bash/$name.git"}"
-    local branch="${3:-main}"
-    git subtree pull --prefix="mod/$name" "$position" "$branch" --squash
-}
-
-___x_cmd_yanfa_pkg_update_main0(){
-    local mod="$1"
-    if [ -e "mod/$mod" ]; then
-        ___x_cmd_yanfa_pkg_pull "$mod"
-    else
-        ___x_cmd_yanfa_pkg_add "$mod"
+# Section: main
+___x_cmd_yanfa_pkg(){
+    if [ -f "$(x wsroot)/.x-cmd/$1" ]; then
+        x _ws "$@"
+        return
     fi
+
+    x:trace yanfa/relesae "$@"
+
+    param:subcmd    ___x_cmd_yanfa                  \
+        init        "init"
+    param:subcmd:try
+
+    param:subcmd    ___x_cmd_yanfa_ws               \
+        pull        "pull"                          \
+        push        "push"                          \
+        name        "get workspace name from git config"
+    param:subcmd:try
+
+    param:subcmd    ___x_cmd_yanfa_pkg          \
+        update          "update or add module"      \
+        pub             "publish the package"       \
+        lsmod           "ls module"                 \
+        lsfile          "ls file"                   \
+        wc              "count"                     \
+        tgz             "compress modules of core/all/<special-release> into <name>.tgz"    \
+        7z              "compress modules of 7z"
+    param:subcmd:try
+
+    param:run
+    ___x_cmd_yanfa_pkg help
 }
+# EndSection
 
-___x_cmd_yanfa_pkg_update0(){
-    param:void
-    local IFS
-    local mod
-    git prune
+___x_cmd_run_or_fail(){
+    local start_msg="${1:?Provide start msg}"
+    local fail_msg="${2:?Provide failure msg}"
+    shift 2
 
-    ___x_cmd_yanfa_pkg_lsmod "$@" | \
-    while read -r mod; do
-        ___x_cmd_yanfa_pkg_update_main0 "$mod"
-    done
-}
-
-___x_cmd_yanfa_pkg_update_main(){
-    local mod="$1"
-    if [ -e "mod/$mod" ]; then
-        printf "%s\n" "Pull: $mod"
-        ___x_cmd_yanfa_pkg_pull "$mod"
+    yanfa:debug "$start_msg"
+    "$@"
+    local code=$?
+    if [ "$code" -eq 0 ]; then
+        yanfa:debug "Exit=$code. Success"
     else
-        printf "%s\n" "Add: $mod"
-        ___x_cmd_yanfa_pkg_add "$mod"
-    fi 1>"$TMPDIR/$mod.out" 2>&1
-    printf "Write: %s\n" "$TMPDIR/$mod.out"
+        yanfa:debug "Exit=$code: $fail_msg"
+    fi
+    return "$code"
 }
+
+# Section: pub
+___x_cmd_yanfa_pkg_pub()(
+    param:void
+    x:trace yanfa/relesae/pub
+    # set -o errexit
+    if  ___x_cmd_run_or_fail "Start update"             "Update fail."              ___x_cmd_yanfa_pkg_update   "${CONCURRENCY:-7}" && \
+        ___x_cmd_run_or_fail "Start CPFILE"             "CPFILE fail."              ___x_cmd_yanfa_pkg_cpfile   "${CONCURRENCY:-7}" && \
+        ___x_cmd_run_or_fail "Start Generate Meta"      "Generate Meta fail."       ___x_cmd_yanfa_pkg_meta     "${CONCURRENCY:-7}" && \
+        ___x_cmd_run_or_fail "Start tgz"                "tgz fail."                 ___x_cmd_yanfa_pkg_tgz                          && \
+        ___x_cmd_yanfa_upload ;
+    then
+        yanfa:info "OK"
+    else
+        yanfa:error "Fail"
+        return 1
+    fi
+)
+# EndSection
+
+# Section: module add pull update
+
+___X_CMD_YANFA_PKG_TMP="${TMPDIR%/}/release/mod"
+
+___x_cmd_yanfa_pkg_add()(
+    x:trace yanfa/relesae/add "[name=$1]" "[position=$2]" "[branch=$branch]"
+    local name="${1:?Provide module name}"
+    local position="${2:-"git@$(___x_cmd_yanfa_git_domain):x-bash/$name.git"}"
+    # local position="${2:-"https://$(___x_cmd_yanfa_git_domain)/x-bash/$name.git"}"
+    local branch="${3:-main}"
+
+    cd "$___X_CMD_YANFA_PKG_TMP" || exit 1
+
+    local i=1
+    while [ "$i" -le "${RETRY:-3}" ]; do
+        if git clone --quiet --depth=1 "$position" -b "$branch"; then
+            yanfa:info "[$mod/$branch] Cloning success from $position"
+            exit 0
+        fi
+        yanfa:info "[$mod/$branch] Fail to git clone. Retry it after 5 seconds."
+        if ! sleep 5; then
+            yanfa:warn "Sleep interrupted."
+        fi
+        i=$((i+1))
+    done
+    yanfa:error "[$mod/$branch] Fail to git clone after 3 attemps. Mission abort."
+    exit 1
+)
 
 ___x_cmd_yanfa_pkg_update(){
     param:void
-    local IFS
-    local mod
-    git prune
 
-    ___x_cmd_yanfa_pkg_lsmod "$@" | {
-        while read -r mod; do
-            # OUT=/dev/null
-            x job put 7 ___x_cmd_yanfa_pkg_update_main "$mod"
-            printf "%s\n" "Update: $mod" >&2
+    x:trace yanfa/relesae/update
+
+    local ___X_CMD_YANFA_CONCURRENCY="${1:-$___X_CMD_YANFA_CONCURRENCY}"
+    local IFS=" "; yanfa:info "[concurrency=$___X_CMD_YANFA_CONCURRENCY]: $*"
+
+    x rmrf "$___X_CMD_YANFA_PKG_TMP"
+    x mkdirp "$___X_CMD_YANFA_PKG_TMP"
+
+    local ___X_CMD_JOB_WRAPPER=log # report
+    ___x_cmd_yanfa_pkg_lsmod | {
+        local mod; while read -r mod; do
+            x job put "${1:-7}" ___x_cmd_yanfa_pkg_add "$mod"
         done
-
-        x job wait
-    } | while read -r line; do
-        printf "%s\n" "$line"
-        case "$line" in
-            Write*)
-                printf "%s\n" "---------------"
-                cat "${line#Write: }"
-                printf "%s\n" "---------------"
-        esac
-    done
+    } | cat # x job report
 }
 
 # EndSection
 
 # Section: information
 
+# shellcheck disable=SC2120
 ___x_cmd_yanfa_pkg_lsmod(){
     param:void
+    x:trace yanfa/relesae/lsmod "$@"
     ___x_cmd_yanfa_mod_ls "$@"
+    local code=$?
+    yanfa:debug "___x_cmd_yanfa_pkg_lsmod: $code"
+    return $code
 }
 
 ___x_cmd_yanfa_pkg_lsfile()(
     param:void
-    cd "$(x wsroot)/mod" || return
+    x:trace yanfa/relesae/lsfile
+    [ -d "$___X_CMD_YANFA_PKG_TMP" ] || return 1
 
-    ___x_cmd_yanfa_pkg_lsmod "$@" | (
-        cd "$(x wsroot)/mod" && \
+    ___x_cmd_yanfa_pkg_lsmod | (
+        cd "$___X_CMD_YANFA_PKG_TMP" && \
         while read -r line; do
-            ( cd "$line" && ___x_cmd_yanfa_mod_lsfile | x arg1 'printf "%s/%s\n" "$line" "$1"' )
+            (
+                if ! cd "$line"; then
+                    yanfa:error "___x_cmd_yanfa_pkg_lsfile while-loop: fail to cd - $line"
+                    exit 1
+                fi
+                ___x_cmd_yanfa_mod_lsfile | x arg1 'printf "%s/%s\n" "$line" "$1"'
+            )
         done
     )
+
+    local code=$?
+    yanfa:info "___x_cmd_yanfa_pkg_lsfile"
+    return $code
 )
 
-___x_cmd_yanfa_pkg_install()(
-    param:void
-    cd "$(x wsroot)/mod" || return
+___x_cmd_yanfa_pkg_cpfile_inner(){
+    # x:trace yanfa/relesae/cpfile/inner        # Use debug
+    if [ -d "$2" ]; then
+        local p="$2/$1"
+        if ! x cp "$1" "$p"; then
+            yanfa:info "fail to cp [src=$1] to [dst=$p]"
+        fi
+    else
+        if ! x cp "$1" "$2"; then
+            yanfa:info "fail to cp [src=$1] to [dst=$2]"
+        fi
+    fi
+}
 
-    ___x_cmd_yanfa_pkg_lsmod "$@" | (
-        cd "$(x wsroot)/mod" && \
+___x_cmd_yanfa_pkg_cpfile(){
+    x:trace yanfa/relesae/cpfile
+    local tgt
+    tgt="$(x wsroot)/mod"
+    yanfa:debug "Staring cpfile: tgt=$tgt"
+
+    x rmrf "$tgt"; x mkdirp "$tgt"
+
+    ___x_cmd_yanfa_pkg_lsfile | (
+        cd "$___X_CMD_YANFA_PKG_TMP"
         while read -r line; do
-            ( cd "$line" && ___x_cmd_yanfa_mod_install )
+            ___x_cmd_yanfa_pkg_cpfile_inner "$line" "${tgt}"
+            local code=$?; yanfa:debug "<release_cpfile> $line => $tgt: $code"
         done
     )
-)
+    # TODO: In Github Action, it return 1. Resulting in breaking. cpfile_inner is OK. The bug might be in while pipe.
+    yanfa:debug "exit: $?"
+}
+
+___x_cmd_yanfa_pkg_meta(){
+    local tgt
+    tgt="$(x wsroot)/mod"
+
+    local mod
+    ___x_cmd_yanfa_pkg_lsmod | while read -r mod; do
+        (
+            x cd "$___X_CMD_YANFA_PKG_TMP/$mod" || exit 1
+            local id; id=$(x git meta id)
+            local branch; branch=$(x git meta branch);  branch="${branch:-NULL}"
+            local tag; tag=$(x git meta tag);           tag="${tag:-NULL}"
+
+            printf "%s %s %s %s\n" "$id" "$mod" "$branch" "$tag"
+        )
+    done >"$tgt/mod.txt"
+
+    {
+        printf "md5:%s\n" "$(x md5 "$tgt/repo.txt")"
+        printf "sha256:%s\n" "$(x sha256 "$tgt/repo.txt")"
+        printf "sha512:%s\n" "$(x sha512 "$tgt/repo.txt")"
+    } >"$tgt/hashsum.txt"
+}
 
 ___x_cmd_yanfa_pkg_wc(){
     param:void
+    x:trace yanfa/relesae/wc
     cd "$(x wsroot)/mod" &&
         ___x_cmd_yanfa_pkg_lsfile "$@" | xargs wc | sort -n -r | less
 }
 
 # EndSection
 
-# Section: tgz tar 7z
-
+# Section: tgz
 ___x_cmd_yanfa_pkg_tgz()(
     param:void
     case "${1:-all}" in
@@ -127,91 +228,42 @@ ___x_cmd_yanfa_pkg_tgz()(
         *)          return 1 ;;
     esac
 
+    local WSROOT
     WSROOT="$(x wsroot)"
 
-    cd "$WSROOT/mod" &&
-    mkdir -p "$WSROOT/dist" &&
-        eval "tar czvf $scope.tgz $(___x_cmd_yanfa_pkg_lsfile "$scope" | sort | uniq | tr '\n' ' ')" &&
-        mv $scope.tgz "$WSROOT/dist/$scope.tgz" &&
-        ls -alh "$WSROOT/dist/$scope.tgz"
-)
-
-___x_cmd_yanfa_pkg_tar()(
-    param:void
-    case "${1:-all}" in
-        core)       scope=core ;;
-        all)        scope=all ;;
-        *)          return 1 ;;
-    esac
-
-    WSROOT="$(x wsroot)"
-
-    cd "$WSROOT/mod" &&
-    mkdir -p "$WSROOT/dist" &&
-        eval "tar cvf $scope.tar $(___x_cmd_yanfa_pkg_lsfile "$scope" | sort | uniq | tr '\n' ' ')" &&
-        mv $scope.tar "$WSROOT/dist/$scope.tar" &&
-        ls -alh "$WSROOT/dist/$scope.tar"
-)
-
-___x_cmd_yanfa_pkg_7z()(
-    param:void
-    case "${1:-all}" in
-        core)       scope=core ;;
-        all)        scope=all ;;
-        *)          return 1 ;;
-    esac
-
-    WSROOT="$(x wsroot)"
-
-    cd "$WSROOT/mod" &&
-    mkdir -p "$WSROOT/dist" &&
-        eval "7z a $WSROOT/dist/all.7z $(___x_cmd_yanfa_pkg_lsfile "$scope" | sort | uniq | tr '\n' ' ')" &&
-        mv $scope.7z "$WSROOT/dist/$scope.7z" &&
-        ls -alh "$WSROOT/dist/$scope.7z"
-)
-
-# EndSection
-
-___x_cmd_yanfa_pkg_pub0(){
-    param:void
-    ___x_cmd_yanfa_pkg_update0 "$@" && ___x_cmd_yanfa_pkg_tgz "$@" && git add . && git commit -m ...
-    ___x_cmd_yanfa_ws_push
-}
-
-___x_cmd_yanfa_pkg_pub(){
-    param:void
-    ___x_cmd_yanfa_pkg_update "$@" && ___x_cmd_yanfa_pkg_tgz "$@" && git add . && git commit -m ...
-    ___x_cmd_yanfa_ws_push
-}
-
-___x_cmd_yanfa_pkg(){
-    if [ -f "$(x wsroot)/.x-cmd/$1" ]; then
-        x ws execfile "$@"
-        return
+    x rmrf "$scope.tgz"
+    local code=$?
+    if [ "$code" = 0 ]; then        yanfa:debug "Cleaning up success[Exit=$code]: $scope.tgz"
+    else                            yanfa:warn  "Cleaning up Fail[Exit=$code]: $scope.tgz"
     fi
 
-    param:subcmd ___x_cmd_yanfa                                 \
-        init            "init"
-    param:subcmd:try
+    cd "$WSROOT/mod" &&
+        x z "$scope.tgz" . 2>/dev/null &&
+        x mv "$scope.tgz" "$WSROOT/dist/$scope.tgz"
 
-    param:subcmd ___x_cmd_yanfa_ws                              \
-        pull            "pull"                                  \
-        push            "push"                                  \
-        name            "get workspace name from git config"
-    param:subcmd:try
+    local code="$?"
+    if [ "$code" = 0 ]; then
+        ls -alh "$WSROOT/dist/$scope.tgz"
+    else
+        yanfa:error "Failure at yanfa zip and mv"
+        return "$code"
+    fi
+)
+# EndSection
 
-    param:subcmd ___x_cmd_yanfa_pkg                             \
-        install         "install all modules"                   \
-        update          "update or add module"                  \
-        pub0            "publish the package"                   \
-        pub             "publish the package"                   \
-        lsmod           "ls module"                             \
-        lsfile          "lsfile"                                \
-        wc              "count"                                 \
-        tgz             "compress modules of core/all/<special-release> into <name>.tgz" \
-        tar             "compress modules"                      \
-        7z              "compress modules of 7z"
-    param:subcmd:try
+___x_cmd_yanfa_upload(){
+    local id=2
+    x ui select id "Do you want to commit and push?" "Yes" "No"
 
-    param:run
+    if [ "$id" = 2 ]; then
+        yanfa:info "No Upload. Skip Add && Commit && Push"
+    else
+        yanfa:info "Add && Commit && Push"
+        git add . && git commit -m ... && ___x_cmd_yanfa_ws_push;
+        local code=$?
+        if [ "$code" = 0 ]; then            yanfa:info "Success"
+        else                                yanfa:error "Add && Commit && Push exit: $code"
+        fi
+        return "$code"
+    fi
 }

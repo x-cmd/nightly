@@ -13,7 +13,7 @@ ___x_cmd_job___wrapper_startlog(){
 ___x_cmd_job___wrapper_log(){
     ___x_cmd_job___wrapper_startlog "$@"
     (
-        ( eval "$@"; ) 1>/dev/null 2>/dev/null
+        ( "$@"; ) 1>/dev/null 2>/dev/null
         code=$?
         if [ "$code" = 0 ]; then        job:info "Success: $*"
         else                            job:error "Fail: [code=$code] $*"
@@ -22,11 +22,10 @@ ___x_cmd_job___wrapper_log(){
 }
 
 ___x_cmd_job___wrapper_report(){
-    printf "%s\n" "start: $*"
+    local IFS=" "; printf "%s\n" "start: $*"
     (
         ( "$@"; ) 1>/dev/null 2>/dev/null
         code=$?
-        local IFS=" "
         printf "%s\n" "exit: $code $*"
     ) &
 }

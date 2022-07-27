@@ -2,8 +2,8 @@
 
 # shellcheck shell=sh
 # shellcheck disable=SC2039,3043
-___x_cmd_gitlab_groups_member(){
-    param:subcmd ___x_cmd_gitlab_groups_member          \
+___x_cmd_gl_groups_member(){
+    param:subcmd ___x_cmd_gl_groups_member          \
         ls              "List member"                   \
         user            "Show groups member user info"  \
         add             "Add member"                    \
@@ -11,14 +11,14 @@ ___x_cmd_gitlab_groups_member(){
     param:subcmd:try
     param:run
 
-    ___x_cmd_gitlab_groups_member _param_help_doc
-    gitlab_log warn "Subcmd Not Found."
+    ___x_cmd_gl_groups_member _param_help_doc
+    gl_log warn "Subcmd Not Found."
     return 1
 }
 
 # shellcheck disable=SC2154
-___x_cmd_gitlab_groups_member_ls(){
-    param:scope     ___x_cmd_gitlab
+___x_cmd_gl_groups_member_ls(){
+    param:scope     ___x_cmd_gl
     param:dsl       '
 options:
     #1|--id         "The ID or URL-encoded path of the group."    <>
@@ -26,14 +26,14 @@ options:
     --user_ids      "Filter the results on the given user IDs"      <>:integer_array=""
 '
  param:run
-   ___gitlab_ui_mutual ___x_cmd_gitlab_get_multi "/groups/$id/members" <<A
+   ___gl_ui_mutual ___x_cmd_gl_get_multi "/groups/$id/members" <<A
         ___ui_table_json Id=.id Username=.username web_url=.web_url State=.state -- \$@
 A
 }
 
 # shellcheck disable=SC2154
-___x_cmd_gitlab_groups_member_user(){
-    param:scope     ___x_cmd_gitlab
+___x_cmd_gl_groups_member_user(){
+    param:scope     ___x_cmd_gl
     param:dsl      '
 options:
     #1|--id         "The ID or URL-encoded path of the group."  <>
@@ -41,7 +41,7 @@ options:
 '
     param:run
 
-    ___x_cmd_gitlab_http get "/groups/$id/members/$user_id" | \
+    ___x_cmd_gl_http get "/groups/$id/members/$user_id" | \
     {
         ___x_cmd_git_json_query_rename username=.username url=.web_url email=.email
         if [ -n "$username" ]; then
@@ -55,8 +55,8 @@ options:
 }
 
 # shellcheck disable=SC2181
-___x_cmd_gitlab_groups_member_add(){
-    param:scope     ___x_cmd_gitlab
+___x_cmd_gl_groups_member_add(){
+    param:scope     ___x_cmd_gl
     param:dsl       '
 options:
     --id                "The ID or URL-encoded path of the group"                                   <>:address
@@ -70,25 +70,25 @@ options:
     param:run
 
     if [ $# -eq 0 ];then
-        gitlab_log error "The user ID of the new member or multiple IDs separated by commas"
+        gl_log error "The user ID of the new member or multiple IDs separated by commas"
         return 1
     fi
 
-    local gen_gitlab_json
-    gen_gitlab_json="$(param:option2json -id +user_id)"
+    local gen_gl_json
+    gen_gl_json="$(param:option2json -id +user_id)"
 
-    if ___x_cmd_gitlab_http post "/groups/$id/members" "$gen_gitlab_json" >/dev/null; then
-        gitlab_log info  "Add $username successfully"
+    if ___x_cmd_gl_http post "/groups/$id/members" "$gen_gl_json" >/dev/null; then
+        gl_log info  "Add $username successfully"
     else
-        gitlab_log error "Add $username failure"
+        gl_log error "Add $username failure"
         return 1
     fi
 
 }
 
 # shellcheck disable=SC2181
-___x_cmd_gitlab_groups_member_rm(){
-    param:scope     ___x_cmd_gitlab
+___x_cmd_gl_groups_member_rm(){
+    param:scope     ___x_cmd_gl
     param:dsl       '
 options:
     --id                    "The ID or URL-encoded path of the group"         <>
@@ -99,17 +99,17 @@ options:
     param:run
 
     if [ $# -eq 0 ];then
-        gitlab_log error "At least one user's spatial address is needed"
+        gl_log error "At least one user's spatial address is needed"
         return 1
     fi
 
     local username
     for username in "$@"; do
         # TODO:http handle，delete repo return data is null.Status: 204 No Content
-        if ___x_cmd_gitlab_http delete "/groups/$id/members/$username" >/dev/null; then
-            gitlab_log info  "Remove $username successfully."
+        if ___x_cmd_gl_http delete "/groups/$id/members/$username" >/dev/null; then
+            gl_log info  "Remove $username successfully."
         else
-            gitlab_log error "Remove $username failure"
+            gl_log error "Remove $username failure"
             return 1
         fi
     done

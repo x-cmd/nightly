@@ -25,7 +25,7 @@ ___x_cmd_zuz_help(){ cat "$___X_CMD_ROOT_MOD/zuz/lib/help.txt" >&2 ;}
 ___x_cmd_zuz_run(){
     local IFS=' '
     # shellcheck disable=SC2154
-    zuz:info "Command to execute => $* $extra_logger_msg"
+    zuz:debug "Command to execute => $*"
     # IFS=
     "$@" 2>/dev/null 1>&2
     local exit_code=$?

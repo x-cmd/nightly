@@ -68,7 +68,9 @@
     "upgrade|update": {
         "#desc": "Upgrade or Update x-cmd",
         "#1": {
+            "#default": "x-cmd",
             "#cand": [
+                "x-cmd",
                 "nightly",
                 "dev"
             ]
@@ -152,26 +154,95 @@
             "#exec": "___x_cmd_advise__file"
         }
     },
-    "#1": {
-        "#cand": [
-            "cd --- Change the working directory",
-            "hub --- Manage your script file in x-service",
-            "yanfa",
-            "man --- An interface to the system reference manuals",
-            "env --- Inject the environment",
-            "advise --- Generate command completion based on advise json",
-            "theme --- Change terminal theme",
-            "tldr --- Collaborative cheatsheets for console commands",
-            "install --- Install Command-line tools",
-            "proxy --- Setting up mirror sources for various package management",
-            "cowsay --- Generates ASCII art pictures of a cow with a message",
-            "jo --- Command-line incomplete JSON processor",
-            "npx --- Run a command from a local or remote npm package",
-            "pipx",
-            "license"
-        ]
+    "cd": {
+        "#desc": "Change the working directory",
+        "#n": {
+            "#exec": "___x_cmd_advise__comp_from_x 1"
+        }
+    },
+    "hub": {
+        "#desc": "Manage your script file in x-service",
+        "#n": {
+            "#exec": "___x_cmd_advise__comp_from_x 1"
+        }
+    },
+    "yanfa": {
+        "#n": {
+            "#exec": "___x_cmd_advise__comp_from_x 1"
+        }
+    },
+    "man": {
+        "#desc": "An interface to the system reference manuals",
+        "#n": {
+            "#exec": "___x_cmd_advise__comp_from_x 1"
+        }
+    },
+    "env": {
+        "#desc": "Inject the environment",
+        "#n": {
+            "#exec": "___x_cmd_advise__comp_from_x 1"
+        }
+    },
+    "advise": {
+        "#desc": "Generate command completion based on advise json",
+        "#n": {
+            "#exec": "___x_cmd_advise__comp_from_x 1"
+        }
+    },
+    "theme": {
+        "#desc": "Change terminal theme",
+        "#n": {
+            "#exec": "___x_cmd_advise__comp_from_x 1"
+        }
+    },
+    "tldr": {
+        "#desc": "Collaborative cheatsheets for console commands",
+        "#n": {
+            "#exec": "___x_cmd_advise__comp_from_x 1"
+        }
+    },
+    "install": {
+        "#desc": "Install Command-line tools",
+        "#n": {
+            "#exec": "___x_cmd_advise__comp_from_x 1"
+        }
+    },
+    "proxy": {
+        "#desc": "Setting up mirror sources for various package management",
+        "#n": {
+            "#exec": "___x_cmd_advise__comp_from_x 1"
+        }
+    },
+    "cowsay": {
+        "#desc": "Generates ASCII art pictures of a cow with a message",
+        "#n": {
+            "#exec": "___x_cmd_advise__comp_from_x 1"
+        }
+    },
+    "jo": {
+        "#desc": "Command-line incomplete JSON processor",
+        "#n": {
+            "#exec": "___x_cmd_advise__comp_from_x 1"
+        }
+    },
+    "npx": {
+        "#desc": "Run a command from a local or remote npm package",
+        "#n": {
+            "#exec": "___x_cmd_advise__comp_from_x 1"
+        }
+    },
+    "pipx": {
+        "#desc": "Run a command from a local or remote pip package",
+        "#n": {
+            "#exec": "___x_cmd_advise__comp_from_x 1"
+        }
+    },
+    "license": {
+        "#n": {
+            "#exec": "___x_cmd_advise__comp_from_x 1"
+        }
     },
     "#n": {
-        "#exec": "___x_cmd_advise__comp_from_x"
+        "#exec": "___x_cmd_advise__comp_from_x 1"
     }
 }

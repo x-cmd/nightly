@@ -1,72 +1,132 @@
-# shellcheck shell=dash
+# shellcheck disable=SC2154,SC3043,SC2034,SC3028 shell=sh
 
+# We should use 7zip for better compresssion rate: `x 7z a --ttar "$target_file" "$@"`
+# NOTE: NO support 7z pipe create tar volumes with -si stdin
 ___x_cmd_zuz_z_tar(){
-    # We should use 7zip for better compresssion rate
-    if [ "$size" != 0 ]; then       ___x_cmd_zuz_run x 7z -v"$size" "$target_file" "$@"
-    else                            ___x_cmd_zuz_run tar cvf "$target_file" "$@"
+    if [ "$#" -eq 0 ]; then
+        local _tem_target
+        _tem_target="${target_file}.$(x rand int 1 99999).tmp"
+        if [ "$size" != 0 ]; then           tar cf "$_tem_target" --files-from "/dev/stdin" | ___x_cmd_zuz_run x 7z a -v"$size" -ttar -sdel "$target_file" "$_tem_target" && ___x_cmd_zuz_z_pipe_volume_name "$target_file"
+        else                                ___x_cmd_zuz_run tar cv --files-from "/dev/stdin" -f "$target_file" && ___x_cmd_zuz_z_pipe_name        "$target_file"
+        fi
+        return
+    fi
+
+    if [ "$size" != 0 ]; then               ___x_cmd_zuz_run x 7z a -v"$size" -ttar "$target_file" "$@" && ___x_cmd_zuz_z_pipe_volume_name "$target_file"
+    else                                    ___x_cmd_zuz_run tar cvf "$target_file" "$@" && ___x_cmd_zuz_z_pipe_name        "$target_file"
     fi
 }
 
 ___x_cmd_zuz_z_tgz(){
     if [ "$#" -eq 0 ]; then
-        if [ "$size" != 0 ]; then       tar cf - --files-from "/dev/stdin" | ___x_cmd_zuz_run x 7z a -v"$size" -si "$target_file"
-        else                            ___x_cmd_zuz_run tar cz --files-from "/dev/stdin" -f "$target_file"
+        if [ "$size" != 0 ]; then           tar cf - --files-from "/dev/stdin" | ___x_cmd_zuz_run x 7z a -v"$size" -si "$target_file" && ___x_cmd_zuz_z_pipe_volume_name "$target_file"
+        else                                ___x_cmd_zuz_run tar cz --files-from "/dev/stdin" -f "$target_file" && ___x_cmd_zuz_z_pipe_name "$target_file"
         fi
         return
     fi
 
-    if [ "$size" != 0 ]; then           tar cf - "$@" | ___x_cmd_zuz_run x 7z a -v"$size" -si "$target_file"
-    else                                ___x_cmd_zuz_run tar czf "$target_file" "$@"
+    if [ "$size" != 0 ]; then               tar cf - "$@" | ___x_cmd_zuz_run x 7z a -v"$size" -si "$target_file" && ___x_cmd_zuz_z_pipe_volume_name "$target_file"
+    else                                    ___x_cmd_zuz_run tar czf "$target_file" "$@" && ___x_cmd_zuz_z_pipe_name "$target_file"
     fi
-
 }
 
+# NOTE: NO support 7z nosupport resovle tar.Z volumes directly
 ___x_cmd_zuz_z_tarz(){
-    if [ "$size" != 0 ]; then       ___x_cmd_zuz_run x 7z -v"$size" "$target_file" "$@"
-    else                            ___x_cmd_zuz_run tar cZf "$target_file" "$@"
+    if [ "$#" -eq 0 ]; then
+        # if [ "$size" != 0 ]; then         tar cZ --files-from "/dev/stdin" -f "${target_file}.$$.tmp" | ___x_cmd_zuz_run x 7z a -v"$size" -si -sdel "$target_file" "${target_file}.$$.tmp"
+        if [ "$size" != 0 ]; then           zuz:error "tar.Z no support create volumes"; return 1
+        else                                ___x_cmd_zuz_run tar cZ --files-from "/dev/stdin" -f "$target_file" && ___x_cmd_zuz_z_pipe_name        "$target_file"
+        fi
+        return
+    fi
+
+    if [ "$size" != 0 ]; then               zuz:error "tar.Z no support create volumes"; return 1
+    else                                    ___x_cmd_zuz_run tar cZf "$target_file" "$@" && ___x_cmd_zuz_z_pipe_name        "$target_file"
     fi
 }
 
 ___x_cmd_zuz_z_tar_xz(){
-    [ -z "$(command -v xz)" ] && zuz_log err "xz command not exist" && return 1
-    if [ "$size" != 0 ]; then
-        # TODO: We should use 7zip
-        ___x_cmd_zuz_run x 7z -v"$size" "$target_file" "$@"
-    else
-        local extra_logger_msg="&& xz ${target_file%.*}"
-        ___x_cmd_zuz_run tar cvf "${target_file%.*}" "$@" && xz "${target_file%.*}"
+    if [ "$#" -eq 0 ]; then
+        if [ "$size" != 0 ]; then           tar cf - --files-from "/dev/stdin" | ___x_cmd_zuz_run x 7z a -si -v"$size" "$target_file" && ___x_cmd_zuz_z_pipe_volume_name "$target_file"
+        else                                tar cf - --files-from "/dev/stdin" | ___x_cmd_zuz_run x 7z a -si           "$target_file" && ___x_cmd_zuz_z_pipe_name        "$target_file"
+        fi
+        return
+    fi
+
+    if [ "$size" != 0 ]; then               tar cf - "$@" | ___x_cmd_zuz_run x 7z a -si -v"$size" "$target_file" && ___x_cmd_zuz_z_pipe_volume_name "$target_file"
+    else                                    tar cf - "$@" | ___x_cmd_zuz_run x 7z a -si           "$target_file" && ___x_cmd_zuz_z_pipe_name        "$target_file"
     fi
 }
 
+# NOTE: NO support 7z pipe create bz2 volumes with -si stdin
 ___x_cmd_zuz_z_bz2(){
-    if [ "$size" != 0 ]; then       ___x_cmd_zuz_run x 7z -v"$size" "$target_file" "$@"
-    else                            ___x_cmd_zuz_run tar cjf "$target_file" "$@"
+    local _tem_target
+    _tem_target="${target_file}.$(x rand int 1 99999).tmp"
+    if [ "$#" -eq 0 ]; then
+        if [ "$size" != 0 ]; then           tar cj --files-from "/dev/stdin" -f "$_tem_target" | ___x_cmd_zuz_run x 7z a -v"$size" -sdel "$target_file" "$_tem_target" && ___x_cmd_zuz_z_pipe_volume_name "$target_file"
+        else                                ___x_cmd_zuz_run tar cj --files-from "/dev/stdin" -f "$target_file" && ___x_cmd_zuz_z_pipe_name        "$target_file"
+        fi
+        return
+    fi
+
+    if [ "$size" != 0 ]; then               tar cjf "$_tem_target" "$@" | ___x_cmd_zuz_run x 7z a -v"$size" -sdel "$target_file" "$_tem_target" && ___x_cmd_zuz_z_pipe_volume_name "$target_file"
+    else                                    ___x_cmd_zuz_run tar cjf "$target_file" "$@" && ___x_cmd_zuz_z_pipe_name        "$target_file"
     fi
 }
 
 ___x_cmd_zuz_z_xz(){
-    # NOTE: xz: Can't compress directory, Will skipping. Can use tar container.
-    # We can use 7zip to handle xz ? Little footprint.
-    local extra_logger_msg="> $target_file"
-    ___x_cmd_zuz_run xz -c -kz "$@" > "$target_file"
+    zuz:warn "xz only support archive single file. Directory and multi file, please use tar.xz"
+
+    if [ "$#" -eq 0 ]; then
+        if [ "$size" != 0 ]; then           ___x_cmd_zuz_run x 7z a -si -v"$size" "$target_file"< "$(cat)" && ___x_cmd_zuz_z_pipe_volume_name "$target_file"
+        else                                ___x_cmd_zuz_run x 7z a -si           "$target_file"< "$(cat)" && ___x_cmd_zuz_z_pipe_name        "$target_file"
+        fi
+        return
+    fi
+
+    if [ "$size" != 0 ]; then               ___x_cmd_zuz_run x 7z a -v"$size" "$target_file" "$@" && ___x_cmd_zuz_z_pipe_volume_name "$target_file"
+    else                                    ___x_cmd_zuz_run x 7z a           "$target_file" "$@" && ___x_cmd_zuz_z_pipe_name        "$target_file"
+    fi
 }
 
 ___x_cmd_zuz_z_zip(){
-    # Using zip facility
-    # ___x_cmd_zuz_run zip -r "$target_file" "$@"
-    # unzip xfv "$target_file" "$@"
-    ___x_cmd_zuz_run x 7z a -tzip -r "$target_file" "$@"
+    if [ "$#" -eq 0 ]; then
+        local _file_record_path
+        _file_record_path="${target_file}.$(x rand int 1 99999).txt"
+        if [ "$size" != 0 ]; then           tee "$_file_record_path" | ___x_cmd_zuz_run x 7z a -tzip -r -v"$size" "$target_file" "@${_file_record_path}" && rm "$_file_record_path" && ___x_cmd_zuz_z_pipe_volume_name "$target_file"
+        else                                tee "$_file_record_path" | ___x_cmd_zuz_run x 7z a -tzip -r           "$target_file" "@${_file_record_path}" && rm "$_file_record_path" && ___x_cmd_zuz_z_pipe_name        "$target_file"
+        fi
+        return
+    fi
+
+    if [ "$size" != 0 ]; then               ___x_cmd_zuz_run x 7z a -tzip -r -v"$size" "$target_file" "$@" && ___x_cmd_zuz_z_pipe_volume_name "$target_file"
+    else                                    ___x_cmd_zuz_run x 7z a -tzip -r           "$target_file" "$@" && ___x_cmd_zuz_z_pipe_name        "$target_file"
+    fi
 }
 
+# NOTE: Wait static build. use 7zr command
+___x_cmd_zuz_z_7z(){
+    if [ "$#" -eq 0 ]; then
+        local _file_record_path
+        _file_record_path="${target_file}.$(x rand int 1 99999).txt"
+        if [ "$size" != 0 ]; then           tee "$_file_record_path" | ___x_cmd_zuz_run x 7z a -t7z -v"$size" "$target_file" "@${_file_record_path}" && rm "$_file_record_path" && ___x_cmd_zuz_z_pipe_volume_name "$target_file"
+        else                                tee "$_file_record_path" | ___x_cmd_zuz_run x 7z a -t7z           "$target_file" "@${_file_record_path}" && rm "$_file_record_path" && ___x_cmd_zuz_z_pipe_name        "$target_file"
+        fi
+        return
+    fi
+
+    if [ "$size" != 0 ]; then               ___x_cmd_zuz_run x 7z a -t7z -v"$size" "$target_file" "$@" && ___x_cmd_zuz_z_pipe_volume_name "$target_file"
+    else                                    ___x_cmd_zuz_run x 7z a -t7z           "$target_file" "$@" && ___x_cmd_zuz_z_pipe_name        "$target_file"
+    fi
+}
+
+# TODO: wait x rar
 ___x_cmd_zuz_z_rar(){
-    # x rar
-    zuz_log error "Unsupported to compress as rar format."
+    zuz:error "Unsupported to compress as rar format."
     return 1
 }
 
-___x_cmd_zuz_z_7z(){
-    # NOTE: Wait static build. use 7zr command
-    if [ "$size" != 0 ]; then       ___x_cmd_zuz_run x 7z a -v"$size" "$target_file" "$@"
-    else                            ___x_cmd_zuz_run x 7z a "$target_file" "$@"
-    fi
-}
+___x_cmd_zuz_z_pipe_name() { printf "%s" "$@"; }
+
+___x_cmd_zuz_z_pipe_volume_name() { find . -maxdepth 1 -name "${1:?-"Provide target file name"}*"; }
+

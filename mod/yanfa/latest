@@ -20,8 +20,7 @@ ___x_cmd_yanfa(){
     param:subcmd ___x_cmd_yanfa     \
         init        "init"          \
         mod         "modules"       \
-        pkg         "package"       \
-        release     "release"       \
+        pkg         "pkg"           \
         ws          "workspace"     \
         xb          "x-bash"        \
         xc          "x-cmd"         \

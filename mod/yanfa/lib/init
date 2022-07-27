@@ -36,7 +36,7 @@ A
 # According project
 ___x_cmd_yanfa_init_vscode(){
     param:void
-    mkdir -p "$(x wsroot)/.vscode"
+    x mkdirp "$(x wsroot)/.vscode"
     xrc cat yanfa/lib/settings.json >"$(x wsroot)/.vscode/settings.json"
 
     local ext; for ext in zokugun.explicit-folding \

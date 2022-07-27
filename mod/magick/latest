@@ -3,29 +3,39 @@
 # author:       Li Junhao           l@x-cmd.com
 # license:      GPLv3
 
-xrc pkg/lib/staticbin os
+# xrc pkg/lib/staticbin os
+xrc pkg/latest
+# ___x_cmd_magick(){
+#     local arch
+#     arch="$(os arch)"
+#     local osname
+#     osname="$(os name)"
+#     local exe
+#     case "$osname" in
+#         win)    exe=magick.x64.exe        ;;
+#         *)      exe=magick.${osname}.${arch}  ;;
+#     esac
+#     ___x_cmd_staticbin_init \
+#         ___x_cmd_magick_download \
+#         "$___X_CMD_ROOT/.bin/magick" \
+#         "$exe" \
+#         "$(___x_cmd_pandoc_bin_download_url "$exe")" \
+#         &&(
+#             cd "$___X_CMD_ROOT/.bin/magick" && {
+#                 chmod +x "$exe"
+#             }
+#         )&& ___x_cmd_magick_download "$@"
+# }
 ___x_cmd_magick(){
-    local arch
-    arch="$(os arch)"
-    local osname
-    osname="$(os name)"
-    local exe
-    case "$osname" in
-        win)    exe=magick.x64.exe        ;;
-        *)      exe=magick.${osname}.${arch}  ;;
-    esac
-    ___x_cmd_staticbin_init \
-        ___x_cmd_magick_download \
-        "$___X_CMD_ROOT/.bin/magick" \
-        "$exe" \
-        "$(___x_cmd_pandoc_bin_download_url "$exe")" \
-        &&(
-            cd "$___X_CMD_ROOT/.bin/magick" && {
-                chmod +x "$exe"
-            }
-        )&& ___x_cmd_magick_download "$@"
-}
+    if ! [ -d $___X_CMD_INSTALL_PATH/magick ]; then
+        x pkg install magick 1>/dev/null
+    fi
 
+    if [ -z $bin_path  ];then
+    bin_path=$(x pkg xbin path magick)
+    fi
+    eval $bin_path "$@"
+}
 # Section: detail
 
 # Reference: https://imagemagick.org/script/download.php
@@ -40,14 +50,14 @@ ___x_cmd_magick(){
 
 # https://ftp.acc.umu.se/mirror/imagemagick.org/ftp/binaries/magick
 
-___x_cmd_magick_bin_download_url(){
-    local exe="${1:?Provide app name}"
-    if [ "$___X_CMD_WHICHNET" != cn ]; then
-        printf "%s/%s" "https://raw.githubusercontent.com/static-build/magick/main/bin" "$exe.7z"
-    else
-        printf "%s/%s" "https://gitcode.net/x-bash/magick/-/raw/master/bin" "$exe.7z"
-    fi
-}
+# ___x_cmd_magick_bin_download_url(){
+#     local exe="${1:?Provide app name}"
+#     if [ "$___X_CMD_WHICHNET" != cn ]; then
+#         printf "%s/%s" "https://raw.githubusercontent.com/static-build/magick/main/bin" "$exe.7z"
+#     else
+#         printf "%s/%s" "https://gitcode.net/x-bash/magick/-/raw/master/bin" "$exe.7z"
+#     fi
+# }
 
 # EndSection
 

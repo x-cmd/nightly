@@ -4,7 +4,7 @@ function CDADD( s ){    CODE = CODE s "\n"; }
 
 function swrap( s ){  return "\"" s "\""; }
 
-function generate_advise_json_value_candidates_by_rules( optarg_id, advise_map,        op ){
+function generate_advise_json_value_candidates_by_rules( optarg_id, advise_map,        op, _default ){
     AJADD("{");
     AJADD( swrap("#desc") ); AJADD( ":" ); AJADD( swrap(option_desc_get( optarg_id )) );
 
@@ -14,11 +14,16 @@ function generate_advise_json_value_candidates_by_rules( optarg_id, advise_map, 
 
     op = oparr_get( optarg_id, 1 )
     if (op == "=~") {
-        AJADD(","); AJADD( swrap("#regex") ); AJADD(":")                        AJADD("["); AJADD( oparr_join_wrap( optarg_id, SSS "," SSS ) ); AJADD("]")
+        AJADD(","); AJADD( swrap("#cand_regex") ); AJADD(":")                   AJADD("["); AJADD( oparr_join_wrap( optarg_id, SSS "," SSS ) ); AJADD("]")
     }
 
     if (op == "=") {
         AJADD(","); AJADD( swrap("#cand") ); AJADD(":");                        AJADD("["); AJADD( oparr_join_wrap( optarg_id, SSS "," SSS ) ); AJADD("]")
+    }
+
+    _default = optarg_default_get( optarg_id )
+    if (_default != "" && ! optarg_default_value_eq_require( _default ) ) {
+        AJADD(","); AJADD( swrap("#default") ); AJADD(":");                     AJADD( swrap( _default ) )
     }
 
     AJADD("}");
@@ -59,6 +64,9 @@ function generate_advise_json_except_subcmd(      i, j, _option_id, _option_argc
         AJADD(","); AJADD( swrap(get_option_key_by_id(_option_id)) ); AJADD( ":" );
         AJADD( "{" );
         AJADD( swrap("#desc") ); AJADD(":"); AJADD( swrap( option_desc_get( _option_id ) ) )
+        if ( _option_argc > 0 ) {
+            AJADD(","); AJADD( swrap("#arguments_str") ); AJADD(":");           AJADD( swrap(get_option_arguments_str(_option_id) ))
+        }
         for ( j=1; j<=_option_argc; ++j ) {
             AJADD(",")
             AJADD( swrap( "#" j ) ); AJADD(":");                                generate_advise_json_value_candidates_by_rules( _option_id SUBSEP j );

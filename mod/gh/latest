@@ -25,7 +25,7 @@ ___x_cmd_gh(){
 
     param:subcmd ___x_cmd_gh_repo               \
         release       "manage release"          \
-        member        "Authorize gh"
+        member        "member manage"
     param:subcmd:try
     param:run
 

@@ -1,8 +1,16 @@
 # shellcheck shell=sh disable=SC3043 # xrc
 
 # author:       Li Junhao           l@x-cmd.com
-
+xrc pkg/latest
 ___x_cmd_terraform(){
-    :
+    if ! [ -d $___X_CMD_INSTALL_PATH/terraform ]; then
+        x pkg install terraform 1>/dev/null
+    fi
+   
+    if [ -z $TERRAFORM_BIN_PATH  ];then
+    TERRAFORM_BIN_PATH=$(x pkg xbin path terraform)
+    fi
+    eval $TERRAFORM_BIN_PATH "$@"
 }
 
+xrc setmain ___x_cmd_terraform

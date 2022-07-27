@@ -3,7 +3,6 @@
 ___x_cmd_zuz_cat(){
 
     local target_file="${1:-filename}"; shift
-    local extra_logger_msg="< ${target_file}"
     case "$target_file" in
         *.tar)
             ___x_cmd_zuz_run tar -t <"$target_file"  # bsdtar
@@ -18,7 +17,6 @@ ___x_cmd_zuz_cat(){
             ___x_cmd_zuz_run tar -t <"$target_file"  # bsdtar
             ;;
         *.tgz)
-            extra_logger_msg=
             ___x_cmd_zuz_run gzip --list "$target_file"
             ;;
         *.xz)
@@ -34,7 +32,6 @@ ___x_cmd_zuz_cat(){
             return 1
             ;;
         *.7z)
-            extra_logger_msg=
             ___x_cmd_zuz_run x 7z l -ba "$target_file" | awk '{ print $NF }'
             ;;
         *)

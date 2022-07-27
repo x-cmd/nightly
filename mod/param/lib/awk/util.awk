@@ -88,26 +88,26 @@ function debug(msg){
 # example:
 #   1. --option1,-o1
 #   2. --option1,-o1 <arg1> <arg2> ...
-function get_option_string(option_id,
-    _option_string, j){
-    _option_string = get_option_key_by_id( option_id )
-    gsub("\\|m", "", _option_string)
-    gsub("\\|", ",", _option_string)
-
-    option_argc      = option_arr[ option_id L ]
-    for ( j=1; j<=option_argc; ++j ) {
-        # BUG
-        _option_string = _option_string " <" option_arr[ option_id S j S OPTARG_NAME ] ">"
-    }
-
-    return _option_string
-}
-
 function get_option_key_by_id(option_id){
+    gsub("\\|m", "", option_id)
     if (match(option_id, "\\|-") && ( option_id !~ "^-") ) return substr( option_id, RSTART+1)
     return option_id
 }
 
+function get_option_arguments_str(option_id,        l, i, _str){
+    l = option_arr[ option_id L ]
+    for ( i=1; i<=l; ++i ) {
+        # BUG
+        _str = _str " <" option_arr[ option_id S i S OPTARG_NAME ] ">"
+    }
+    return _str
+}
+
+function get_option_string(option_id,           _option_string){
+    _option_string = get_option_key_by_id( option_id )
+    gsub("\\|", ",", _option_string)
+    return _option_string get_option_arguments_str(option_id)
+}
 
 function is_interactive(){
     return IS_INTERACTIVE == 1

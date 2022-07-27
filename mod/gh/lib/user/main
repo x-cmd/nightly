@@ -52,8 +52,8 @@ options:
     --affiliation   "affiliation"                               <>:UserGroup="owner"
     --sort          "sort"                                      <>:UserSort="created"
     --direction     "direction"                                 <>:Direction="desc"
-    --per_page      "Results per page"                          <>=30
-    --page          "Page number of the results to fetch."      <>=1
+    --per_page      "Results per page"                          <>=""
+    --page          "Page number of the results to fetch."      <>=""
 '
     param:run
 

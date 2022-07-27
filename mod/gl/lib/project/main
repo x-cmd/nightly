@@ -1,9 +1,9 @@
 # shellcheck shell=sh
 # shellcheck disable=SC2039,3043
 
-___x_cmd_gitlab_project(){
-    param:scope         ___x_cmd_gitlab
-    param:subcmd ___x_cmd_gitlab_project                                   \
+___x_cmd_gl_project(){
+    param:scope         ___x_cmd_gl
+    param:subcmd ___x_cmd_gl_project                                   \
         create          "Create project"                                   \
         ls              "List project of owner"                            \
         info            "Show detailed information of project"             \
@@ -14,15 +14,15 @@ ___x_cmd_gitlab_project(){
     param:subcmd:try
     param:run
 
-    ___x_cmd_gitlab_project _param_help_doc
-    gitlab_log warn "Subcmd Not Found."
+    ___x_cmd_gl_project _param_help_doc
+    gl_log warn "Subcmd Not Found."
     return 1
 }
 
 # Section: create
 # shellcheck disable=SC2154
-___x_cmd_gitlab_project_create(){
-    param:scope     ___x_cmd_gitlab
+___x_cmd_gl_project_create(){
+    param:scope     ___x_cmd_gl
     param:dsl       '
 option:
     #1                                                  "project names"                                                                     <>:RepoName
@@ -90,17 +90,17 @@ option:
     --only_allow_merge_if_all_discussions_are_resolved  "Set whether merge requests can only be merged when all the discussions are resolved."
 '
     param:run
-    [ $# -ne 0 ] || { gitlab_log error "Please provide project name"; return 1; }
-    local gitlab_path="$1"
-    [ -z "$p" ] || gitlab_path="$p"
+    [ $# -ne 0 ] || { gl_log error "Please provide project name"; return 1; }
+    local gl_path="$1"
+    [ -z "$p" ] || gl_path="$p"
     local name="$1"
-    local gen_gitlab_json
-    gen_gitlab_json="$(param:option2json +name -p path=gitlab_path)"
-    ___x_cmd_gitlab_http post "/projects" "$gen_gitlab_json" | ___x_cmd_gitlab_project_create_status_handler
+    local gen_gl_json
+    gen_gl_json="$(param:option2json +name -p path=gl_path)"
+    ___x_cmd_gl_http post "/projects" "$gen_gl_json" | ___x_cmd_gl_project_create_status_handler
 }
 
 # shellcheck disable=SC2154
-___x_cmd_gitlab_project_create_status_handler(){
+___x_cmd_gl_project_create_status_handler(){
     if [ ! -t 1 ] || [ -n "$ENFORCE_JSON" ]; then
         cat
         return
@@ -118,15 +118,15 @@ ___x_cmd_gitlab_project_create_status_handler(){
 
 # Section: list
 # shellcheck disable=SC2154,SC2145
-___x_cmd_gitlab_project_ls(){
-    param:scope     ___x_cmd_gitlab
+___x_cmd_gl_project_ls(){
+    param:scope     ___x_cmd_gl
     param:dsl       '
 options:
 
 '
     param:run
-    ___x_cmd_gitlab_current_owner 1>/dev/null
-    ___gitlab_ui_mutual  ___x_cmd_gitlab_get_multi "/users/$___X_CMD_GITLAB_DEFAULT_OWNER/projects"  <<A
+    ___x_cmd_gl_current_owner 1>/dev/null
+    ___gl_ui_mutual  ___x_cmd_gl_get_multi "/users/$___x_cmd_gl_DEFAULT_OWNER/projects"  <<A
     ___ui_table_json Id=.id Name=.name Owner=.owner.username Url=.web_url -- \$@
 A
 }
@@ -135,8 +135,8 @@ A
 # Section: update
 
 # shellcheck disable=SC2154,SC2034
-___x_cmd_gitlab_project_update(){
-    param:scope     ___x_cmd_gitlab
+___x_cmd_gl_project_update(){
+    param:scope     ___x_cmd_gl
     param:dsl       '
 options:
     #1|--project|--id                                      "The ID or URL-encoded path of the project."      <>:RepoName
@@ -169,7 +169,7 @@ options:
     --merge_pipelines_enabled                           "Enable or disable merge pipelines.."
     --merge_requests_access_level                       "One of disabled, private, or enabled"                                                                                                          <>=""
     --merge_requests_enabled                            "(Deprecated) Enable merge requests for this project. Use instead."
-    --merge_requests_template                           "Default description for merge requests. Description is parsed with GitLab Flavored Markdown."                                                  <>=""
+    --merge_requests_template                           "Default description for merge requests. Description is parsed with gl Flavored Markdown."                                                  <>=""
     --merge_trains_enabled                              "Enable or disable merge trains.."
     --mirror_overwrites_diverged_branches               "Pull mirror overwrites diverged branches."
     --mirror_trigger_builds                             "mirror_trigger_builds"
@@ -202,21 +202,21 @@ options:
     --squash_commit_template                            "Template used to create squash commit message in merge requests"                                                                               <>=""
     --squash_option                                     "One of never, always, default_on, or default_off"                                                                                              <>=""
     --suggestion_commit_message                         "The commit message used to apply merge request suggestions."                                                                                   <>=""
-    --tag_list                                          "(Deprecated in GitLab 14.0) The list of tags for a project; put array of tags, that should be finally assigned to a project. Use instead."     <>:array=""
-    --topics                                            "The list of topics for the project. This replaces any existing topics that are already added to the project. (Introduced in GitLab 14.0.)."    <>:array=""
+    --tag_list                                          "(Deprecated in gl 14.0) The list of tags for a project; put array of tags, that should be finally assigned to a project. Use instead."     <>:array=""
+    --topics                                            "The list of topics for the project. This replaces any existing topics that are already added to the project. (Introduced in gl 14.0.)."    <>:array=""
     --visibility                                        "See project visibility level."                                                                                                                 <>=""
     --wiki_access_level                                 "One of disabled, private, or enabled"                                                                                                          <>="disabled"
     --wiki_enabled                                      "(Deprecated) Enable wiki for this project. Use instead. wiki_access_level"                                                                     <>
 '
     param:run
-    ___x_cmd_gitlab_param_init_owner_project
-    local gen_gitlab_json
-    gen_gitlab_json="$(param:option2json -project)"
+    ___x_cmd_gl_param_init_owner_project
+    local gen_gl_json
+    gen_gl_json="$(param:option2json -project)"
     # project name urlecode
-    ___x_cmd_gitlab_http put "/projects/$1" "$gen_gitlab_json" | ___x_cmd_gitlab_project_update_status_handler
+    ___x_cmd_gl_http put "/projects/$1" "$gen_gl_json" | ___x_cmd_gl_project_update_status_handler
 }
 
-___x_cmd_gitlab_project_update_status_handler(){
+___x_cmd_gl_project_update_status_handler(){
     if [ ! -t 1 ] || [ -n "$ENFORCE_JSON" ]; then
         cat
         return
@@ -234,8 +234,8 @@ ___x_cmd_gitlab_project_update_status_handler(){
 
 # Section: info
 # shellcheck disable=SC2154
-___x_cmd_gitlab_project_info(){
-    param:scope     ___x_cmd_gitlab
+___x_cmd_gl_project_info(){
+    param:scope     ___x_cmd_gl
     param:dsl       '
 options:
     #1|--id                                 "The ID or URL-encoded path of the project."    <>
@@ -244,10 +244,10 @@ options:
     --with_custom_attributes                "Include custom attributes in response. (administrator only)"
 '
  param:run
-   ___x_cmd_gitlab_http get "/projects/$id"| ___x_cmd_gitlab_repo_info_status_handler
+   ___x_cmd_gl_http get "/projects/$id"| ___x_cmd_gl_repo_info_status_handler
 }
 
-___x_cmd_gitlab_repo_info_status_handler() {
+___x_cmd_gl_repo_info_status_handler() {
     if [ ! -t 1 ] || [ -n "$ENFORCE_JSON" ]; then
         cat
         return
@@ -265,15 +265,15 @@ ___x_cmd_gitlab_repo_info_status_handler() {
 
 # Section: del
 # shellcheck disable=SC2181,SC2154
-___x_cmd_gitlab_project_rm(){
-    param:scope     ___x_cmd_gitlab
+___x_cmd_gl_project_rm(){
+    param:scope     ___x_cmd_gl
     param:dsl       '
 options:
     #1|--id                                    "The ID or URL-encoded path of the project."   <>                                                                            <>
 '
  param:run
 
-    if ___x_cmd_gitlab_http delete "/projects/$1" >/dev/null; then
+    if ___x_cmd_gl_http delete "/projects/$1" >/dev/null; then
         ___x_cmd_ui_tf true  "Deleting repo $1 successfully"
     else
         ___x_cmd_ui_tf false "Deleting repo failure: $1. Probably because it desn't exists."
@@ -283,8 +283,8 @@ options:
 # EndSection
 
 # Section: project issue ls
-___x_cmd_gitlab_project_issue(){
-    param:scope     ___x_cmd_gitlab
+___x_cmd_gl_project_issue(){
+    param:scope     ___x_cmd_gl
     param:dsl       '
 options:
    --assignee_id                           "Return issues assigned to the given user id."                                                                               <>:Number=""
@@ -317,7 +317,7 @@ options:
 '
  param:run
 
-  ___gitlab_ui_mutual  ___x_cmd_gitlab_get_multi  "/projects/$id/issues" sort order_by search state  <<A
+  ___gl_ui_mutual  ___x_cmd_gl_get_multi  "/projects/$id/issues" sort order_by search state  <<A
         ___ui_table_json Id=.id iid=.iid project_id=.project_id title=.title state=.state web_url=.web_url -- \$@
 A
 }
