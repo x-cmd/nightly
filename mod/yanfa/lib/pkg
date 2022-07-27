@@ -204,9 +204,9 @@ ___x_cmd_yanfa_pkg_meta(){
     done >"$tgt/mod.txt"
 
     {
-        printf "md5:%s\n" "$(x md5 "$tgt/repo.txt")"
-        printf "sha256:%s\n" "$(x sha256 "$tgt/repo.txt")"
-        printf "sha512:%s\n" "$(x sha512 "$tgt/repo.txt")"
+        printf "md5: %s\n" "$(x md5 "$tgt/mod.txt")"
+        printf "sha256: %s\n" "$(x sha256 "$tgt/mod.txt")"
+        printf "sha512: %s\n" "$(x sha512 "$tgt/mod.txt")"
     } >"$tgt/hashsum.txt"
 }
 
